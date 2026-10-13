@@ -1,0 +1,41 @@
+:root {
+    color-scheme: dark;
+    --background: #101116;
+    --surface: #1a1c25;
+    --text: #f1f2f6;
+    --text-muted: #a9adbc;
+    --accent: #e3b341;
+    --border: #303340;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+main {
+    width: min(100% - 2rem, 960px);
+    margin: 4rem auto;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+h1 {
+    margin: 0 0 1rem;
+    color: var(--accent);
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.2;
+}
+
+p {
+    color: var(--text-muted);
+}
