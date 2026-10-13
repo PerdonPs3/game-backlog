@@ -10,7 +10,17 @@
     <main>
         <h1>Game Backlog</h1>
         <p>Your next adventure starts here.</p>
-        <p>No games yet. Your collection is waiting!</p>
+        <section aria-label="Game collection">
+            {% for game in games %}
+                <article class="game-card">
+                        <h2>{{ game.title }}</h2>
+                        <p>Platform: {{ game.platform }}</p>
+                        <p>Status: {{ game.status }}</p>
+                </article>
+            {% else %}
+                <p>No games yet. Your collection is waiting!</p>
+            {% endfor %}
+        </section>
     </main>
 </body>
 </html>
