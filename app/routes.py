@@ -53,13 +53,30 @@ def create():
         title = request.form.get("title", "").strip()
         platform = request.form.get("platform", "").strip()
         status = request.form.get("status", "")
+        rating_text = request.form.get("rating", "").strip()
+        review = request.form.get("review", "").strip()
         error = validate_game(title, platform, status)
+
+        rating = None
+
+        if error is None and rating_text:
+            try:
+                rating = int(rating_text)
+            except ValueError:
+                error = "Rating must be a whole number between 1 and 10."
+            else:
+                if not 1 <= rating <= 10:
+                    error = "Rating must be a whole number between 1 and 10."
+
+        if error is None and len(review) > 2000:
+            error = "Review must contain no more than 2000 characters."
 
         if error is None:
             db = get_db()
             db.execute(
-                "INSERT INTO games (title, platform, status) VALUES (?, ?, ?)",
-                (title, platform, status),
+                "INSERT INTO games (title, platform, status, rating, review) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (title, platform, status, rating, review),
             )
             db.commit()
 
@@ -72,7 +89,8 @@ def create():
 def edit(game_id):
     db = get_db()
     game = db.execute(
-        "SELECT id, title, platform, status FROM games WHERE id = ?",
+        "SELECT id, title, platform, status, rating, review "
+        "FROM games WHERE id = ?",
         (game_id,),
     ).fetchone()
 
@@ -87,11 +105,28 @@ def edit(game_id):
         status = request.form.get("status", "")
         error = validate_game(title, platform, status)
 
+        rating_text = request.form.get("rating", "").strip()
+        review = request.form.get("review", "").strip()
+        rating = None
+
+        if error is None and rating_text:
+            try:
+                rating = int(rating_text)
+            except ValueError:
+                error = "Rating must be a whole number between 1 and 10."
+            else:
+                if not 1 <= rating <= 10:
+                    error = "Rating must be a whole number between 1 and 10."
+
+        if error is None and len(review) > 2000:
+            error = "Review must contain no more than 2000 characters."
+
         if error is None:
             db.execute(
-                "UPDATE games SET title = ?, platform = ?, status = ? "
+                "UPDATE games SET title = ?, platform = ?, status = ?, "
+                "rating = ?, review = ? "
                 "WHERE id = ?",
-                (title, platform, status, game_id),
+                (title, platform, status, rating, review, game_id),
             )
             db.commit()
 

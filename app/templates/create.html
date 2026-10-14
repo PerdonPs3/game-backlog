@@ -15,7 +15,8 @@
             <p role="alert">{{ error }}</p>
         {% endif %}
         <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
             <div>
                 <label for="title">Title</label>
                 <input
@@ -53,7 +54,28 @@
                     {% endfor %}
                 </select>
             </div>
+            <div>
+                <label for="rating">Rating (1–10, optional)</label>
+                <input
+                    type="number"
+                    id="rating"
+                    name="rating"
+                    min="1"
+                    max="10"
+                    step="1"
+                    value="{{ request.form.get('rating', '') }}"
+                >
+            </div>
 
+            <div>
+                <label for="review">Review (optional)</label>
+                <textarea
+                    id="review"
+                    name="review"
+                    rows="4"
+                    maxlength="2000"
+                >{{ request.form.get('review', '') }}</textarea>
+            </div>
             <button type="submit">Add game</button>
         </form>
 

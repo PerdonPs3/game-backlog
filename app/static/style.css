@@ -22,6 +22,7 @@ body {
 
 main {
     width: min(100% - 2rem, 960px);
+    overflow-wrap: anywhere;
     margin: 4rem auto;
     padding: clamp(1.5rem, 4vw, 3rem);
     background: var(--surface);
@@ -56,6 +57,11 @@ p {
 
 .game-card p {
     margin: 0.25rem 0;
+    overflow-wrap: anywhere;
+}
+
+.game-review {
+    white-space: pre-wrap;
 }
 
 form {
