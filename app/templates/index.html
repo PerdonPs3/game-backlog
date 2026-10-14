@@ -19,9 +19,15 @@
                     <h2>{{ game.title }}</h2>
                     <p>Platform: {{ game.platform }}</p>
                     <p>Status: {{ game.status }}</p>
-                    <a href="{{ url_for('main.edit', game_id=game['id']) }}">
-                        Edit game
-                    </a>
+                    <div class="game-actions">
+                        <a href="{{ url_for('main.edit', game_id=game['id']) }}">
+                            Edit game
+                        </a>
+                        <a class="danger-link"
+                            href="{{ url_for('main.delete', game_id=game['id']) }}">
+                            Delete game
+                        </a>
+                    </div>
                 </article>
             {% else %}
                 <p>No games yet. Your collection is waiting!</p>

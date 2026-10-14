@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete game · Game Backlog</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main>
+        <h1>Delete game</h1>
+        <p>Are you sure you want to delete “{{ game['title'] }}”?</p>
+        <p>This action cannot be undone.</p>
+
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Yes, delete game</button>
+        </form>
+
+        <a href="{{ url_for('main.index') }}">Cancel and return to collection</a>
+    </main>
+</body>
+</html>

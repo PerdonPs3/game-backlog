@@ -79,3 +79,26 @@ def edit(game_id):
             return redirect(url_for("main.index"))
 
     return render_template("edit.html", game=game, error=error)
+
+
+@main.route("/games/<int:game_id>/delete", methods=["GET", "POST"])
+def delete(game_id):
+    db = get_db()
+    game = db.execute(
+        "SELECT id, title FROM games WHERE id = ?",
+        (game_id,),
+    ).fetchone()
+
+    if game is None:
+        abort(404)
+
+    if request.method == "POST":
+        db.execute(
+            "DELETE FROM games WHERE id = ?",
+            (game_id,),
+        )
+        db.commit()
+
+        return redirect(url_for("main.index"))
+
+    return render_template("delete.html", game=game)

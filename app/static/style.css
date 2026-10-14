@@ -123,3 +123,24 @@ a:focus-visible {
 .button-link:hover {
     text-decoration: underline;
 }
+
+.game-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.danger-link {
+    color: var(--accent);
+}
+
+.game-actions a {
+    text-decoration: none;
+}
+
+.game-actions a:hover,
+.game-actions a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
