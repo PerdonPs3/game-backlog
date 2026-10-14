@@ -22,6 +22,7 @@
                     type="text"
                     id="title"
                     name="title"
+                    value="{{ request.form.get('title', '') }}"
                     maxlength="200"
                     required
                 >
@@ -33,6 +34,7 @@
                     type="text"
                     id="platform"
                     name="platform"
+                    value="{{ request.form.get('platform', '') }}"                    
                     maxlength="80"
                     required
                 >
@@ -41,9 +43,14 @@
             <div>
                 <label for="status">Status</label>
                 <select id="status" name="status" required>
-                    <option value="Backlog">Backlog</option>
-                    <option value="Playing">Playing</option>
-                    <option value="Completed">Completed</option>
+                    {% for status in ('Backlog', 'Playing', 'Completed') %}
+                        <option
+                            value="{{ status }}"
+                            {% if request.form.get('status', 'Backlog') == status %}selected{% endif %}
+                        >
+                            {{ status }}
+                        </option>
+                    {% endfor %}
                 </select>
             </div>
 

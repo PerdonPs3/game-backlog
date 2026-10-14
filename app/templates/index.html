@@ -10,6 +10,9 @@
     <main>
         <h1>Game Backlog</h1>
         <p>Your next adventure starts here.</p>
+        <a class="button-link" href="{{ url_for('main.create') }}">
+            + Add game
+        </a>        
         <section aria-label="Game collection">
             {% for game in games %}
                 <article class="game-card">
