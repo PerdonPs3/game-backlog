@@ -12,7 +12,27 @@
         <p>Your next adventure starts here.</p>
         <a class="button-link" href="{{ url_for('main.create') }}">
             + Add game
-        </a>        
+        </a> 
+        <form method="get" action="{{ url_for('main.index') }}">
+            <div>
+                <label for="status-filter">Filter by status</label>
+                <select id="status-filter" name="status">
+                    <option value="" {% if selected_status == '' %}selected{% endif %}>
+                        All games
+                    </option>
+                    {% for status in ('Backlog', 'Playing', 'Completed') %}
+                        <option
+                            value="{{ status }}"
+                            {% if selected_status == status %}selected{% endif %}
+                        >
+                            {{ status }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Apply filter</button>
+        </form>       
         <section aria-label="Game collection">
             {% for game in games %}
                 <article class="game-card">
@@ -30,7 +50,11 @@
                     </div>
                 </article>
             {% else %}
-                <p>No games yet. Your collection is waiting!</p>
+                {% if selected_status %}
+                    <p>No games with this status yet.</p>
+                {% else %}
+                    <p>No games yet. Your collection is waiting!</p>
+                {% endif %}
             {% endfor %}
         </section>
     </main>

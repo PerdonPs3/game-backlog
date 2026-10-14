@@ -15,15 +15,34 @@ def validate_game(title, platform, status):
 
     return None
 
+
 @main.get("/")
 def index():
-    db = get_db()
-    games = db.execute(
-        "SELECT id, title, platform, status, rating, review "
-        "FROM games ORDER BY created_at DESC, id DESC"
-    ).fetchall()
+    status = request.args.get("status", "")
 
-    return render_template("index.html", games=games)
+    if status not in ("", "Backlog", "Playing", "Completed"):
+        abort(400)
+
+    db = get_db()
+
+    if status:
+        games = db.execute(
+            "SELECT id, title, platform, status, rating, review "
+            "FROM games WHERE status = ? "
+            "ORDER BY created_at DESC, id DESC",
+            (status,),
+        ).fetchall()
+    else:
+        games = db.execute(
+            "SELECT id, title, platform, status, rating, review "
+            "FROM games ORDER BY created_at DESC, id DESC"
+        ).fetchall()
+
+    return render_template(
+        "index.html",
+        games=games,
+        selected_status=status,
+    )
 
 
 @main.route("/games/new", methods=["GET", "POST"])
