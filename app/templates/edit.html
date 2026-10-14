@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit game · Game Backlog</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main>
+        <h1>Edit game</h1>
+        <p>Update your game details.</p>
+
+        {% if error %}
+            <p role="alert">{{ error }}</p>
+        {% endif %}
+
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div>
+                <label for="title">Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{{ request.form.get('title', game['title']) }}"
+                    maxlength="200"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="platform">Platform</label>
+                <input
+                    type="text"
+                    id="platform"
+                    name="platform"
+                    value="{{ request.form.get('platform', game['platform']) }}"
+                    maxlength="80"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    {% for status in ('Backlog', 'Playing', 'Completed') %}
+                        <option
+                            value="{{ status }}"
+                            {% if request.form.get('status', game['status']) == status %}selected{% endif %}
+                        >
+                            {{ status }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Save changes</button>
+        </form>
+
+        <a href="{{ url_for('main.index') }}">Back to collection</a>
+    </main>
+</body>
+</html>
