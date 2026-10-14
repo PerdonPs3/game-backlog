@@ -8,6 +8,7 @@
           href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include '_brand_easter_egg.html' %}
     <main>
         <h1>Edit game</h1>
         <p>Update your game details.</p>
@@ -97,5 +98,6 @@
 
         <a href="{{ url_for('main.index') }}">Back to collection</a>
     </main>
+    <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
 </body>
 </html>

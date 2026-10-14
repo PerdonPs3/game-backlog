@@ -12,7 +12,9 @@ input validation, and automated testing.
 - Add, view, edit, and delete games.
 - Track a title, platform, and status: **Backlog**, **Playing**, or **Completed**.
 - Search the collection by title and filter by status.
+- Update collection results automatically while typing or changing status, without reloading the page.
 - Choose new games from IGDB suggestions with covers and release years.
+- Display saved covers beside collection entries, with a fallback when no cover is available.
 - Suggestions prioritize exact titles, then title prefixes, with newest releases first within each group.
 - Choose a platform from the selected game's available platforms, including linked ports.
 - Validate catalog IDs and game/platform combinations on the server.
@@ -64,7 +66,7 @@ the environment is optional and no PowerShell execution-policy change is needed.
 ```
 
 This creates the `games` table if it does not already exist. Existing games are
-preserved. On connection, older tables receive a nullable `igdb_id` column so
+preserved. On connection, older tables receive nullable `igdb_id` and `cover_image_id` columns so
 legacy entries continue to work without requiring a catalog match.
 
 The application uses `instance/backlog.sqlite` for local data and generates a
@@ -122,7 +124,7 @@ selection, and preservation of legacy data. Catalog requests are mocked.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs
+node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs
 ```
 
 Each test uses a separate temporary SQLite database rather than the real
@@ -141,6 +143,7 @@ game-backlog/
 │   ├── schema.sql        # SQLite table definition
 │   ├── static/
 │   │   ├── style.css
+│   │   ├── collection-covers.js
 │   │   └── catalog-search.js
 │   └── templates/
 │       ├── index.html
@@ -152,6 +155,7 @@ game-backlog/
 │   ├── test_games.py
 │   ├── test_catalog.py
 │   ├── test_catalog_selection.py
+│   ├── test_collection_covers.py
 │   └── catalog-search.test.cjs
 ├── pytest.ini
 ├── requirements.txt
@@ -163,7 +167,11 @@ game-backlog/
 
 This is a **single-user local application**, not a hosted multi-user service.
 It has no account system. New games must be chosen from IGDB; existing manual
-entries remain editable. Covers currently appear in suggestions, not collection cards.
+entries remain editable. Cover identifiers are saved when adding or editing a
+catalog game. Existing catalog entries receive their cover the next time they are
+saved from Edit game. Old manual entries without an IGDB ID show a placeholder.
+Opening the collection does not make catalog API requests; cover images are loaded
+by the browser from IGDB's image host and require an internet connection.
 
 ## Roadmap
 
@@ -186,7 +194,7 @@ not a release schedule. Checked items are implemented; unchecked items are plann
       For example, searching **Resident** would return matching titles to choose from.
 - [x] Display covers and release years in suggestions, with available platforms after selection.
 - [x] Store catalog identifiers and validate the selected game and platform.
-- [ ] Display game covers in the collection.
+- [x] Display game covers in the collection.
 - [ ] Warn when adding a game/platform combination already in the collection.
 
 Game metadata and covers are provided by [IGDB](https://www.igdb.com/).

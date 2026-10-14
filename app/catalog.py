@@ -221,6 +221,21 @@ def is_game_pack(game):
     )
 
 
+def cover_image_id(game):
+    cover = game.get("cover")
+    image_id = cover.get("image_id") if isinstance(cover, dict) else None
+    if isinstance(image_id, str) and re.fullmatch(r"[A-Za-z0-9_]+", image_id):
+        return image_id
+    return None
+
+
+def collection_cover_url(image_id):
+    """Revalidate stored IDs and keep collection images on the fixed IGDB host."""
+    if cover_image_id({"cover": {"image_id": image_id}}) is not None:
+        return f"https://images.igdb.com/igdb/image/upload/t_cover_big/{image_id}.jpg"
+    return None
+
+
 def game_suggestion(game):
     """Expose only public display metadata, with a fixed image host."""
     year = None
@@ -232,9 +247,8 @@ def game_suggestion(game):
             pass
 
     cover_url = None
-    cover = game.get("cover")
-    image_id = cover.get("image_id") if isinstance(cover, dict) else None
-    if isinstance(image_id, str) and re.fullmatch(r"[A-Za-z0-9_]+", image_id):
+    image_id = cover_image_id(game)
+    if image_id is not None:
         cover_url = f"https://images.igdb.com/igdb/image/upload/t_cover_small/{image_id}.jpg"
 
     platforms = game.get("platforms", [])

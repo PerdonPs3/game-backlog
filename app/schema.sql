@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS games (
     rating INTEGER CHECK (rating BETWEEN 1 AND 10),
     review TEXT NOT NULL DEFAULT '',
     igdb_id INTEGER,
+    cover_image_id TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id)

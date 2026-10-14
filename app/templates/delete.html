@@ -8,6 +8,7 @@
           href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include '_brand_easter_egg.html' %}
     <main>
         <h1>Delete game</h1>
         <p>Are you sure you want to delete “{{ game['title'] }}”?</p>
@@ -20,5 +21,6 @@
 
         <a href="{{ url_for('main.index') }}">Cancel and return to collection</a>
     </main>
+    <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
 </body>
 </html>

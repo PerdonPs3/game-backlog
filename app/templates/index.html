@@ -7,13 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include '_brand_easter_egg.html' %}
     <main>
         <h1>Game Backlog</h1>
         <p>Your next adventure starts here.</p>
         <a class="button-link" href="{{ url_for('main.create') }}">
             + Add game
         </a> 
-        <form method="get" action="{{ url_for('main.index') }}">
+        <form id="collection-filters" method="get" action="{{ url_for('main.index') }}">
             <div>
                 <label for="title-search">Search your collection</label>
                 <input
@@ -42,45 +43,23 @@
                 </select>
             </div>
 
-            <button type="submit">Apply filters</button>
-            {% if search_query or selected_status %}
-                <a href="{{ url_for('main.index') }}">Clear filters</a>
-            {% endif %}
-        </form>       
-        <section aria-label="Game collection">
-            {% for game in games %}
-                <article class="game-card">
-                    <h2>{{ game.title }}</h2>
-                    <p>Platform: {{ game.platform }}</p>
-                    <p>Status: {{ game.status }}</p>
-                    {% if game['rating'] is not none %}
-                        <p>Rating: {{ game['rating'] }}/10</p>
-                    {% endif %}
-
-                    {% if game['review'] %}
-                        <p class="game-review">{{ game['review'] }}</p>
-                    {% endif %}
-                    
-                    <div class="game-actions">
-                        <a href="{{ url_for('main.edit', game_id=game['id']) }}">
-                            Edit game
-                        </a>
-                        <a class="danger-link"
-                            href="{{ url_for('main.delete', game_id=game['id']) }}">
-                            Delete game
-                        </a>
-                    </div>
-                </article>
-            {% else %}
-                {% if search_query %}
-                    <p>No games match your search and selected filters.</p>
-                {% elif selected_status %}
-                    <p>No games with this status yet.</p>
-                {% else %}
-                    <p>No games yet. Your collection is waiting!</p>
+            <button id="apply-filters" type="submit">Apply filters</button>
+            <div id="filter-reset">
+                {% if search_query or selected_status %}
+                    <a href="{{ url_for('main.index') }}">Clear filters</a>
                 {% endif %}
-            {% endfor %}
+            </div>
+        </form>
+        <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
+        <section id="game-collection" aria-label="Game collection" aria-busy="false">
+            {% include '_game_collection.html' %}
         </section>
+        <p class="catalog-message">Game data and covers provided by
+            <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.
+        </p>
     </main>
+    <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='collection-filters.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
 </body>
 </html>

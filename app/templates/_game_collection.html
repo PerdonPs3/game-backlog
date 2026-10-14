@@ -1,0 +1,38 @@
+{% for game in games %}
+    <article class="game-card">
+        <div class="game-card-cover" aria-hidden="true">
+            <span>No cover available</span>
+            {% if game['cover_url'] %}
+                <img src="{{ game['cover_url'] }}" alt="" width="264" height="374"
+                     loading="lazy" decoding="async" referrerpolicy="no-referrer">
+            {% endif %}
+        </div>
+        <div class="game-card-details">
+            <h2>{{ game.title }}</h2>
+            <p>Platform: {{ game.platform }}</p>
+            <div class="game-meta">
+                <p class="game-status">Status: {{ game.status }}</p>
+                {% if game['rating'] is not none %}
+                    <p class="game-rating">Rating: {{ game['rating'] }}/10</p>
+                {% endif %}
+            </div>
+
+            {% if game['review'] %}
+                <p class="game-review">{{ game['review'] }}</p>
+            {% endif %}
+
+            <div class="game-actions">
+                <a href="{{ url_for('main.edit', game_id=game['id']) }}">Edit game</a>
+                <a class="danger-link" href="{{ url_for('main.delete', game_id=game['id']) }}">Delete game</a>
+            </div>
+        </div>
+    </article>
+{% else %}
+    {% if search_query %}
+        <p>No games match your search and selected filters.</p>
+    {% elif selected_status %}
+        <p>No games with this status yet.</p>
+    {% else %}
+        <p>No games yet. Your collection is waiting!</p>
+    {% endif %}
+{% endfor %}

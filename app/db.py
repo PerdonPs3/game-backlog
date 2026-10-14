@@ -10,11 +10,17 @@ def get_db():
         g.db.row_factory = sqlite3.Row
         # Additive migration: preserve existing collections and legacy entries.
         columns = g.db.execute("PRAGMA table_info(games)").fetchall()
-        if columns and "igdb_id" not in {column["name"] for column in columns}:
+        additions = {
+            "igdb_id": "ALTER TABLE games ADD COLUMN igdb_id INTEGER",
+            "cover_image_id": "ALTER TABLE games ADD COLUMN cover_image_id TEXT",
+        }
+        if columns and additions.keys() - {column["name"] for column in columns}:
             g.db.execute("BEGIN IMMEDIATE")
             columns = g.db.execute("PRAGMA table_info(games)").fetchall()
-            if "igdb_id" not in {column["name"] for column in columns}:
-                g.db.execute("ALTER TABLE games ADD COLUMN igdb_id INTEGER")
+            existing = {column["name"] for column in columns}
+            for name, statement in additions.items():
+                if name not in existing:
+                    g.db.execute(statement)
             g.db.commit()
 
     return g.db

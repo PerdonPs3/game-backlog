@@ -1,5 +1,5 @@
-from flask import Blueprint, abort, jsonify, redirect, render_template, request, url_for
-from app.catalog import CatalogError, game_suggestion, get_catalog
+from flask import Blueprint, abort, jsonify, make_response, redirect, render_template, request, url_for
+from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_suggestion, get_catalog
 from app.db import get_db
 
 main = Blueprint("main", __name__)
@@ -40,19 +40,25 @@ def index():
         conditions.append("instr(lower(title), lower(?)) > 0")
         parameters.append(search_query)
 
-    query = "SELECT id, title, platform, status, rating, review FROM games"
+    query = "SELECT id, title, platform, status, rating, review, cover_image_id FROM games"
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     query += " ORDER BY created_at DESC, id DESC"
 
-    games = get_db().execute(query, parameters).fetchall()
+    games = [
+        {**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}
+        for game in get_db().execute(query, parameters).fetchall()
+    ]
 
-    return render_template(
-        "index.html",
-        games=games,
-        selected_status=status,
-        search_query=search_query,
-    )
+    context = dict(games=games, selected_status=status, search_query=search_query)
+    if request.accept_mimetypes.best == "application/json":
+        response = jsonify(
+            html=render_template("_game_collection.html", **context), count=len(games),
+        )
+    else:
+        response = make_response(render_template("index.html", **context))
+    response.vary.add("Accept")
+    return response
 
 
 @main.get("/catalog/search")
@@ -115,9 +121,10 @@ def create():
         if error is None:
             db = get_db()
             db.execute(
-                "INSERT INTO games (title, platform, status, rating, review, igdb_id) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (selected_game["name"], platform, status, rating, review, selected_game["id"]),
+                "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (selected_game["name"], platform, status, rating, review, selected_game["id"],
+                 cover_image_id(catalog_game)),
             )
             db.commit()
 
@@ -130,7 +137,7 @@ def create():
 def edit(game_id):
     db = get_db()
     game = db.execute(
-        "SELECT id, title, platform, status, rating, review, igdb_id "
+        "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id "
         "FROM games WHERE id = ?",
         (game_id,),
     ).fetchone()
@@ -181,9 +188,11 @@ def edit(game_id):
         if error is None:
             db.execute(
                 "UPDATE games SET title = ?, platform = ?, status = ?, "
-                "rating = ?, review = ? "
+                "rating = ?, review = ?, cover_image_id = ? "
                 "WHERE id = ?",
-                (title, platform, status, rating, review, game_id),
+                (title, platform, status, rating, review,
+                 cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
+                 game_id),
             )
             db.commit()
 
