@@ -3,7 +3,7 @@ from flask import Flask
 from secrets import token_hex
 from flask_wtf.csrf import CSRFProtect
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     instance_path = Path(app.instance_path)
@@ -17,6 +17,9 @@ def create_app():
     CSRFProtect(app)
     
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
+
+    if test_config is not None:
+        app.config.update(test_config)
 
     from app import db
     app.teardown_appcontext(db.close_db)
