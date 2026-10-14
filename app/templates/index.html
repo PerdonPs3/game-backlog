@@ -15,6 +15,17 @@
         </a> 
         <form method="get" action="{{ url_for('main.index') }}">
             <div>
+                <label for="title-search">Search your collection</label>
+                <input
+                    type="search"
+                    id="title-search"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Search by game title..."
+                    maxlength="200"
+                >
+            </div>
+            <div>
                 <label for="status-filter">Filter by status</label>
                 <select id="status-filter" name="status">
                     <option value="" {% if selected_status == '' %}selected{% endif %}>
@@ -31,7 +42,10 @@
                 </select>
             </div>
 
-            <button type="submit">Apply filter</button>
+            <button type="submit">Apply filters</button>
+            {% if search_query or selected_status %}
+                <a href="{{ url_for('main.index') }}">Clear filters</a>
+            {% endif %}
         </form>       
         <section aria-label="Game collection">
             {% for game in games %}
@@ -58,7 +72,9 @@
                     </div>
                 </article>
             {% else %}
-                {% if selected_status %}
+                {% if search_query %}
+                    <p>No games match your search and selected filters.</p>
+                {% elif selected_status %}
                     <p>No games with this status yet.</p>
                 {% else %}
                     <p>No games yet. Your collection is waiting!</p>

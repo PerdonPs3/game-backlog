@@ -8,6 +8,14 @@ def get_db():
     if "db" not in g:
         g.db = sqlite3.connect(current_app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
+        # Additive migration: preserve existing collections and legacy entries.
+        columns = g.db.execute("PRAGMA table_info(games)").fetchall()
+        if columns and "igdb_id" not in {column["name"] for column in columns}:
+            g.db.execute("BEGIN IMMEDIATE")
+            columns = g.db.execute("PRAGMA table_info(games)").fetchall()
+            if "igdb_id" not in {column["name"] for column in columns}:
+                g.db.execute("ALTER TABLE games ADD COLUMN igdb_id INTEGER")
+            g.db.commit()
 
     return g.db
 

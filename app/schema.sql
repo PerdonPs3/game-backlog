@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS games (
         CHECK (status IN ('Backlog', 'Playing', 'Completed')),
     rating INTEGER CHECK (rating BETWEEN 1 AND 10),
     review TEXT NOT NULL DEFAULT '',
+    igdb_id INTEGER,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id)

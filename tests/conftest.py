@@ -49,10 +49,19 @@ def post_form(client):
 
 
 @pytest.fixture
-def game_data():
+def game_data(app):
+    # Existing CRUD tests now submit a genuine mocked catalog selection.
+    from unittest.mock import Mock
+    catalog_client = Mock()
+    catalog_client.get_game.side_effect = lambda game_id: {
+        "id": 123, "name": "Portal 2", "platforms": [{"id": 6, "name": "PC"},
+                                                     {"id": 9, "name": "PS3"}],
+    } if game_id == 123 else None
+    app.extensions["igdb_client"] = catalog_client
     return {
         "title": "Portal 2", "platform": "PC", "status": "Playing",
         "rating": "9", "review": "A great puzzle game.",
+        "igdb_id": "123",
     }
 
 

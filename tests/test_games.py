@@ -147,3 +147,70 @@ def test_review_is_escaped_in_html(client, post_form, game_data):
     page = client.get("/")
     assert b"<script>" not in page.data
     assert b"&lt;script&gt;" in page.data
+
+
+@pytest.mark.parametrize("query", ["Resident", "resident", "RESIDENT", "  evil  "])
+def test_search_matches_partial_title_ignoring_ascii_case(client, seed_game, query):
+    seed_game(title="Resident Evil 4 Remake")
+    seed_game(title="Resident Evil 2")
+    seed_game(title="Portal 2")
+    response = client.get("/", query_string={"q": query})
+    assert response.status_code == 200
+    assert b"Resident Evil 4 Remake" in response.data
+    assert b"Resident Evil 2" in response.data
+    assert b"Portal 2" not in response.data
+
+
+def test_search_and_status_filter_work_together(client, seed_game, stored_games):
+    seed_game(title="Resident Finished", status="Completed")
+    seed_game(title="Resident Pending", status="Backlog")
+    seed_game(title="Portal Finished", status="Completed")
+    before = stored_games()
+    response = client.get("/", query_string={"q": "Resident", "status": "Completed"})
+    assert response.status_code == 200
+    assert b"Resident Finished" in response.data
+    assert b"Resident Pending" not in response.data
+    assert b"Portal Finished" not in response.data
+    assert b'value="Resident"' in response.data
+    assert b"Clear filters" in response.data
+    assert stored_games() == before
+
+
+@pytest.mark.parametrize("query", ["", "   "])
+def test_empty_search_shows_all_games(client, seed_game, query):
+    seed_game(title="Portal 2")
+    seed_game(title="Hollow Knight")
+    response = client.get("/", query_string={"q": query})
+    assert b"Portal 2" in response.data
+    assert b"Hollow Knight" in response.data
+    assert b"Clear filters" not in response.data
+
+
+def test_no_search_matches_displays_helpful_message(client, seed_game):
+    seed_game(title="Portal 2")
+    response = client.get("/", query_string={"q": "Resident"})
+    assert response.status_code == 200
+    assert b"No games match your search" in response.data
+    assert b"No games yet" not in response.data
+    assert b"Portal 2" not in response.data
+
+
+@pytest.mark.parametrize("query", ["%", "_", "' OR 1=1 --"])
+def test_search_treats_special_characters_as_literal_text(client, seed_game, query):
+    seed_game(title="Portal 2")
+    seed_game(title=f"Game containing {query}")
+    response = client.get("/", query_string={"q": query})
+    assert response.status_code == 200
+    assert b"Game containing" in response.data
+    assert b"Portal 2" not in response.data
+
+
+def test_search_input_is_escaped(client):
+    response = client.get("/", query_string={"q": '<script>alert("test")</script>'})
+    assert response.status_code == 200
+    assert b"<script>" not in response.data
+    assert b"&lt;script&gt;" in response.data
+
+
+def test_overlong_search_returns_400(client):
+    assert client.get("/", query_string={"q": "x" * 201}).status_code == 400

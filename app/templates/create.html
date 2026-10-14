@@ -16,29 +16,55 @@
         {% endif %}
         <form method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" id="igdb-id" name="igdb_id"
+                   value="{{ selected_game['id'] if selected_game else '' }}">
             
-            <div>
+            <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
+                 data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
                 <label for="title">Title</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value="{{ request.form.get('title', '') }}"
-                    maxlength="200"
-                    required
-                >
+                <div class="catalog-input-wrapper">
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ request.form.get('title', '') }}"
+                        maxlength="200"
+                        autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="catalog-results"
+                        aria-describedby="catalog-message"
+                        required
+                    >
+                    <div id="catalog-results" class="catalog-results" role="listbox"
+                         aria-label="Matching games" hidden></div>
+                </div>
+                <p id="catalog-message" class="catalog-message" role="status">
+                    {% if selected_game %}
+                        Selected: {{ selected_game['name'] }}. Choose a platform below.
+                    {% else %}
+                        Type at least 2 characters, then choose a game from the suggestions.
+                    {% endif %}
+                </p>
             </div>
 
             <div>
                 <label for="platform">Platform</label>
-                <input
-                    type="text"
-                    id="platform"
-                    name="platform"
-                    value="{{ request.form.get('platform', '') }}"                    
-                    maxlength="80"
-                    required
-                >
+                <select id="platform" name="platform" required
+                        aria-describedby="platform-message" {% if not selected_game %}disabled{% endif %}>
+                    <option value="">{{ 'Choose a platform' if selected_game else 'Choose a game first' }}</option>
+                    {% if selected_game %}
+                        {% for platform in selected_game['platforms'] %}
+                            <option value="{{ platform }}" {% if request.form.get('platform') == platform %}selected{% endif %}>
+                                {{ platform }}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+                <p id="platform-message" class="catalog-message" role="status">
+                    Only platforms listed for the selected game can be used.
+                </p>
             </div>
 
             <div>
@@ -76,10 +102,14 @@
                     maxlength="2000"
                 >{{ request.form.get('review', '') }}</textarea>
             </div>
-            <button type="submit">Add game</button>
+            <button id="add-game-button" type="submit" {% if not selected_game %}disabled{% endif %}>Add game</button>
         </form>
 
         <a href="{{ url_for('main.index') }}">Back to collection</a>
+        <p class="catalog-message">Game data and covers provided by
+            <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.
+        </p>
     </main>
+    <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>
 </body>
 </html>

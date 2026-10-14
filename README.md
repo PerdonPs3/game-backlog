@@ -11,7 +11,11 @@ input validation, and automated testing.
 
 - Add, view, edit, and delete games.
 - Track a title, platform, and status: **Backlog**, **Playing**, or **Completed**.
-- Filter the collection by status.
+- Search the collection by title and filter by status.
+- Choose new games from IGDB suggestions with covers and release years.
+- Suggestions prioritize exact titles, then title prefixes, with newest releases first within each group.
+- Choose a platform from the selected game's available platforms, including linked ports.
+- Validate catalog IDs and game/platform combinations on the server.
 - Add an optional whole-number rating from 1 to 10 and a review of up to 2,000 characters.
 - Clear an existing rating or review by leaving its field empty when editing.
 - Preserve entered form values when validation fails.
@@ -59,14 +63,37 @@ the environment is optional and no PowerShell execution-policy change is needed.
 .\.venv\Scripts\python.exe -m flask --app app init-db
 ```
 
-This creates the `games` table if it does not already exist. It does not delete
-existing games or migrate an existing table to a different schema.
+This creates the `games` table if it does not already exist. Existing games are
+preserved. On connection, older tables receive a nullable `igdb_id` column so
+legacy entries continue to work without requiring a catalog match.
 
 The application uses `instance/backlog.sqlite` for local data and generates a
 local secret key in `instance/secret_key`. The `instance/` directory is excluded
 from Git. Do not commit or share the secret key.
 
-### 4. Start the development server
+### 4. Configure IGDB
+
+Register a confidential application in the Twitch Developer Console, then create
+`instance/config.py` locally:
+
+```python
+IGDB_CLIENT_ID = "your-client-id"
+IGDB_CLIENT_SECRET = "your-client-secret"
+```
+
+Never commit this file or share its contents. Credentials and access tokens stay
+on the server. Check the connection with:
+
+```powershell
+.\.venv\Scripts\python.exe -m flask --app app check-igdb
+```
+
+New games require a catalog selection and an available platform. Search results
+exclude editions, packs, bundles, and separate port entries; remakes and remasters
+remain distinct games. Platforms from linked ports are included in the selected
+game's platform dropdown. Results depend on IGDB's available metadata.
+
+### 5. Start the development server
 
 ```powershell
 .\.venv\Scripts\python.exe -m flask --app app run --debug
@@ -87,9 +114,16 @@ Install the development dependencies, which also include the application depende
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-The current suite contains **32 test cases**, covering creation, editing,
+The Python suite covers creation, editing,
 deletion, filtering, optional ratings and reviews, invalid input, missing games,
-CSRF protection, and HTML escaping of reviews.
+CSRF protection, HTML escaping of reviews, catalog errors, strict game/platform
+selection, and preservation of legacy data. Catalog requests are mocked.
+
+If Node.js is installed, also run the dependency-free interaction tests:
+
+```powershell
+node --test tests/catalog-search.test.cjs
+```
 
 Each test uses a separate temporary SQLite database rather than the real
 collection. CSRF protection remains enabled during the tests. These tests check
@@ -101,11 +135,13 @@ server behavior and rendered HTML; they do not check browser layout visually.
 game-backlog/
 ├── app/
 │   ├── __init__.py       # Application factory and configuration
+│   ├── catalog.py        # Server-side IGDB client and catalog normalization
 │   ├── db.py             # Database connection lifecycle and init-db command
 │   ├── routes.py         # Collection, forms, validation, and CRUD routes
 │   ├── schema.sql        # SQLite table definition
 │   ├── static/
-│   │   └── style.css
+│   │   ├── style.css
+│   │   └── catalog-search.js
 │   └── templates/
 │       ├── index.html
 │       ├── create.html
@@ -113,7 +149,10 @@ game-backlog/
 │       └── delete.html
 ├── tests/
 │   ├── conftest.py        # Fixtures, temporary databases, and form helpers
-│   └── test_games.py
+│   ├── test_games.py
+│   ├── test_catalog.py
+│   ├── test_catalog_selection.py
+│   └── catalog-search.test.cjs
 ├── pytest.ini
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -123,17 +162,18 @@ game-backlog/
 ## Current scope
 
 This is a **single-user local application**, not a hosted multi-user service.
-It has no account system, and games are entered manually.
+It has no account system. New games must be chosen from IGDB; existing manual
+entries remain editable. Covers currently appear in suggestions, not collection cards.
 
 ## Roadmap
 
 The long-term idea is a personal gaming library where finishing adventures also
 helps your player profile grow. The stages below describe a proposed direction,
-not a release schedule. **All items are planned and not yet implemented.**
+not a release schedule. Checked items are implemented; unchecked items are planned.
 
 ### 1. Make the collection easier to manage
 
-- [ ] Search your own collection by title, alongside the existing status filter.
+- [x] Search your own collection by title, alongside the existing status filter.
 - [ ] Add **On hold** and **Dropped** statuses for paused and abandoned games.
 - [ ] Record start and completion dates to build a personal play history.
 - [ ] Add a **What should I play next?** picker that suggests a pending game,
@@ -142,15 +182,14 @@ not a release schedule. **All items are planned and not yet implemented.**
 
 ### 2. Find games in a shared catalog
 
-- [ ] Search an external game catalog instead of typing every detail manually.
+- [x] Search an external game catalog instead of typing every detail manually.
       For example, searching **Resident** would return matching titles to choose from.
-- [ ] Display game covers and available information such as release dates and platforms.
-- [ ] Store catalog identifiers to distinguish different games, remakes, and editions,
-      and help prevent accidental duplicates.
-- [ ] Keep manual entry available for games the catalog does not include.
+- [x] Display covers and release years in suggestions, with available platforms after selection.
+- [x] Store catalog identifiers and validate the selected game and platform.
+- [ ] Display game covers in the collection.
+- [ ] Warn when adding a game/platform combination already in the collection.
 
-The catalog provider has not been selected yet. Available metadata, image usage
-rules, API limits, and attribution requirements will be evaluated before integration.
+Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
 
 ### 3. Connect Steam
 
@@ -163,7 +202,7 @@ rules, API limits, and attribution requirements will be evaluated before integra
 
 Steam integration will depend on API access and account privacy settings. Importing
 a game or detecting playtime will not automatically mark it as completed.
-Games from other platforms will remain supported through manual entry.
+Games from other platforms remain supported through the catalog.
 
 ### 4. Build a personal player profile
 

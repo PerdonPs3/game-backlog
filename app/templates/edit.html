@@ -27,12 +27,23 @@
                     name="title"
                     value="{{ request.form.get('title', game['title']) }}"
                     maxlength="200"
+                    {% if game['igdb_id'] is not none %}readonly{% endif %}
                     required
                 >
             </div>
 
             <div>
                 <label for="platform">Platform</label>
+                {% if game['igdb_id'] is not none %}
+                <select id="platform" name="platform" required>
+                    <option value="">Choose a platform</option>
+                    {% for platform in available_platforms %}
+                        <option value="{{ platform }}" {% if request.form.get('platform', game['platform']) == platform %}selected{% endif %}>
+                            {{ platform }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% else %}
                 <input
                     type="text"
                     id="platform"
@@ -41,6 +52,7 @@
                     maxlength="80"
                     required
                 >
+                {% endif %}
             </div>
 
             <div>

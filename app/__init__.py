@@ -18,12 +18,21 @@ def create_app(test_config=None):
     
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
 
+    if test_config is None:
+        app.config.from_pyfile(
+            str(instance_path / "config.py"),
+            silent=True,
+        )
+
     if test_config is not None:
         app.config.update(test_config)
 
     from app import db
     app.teardown_appcontext(db.close_db)
     app.cli.add_command(db.init_db_command)
+
+    from app.catalog import check_igdb_command
+    app.cli.add_command(check_igdb_command)
 
     from app.routes import main
     app.register_blueprint(main)
