@@ -15,7 +15,7 @@ class Element {
 
 function setup() {
     const ids = ["collection-filters", "title-search", "status-filter", "apply-filters",
-                 "filter-reset", "game-collection", "filter-message", "collection-sort"];
+                 "filter-reset", "game-collection", "filter-message", "collection-sort", "list-filter"];
     const nodes = Object.fromEntries(ids.map((id) => [id, new Element()]));
     const form = nodes["collection-filters"];
     form.action = "http://localhost/";
@@ -47,6 +47,25 @@ function setup() {
         run() { const [id, callback] = [...timers.entries()].at(-1); timers.delete(id); return callback(); },
     };
 }
+
+test("list filters combine with search and reset without changing the chosen sort", async () => {
+    const ui = setup();
+    ui["title-search"].value = "Portal";
+    ui["list-filter"].value = "7";
+    ui["collection-sort"].value = "title";
+    ui["list-filter"].fire("change");
+    const pending = ui.run();
+    assert.equal(ui.requests[0].url, "http://localhost/?q=Portal&sort=title&list=7");
+    ui.requests[0].reply("<article>Portal</article>", 1);
+    await pending;
+    assert.equal(ui["filter-reset"].hidden, false);
+    ui["filter-reset"].fire("click", { target: { closest: () => ({}) } });
+    assert.equal(ui["list-filter"].value, "");
+    const reset = ui.run();
+    assert.equal(ui.requests[1].url, "http://localhost/?sort=title");
+    ui.requests[1].reply("All", 2);
+    await reset;
+});
 
 test("typing is debounced and combines title and status without reloading inputs", async () => {
     const ui = setup();

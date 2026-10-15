@@ -48,6 +48,22 @@ def get_db():
                 g.pop("db", None)
                 raise
 
+        g.db.execute("PRAGMA foreign_keys = ON")
+        if g.db.execute("SELECT 1 FROM sqlite_master WHERE name = 'game_list_members'").fetchone() is None:
+            g.db.execute("BEGIN IMMEDIATE")
+            try:
+                with current_app.open_resource("lists_schema.sql") as schema_file:
+                    statements = schema_file.read().decode("utf-8").split(";")
+                for statement in statements:
+                    if statement.strip():
+                        g.db.execute(statement)
+                g.db.commit()
+            except Exception:
+                g.db.rollback()
+                g.db.close()
+                g.pop("db", None)
+                raise
+
     return g.db
 
 

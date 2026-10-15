@@ -10,6 +10,9 @@ input validation, and automated testing.
 ## Features
 
 - Add, view, edit, and delete games.
+- Create and rename personal lists, include a game in several lists, and filter the library by list alongside search and status. Removing a list never removes its games.
+- Preview each list with a stack of its covers; switch the editor between All games and In this list. Saving stays in the editor with confirmation and preserves the selected view.
+- New JSON backups include lists and their memberships; old backups still work. Imports merge same-named lists additively without removing existing memberships or replacing personal game data.
 - Track a title, platform, and status: **Backlog**, **Playing**, **Completed**, **On hold**, or **Dropped**.
 - Record optional start and completion dates; clear them by leaving the fields empty.
 - Mark personal Favorite and Your GOTY stickers when adding or editing; both can be selected independently.
@@ -144,7 +147,7 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs
+node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs tests/list-editor.test.cjs
 ```
 
 Each test uses a separate temporary SQLite database rather than the real

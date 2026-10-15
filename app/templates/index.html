@@ -69,9 +69,17 @@
                 </select>
             </div>
 
+            <div class="filter-list">
+                <label for="list-filter">Personal list</label>
+                <select id="list-filter" name="list">
+                    <option value="">All lists</option>
+                    {% for item in lists %}<option value="{{ item.id }}" {% if selected_list == item.id|string %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+                </select>
+            </div>
+
             <button id="apply-filters" type="submit">Apply filters</button>
-            <div id="filter-reset" {% if not search_query and not selected_status %}hidden{% endif %}>
-                {% if search_query or selected_status %}
+            <div id="filter-reset" {% if not search_query and not selected_status and not selected_list %}hidden{% endif %}>
+                {% if search_query or selected_status or selected_list %}
                     <a href="{{ url_for('main.index', sort=selected_sort) if selected_sort != 'newest' else url_for('main.index') }}">Clear filters</a>
                 {% endif %}
             </div>
@@ -80,8 +88,18 @@
         <div class="library-heading">
             <h2 id="library-title">Your library</h2>
             <div class="backup-actions">
-                <a href="{{ url_for('main.export_backup') }}">Export backup</a>
-                <a href="{{ url_for('main.import_backup') }}">Import backup</a>
+                <a class="library-tool library-tool-featured" href="{{ url_for('main.lists') }}">
+                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h2m3 0h5M7 14h2m3 0h5"/></svg>
+                    <span>Your lists</span>
+                </a>
+                <a class="library-tool" href="{{ url_for('main.export_backup') }}">
+                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/></svg>
+                    <span>Export backup</span>
+                </a>
+                <a class="library-tool" href="{{ url_for('main.import_backup') }}">
+                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4M4 16v4h16v-4"/></svg>
+                    <span>Import backup</span>
+                </a>
             </div>
         </div>
         <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>

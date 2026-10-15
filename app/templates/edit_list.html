@@ -1,0 +1,36 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Manage {{ item.name }} · Game Backlog{% endblock %}
+{% block page_kicker %}Give your games a place{% endblock %}
+{% block page_heading %}Curate your <span>list</span>{% endblock %}
+{% block page_description %}Rename your list and choose the games that belong here. Nothing is removed from your library.{% endblock %}
+{% block panel_label %}Edit list and memberships{% endblock %}
+{% block panel %}
+    {% for message in get_flashed_messages(category_filter=['list_saved']) %}<p id="list-feedback" class="workspace-success" role="status" tabindex="-1">{{ message }}</p>{% endfor %}
+    {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+    <form method="post" class="workspace-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="view" id="list-editor-view" value="{{ view }}">
+        <div class="form-wide"><label for="list-name">List name</label><input id="list-name" name="name" value="{{ request.form.get('name', item.name) }}" maxlength="80" required></div>
+        <fieldset class="list-game-picker form-wide">
+            <legend>Games in this list</legend>
+            <p class="form-note">Check to include, uncheck to remove from this list only.</p>
+            <div class="list-editor-toolbar" id="list-editor-toolbar" hidden>
+                <div role="group" aria-label="Show games" class="list-editor-switch">
+                    <button type="button" data-list-view="all" aria-pressed="true">All games</button>
+                    <button type="button" data-list-view="selected" aria-pressed="false">In this list</button>
+                </div>
+                <span id="list-selected-count" role="status" aria-live="polite"></span>
+            </div>
+            {% for game in games %}
+                <label class="list-game-choice">
+                    <input type="checkbox" name="games" value="{{ game.id }}" {% if game.id in selected %}checked{% endif %}>
+                    {% if game.cover_url %}<img src="{{ game.cover_url }}" alt="" width="34" height="48" loading="lazy" referrerpolicy="no-referrer">{% endif %}
+                    <span><strong>{{ game.title }}</strong><small>{{ game.platform }} · {{ game.status }}</small></span>
+                </label>
+            {% else %}<p class="form-note">Your collection is empty. <a href="{{ url_for('main.create') }}">Add a game</a>, then come back to include it.</p>{% endfor %}
+            <p id="list-selection-empty" class="form-note" hidden>No games selected yet. Switch to All games to add some.</p>
+        </fieldset>
+        <div class="form-actions"><button type="submit">Save list</button><a href="{{ url_for('main.lists') }}">Back to lists</a><a href="{{ url_for('main.index', list=item.id, _anchor='library-title') }}">View in library</a></div>
+    </form>
+{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='list-editor.js') }}" defer></script>{% endblock %}

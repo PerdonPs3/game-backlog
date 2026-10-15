@@ -2,11 +2,12 @@ import json
 import sqlite3
 from random import choice, sample
 
-from flask import Blueprint, abort, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import get_db
 from app.game_fields import STATUSES, validate_dates
+from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
 
 main = Blueprint("main", __name__)
 
@@ -71,6 +72,12 @@ def collection_statistics(db):
 
 @main.get("/")
 def index():
+    selected_list = request.args.get("list", "")
+    if selected_list:
+        if not selected_list.isascii() or not selected_list.isdigit() or len(selected_list) > 18:
+            abort(400)
+        if get_db().execute("SELECT 1 FROM game_lists WHERE id = ?", (int(selected_list),)).fetchone() is None:
+            abort(404)
     status = request.args.get("status", "")
     search_query = request.args.get("q", "").strip()
     selected_sort = request.args.get("sort", "newest")
@@ -86,6 +93,9 @@ def index():
 
     conditions = []
     parameters = []
+    if selected_list:
+        conditions.append("id IN (SELECT game_id FROM game_list_members WHERE list_id = ?)")
+        parameters.append(int(selected_list))
 
     if status:
         conditions.append("status = ?")
@@ -108,7 +118,8 @@ def index():
     ]
 
     context = dict(games=games, selected_status=status, search_query=search_query,
-                   selected_sort=selected_sort, sort_options=COLLECTION_SORTS)
+                   selected_sort=selected_sort, sort_options=COLLECTION_SORTS,
+                   selected_list=selected_list, lists=all_lists(get_db()))
     if request.accept_mimetypes.best == "application/json":
         response = jsonify(
             html=render_template("_game_collection.html", **context), count=len(games),
@@ -119,6 +130,86 @@ def index():
         ))
     response.vary.add("Accept")
     return response
+
+
+@main.route("/lists", methods=["GET", "POST"])
+def lists():
+    db = get_db()
+    error = None
+    if request.method == "POST":
+        try:
+            name = clean_list_name(request.form.get("name", ""))
+        except ValueError as problem:
+            error = str(problem)
+        else:
+            db.execute("BEGIN IMMEDIATE")
+            if db.execute("SELECT COUNT(*) FROM game_lists").fetchone()[0] >= MAX_LISTS:
+                db.rollback()
+                error = "You can create up to 100 lists."
+            else:
+                try:
+                    cursor = db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?)", (name, name.casefold()))
+                    db.commit()
+                    return redirect(url_for("main.edit_list", list_id=cursor.lastrowid))
+                except sqlite3.IntegrityError:
+                    db.rollback()
+                    error = "A list with this name already exists."
+    return render_template("lists.html", lists=list_cards(db), error=error)
+
+
+@main.route("/lists/<int:list_id>/edit", methods=["GET", "POST"])
+def edit_list(list_id):
+    db = get_db()
+    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    if item is None:
+        abort(404)
+    error = None
+    view = request.values.get("view", "all")
+    if view not in ("all", "selected"):
+        view = "all"
+    selected = {row[0] for row in db.execute("SELECT game_id FROM game_list_members WHERE list_id = ?", (list_id,))}
+    if request.method == "POST":
+        try:
+            raw_ids = request.form.getlist("games")
+            if any(not value.isascii() or not value.isdigit() or len(value) > 18 for value in raw_ids):
+                raise ValueError("Please choose games from your collection.")
+            selected = {int(value) for value in raw_ids}
+            name = clean_list_name(request.form.get("name", ""))
+            db.execute("BEGIN IMMEDIATE")
+            existing = {row[0] for row in db.execute("SELECT id FROM games")}
+            if not selected <= existing:
+                raise ValueError("Some selected games are no longer in your collection. Please review your choices.")
+            if db.execute("SELECT 1 FROM game_lists WHERE id = ?", (list_id,)).fetchone() is None:
+                db.rollback()
+                abort(404)
+            db.execute("UPDATE game_lists SET name = ?, name_key = ? WHERE id = ?", (name, name.casefold(), list_id))
+            db.execute("DELETE FROM game_list_members WHERE list_id = ?", (list_id,))
+            db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?)", [(list_id, value) for value in selected])
+            db.commit()
+            flash("List saved. Your games are right where you left them.", "list_saved")
+            return redirect(url_for("main.edit_list", list_id=list_id, view=view, _anchor="list-feedback"))
+        except ValueError as problem:
+            db.rollback()
+            error = str(problem)
+        except sqlite3.IntegrityError:
+            db.rollback()
+            error = "A list with this name already exists. Your changes were not saved."
+    games = [{**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
+             for row in db.execute("SELECT * FROM games ORDER BY title COLLATE NOCASE, platform, id")]
+    return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
+
+
+@main.route("/lists/<int:list_id>/delete", methods=["GET", "POST"])
+def delete_list(list_id):
+    db = get_db()
+    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    if item is None:
+        abort(404)
+    if request.method == "POST":
+        db.execute("DELETE FROM game_lists WHERE id = ?", (list_id,))
+        db.commit()
+        return redirect(url_for("main.lists"))
+    return render_template("delete_list.html", item=item)
 
 
 @main.get("/games/<int:game_id>")
@@ -214,8 +305,17 @@ def pick_game():
 
 @main.get("/backups/export")
 def export_backup():
-    rows = get_db().execute("SELECT * FROM games ORDER BY id").fetchall()
-    response = make_response(json.dumps(build_backup(rows), ensure_ascii=False, indent=2))
+    db = get_db()
+    # Keep games and membership indices in the same read snapshot.
+    db.execute("BEGIN")
+    rows = db.execute("SELECT * FROM games ORDER BY id").fetchall()
+    positions = {row["id"]: index for index, row in enumerate(rows)}
+    memberships = {}
+    for member in db.execute("SELECT list_id, game_id FROM game_list_members ORDER BY game_id"):
+        memberships.setdefault(member["list_id"], []).append(positions[member["game_id"]])
+    lists = [{"name": item["name"], "games": memberships.get(item["id"], [])} for item in all_lists(db)]
+    db.commit()
+    response = make_response(json.dumps(build_backup(rows, lists), ensure_ascii=False, indent=2))
     response.mimetype = "application/json"
     response.headers["Content-Disposition"] = 'attachment; filename="game-backlog-backup.json"'
     response.headers["Cache-Control"] = "no-store"
@@ -234,7 +334,7 @@ def import_backup():
             error = "Please confirm that you want to add new entries from this backup."
         else:
             try:
-                games = parse_backup(upload.read(MAX_BACKUP_BYTES + 1))
+                games, backup_lists = parse_backup(upload.read(MAX_BACKUP_BYTES + 1), include_lists=True)
             except BackupError as problem:
                 error = str(problem)
             else:
@@ -242,16 +342,28 @@ def import_backup():
                 db.execute("BEGIN IMMEDIATE")
                 imported = skipped = 0
                 try:
+                    existing_keys = {row[0] for row in db.execute("SELECT name_key FROM game_lists")}
+                    if len(existing_keys | {item["name"].casefold() for item in backup_lists}) > MAX_LISTS:
+                        raise sqlite3.IntegrityError("List limit")
+                    saved_ids = []
                     for game in games:
-                        if find_duplicate_game(db, game["igdb_id"], game["title"], game["platform"]) is not None:
+                        duplicate = find_duplicate_game(db, game["igdb_id"], game["title"], game["platform"])
+                        if duplicate is not None:
                             skipped += 1
+                            saved_ids.append(duplicate["id"])
                             continue
-                        db.execute(
+                        cursor = db.execute(
                             "INSERT INTO games (" + ", ".join(BACKUP_FIELDS) + ") "
                             "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ")",
                             [game[field] for field in BACKUP_FIELDS],
                         )
+                        saved_ids.append(cursor.lastrowid)
                         imported += 1
+                    for item in backup_lists:
+                        db.execute("INSERT OR IGNORE INTO game_lists (name, name_key) VALUES (?, ?)", (item["name"], item["name"].casefold()))
+                        list_id = db.execute("SELECT id FROM game_lists WHERE name_key = ?", (item["name"].casefold(),)).fetchone()[0]
+                        db.executemany("INSERT OR IGNORE INTO game_list_members (list_id, game_id) VALUES (?, ?)",
+                                       [(list_id, saved_ids[index]) for index in item["games"]])
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
                 except sqlite3.DatabaseError:

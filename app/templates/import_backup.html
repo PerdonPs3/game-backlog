@@ -7,6 +7,7 @@
 {% block panel %}
     <h2 class="panel-heading">Choose your backup</h2>
     <p class="form-note">Use a Game Backlog JSON export. Existing game/platform entries are skipped, never overwritten.</p>
+    <p class="form-note">Saved lists are restored too. Lists with the same name are merged additively: existing memberships are never removed.</p>
     {% if error %}<p role="alert">{{ error }}</p>{% endif %}
     {% if result is not none %}
         <p class="workspace-success" role="status">Imported {{ result.imported }} entries. Skipped {{ result.skipped }} duplicates.</p>

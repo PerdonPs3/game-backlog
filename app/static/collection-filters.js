@@ -6,6 +6,7 @@
     const search = form.querySelector("#title-search");
     const status = form.querySelector("#status-filter");
     const sort = form.querySelector("#collection-sort");
+    const list = form.querySelector("#list-filter");
     const button = form.querySelector("#apply-filters");
     const reset = form.querySelector("#filter-reset");
     const collection = document.querySelector("#game-collection");
@@ -32,6 +33,7 @@
         if (query) url.searchParams.set("q", query);
         if (status.value) url.searchParams.set("status", status.value);
         if (sort.value !== "newest") url.searchParams.set("sort", sort.value);
+        if (list?.value) url.searchParams.set("list", list.value);
         controller = new AbortController();
         try {
             const response = await fetch(url, {
@@ -47,8 +49,8 @@
             // Only the server-rendered, autoescaped collection fragment is inserted.
             collection.innerHTML = data.html;
             reset.replaceChildren();
-            reset.hidden = !query && !status.value;
-            if (query || status.value) {
+            reset.hidden = !query && !status.value && !list?.value;
+            if (query || status.value || list?.value) {
                 const link = document.createElement("a");
                 const resetUrl = new URL(form.action, window.location.href);
                 if (sort.value !== "newest") resetUrl.searchParams.set("sort", sort.value);
@@ -85,6 +87,7 @@
     });
     status.addEventListener("change", () => schedule(0));
     sort.addEventListener("change", () => schedule(0));
+    list?.addEventListener("change", () => schedule(0));
     form.addEventListener("submit", (event) => {
         event.preventDefault();
         schedule(0);
@@ -94,6 +97,7 @@
         event.preventDefault();
         search.value = "";
         status.value = "";
+        if (list) list.value = "";
         schedule(0);
     });
 })();

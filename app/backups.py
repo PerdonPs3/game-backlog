@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from app.catalog import collection_cover_url
 from app.game_fields import STATUSES, validate_dates
+from app.game_lists import MAX_LISTS, clean_list_name
 
 
 MAX_BACKUP_BYTES = 2 * 1024 * 1024
@@ -20,13 +21,16 @@ class BackupError(ValueError):
     pass
 
 
-def build_backup(rows):
-    return {
+def build_backup(rows, lists=None):
+    payload = {
         "format": "game-backlog", "version": 1,
         "exported_at": datetime.now(timezone.utc).isoformat(),
         "games": [{field: bool(row[field]) if field in FLAG_FIELDS else row[field]
                    for field in BACKUP_FIELDS} for row in rows],
     }
+    if lists is not None:
+        payload["lists"] = lists
+    return payload
 
 
 def _unique_keys(pairs):
@@ -38,7 +42,7 @@ def _unique_keys(pairs):
     return result
 
 
-def parse_backup(raw):
+def parse_backup(raw, include_lists=False):
     if len(raw) > MAX_BACKUP_BYTES:
         raise BackupError("Backup must be no larger than 2 MB.")
     try:
@@ -56,7 +60,24 @@ def parse_backup(raw):
             result.append(_validate_entry(entry))
         except (ValueError, TypeError, KeyError):
             raise BackupError(f"Game {number} contains invalid fields. Nothing was imported.") from None
-    return result
+    lists = payload.get("lists", [])
+    if not isinstance(lists, list) or len(lists) > MAX_LISTS:
+        raise BackupError("A backup can contain no more than 100 lists. Nothing was imported.")
+    validated_lists = []
+    names = set()
+    for item in lists:
+        try:
+            name = clean_list_name(item["name"])
+            members = item["games"]
+            if name.casefold() in names or not isinstance(members, list) or len(members) > MAX_BACKUP_GAMES:
+                raise ValueError
+            if any(type(index) is not int or not 0 <= index < len(result) for index in members):
+                raise ValueError
+        except (ValueError, TypeError, KeyError):
+            raise BackupError("The backup contains invalid lists. Nothing was imported.") from None
+        names.add(name.casefold())
+        validated_lists.append({"name": name, "games": sorted(set(members))})
+    return (result, validated_lists) if include_lists else result
 
 
 def _validate_entry(entry):

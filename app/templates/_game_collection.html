@@ -45,6 +45,8 @@
 {% else %}
     {% if search_query %}
         <p>No games match your search and selected filters.</p>
+    {% elif selected_list %}
+        <p>No games in this list match your selected filters. Manage your lists to add entries.</p>
     {% elif selected_status %}
         <p>No games with this status yet.</p>
     {% else %}

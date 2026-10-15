@@ -1,0 +1,35 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Your lists · Game Backlog{% endblock %}
+{% block page_kicker %}A collection within your collection{% endblock %}
+{% block page_heading %}Your <span>lists</span>{% endblock %}
+{% block page_description %}For game nights, favourite sagas, or adventures you want to save for later.{% endblock %}
+{% block panel_label %}Manage personal lists{% endblock %}
+{% block panel %}
+    {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+    <form method="post" class="workspace-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-wide"><label for="list-name">New list name</label><input id="list-name" name="name" value="{{ request.form.get('name', '') }}" placeholder="Game nights with friends" maxlength="80" required></div>
+        <div class="form-actions"><button type="submit">＋ Create list</button></div>
+    </form>
+    <div class="personal-lists">
+        {% for item in lists %}
+            <article class="personal-list-card">
+                <div class="list-card-art" aria-hidden="true">
+                    <span class="list-art-caption">YOUR PERSONAL COLLECTION</span>
+                    <div class="list-cover-stack">
+                        {% for cover in item.previews %}<div class="list-preview-cover">{% if cover %}<img src="{{ cover }}" alt="" width="66" height="94" loading="lazy" referrerpolicy="no-referrer">{% else %}<span>◇</span>{% endif %}</div>
+                        {% else %}{% for slot in range(3) %}<div class="list-preview-cover list-preview-empty"><span>◇</span></div>{% endfor %}{% endfor %}
+                    </div>
+                </div>
+                <div class="list-card-heading">
+                    <h2><a href="{{ url_for('main.index', list=item.id) }}">{{ item.name }}</a></h2>
+                    <span class="list-entry-count">{{ item.game_count }} {{ 'entry' if item.game_count == 1 else 'entries' }}</span>
+                </div>
+                <p>{{ 'A few good games, a collection of your own.' if item.game_count else 'Every great collection starts with one game.' }}</p>
+                <div class="game-actions"><a href="{{ url_for('main.edit_list', list_id=item.id) }}">Manage games</a><a class="danger-link" href="{{ url_for('main.delete_list', list_id=item.id) }}">Delete list</a></div>
+            </article>
+        {% else %}<p class="form-note">No lists yet. Give your next collection a name to get started.</p>{% endfor %}
+    </div>
+{% endblock %}
+{% block aside %}<aside class="workspace-aside"><p class="aside-kicker">Make it yours</p><h2>One game. Many lists.</h2><p class="aside-note">A game can belong to several lists. Each platform copy is a separate entry, so you choose exactly which one to include.</p><p class="aside-note">Deleting a list never deletes games, ratings, or reviews. Lists and their memberships are included in new JSON backups.</p></aside>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='list-editor.js') }}" defer></script>{% endblock %}
