@@ -12,6 +12,7 @@ input validation, and automated testing.
 - Add, view, edit, and delete games.
 - Track a title, platform, and status: **Backlog**, **Playing**, or **Completed**.
 - Search the collection by title and filter by status.
+- Sort the collection by recently added, oldest added, title (A–Z), or highest rating; unrated games appear last when sorting by rating.
 - Update collection results automatically while typing or changing status, without reloading the page.
 - View global collection counts, completion progress, and the average of rated games above the filters.
 - Choose new games from IGDB suggestions with covers and release years.

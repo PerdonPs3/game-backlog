@@ -5,6 +5,7 @@
     if (!form) return;
     const search = form.querySelector("#title-search");
     const status = form.querySelector("#status-filter");
+    const sort = form.querySelector("#collection-sort");
     const button = form.querySelector("#apply-filters");
     const reset = form.querySelector("#filter-reset");
     const collection = document.querySelector("#game-collection");
@@ -30,6 +31,7 @@
         const query = search.value.trim();
         if (query) url.searchParams.set("q", query);
         if (status.value) url.searchParams.set("status", status.value);
+        if (sort.value !== "newest") url.searchParams.set("sort", sort.value);
         controller = new AbortController();
         try {
             const response = await fetch(url, {
@@ -45,9 +47,12 @@
             // Only the server-rendered, autoescaped collection fragment is inserted.
             collection.innerHTML = data.html;
             reset.replaceChildren();
+            reset.hidden = !query && !status.value;
             if (query || status.value) {
                 const link = document.createElement("a");
-                link.href = form.action;
+                const resetUrl = new URL(form.action, window.location.href);
+                if (sort.value !== "newest") resetUrl.searchParams.set("sort", sort.value);
+                link.href = resetUrl.href;
                 link.textContent = "Clear filters";
                 reset.append(link);
             }
@@ -79,6 +84,7 @@
         schedule();
     });
     status.addEventListener("change", () => schedule(0));
+    sort.addEventListener("change", () => schedule(0));
     form.addEventListener("submit", (event) => {
         event.preventDefault();
         schedule(0);

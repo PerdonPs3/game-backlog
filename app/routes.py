@@ -6,6 +6,13 @@ main = Blueprint("main", __name__)
 
 DUPLICATE_GAME_ERROR = "This game is already in your collection for this platform."
 
+COLLECTION_SORTS = {
+    "newest": ("Recently added", "created_at DESC, id DESC"),
+    "oldest": ("Oldest added", "created_at ASC, id ASC"),
+    "title": ("Title (A–Z)", "title COLLATE NOCASE ASC, id ASC"),
+    "rating": ("Highest rated", "rating IS NULL ASC, rating DESC, created_at DESC, id DESC"),
+}
+
 
 def find_duplicate_game(db, igdb_id, title, platform, exclude_id=None):
     """Prefer catalog identity; compare names only between legacy manual entries."""
@@ -58,6 +65,10 @@ def collection_statistics(db):
 def index():
     status = request.args.get("status", "")
     search_query = request.args.get("q", "").strip()
+    selected_sort = request.args.get("sort", "newest")
+
+    if selected_sort not in COLLECTION_SORTS:
+        abort(400)
 
     if status not in ("", "Backlog", "Playing", "Completed"):
         abort(400)
@@ -80,14 +91,16 @@ def index():
     query = "SELECT id, title, platform, status, rating, review, cover_image_id FROM games"
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
-    query += " ORDER BY created_at DESC, id DESC"
+    # Only fixed, allowlisted SQL can become an ORDER BY clause.
+    query += " ORDER BY " + COLLECTION_SORTS[selected_sort][1]
 
     games = [
         {**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}
         for game in get_db().execute(query, parameters).fetchall()
     ]
 
-    context = dict(games=games, selected_status=status, search_query=search_query)
+    context = dict(games=games, selected_status=status, search_query=search_query,
+                   selected_sort=selected_sort, sort_options=COLLECTION_SORTS)
     if request.accept_mimetypes.best == "application/json":
         response = jsonify(
             html=render_template("_game_collection.html", **context), count=len(games),

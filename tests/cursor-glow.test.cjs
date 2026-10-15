@@ -4,7 +4,7 @@ const { runInNewContext } = require("node:vm");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
-function setup({ fine = true, reduced = false, withLogo = true } = {}) {
+function setup({ fine = true, reduced = false, withLogo = true, withHero = false } = {}) {
     const documentEvents = {};
     const windowEvents = {};
     const frames = new Map();
@@ -18,12 +18,16 @@ function setup({ fine = true, reduced = false, withLogo = true } = {}) {
         style: { setProperty(name, value) { this[name] = value; } },
         getBoundingClientRect: () => ({ left: 20, right: 62, top: 12, bottom: 60 }),
     };
+    const hero = {
+        style: { setProperty(name, value) { this[name] = value; } },
+        getBoundingClientRect: () => ({ left: 600, right: 780, top: 100, bottom: 300 }),
+    };
     const mouse = { matches: fine, addEventListener(name, fn) { this.change = fn; } };
     const motion = { matches: reduced, addEventListener(name, fn) { this.change = fn; } };
     const document = {
         body: { append(node) { assert.equal(node, glow); } },
         createElement: () => glow,
-        querySelector: () => withLogo ? logo : null,
+        querySelectorAll: () => [...(withLogo ? [logo] : []), ...(withHero ? [hero] : [])],
         addEventListener(name, fn) { documentEvents[name] = fn; },
     };
     let sequence = 0;
@@ -36,7 +40,7 @@ function setup({ fine = true, reduced = false, withLogo = true } = {}) {
             cancelAnimationFrame(id) { frames.delete(id); },
         },
     });
-    return { document, documentEvents, windowEvents, frames, glow, logo, classes, motion,
+    return { document, documentEvents, windowEvents, frames, glow, logo, hero, classes, motion,
         move(extra = {}) { documentEvents.pointermove({ pointerType: "mouse", clientX: 400, clientY: 300, ...extra }); },
         paint() { const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach((fn) => fn()); },
     };
@@ -115,4 +119,19 @@ test("glow still works on pages without a logo", () => {
     ui.move();
     ui.paint();
     assert.equal(ui.classes.has("is-visible"), true);
+});
+
+test("hero and small logo respond independently to the same cursor light", () => {
+    const ui = setup({ withHero: true });
+    ui.move({ clientX: 650, clientY: 150 });
+    ui.paint();
+    assert.equal(Number(ui.hero.style["--logo-light"]), 1);
+    assert.equal(Number(ui.logo.style["--logo-light"]), 0);
+    ui.move({ clientX: 40, clientY: 30 });
+    ui.paint();
+    assert.equal(Number(ui.hero.style["--logo-light"]), 0);
+    assert.equal(Number(ui.logo.style["--logo-light"]), 1);
+    ui.windowEvents.scroll();
+    assert.equal(Number(ui.hero.style["--logo-light"]), 0);
+    assert.equal(Number(ui.logo.style["--logo-light"]), 0);
 });

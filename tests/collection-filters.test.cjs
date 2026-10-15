@@ -15,10 +15,11 @@ class Element {
 
 function setup() {
     const ids = ["collection-filters", "title-search", "status-filter", "apply-filters",
-                 "filter-reset", "game-collection", "filter-message"];
+                 "filter-reset", "game-collection", "filter-message", "collection-sort"];
     const nodes = Object.fromEntries(ids.map((id) => [id, new Element()]));
     const form = nodes["collection-filters"];
     form.action = "http://localhost/";
+    nodes["collection-sort"].value = "newest";
     form.querySelector = (selector) => nodes[selector.slice(1)];
     const document = new Element();
     document.querySelector = form.querySelector;
@@ -64,6 +65,7 @@ test("typing is debounced and combines title and status without reloading inputs
     assert.equal(ui["game-collection"].innerHTML, "<article>Resident</article>");
     assert.equal(ui["title-search"].value, "res");
     assert.equal(ui["filter-message"].textContent, "1 game found.");
+    assert.equal(ui["filter-reset"].hidden, false);
     assert.equal(ui["game-collection"].attributes["aria-busy"], "false");
     assert.equal(ui.events[0], "collection:updated");
     assert.equal(ui.history[0], ui.requests[0].url);
@@ -96,6 +98,7 @@ test("clearing filters requests all games", async () => {
     ui.requests[0].reply("All games", 3);
     await pending;
     assert.equal(ui["filter-reset"].children.length, 0);
+    assert.equal(ui["filter-reset"].hidden, true);
     assert.equal(ui["title-search"].value, "");
     assert.equal(ui["status-filter"].value, "");
 });
@@ -139,4 +142,39 @@ test("cover fallbacks are reattached after filtering", () => {
     document.fire("collection:updated");
     image.fire("error");
     assert.equal(image.removed, true);
+});
+
+test("changing sort refreshes results and keeps it when clearing filters", async () => {
+    const ui = setup();
+    ui["title-search"].value = "res";
+    ui["collection-sort"].value = "rating";
+    ui["collection-sort"].fire("change");
+    let pending = ui.run();
+    assert.equal(ui.requests[0].url, "http://localhost/?q=res&sort=rating");
+    ui.requests[0].reply("Highest rated first", 2);
+    await pending;
+    assert.equal(ui["filter-reset"].children[0].href, "http://localhost/?sort=rating");
+    ui["filter-reset"].fire("click", { target: { closest: () => ({}) } });
+    pending = ui.run();
+    assert.equal(ui.requests[1].url, "http://localhost/?sort=rating");
+    ui.requests[1].reply("All games sorted", 3);
+    await pending;
+    assert.equal(ui["collection-sort"].value, "rating");
+    assert.equal(ui["game-collection"].innerHTML, "All games sorted");
+});
+
+test("stale sorting response cannot overwrite a newer ordering", async () => {
+    const ui = setup();
+    ui["collection-sort"].value = "rating";
+    ui["collection-sort"].fire("change");
+    const old = ui.run();
+    ui["collection-sort"].value = "title";
+    ui["collection-sort"].fire("change");
+    const newer = ui.run();
+    ui.requests[1].reply("Alphabetical", 3);
+    await newer;
+    ui.requests[0].reply("Highest rated", 3);
+    await old;
+    assert.equal(ui["game-collection"].innerHTML, "Alphabetical");
+    assert.equal(ui.history[0], "http://localhost/?sort=title");
 });
