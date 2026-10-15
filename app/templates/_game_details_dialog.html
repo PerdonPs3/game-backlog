@@ -1,0 +1,8 @@
+<dialog id="game-details-dialog" class="game-details-dialog" aria-labelledby="game-details-heading">
+    <div class="details-toolbar">
+        <h2 id="game-details-heading">Game details</h2>
+        <button type="button" class="secondary-button" id="close-game-details" autofocus>Close</button>
+    </div>
+    <div id="game-details-content" aria-busy="false"></div>
+</dialog>
+<script src="{{ url_for('static', filename='game-details.js') }}" defer></script>

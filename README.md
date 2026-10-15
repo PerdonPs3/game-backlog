@@ -21,6 +21,8 @@ input validation, and automated testing.
 - View global collection counts, completion progress, and the average of rated games above the filters.
 - Choose new games from IGDB suggestions with covers and release years.
 - Display saved covers beside collection entries, with a fallback when no cover is available.
+- Switch between detailed cards and a cover-focused shelf; your browser remembers the view while search, sorting, and filters keep working. Open a cover or title for the full review and dates.
+- Open a game's cover or title to view its synopsis, genres, first release date, and personal notes in an accessible dialog. A regular details page works without JavaScript; catalog outages never hide your saved notes.
 - Suggestions prioritize exact titles, then title prefixes, with newest releases first within each group.
 - Choose a platform from the selected game's available platforms, including linked ports.
 - Validate catalog IDs and game/platform combinations on the server.
@@ -138,7 +140,7 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs
+node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs
 ```
 
 Each test uses a separate temporary SQLite database rather than the real

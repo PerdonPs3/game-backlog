@@ -1,14 +1,14 @@
 {% for game in games %}
     <article class="game-card">
-        <div class="game-card-cover" aria-hidden="true">
+        <a class="game-card-cover" href="{{ url_for('main.game_details', game_id=game['id']) }}" data-game-details aria-label="View details for {{ game.title }}">
             <span>No cover available</span>
             {% if game['cover_url'] %}
                 <img src="{{ game['cover_url'] }}" alt="" width="264" height="374"
                      loading="lazy" decoding="async" referrerpolicy="no-referrer">
             {% endif %}
-        </div>
+        </a>
         <div class="game-card-details">
-            <h2>{{ game.title }}</h2>
+            <h2><a class="game-title-link" href="{{ url_for('main.game_details', game_id=game['id']) }}" data-game-details>{{ game.title }}</a></h2>
             {% if game['is_favorite'] or game['is_goty'] %}
                 <div class="game-stickers" aria-label="Personal game distinctions">
                     {% if game['is_favorite'] %}<span class="game-sticker sticker-favorite"><span aria-hidden="true">★</span> Favorite</span>{% endif %}

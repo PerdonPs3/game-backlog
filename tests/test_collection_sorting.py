@@ -7,7 +7,7 @@ from app.db import get_db
 
 def titles(response):
     html = response.json["html"] if response.is_json else response.get_data(as_text=True)
-    return re.findall(r"<h2>(.*?)</h2>", html)
+    return [re.sub(r"<[^>]*>", "", title) for title in re.findall(r"<h2>(.*?)</h2>", html)]
 
 
 def test_default_sort_keeps_recently_added_first(client, seed_game):

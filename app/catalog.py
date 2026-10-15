@@ -127,7 +127,7 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS}; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -270,6 +270,26 @@ def game_suggestion(game):
         "cover_url": cover_url,
         "platforms": names,
     }
+
+
+def game_profile(game):
+    """Public catalog details, with safe defaults for optional upstream fields."""
+    release = None
+    timestamp = game.get("first_release_date")
+    if type(timestamp) is int:
+        try:
+            release = datetime.fromtimestamp(timestamp, tz=timezone.utc).date().isoformat()
+        except (ValueError, OverflowError, OSError):
+            pass
+    genres = game.get("genres", [])
+    if not isinstance(genres, list):
+        genres = []
+    names = sorted({genre["name"].strip()[:100] for genre in genres
+                    if isinstance(genre, dict) and isinstance(genre.get("name"), str)
+                    and genre["name"].strip()}, key=str.casefold)
+    summary = game.get("summary")
+    return {"release": release, "genres": names,
+            "summary": summary[:12000] if isinstance(summary, str) else None}
 
 
 def get_catalog():

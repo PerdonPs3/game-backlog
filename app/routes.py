@@ -3,7 +3,7 @@ import sqlite3
 
 from flask import Blueprint, abort, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
-from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_suggestion, get_catalog
+from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import get_db
 from app.game_fields import STATUSES, validate_dates
 
@@ -117,6 +117,33 @@ def index():
             "index.html", stats=collection_statistics(get_db()), **context,
         ))
     response.vary.add("Accept")
+    return response
+
+
+@main.get("/games/<int:game_id>")
+def game_details(game_id):
+    row = get_db().execute("SELECT * FROM games WHERE id = ?", (game_id,)).fetchone()
+    if row is None:
+        abort(404)
+    game = {**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
+    profile = {"release": None, "genres": [], "summary": None}
+    notice = "This entry is not linked to the catalog." if game["igdb_id"] is None else None
+    if game["igdb_id"] is not None:
+        try:
+            catalog_game = get_catalog().get_game(game["igdb_id"])
+            if catalog_game is None:
+                notice = "Catalog details are no longer available. Your collection entry is safe."
+            else:
+                profile = game_profile(catalog_game)
+        except CatalogError:
+            notice = "Catalog details are temporarily unavailable. Your personal notes are still here."
+    context = dict(game=game, profile=profile, notice=notice)
+    if request.accept_mimetypes.best == "application/json":
+        response = jsonify(html=render_template("_game_details.html", **context))
+    else:
+        response = make_response(render_template("game_details.html", **context))
+    response.vary.add("Accept")
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 

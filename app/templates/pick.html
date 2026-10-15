@@ -32,5 +32,6 @@
     </aside>
 {% endblock %}
 {% block page_scripts %}
+    {% include '_game_details_dialog.html' %}
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
 {% endblock %}

@@ -84,6 +84,10 @@
                 <a href="{{ url_for('main.import_backup') }}">Import backup</a>
             </div>
         </div>
+        <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>
+            <button type="button" data-collection-view="cards" aria-pressed="true" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Cards</button>
+            <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
+        </div>
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}
         </section>
@@ -102,7 +106,9 @@
             <button id="confirm-delete" type="submit" disabled>Yes, delete game</button>
         </form>
     </dialog>
+    {% include '_game_details_dialog.html' %}
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='collection-view.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-filters.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     <script src="{{ url_for('static', filename='delete-confirmation.js') }}" defer></script>
