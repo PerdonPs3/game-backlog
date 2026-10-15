@@ -406,3 +406,53 @@ a:focus-visible {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
 }
+
+.delete-dialog {
+    width: min(420px, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    padding: 1.5rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid #e3b34155;
+    border-radius: 16px;
+    box-shadow: 0 24px 70px #0008;
+}
+
+.delete-dialog::backdrop {
+    background: #08090eb3;
+    backdrop-filter: blur(3px);
+}
+
+.delete-dialog h2 {
+    margin: 0 0 0.75rem;
+    color: var(--accent);
+    font-size: 1.4rem;
+}
+
+.delete-dialog p {
+    margin: 0;
+}
+
+.delete-dialog strong {
+    color: var(--text);
+}
+
+.delete-dialog form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+}
+
+.secondary-button {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid #e3b34155;
+}
+
+.secondary-button:hover {
+    background: #e3b34110;
+}

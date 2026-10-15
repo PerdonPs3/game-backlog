@@ -16,6 +16,9 @@
         {% if error %}
             <p role="alert">{{ error }}</p>
         {% endif %}
+        {% if duplicate_game_id %}
+            <p><a href="{{ url_for('main.edit', game_id=duplicate_game_id) }}">Edit the existing game</a></p>
+        {% endif %}
 
         <form method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

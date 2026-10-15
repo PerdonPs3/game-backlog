@@ -18,10 +18,12 @@ input validation, and automated testing.
 - Suggestions prioritize exact titles, then title prefixes, with newest releases first within each group.
 - Choose a platform from the selected game's available platforms, including linked ports.
 - Validate catalog IDs and game/platform combinations on the server.
+- Prevent adding the same catalog game twice on the same platform, including when editing.
 - Add an optional whole-number rating from 1 to 10 and a review of up to 2,000 characters.
 - Clear an existing rating or review by leaving its field empty when editing.
 - Preserve entered form values when validation fails.
 - Confirm deletion before permanently removing a game.
+- Confirm deletion in a small accessible dialog without leaving the collection (with a separate-page fallback without JavaScript).
 - Store the collection locally in SQLite, including across server restarts.
 - Use a dark interface with gold accents and wrapping for long text.
 
@@ -195,7 +197,7 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 - [x] Display covers and release years in suggestions, with available platforms after selection.
 - [x] Store catalog identifiers and validate the selected game and platform.
 - [x] Display game covers in the collection.
-- [ ] Warn when adding a game/platform combination already in the collection.
+- [x] Block duplicate catalog game/platform combinations and link to the existing entry.
 
 Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
 

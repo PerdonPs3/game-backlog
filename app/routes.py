@@ -4,6 +4,28 @@ from app.db import get_db
 
 main = Blueprint("main", __name__)
 
+DUPLICATE_GAME_ERROR = "This game is already in your collection for this platform."
+
+
+def find_duplicate_game(db, igdb_id, title, platform, exclude_id=None):
+    """Prefer catalog identity; compare names only between legacy manual entries."""
+    parameters = [platform.strip()]
+    conditions = ["trim(platform) = ? COLLATE NOCASE"]
+    if igdb_id is not None:
+        conditions.append("igdb_id = ?")
+        parameters.append(igdb_id)
+    else:
+        conditions.extend(["igdb_id IS NULL", "trim(title) = ? COLLATE NOCASE"])
+        parameters.append(title.strip())
+    if exclude_id is not None:
+        conditions.append("id != ?")
+        parameters.append(exclude_id)
+    return db.execute(
+        "SELECT id FROM games WHERE " + " AND ".join(conditions) + " ORDER BY id LIMIT 1",
+        parameters,
+    ).fetchone()
+
+
 def validate_game(title, platform, status):
     if not title or len(title) > 200:
         return "Title must contain between 1 and 200 characters."
@@ -79,6 +101,7 @@ def catalog_search():
 def create():
     error = None
     selected_game = None
+    duplicate_game_id = None
 
     if request.method == "POST":
         title = request.form.get("title", "").strip()
@@ -120,17 +143,28 @@ def create():
 
         if error is None:
             db = get_db()
-            db.execute(
-                "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (selected_game["name"], platform, status, rating, review, selected_game["id"],
-                 cover_image_id(catalog_game)),
+            # Serialize check + write so simultaneous submissions cannot both pass.
+            db.execute("BEGIN IMMEDIATE")
+            duplicate = find_duplicate_game(
+                db, selected_game["id"], selected_game["name"], platform,
             )
-            db.commit()
+            if duplicate is not None:
+                duplicate_game_id = duplicate["id"]
+                db.rollback()
+                error = DUPLICATE_GAME_ERROR
+            else:
+                db.execute(
+                    "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (selected_game["name"], platform, status, rating, review, selected_game["id"],
+                     cover_image_id(catalog_game)),
+                )
+                db.commit()
 
-            return redirect(url_for("main.index"))
+                return redirect(url_for("main.index"))
 
-    return render_template("create.html", error=error, selected_game=selected_game)
+    return render_template("create.html", error=error, selected_game=selected_game,
+                           duplicate_game_id=duplicate_game_id)
 
 
 @main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])
@@ -146,6 +180,7 @@ def edit(game_id):
         abort(404)
 
     error = None
+    duplicate_game_id = None
     catalog_game = None
     available_platforms = []
     if game["igdb_id"] is not None:
@@ -186,20 +221,39 @@ def edit(game_id):
             error = "Review must contain no more than 2000 characters."
 
         if error is None:
-            db.execute(
-                "UPDATE games SET title = ?, platform = ?, status = ?, "
-                "rating = ?, review = ?, cover_image_id = ? "
-                "WHERE id = ?",
-                (title, platform, status, rating, review,
-                 cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
-                 game_id),
+            db.execute("BEGIN IMMEDIATE")
+            current_identity = db.execute(
+                "SELECT title, platform FROM games WHERE id = ?", (game_id,),
+            ).fetchone()
+            if current_identity is None:
+                db.rollback()
+                abort(404)
+            identity_changed = (
+                platform.casefold() != current_identity["platform"].strip().casefold()
+                or (game["igdb_id"] is None and title.casefold() != current_identity["title"].strip().casefold())
             )
-            db.commit()
+            # Pre-existing duplicates remain editable; never delete or merge user data.
+            duplicate = find_duplicate_game(db, game["igdb_id"], title, platform, game_id) if identity_changed else None
+            if duplicate is not None:
+                duplicate_game_id = duplicate["id"]
+                db.rollback()
+                error = DUPLICATE_GAME_ERROR
+            else:
+                db.execute(
+                    "UPDATE games SET title = ?, platform = ?, status = ?, "
+                    "rating = ?, review = ?, cover_image_id = ? "
+                    "WHERE id = ?",
+                    (title, platform, status, rating, review,
+                     cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
+                     game_id),
+                )
+                db.commit()
 
-            return redirect(url_for("main.index"))
+                return redirect(url_for("main.index"))
 
     return render_template("edit.html", game=game, error=error,
-                           available_platforms=available_platforms)
+                           available_platforms=available_platforms,
+                           duplicate_game_id=duplicate_game_id)
 
 
 @main.get("/catalog/games/<int:catalog_id>")

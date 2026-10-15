@@ -23,7 +23,8 @@
 
             <div class="game-actions">
                 <a href="{{ url_for('main.edit', game_id=game['id']) }}">Edit game</a>
-                <a class="danger-link" href="{{ url_for('main.delete', game_id=game['id']) }}">Delete game</a>
+                <a class="danger-link" href="{{ url_for('main.delete', game_id=game['id']) }}"
+                   data-delete-game data-game-title="{{ game.title }}">Delete game</a>
             </div>
         </div>
     </article>

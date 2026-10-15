@@ -58,8 +58,20 @@
             <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.
         </p>
     </main>
+    <dialog id="delete-game-dialog" class="delete-dialog"
+            aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+        <h2 id="delete-dialog-title">Delete game?</h2>
+        <p id="delete-dialog-description">Are you sure you want to delete
+            “<strong id="delete-game-title"></strong>”? This action cannot be undone.</p>
+        <form id="delete-game-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button id="cancel-delete" class="secondary-button" type="button" autofocus>Cancel</button>
+            <button id="confirm-delete" type="submit" disabled>Yes, delete game</button>
+        </form>
+    </dialog>
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-filters.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='delete-confirmation.js') }}" defer></script>
 </body>
 </html>
