@@ -13,6 +13,7 @@ input validation, and automated testing.
 - Track a title, platform, and status: **Backlog**, **Playing**, or **Completed**.
 - Search the collection by title and filter by status.
 - Update collection results automatically while typing or changing status, without reloading the page.
+- View global collection counts, completion progress, and the average of rated games above the filters.
 - Choose new games from IGDB suggestions with covers and release years.
 - Display saved covers beside collection entries, with a fallback when no cover is available.
 - Suggestions prioritize exact titles, then title prefixes, with newest releases first within each group.
@@ -217,7 +218,7 @@ Games from other platforms remain supported through the catalog.
 ### 4. Build a personal player profile
 
 - [ ] Add an avatar, a short bio, and a shelf of favorite games.
-- [ ] Show personal statistics, such as completed games and a breakdown by status.
+- [x] Show collection statistics: totals, status counts, completion progress, and average rating.
 - [ ] Introduce accounts and separate collections before supporting multiple users.
 - [ ] Let users choose which profile information and activity to make public.
 

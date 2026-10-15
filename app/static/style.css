@@ -104,6 +104,99 @@ p {
     color: var(--text-muted);
 }
 
+.collection-summary {
+    margin: 1.75rem 0;
+}
+
+.summary-heading h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.summary-heading p {
+    margin: 0.25rem 0 1rem;
+    font-size: 0.8rem;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.summary-stat {
+    padding: 1rem;
+    border: 1px solid #e3b34130;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #e3b3410a, transparent 70%), var(--background);
+}
+
+.summary-stat dt {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.summary-stat dd {
+    margin: 0.25rem 0 0;
+    color: var(--accent);
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.summary-progress {
+    margin-top: 1rem;
+}
+
+.summary-progress p,
+.summary-average {
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+}
+
+.collection-summary strong {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-progress progress {
+    display: block;
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: var(--background);
+    accent-color: var(--accent);
+}
+
+.summary-progress progress::-webkit-progress-bar {
+    background: var(--background);
+    border-radius: 999px;
+}
+
+.summary-progress progress::-webkit-progress-value {
+    background: linear-gradient(90deg, #b88623, #edca73);
+    border-radius: 999px;
+}
+
+.summary-progress progress::-moz-progress-bar {
+    background: linear-gradient(90deg, #b88623, #edca73);
+    border-radius: 999px;
+}
+
+@media (max-width: 620px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .game-card {
     display: grid;
     grid-template-columns: 132px minmax(0, 1fr);

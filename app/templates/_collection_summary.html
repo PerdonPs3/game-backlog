@@ -1,0 +1,45 @@
+<section id="collection-summary" class="collection-summary" aria-labelledby="summary-title">
+    <div class="summary-heading">
+        <h2 id="summary-title">Your collection at a glance</h2>
+        <p>Whole collection · each platform entry counts separately.</p>
+    </div>
+    <dl class="summary-grid">
+        <div class="summary-stat">
+            <dt>Total games</dt>
+            <dd id="summary-total">{{ stats.total }}</dd>
+        </div>
+        <div class="summary-stat">
+            <dt>Completed</dt>
+            <dd id="summary-completed">{{ stats.completed }}</dd>
+        </div>
+        <div class="summary-stat">
+            <dt>Playing</dt>
+            <dd id="summary-playing">{{ stats.playing }}</dd>
+        </div>
+        <div class="summary-stat">
+            <dt>Backlog</dt>
+            <dd id="summary-backlog">{{ stats.backlog }}</dd>
+        </div>
+    </dl>
+    <div class="summary-progress">
+        <p id="summary-progress-text">
+            {% if stats.total %}
+                You have completed <strong>{{ stats.completion_percent }}%</strong> of your collection.
+            {% else %}
+                Add your first game to start tracking progress.
+            {% endif %}
+        </p>
+        <progress value="{{ stats.completed }}" max="{{ stats.total or 1 }}"
+                  aria-label="Collection completion" aria-describedby="summary-progress-text">
+            {{ stats.completion_percent }}%
+        </progress>
+    </div>
+    <p class="summary-average">
+        {% if stats.average is not none %}
+            Your average rating: <strong>{{ '%.1f'|format(stats.average) }}/10</strong>
+            <span>· {{ stats.rated }} {{ 'game' if stats.rated == 1 else 'games' }} rated</span>
+        {% else %}
+            No ratings yet. Rate a game to see your average.
+        {% endif %}
+    </p>
+</section>

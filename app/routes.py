@@ -39,6 +39,21 @@ def validate_game(title, platform, status):
     return None
 
 
+def collection_statistics(db):
+    """Global entry counts; unrated games do not contribute to the average."""
+    row = db.execute(
+        "SELECT COUNT(*) AS total, "
+        "COALESCE(SUM(status = 'Completed'), 0) AS completed, "
+        "COALESCE(SUM(status = 'Playing'), 0) AS playing, "
+        "COALESCE(SUM(status = 'Backlog'), 0) AS backlog, "
+        "COUNT(rating) AS rated, AVG(rating) AS average "
+        "FROM games"
+    ).fetchone()
+    stats = dict(row)
+    stats["completion_percent"] = int(stats["completed"] * 100 / stats["total"] + 0.5) if stats["total"] else 0
+    return stats
+
+
 @main.get("/")
 def index():
     status = request.args.get("status", "")
@@ -78,7 +93,9 @@ def index():
             html=render_template("_game_collection.html", **context), count=len(games),
         )
     else:
-        response = make_response(render_template("index.html", **context))
+        response = make_response(render_template(
+            "index.html", stats=collection_statistics(get_db()), **context,
+        ))
     response.vary.add("Accept")
     return response
 

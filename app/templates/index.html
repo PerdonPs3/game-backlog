@@ -11,6 +11,7 @@
     <main>
         <h1>Game Backlog</h1>
         <p>Your next adventure starts here.</p>
+        {% include '_collection_summary.html' %}
         <a class="button-link" href="{{ url_for('main.create') }}">
             + Add game
         </a> 
