@@ -15,9 +15,12 @@
                 <h1 class="library-wordmark">Game <span>Backlog</span></h1>
                 <p class="hero-description">Less scrolling. More playing.<br>
                     Your next adventure starts here.</p>
-                <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
-                    <span aria-hidden="true">＋</span> Add game
-                </a>
+                <div class="hero-actions">
+                    <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
+                        <span aria-hidden="true">＋</span> Add game
+                    </a>
+                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}">What should I play?</a>
+                </div>
             </div>
             <div class="hero-emblem" data-hero-logo aria-hidden="true">
                 <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false">
@@ -44,7 +47,7 @@
                     <option value="" {% if selected_status == '' %}selected{% endif %}>
                         All games
                     </option>
-                    {% for status in ('Backlog', 'Playing', 'Completed') %}
+                    {% for status in game_statuses %}
                         <option
                             value="{{ status }}"
                             {% if selected_status == status %}selected{% endif %}
@@ -76,7 +79,10 @@
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
         <div class="library-heading">
             <h2 id="library-title">Your library</h2>
-            <span>Good games. Your own pace.</span>
+            <div class="backup-actions">
+                <a href="{{ url_for('main.export_backup') }}">Export backup</a>
+                <a href="{{ url_for('main.import_backup') }}">Import backup</a>
+            </div>
         </div>
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}

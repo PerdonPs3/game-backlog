@@ -21,6 +21,9 @@
             <dd id="summary-backlog">{{ stats.backlog }}</dd>
         </div>
     </dl>
+    {% if stats.on_hold or stats.dropped %}
+        <p class="summary-paused">On hold: <strong>{{ stats.on_hold }}</strong> · Dropped: <strong>{{ stats.dropped }}</strong></p>
+    {% endif %}
     <div class="summary-footer">
     <div class="summary-progress">
         <p id="summary-progress-text">

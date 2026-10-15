@@ -17,6 +17,7 @@ def create_app(test_config=None):
     CSRFProtect(app)
     
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
+    app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 
     if test_config is None:
         app.config.from_pyfile(
@@ -36,5 +37,11 @@ def create_app(test_config=None):
 
     from app.routes import main
     app.register_blueprint(main)
+
+    from app.game_fields import STATUSES
+
+    @app.context_processor
+    def game_choices():
+        return {"game_statuses": STATUSES}
 
     return app

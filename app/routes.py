@@ -1,6 +1,11 @@
+import json
+import sqlite3
+
 from flask import Blueprint, abort, jsonify, make_response, redirect, render_template, request, url_for
+from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_suggestion, get_catalog
 from app.db import get_db
+from app.game_fields import STATUSES, validate_dates
 
 main = Blueprint("main", __name__)
 
@@ -40,7 +45,7 @@ def validate_game(title, platform, status):
     if not platform or len(platform) > 80:
         return "Platform must contain between 1 and 80 characters."
 
-    if status not in ("Backlog", "Playing", "Completed"):
+    if status not in STATUSES:
         return "Please select a valid status."
 
     return None
@@ -53,6 +58,8 @@ def collection_statistics(db):
         "COALESCE(SUM(status = 'Completed'), 0) AS completed, "
         "COALESCE(SUM(status = 'Playing'), 0) AS playing, "
         "COALESCE(SUM(status = 'Backlog'), 0) AS backlog, "
+        "COALESCE(SUM(status = 'On hold'), 0) AS on_hold, "
+        "COALESCE(SUM(status = 'Dropped'), 0) AS dropped, "
         "COUNT(rating) AS rated, AVG(rating) AS average "
         "FROM games"
     ).fetchone()
@@ -70,7 +77,7 @@ def index():
     if selected_sort not in COLLECTION_SORTS:
         abort(400)
 
-    if status not in ("", "Backlog", "Playing", "Completed"):
+    if status not in ("", *STATUSES):
         abort(400)
 
     if len(search_query) > 200:
@@ -88,7 +95,7 @@ def index():
         conditions.append("instr(lower(title), lower(?)) > 0")
         parameters.append(search_query)
 
-    query = "SELECT id, title, platform, status, rating, review, cover_image_id FROM games"
+    query = "SELECT id, title, platform, status, rating, review, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     # Only fixed, allowlisted SQL can become an ORDER BY clause.
@@ -127,6 +134,63 @@ def catalog_search():
     return jsonify(games=[game_suggestion(game) for game in games])
 
 
+@main.get("/games/pick")
+def pick_game():
+    game = get_db().execute(
+        "SELECT * FROM games WHERE status = 'Backlog' ORDER BY RANDOM() LIMIT 1"
+    ).fetchone()
+    games = [{**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}] if game else []
+    return render_template("pick.html", games=games, selected_status="Backlog", search_query="")
+
+
+@main.get("/backups/export")
+def export_backup():
+    rows = get_db().execute("SELECT * FROM games ORDER BY id").fetchall()
+    response = make_response(json.dumps(build_backup(rows), ensure_ascii=False, indent=2))
+    response.mimetype = "application/json"
+    response.headers["Content-Disposition"] = 'attachment; filename="game-backlog-backup.json"'
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@main.route("/backups/import", methods=["GET", "POST"])
+def import_backup():
+    error = None
+    result = None
+    if request.method == "POST":
+        upload = request.files.get("backup")
+        if upload is None or not upload.filename:
+            error = "Please choose a JSON backup file."
+        elif request.form.get("confirm_import") != "yes":
+            error = "Please confirm that you want to add new entries from this backup."
+        else:
+            try:
+                games = parse_backup(upload.read(MAX_BACKUP_BYTES + 1))
+            except BackupError as problem:
+                error = str(problem)
+            else:
+                db = get_db()
+                db.execute("BEGIN IMMEDIATE")
+                imported = skipped = 0
+                try:
+                    for game in games:
+                        if find_duplicate_game(db, game["igdb_id"], game["title"], game["platform"]) is not None:
+                            skipped += 1
+                            continue
+                        db.execute(
+                            "INSERT INTO games (" + ", ".join(BACKUP_FIELDS) + ") "
+                            "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ")",
+                            [game[field] for field in BACKUP_FIELDS],
+                        )
+                        imported += 1
+                    db.commit()
+                    result = {"imported": imported, "skipped": skipped}
+                except sqlite3.DatabaseError:
+                    db.rollback()
+                    error = "The backup could not be saved. Nothing was imported. Please try again."
+    return render_template("import_backup.html", error=error, result=result)
+
+
 @main.route("/games/new", methods=["GET", "POST"])
 def create():
     error = None
@@ -140,6 +204,11 @@ def create():
         rating_text = request.form.get("rating", "").strip()
         review = request.form.get("review", "").strip()
         error = validate_game(title, platform, status)
+        started_on = request.form.get("started_on", "").strip() or None
+        completed_on = request.form.get("completed_on", "").strip() or None
+        is_favorite = int(request.form.get("is_favorite") == "yes")
+        is_goty = int(request.form.get("is_goty") == "yes")
+        error = error or validate_dates(started_on, completed_on)
 
         rating = None
 
@@ -184,10 +253,10 @@ def create():
                 error = DUPLICATE_GAME_ERROR
             else:
                 db.execute(
-                    "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (selected_game["name"], platform, status, rating, review, selected_game["id"],
-                     cover_image_id(catalog_game)),
+                     cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
                 )
                 db.commit()
 
@@ -201,7 +270,7 @@ def create():
 def edit(game_id):
     db = get_db()
     game = db.execute(
-        "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id "
+        "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty "
         "FROM games WHERE id = ?",
         (game_id,),
     ).fetchone()
@@ -228,6 +297,11 @@ def edit(game_id):
         platform = request.form.get("platform", "").strip()
         status = request.form.get("status", "")
         error = error or validate_game(title, platform, status)
+        started_on = request.form.get("started_on", game["started_on"] or "").strip() or None
+        completed_on = request.form.get("completed_on", game["completed_on"] or "").strip() or None
+        is_favorite = int(request.form.get("is_favorite") == "yes")
+        is_goty = int(request.form.get("is_goty") == "yes")
+        error = error or validate_dates(started_on, completed_on)
         if error is None and game["igdb_id"] is not None:
             if title != catalog_game["name"]:
                 error = "The title must match the selected catalog game."
@@ -271,11 +345,11 @@ def edit(game_id):
             else:
                 db.execute(
                     "UPDATE games SET title = ?, platform = ?, status = ?, "
-                    "rating = ?, review = ?, cover_image_id = ? "
+                    "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
                     "WHERE id = ?",
                     (title, platform, status, rating, review,
                      cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
-                     game_id),
+                     started_on, completed_on, is_favorite, is_goty, game_id),
                 )
                 db.commit()
 

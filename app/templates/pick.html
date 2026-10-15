@@ -1,0 +1,36 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Your next adventure · Game Backlog{% endblock %}
+{% block page_kicker %}A little less indecision{% endblock %}
+{% block page_heading %}Your next <span>adventure</span>{% endblock %}
+{% block page_description %}A random pick from all your Backlog entries. No status changes, just a suggestion.{% endblock %}
+{% block panel_label %}Your suggested game{% endblock %}
+{% block panel %}
+    {% if games %}
+        {% include '_game_collection.html' %}
+        <div class="page-actions">
+            <a class="button-link" href="{{ url_for('main.pick_game') }}">Pick again</a>
+            <a href="{{ url_for('main.index') }}">Back to collection</a>
+        </div>
+    {% else %}
+        <div class="workspace-empty">
+            <p class="aside-kicker">Room for a new adventure</p>
+            <h2>Your Backlog is clear</h2>
+            <p>No pending games yet. Add a game to your Backlog to get a suggestion.</p>
+            <div class="page-actions">
+                <a class="button-link" href="{{ url_for('main.create') }}">Add game</a>
+                <a href="{{ url_for('main.index') }}">Back to collection</a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+{% block aside %}
+    <aside class="workspace-aside" aria-label="How suggestions work">
+        <p class="aside-kicker">Let chance choose</p>
+        <h2>One game. No pressure.</h2>
+        <p class="aside-note">Only Backlog entries are included. Games you are playing, have completed, paused, or dropped stay out of the draw.</p>
+        <p class="aside-note">Not feeling this pick? Try again. Nothing changes in your collection until you decide to edit a game.</p>
+    </aside>
+{% endblock %}
+{% block page_scripts %}
+    <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
+{% endblock %}

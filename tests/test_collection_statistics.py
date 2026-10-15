@@ -16,7 +16,7 @@ def summary_from(response):
 
 def test_empty_collection_has_safe_statistics_and_help(client, app):
     assert stats_for(app) == {
-        "total": 0, "completed": 0, "playing": 0, "backlog": 0,
+        "total": 0, "completed": 0, "playing": 0, "backlog": 0, "on_hold": 0, "dropped": 0,
         "rated": 0, "average": None, "completion_percent": 0,
     }
     summary = summary_from(client.get("/"))
@@ -32,7 +32,7 @@ def test_statistics_count_statuses_and_ignore_unrated_games(app, client, seed_ga
     seed_game(status="Playing", rating=6)
     seed_game(status="Backlog", rating=None)
     assert stats_for(app) == {
-        "total": 4, "completed": 2, "playing": 1, "backlog": 1,
+        "total": 4, "completed": 2, "playing": 1, "backlog": 1, "on_hold": 0, "dropped": 0,
         "rated": 3, "average": 8.0, "completion_percent": 50,
     }
     summary = summary_from(client.get("/"))

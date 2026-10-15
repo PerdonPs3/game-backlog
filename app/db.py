@@ -13,15 +13,40 @@ def get_db():
         additions = {
             "igdb_id": "ALTER TABLE games ADD COLUMN igdb_id INTEGER",
             "cover_image_id": "ALTER TABLE games ADD COLUMN cover_image_id TEXT",
+            "started_on": "ALTER TABLE games ADD COLUMN started_on TEXT",
+            "completed_on": "ALTER TABLE games ADD COLUMN completed_on TEXT",
+            "is_favorite": "ALTER TABLE games ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0 CHECK (is_favorite IN (0, 1))",
+            "is_goty": "ALTER TABLE games ADD COLUMN is_goty INTEGER NOT NULL DEFAULT 0 CHECK (is_goty IN (0, 1))",
         }
-        if columns and additions.keys() - {column["name"] for column in columns}:
+        schema = g.db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'games'").fetchone()
+        needs_status_upgrade = schema is not None and "status" in {c["name"] for c in columns} and "'On hold'" not in schema["sql"]
+        if columns and (additions.keys() - {column["name"] for column in columns} or needs_status_upgrade):
             g.db.execute("BEGIN IMMEDIATE")
-            columns = g.db.execute("PRAGMA table_info(games)").fetchall()
-            existing = {column["name"] for column in columns}
-            for name, statement in additions.items():
-                if name not in existing:
-                    g.db.execute(statement)
-            g.db.commit()
+            try:
+                columns = g.db.execute("PRAGMA table_info(games)").fetchall()
+                existing = {column["name"] for column in columns}
+                for name, statement in additions.items():
+                    if name not in existing:
+                        g.db.execute(statement)
+                schema = g.db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'games'").fetchone()
+                if "status" in existing and "'On hold'" not in schema["sql"]:
+                    # SQLite CHECK constraints require a new table. Keep the original
+                    # as a safety snapshot; all changes commit or roll back together.
+                    with current_app.open_resource("schema.sql") as schema_file:
+                        table_sql = schema_file.read().decode("utf-8")
+                    g.db.execute(table_sql.replace("IF NOT EXISTS games", "games_status_upgrade", 1))
+                    names = [c["name"] for c in g.db.execute("PRAGMA table_info(games)")]
+                    # Column identifiers originate only from SQLite's schema metadata.
+                    quoted = ", ".join('"' + name.replace('"', '""') + '"' for name in names)
+                    g.db.execute(f"INSERT INTO games_status_upgrade ({quoted}) SELECT {quoted} FROM games")
+                    g.db.execute("ALTER TABLE games RENAME TO games_before_status_upgrade")
+                    g.db.execute("ALTER TABLE games_status_upgrade RENAME TO games")
+                g.db.commit()
+            except Exception:
+                g.db.rollback()
+                g.db.close()
+                g.pop("db", None)
+                raise
 
     return g.db
 

@@ -9,6 +9,12 @@
         </div>
         <div class="game-card-details">
             <h2>{{ game.title }}</h2>
+            {% if game['is_favorite'] or game['is_goty'] %}
+                <div class="game-stickers" aria-label="Personal game distinctions">
+                    {% if game['is_favorite'] %}<span class="game-sticker sticker-favorite"><span aria-hidden="true">★</span> Favorite</span>{% endif %}
+                    {% if game['is_goty'] %}<span class="game-sticker sticker-goty"><span aria-hidden="true">✦</span> Your GOTY</span>{% endif %}
+                </div>
+            {% endif %}
             <p>Platform: {{ game.platform }}</p>
             <div class="game-meta">
                 <p class="game-status">Status: {{ game.status }}</p>
@@ -16,6 +22,14 @@
                     <p class="game-rating">Rating: {{ game['rating'] }}/10</p>
                 {% endif %}
             </div>
+
+            {% if game['started_on'] or game['completed_on'] %}
+                <p class="game-dates">
+                    {% if game['started_on'] %}Started: <time datetime="{{ game['started_on'] }}">{{ game['started_on'] }}</time>{% endif %}
+                    {% if game['started_on'] and game['completed_on'] %} · {% endif %}
+                    {% if game['completed_on'] %}Completed: <time datetime="{{ game['completed_on'] }}">{{ game['completed_on'] }}</time>{% endif %}
+                </p>
+            {% endif %}
 
             {% if game['review'] %}
                 <p class="game-review">{{ game['review'] }}</p>
