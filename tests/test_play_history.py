@@ -80,7 +80,7 @@ def test_random_pick_only_chooses_backlog_and_never_changes_status(client, seed_
     for status in ["Completed", "Playing", "On hold", "Dropped"]:
         seed_game(title=f"Exclude {status}", status=status)
     before = stored_games()
-    page = client.get("/games/pick")
+    page = client.get("/games/pick?pick=1")
     assert page.status_code == 200
     assert b"Pending adventure" in page.data
     assert b"Exclude" not in page.data

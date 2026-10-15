@@ -14,6 +14,10 @@ input validation, and automated testing.
 - Record optional start and completion dates; clear them by leaving the fields empty.
 - Mark personal Favorite and Your GOTY stickers when adding or editing; both can be selected independently.
 - Pick a random game from the entire Backlog without changing its status.
+- Narrow random picks by your saved platform and catalog genre. Preferences are combined, and Pick again keeps them. Unknown genres stay eligible only with Any genre; catalog outages never silently ignore a selected genre.
+- Choose preferences first: opening the picker does not draw a game until you press Find my next adventure.
+- Reveal random picks with a three-second cover roulette, or skip straight to the result. A single match gets a short reveal; reduced-motion settings and browsers without animation support show the result directly. The animation never changes the server's random selection.
+- Enable optional, quiet roulette ticks and a reveal chime, synthesized locally in your browser. Sound starts muted; your preference is remembered, but browser autoplay restrictions may require clicking Enable sound again.
 - Export a portable JSON backup and import new entries without overwriting existing games.
 - Search the collection by title and filter by status.
 - Sort the collection by recently added, oldest added, title (A–Z), or highest rating; unrated games appear last when sorting by rating.
@@ -140,7 +144,7 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs
+node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs
 ```
 
 Each test uses a separate temporary SQLite database rather than the real

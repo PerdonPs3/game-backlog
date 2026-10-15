@@ -53,6 +53,7 @@ def game_data(app):
     # Existing CRUD tests now submit a genuine mocked catalog selection.
     from unittest.mock import Mock
     catalog_client = Mock()
+    catalog_client.get_game_genres.return_value = {123: ("Puzzle",)}
     catalog_client.get_game.side_effect = lambda game_id: {
         "id": 123, "name": "Portal 2", "platforms": [{"id": 6, "name": "PC"},
                                                      {"id": 9, "name": "PS3"}],

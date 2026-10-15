@@ -50,6 +50,7 @@ class IGDBClient:
         self._last_search_at = 0
         self._search_cache = {}
         self._game_cache = {}
+        self._genre_cache = {}
 
     def _access_token(self):
         if self._token and monotonic() < self._expires_at:
@@ -136,6 +137,29 @@ class IGDBClient:
                 self._game_cache.clear()
             self._game_cache[game_id] = (monotonic() + 300, game)
             return game
+
+    def get_game_genres(self, game_ids):
+        """Fetch only pending-game genres in batches, not one request per entry."""
+        ids = sorted({value for value in game_ids if type(value) is int and 0 < value < 2**63})
+        with self._lock:
+            now = monotonic()
+            missing = [value for value in ids
+                       if value not in self._genre_cache or now >= self._genre_cache[value][0]]
+            for start in range(0, len(missing), 200):
+                batch = missing[start:start + 200]
+                query_ids = ",".join(str(value) for value in batch)
+                games = self._query_games(
+                    f"fields id,name,genres.name; where id = ({query_ids}); limit 200;"
+                )
+                by_id = {game["id"]: tuple(game_profile(game)["genres"]) for game in games
+                         if game["id"] in batch}
+                # Missing games have no known genre; never guess from their titles.
+                for value in batch:
+                    self._genre_cache[value] = (monotonic() + 300, by_id.get(value, ()))
+            result = {value: self._genre_cache[value][1] for value in ids}
+            if len(self._genre_cache) > 5000:
+                self._genre_cache.clear()
+            return result
 
     def _query_games(self, query):
         query = query.encode("utf-8")

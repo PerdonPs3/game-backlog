@@ -2,22 +2,84 @@
 {% block page_title %}Your next adventure · Game Backlog{% endblock %}
 {% block page_kicker %}A little less indecision{% endblock %}
 {% block page_heading %}Your next <span>adventure</span>{% endblock %}
-{% block page_description %}A random pick from all your Backlog entries. No status changes, just a suggestion.{% endblock %}
+{% block page_description %}Choose your mood. Let your Backlog handle the rest. No status changes, just a suggestion.{% endblock %}
 {% block panel_label %}Your suggested game{% endblock %}
 {% block panel %}
+    <form method="get" action="{{ url_for('main.pick_game') }}" class="workspace-form adventure-preferences">
+        <input type="hidden" name="pick" value="1">
+        <div>
+            <label for="pick-platform">Platform</label>
+            <select id="pick-platform" name="platform">
+                <option value="">Any platform</option>
+                {% for platform in platforms %}<option value="{{ platform }}" {% if selected_platform == platform %}selected{% endif %}>{{ platform }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="pick-genre">Genre</label>
+            <select id="pick-genre" name="genre" aria-describedby="pick-genre-help">
+                <option value="">Any genre</option>
+                {% if genre_error and selected_genre %}<option value="{{ selected_genre }}" selected>{{ selected_genre }} (unavailable)</option>{% endif %}
+                {% for genre in genres %}<option value="{{ genre }}" {% if selected_genre == genre %}selected{% endif %}>{{ genre }}</option>{% endfor %}
+            </select>
+        </div>
+        <p id="pick-genre-help" class="adventure-hint">Genres come from catalog-linked games in your Backlog. Entries without a known genre are included only with Any genre.</p>
+        <div class="form-actions">
+            <button type="submit">Find my next adventure <span aria-hidden="true">↗</span></button>
+            {% if selected_platform or selected_genre %}<a href="{{ url_for('main.pick_game') }}">Reset preferences</a>{% endif %}
+        </div>
+    </form>
+    {% if genre_error %}<p role="alert">{{ genre_error }}</p>{% endif %}
     {% if games %}
+        <section id="adventure-roulette" class="adventure-roulette" aria-label="Choosing your next adventure" hidden>
+            <div class="roulette-heading">
+                <p class="aside-kicker" id="roulette-status" role="status" aria-live="polite">Your next adventure is on its way…</p>
+                <div class="roulette-controls">
+                    <button type="button" id="roulette-sound" class="secondary-button sound-icon-button" aria-pressed="false" aria-label="Enable sound" title="Enable sound" hidden>
+                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 5 6 9H3v6h3l5 4Z"/>
+                            <path class="sound-icon-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>
+                            <path class="sound-icon-off" d="m16 9 5 6m0-6-5 6"/>
+                        </svg>
+                    </button>
+                    <button type="button" id="skip-roulette" class="secondary-button">Skip animation</button>
+                </div>
+            </div>
+            <div class="roulette-viewport" id="roulette-viewport" aria-hidden="true">
+                <div class="roulette-marker"></div>
+                <div class="roulette-track" id="roulette-track"></div>
+            </div>
+            <p class="roulette-footnote">Same fair chance. A little more suspense.</p>
+        </section>
+        <script id="roulette-data" type="application/json">{{ roulette|tojson }}</script>
+        <div id="adventure-result" tabindex="-1" aria-label="Your chosen adventure">
+        <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }} · Your next adventure awaits</p>
         {% include '_game_collection.html' %}
         <div class="page-actions">
-            <a class="button-link" href="{{ url_for('main.pick_game') }}">Pick again</a>
+            <a class="button-link" href="{{ url_for('main.pick_game', platform=selected_platform, genre=selected_genre, pick=1) }}">Pick again</a>
             <a href="{{ url_for('main.index') }}">Back to collection</a>
+        </div>
         </div>
     {% else %}
         <div class="workspace-empty">
+            {% if not pick_requested and has_backlog %}
+                <p class="aside-kicker">Ready when you are</p>
+                <h2>What are you in the mood for?</h2>
+                <p>Choose a platform and genre above, or leave both open for a surprise. Press Find my next adventure when you are ready.</p>
+            {% elif genre_error and selected_genre %}
+                <p class="aside-kicker">Taking a short break</p>
+                <h2>We could not check this genre</h2>
+                <p>Try again, or choose Any genre to pick using your saved collection.</p>
+            {% elif has_backlog %}
+                <p class="aside-kicker">A different kind of adventure?</p>
+                <h2>No matches this time</h2>
+                <p>No Backlog entries match both preferences. Try another genre or platform.</p>
+            {% else %}
             <p class="aside-kicker">Room for a new adventure</p>
             <h2>Your Backlog is clear</h2>
             <p>No pending games yet. Add a game to your Backlog to get a suggestion.</p>
+            {% endif %}
             <div class="page-actions">
-                <a class="button-link" href="{{ url_for('main.create') }}">Add game</a>
+                {% if pick_requested or not has_backlog %}<a class="button-link" href="{{ url_for('main.create') }}">Add game</a>{% endif %}
                 <a href="{{ url_for('main.index') }}">Back to collection</a>
             </div>
         </div>
@@ -29,9 +91,12 @@
         <h2>One game. No pressure.</h2>
         <p class="aside-note">Only Backlog entries are included. Games you are playing, have completed, paused, or dropped stay out of the draw.</p>
         <p class="aside-note">Not feeling this pick? Try again. Nothing changes in your collection until you decide to edit a game.</p>
+        <p class="aside-note">Platforms refer to the copies you have saved, not every platform a game supports. Each matching platform entry has an equal chance; Pick again may choose the same game.</p>
     </aside>
 {% endblock %}
 {% block page_scripts %}
     {% include '_game_details_dialog.html' %}
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='roulette-sound.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='adventure-roulette.js') }}" defer></script>
 {% endblock %}

@@ -1,5 +1,6 @@
 import json
 import sqlite3
+from random import choice, sample
 
 from flask import Blueprint, abort, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
@@ -163,11 +164,52 @@ def catalog_search():
 
 @main.get("/games/pick")
 def pick_game():
-    game = get_db().execute(
-        "SELECT * FROM games WHERE status = 'Backlog' ORDER BY RANDOM() LIMIT 1"
-    ).fetchone()
+    pick_requested = request.args.get("pick") == "1"
+    selected_platform = request.args.get("platform", "")
+    selected_genre = request.args.get("genre", "")
+    if len(selected_platform) > 80 or len(selected_genre) > 100:
+        abort(400)
+    backlog = get_db().execute("SELECT * FROM games WHERE status = 'Backlog'").fetchall()
+    platforms = sorted({row["platform"] for row in backlog}, key=str.casefold)
+    if selected_platform and selected_platform not in platforms:
+        abort(400)
+    genre_map = {}
+    error = None
+    catalog_ids = {row["igdb_id"] for row in backlog if row["igdb_id"] is not None}
+    if catalog_ids:
+        try:
+            genre_map = get_catalog().get_game_genres(catalog_ids)
+        except CatalogError:
+            error = "Genre preferences are temporarily unavailable. You can still pick with Any genre."
+    genres = sorted({genre for names in genre_map.values() for genre in names}, key=str.casefold)
+    if selected_genre and error is None and selected_genre not in genres:
+        abort(400)
+    candidates = [row for row in backlog
+                  if (not selected_platform or row["platform"] == selected_platform)
+                  and (not selected_genre or selected_genre in genre_map.get(row["igdb_id"], ()))]
+    # A failed genre lookup must never silently suggest a non-matching game.
+    if selected_genre and error:
+        candidates = []
+    game = choice(candidates) if pick_requested and candidates else None
     games = [{**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}] if game else []
-    return render_template("pick.html", games=games, selected_status="Backlog", search_query="")
+    roulette = None
+    if game is not None:
+        # The animation is decorative: the fair draw above remains authoritative.
+        preview = sample(candidates, min(12, len(candidates)))
+        if not any(row["id"] == game["id"] for row in preview):
+            preview[0] = game
+        roulette = {"winner_id": game["id"], "candidate_count": len(candidates), "games": [
+            {"id": row["id"], "title": row["title"],
+             "cover_url": collection_cover_url(row["cover_image_id"])} for row in preview
+        ]}
+    response = make_response(render_template(
+        "pick.html", games=games, selected_status="Backlog", search_query="",
+        platforms=platforms, genres=genres, selected_platform=selected_platform,
+        selected_genre=selected_genre, genre_error=error, has_backlog=bool(backlog),
+        candidate_count=len(candidates), pick_requested=pick_requested, roulette=roulette,
+    ))
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @main.get("/backups/export")
