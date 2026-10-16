@@ -41,7 +41,7 @@ def test_list_filters_combine_with_search_status_and_json(app, client, post_form
     edit = make_list(post_form)
     response = post_form(edit, {"name": "Puzzle", "games": [str(first), str(second)]})
     assert "/edit?" in response.headers["Location"]
-    url = f"/?list={saved_lists(app)[0][0]['id']}"
+    url = f"/library?list={saved_lists(app)[0][0]['id']}"
     page = client.get(url + "&q=Portal&status=Playing", headers={"Accept": "application/json"})
     assert page.json["count"] == 1
     assert "Portal 2" in page.json["html"]
@@ -100,8 +100,8 @@ def test_list_routes_require_csrf_and_missing_list_is_404(client):
     assert client.post("/lists/1/edit", data={"name": "No CSRF"}).status_code == 400
     assert client.post("/lists/1/delete").status_code == 400
     assert client.get("/lists/999/edit").status_code == 404
-    assert client.get("/?list=999").status_code == 404
-    assert client.get("/?list=not-an-id").status_code == 400
+    assert client.get("/library?list=999").status_code == 404
+    assert client.get("/library?list=not-an-id").status_code == 400
 
 
 def test_list_limit_and_foreign_keys(app, post_form):
@@ -147,7 +147,7 @@ def test_names_are_escaped_and_lists_can_be_empty(app, client, post_form):
     assert "<script>list</script>" not in html
     assert "&lt;script&gt;" in html
     list_id = saved_lists(app)[0][0]["id"]
-    assert b"No games in this list" in client.get(f"/?list={list_id}").data
+    assert b"No games in this list" in client.get(f"/library?list={list_id}").data
 
 
 def test_backup_lists_roundtrip_merges_without_erasing_memberships(app, client, post_form, seed_game, stored_games):

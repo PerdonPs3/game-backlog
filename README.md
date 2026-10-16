@@ -1,4 +1,10 @@
-# Game Backlog
+# Vestigium
+
+*Every game leaves a mark.*
+
+Formerly **Game Backlog**. The repository name and portable backup format remain
+unchanged, so existing installations, collections, and JSON exports still work.
+The welcome page is at `/`; open `/library` to go straight to your collection.
 
 A personal video game tracker built with Python, Flask, and SQLite. Keep track of
 what you want to play, what you are playing, and what you have finished, with
@@ -251,6 +257,9 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 - [x] Record optional start and completion dates to build a personal play history.
 - [x] Add a **What should I play next?** picker that randomly suggests a Backlog entry.
 - [x] Export and import JSON backups, without overwriting existing entries.
+- [x] Organize games into personal lists with cover previews and membership filters.
+- [x] Switch between dark/gold and light/purple themes, remembering the selection.
+- [ ] Offer English and Spanish interface translations without changing user-written content.
 - [ ] Add monthly history charts based on recorded completion dates.
 
 ### 2. Find games in a shared catalog
@@ -296,3 +305,40 @@ Games from other platforms remain supported through the catalog.
 The reward rules are still to be designed. Raw playtime alone should not grant XP:
 leaving a game running is not the same as making progress. Manually reported
 completions and externally verified achievements will need clear distinctions.
+
+### 6. Prepare for a safe public release
+
+The application currently runs as a single-user local library. A public launch
+should wait until accounts, data ownership, and reliable storage are in place.
+These requirements take priority over optional integrations and progression.
+
+- [ ] Add registration, sign-in, sign-out, secure password storage, and account recovery.
+- [ ] Associate games, lists, backups, and statistics with their owning account.
+- [ ] Enforce ownership on the server: users must never edit or delete another
+      user's data, even by changing a URL or submitting a crafted request.
+- [ ] Add public/private profiles and allow viewing only information the owner
+      explicitly shares. Viewing a profile must never grant editing access.
+- [ ] Migrate the existing local collection safely into its owner's account.
+- [ ] Set up persistent production storage and test backup restoration across
+      server restarts and deployments.
+- [ ] Configure HTTPS, production sessions, server-only secrets, and a production
+      server with debug mode disabled; test authentication and access boundaries.
+- [ ] Start with a small, controlled release for friends before opening access widely.
+
+### 7. Give the project its own identity
+
+- [x] Adopt **Vestigium** as the project name and **Every game leaves a mark.**
+      as its tagline, without renaming the repository or altering existing data.
+- [x] Add a minimal, themed welcome screen with a blurred public-cover backdrop,
+      the project name, tagline, and links to the library and GitHub. Personal
+      collection entries are never used in the welcome screen.
+- [x] Add a discreet GitHub link inside the application.
+- [ ] Review naming availability before a public launch and add real product
+      screenshots to the showcase when the interface is ready.
+- [ ] Optionally publish a static project showcase on GitHub Pages, with a
+      deployment workflow. Clearly distinguish it from the working Flask app.
+
+GitHub Pages can host a static showcase, not the Python server or writable
+database. Publishing the full application requires suitable server hosting and
+the public-release safeguards above; secrets and the real local collection must
+never be bundled into a public demo.

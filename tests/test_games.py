@@ -2,7 +2,7 @@ import pytest
 
 
 def test_empty_collection(client):
-    response = client.get("/")
+    response = client.get("/library")
     assert response.status_code == 200
     assert b"No games yet" in response.data
 
@@ -10,13 +10,13 @@ def test_empty_collection(client):
 def test_create_game_persists(app, post_form, game_data, stored_games):
     response = post_form("/games/new", game_data)
     assert response.status_code == 302
-    assert response.headers["Location"] == "/"
+    assert response.headers["Location"] == "/library"
     game = stored_games()[0]
     assert game["title"] == "Portal 2"
     assert game["rating"] == 9
     assert game["review"] == game_data["review"]
     # A fresh client/request must see the saved game too.
-    page = app.test_client().get("/")
+    page = app.test_client().get("/library")
     assert b"Portal 2" in page.data
     assert b"Rating: 9/10" in page.data
 
@@ -104,12 +104,12 @@ def test_invalid_edit_preserves_saved_game(
 def test_filter_by_status(client, seed_game):
     seed_game(title="Finished game", status="Completed")
     seed_game(title="Pending game", status="Backlog")
-    response = client.get("/?status=Completed")
+    response = client.get("/library?status=Completed")
     assert response.status_code == 200
     assert b"Finished game" in response.data
     assert b"Pending game" not in response.data
-    assert b"Pending game" in client.get("/").data
-    assert client.get("/?status=Unknown").status_code == 400
+    assert b"Pending game" in client.get("/library").data
+    assert client.get("/library?status=Unknown").status_code == 400
 
 
 def test_delete_requires_confirmation_and_preserves_other_games(
@@ -120,7 +120,7 @@ def test_delete_requires_confirmation_and_preserves_other_games(
     before = stored_games()
     assert client.get(f"/games/{game_id}/delete").status_code == 200
     assert stored_games() == before
-    assert client.get("/").status_code == 200
+    assert client.get("/library").status_code == 200
     assert stored_games() == before
     assert post_form(f"/games/{game_id}/delete", {}).status_code == 302
     assert stored_games() == [before[1]]
@@ -144,7 +144,7 @@ def test_posts_without_csrf_token_are_rejected(
 def test_review_is_escaped_in_html(client, post_form, game_data):
     review = "<script>alert('test')</script>"
     assert post_form("/games/new", {**game_data, "review": review}).status_code == 302
-    page = client.get("/")
+    page = client.get("/library")
     assert b"<script>" not in page.data
     assert b"&lt;script&gt;" in page.data
 
@@ -154,7 +154,7 @@ def test_search_matches_partial_title_ignoring_ascii_case(client, seed_game, que
     seed_game(title="Resident Evil 4 Remake")
     seed_game(title="Resident Evil 2")
     seed_game(title="Portal 2")
-    response = client.get("/", query_string={"q": query})
+    response = client.get("/library", query_string={"q": query})
     assert response.status_code == 200
     assert b"Resident Evil 4 Remake" in response.data
     assert b"Resident Evil 2" in response.data
@@ -166,7 +166,7 @@ def test_search_and_status_filter_work_together(client, seed_game, stored_games)
     seed_game(title="Resident Pending", status="Backlog")
     seed_game(title="Portal Finished", status="Completed")
     before = stored_games()
-    response = client.get("/", query_string={"q": "Resident", "status": "Completed"})
+    response = client.get("/library", query_string={"q": "Resident", "status": "Completed"})
     assert response.status_code == 200
     assert b"Resident Finished" in response.data
     assert b"Resident Pending" not in response.data
@@ -180,7 +180,7 @@ def test_search_and_status_filter_work_together(client, seed_game, stored_games)
 def test_empty_search_shows_all_games(client, seed_game, query):
     seed_game(title="Portal 2")
     seed_game(title="Hollow Knight")
-    response = client.get("/", query_string={"q": query})
+    response = client.get("/library", query_string={"q": query})
     assert b"Portal 2" in response.data
     assert b"Hollow Knight" in response.data
     assert b"Clear filters" not in response.data
@@ -188,7 +188,7 @@ def test_empty_search_shows_all_games(client, seed_game, query):
 
 def test_no_search_matches_displays_helpful_message(client, seed_game):
     seed_game(title="Portal 2")
-    response = client.get("/", query_string={"q": "Resident"})
+    response = client.get("/library", query_string={"q": "Resident"})
     assert response.status_code == 200
     assert b"No games match your search" in response.data
     assert b"No games yet" not in response.data
@@ -199,18 +199,18 @@ def test_no_search_matches_displays_helpful_message(client, seed_game):
 def test_search_treats_special_characters_as_literal_text(client, seed_game, query):
     seed_game(title="Portal 2")
     seed_game(title=f"Game containing {query}")
-    response = client.get("/", query_string={"q": query})
+    response = client.get("/library", query_string={"q": query})
     assert response.status_code == 200
     assert b"Game containing" in response.data
     assert b"Portal 2" not in response.data
 
 
 def test_search_input_is_escaped(client):
-    response = client.get("/", query_string={"q": '<script>alert("test")</script>'})
+    response = client.get("/library", query_string={"q": '<script>alert("test")</script>'})
     assert response.status_code == 200
     assert b"<script>" not in response.data
     assert b"&lt;script&gt;" in response.data
 
 
 def test_overlong_search_returns_400(client):
-    assert client.get("/", query_string={"q": "x" * 201}).status_code == 400
+    assert client.get("/library", query_string={"q": "x" * 201}).status_code == 400

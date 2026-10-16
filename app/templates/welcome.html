@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <meta name="description" content="Vestigium — your personal gaming library. Every game leaves a mark.">
+    <title>Vestigium · Every game leaves a mark</title>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+</head>
+<body class="library-page welcome-page">
+    {% include '_brand_easter_egg.html' %}
+    {% include '_appearance_bar.html' %}
+    <div class="welcome-backdrop" aria-hidden="true">
+        <div class="welcome-mosaic">
+            {% for column in range(8) %}
+                <div class="cover-column">
+                    {% for row in range(4) %}
+                        <div class="backdrop-cover"><img src="{{ welcome_covers[(column * 3 + row) % welcome_covers|length] }}" alt="" width="264" height="374" decoding="async" referrerpolicy="no-referrer"></div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <main class="welcome-layout">
+        <section class="welcome-copy" aria-labelledby="welcome-title">
+            <h1 id="welcome-title">VESTIGIUM</h1>
+            <p class="welcome-tagline">Every game leaves a mark.</p>
+            <a class="welcome-primary" href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">↗</span></a>
+        </section>
+    </main>
+    <p class="welcome-credit">Covers by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a></p>
+    <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
+</body>
+</html>

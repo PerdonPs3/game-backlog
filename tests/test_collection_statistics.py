@@ -19,7 +19,7 @@ def test_empty_collection_has_safe_statistics_and_help(client, app):
         "total": 0, "completed": 0, "playing": 0, "backlog": 0, "on_hold": 0, "dropped": 0,
         "rated": 0, "average": None, "completion_percent": 0,
     }
-    summary = summary_from(client.get("/"))
+    summary = summary_from(client.get("/library"))
     assert "Add your first game" in summary
     assert "No ratings yet" in summary
     assert 'value="0" max="1"' in summary
@@ -35,7 +35,7 @@ def test_statistics_count_statuses_and_ignore_unrated_games(app, client, seed_ga
         "total": 4, "completed": 2, "playing": 1, "backlog": 1, "on_hold": 0, "dropped": 0,
         "rated": 3, "average": 8.0, "completion_percent": 50,
     }
-    summary = summary_from(client.get("/"))
+    summary = summary_from(client.get("/library"))
     assert 'id="summary-total">4<' in summary
     assert 'id="summary-completed">2<' in summary
     assert 'id="summary-playing">1<' in summary
@@ -49,10 +49,10 @@ def test_filters_never_change_global_statistics(client, seed_game, stored_games)
     seed_game(title="Resident Evil", status="Completed")
     seed_game(title="Portal 2", status="Playing")
     before = stored_games()
-    initial_summary = summary_from(client.get("/"))
-    assert summary_from(client.get("/?q=res&status=Completed")) == initial_summary
-    assert summary_from(client.get("/?q=no-match")) == initial_summary
-    filtered = client.get("/?q=res", headers={"Accept": "application/json"})
+    initial_summary = summary_from(client.get("/library"))
+    assert summary_from(client.get("/library?q=res&status=Completed")) == initial_summary
+    assert summary_from(client.get("/library?q=no-match")) == initial_summary
+    filtered = client.get("/library?q=res", headers={"Accept": "application/json"})
     assert filtered.json["count"] == 1
     assert "collection-summary" not in filtered.json["html"]
     assert stored_games() == before
@@ -63,13 +63,13 @@ def test_all_unrated_games_show_no_average(app, client, seed_game):
     seed_game(rating=None)
     assert stats_for(app)["rated"] == 0
     assert stats_for(app)["average"] is None
-    assert "No ratings yet" in summary_from(client.get("/"))
+    assert "No ratings yet" in summary_from(client.get("/library"))
 
 
 def test_all_completed_and_single_rating_have_clear_labels(app, client, seed_game):
     seed_game(status="Completed", rating=9)
     assert stats_for(app)["completion_percent"] == 100
-    summary = summary_from(client.get("/"))
+    summary = summary_from(client.get("/library"))
     assert "100%" in summary
     assert "1 game rated" in summary
     assert 'value="1" max="1"' in summary

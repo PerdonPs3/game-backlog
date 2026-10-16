@@ -1,0 +1,167 @@
+.welcome-page {
+    --welcome-accent: #efcc79;
+    --welcome-strong: #f6f3eb;
+    --welcome-muted: #dbd8df;
+    --welcome-overlay: #080c15c9;
+    --welcome-centre: #080c15e8;
+    --welcome-button: linear-gradient(135deg, #f3d27c, #ddb042);
+    --welcome-button-text: #211b0c;
+    --welcome-button-shadow: #e3b34128;
+    --welcome-title-highlight: #fff7d9;
+    min-height: 100dvh;
+    position: relative;
+    isolation: isolate;
+    transition: opacity 220ms ease;
+}
+.welcome-page.is-leaving { opacity: 0; }
+html[data-theme="light"] .welcome-page {
+    --welcome-accent: #7042b7;
+    --welcome-strong: #39224f;
+    --welcome-muted: #574766;
+    --welcome-overlay: #ede5f43d;
+    --welcome-centre: #faf8fd;
+    --welcome-title-highlight: #ae7be2;
+    --welcome-button: linear-gradient(135deg, #8250bf, #613297);
+    --welcome-button-text: #fff;
+    --welcome-button-shadow: #7042b728;
+}
+.welcome-backdrop {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--background);
+}
+.welcome-mosaic {
+    position: absolute;
+    inset: -22vh -14vw;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: clamp(10px, 1.1vw, 20px);
+    transform: rotate(-11deg) scale(1.06);
+    filter: blur(5px) saturate(0.8);
+    animation: welcome-drift 36s ease-in-out infinite alternate;
+}
+.cover-column {
+    display: grid;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: clamp(10px, 1.1vw, 20px);
+    min-width: 0;
+}
+.cover-column:nth-child(even) { transform: translateY(-7vh); }
+.backdrop-cover {
+    overflow: hidden;
+    min-height: 0;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #393349, #17212d);
+}
+.backdrop-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.welcome-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--welcome-centre), transparent 75%), var(--welcome-overlay);
+}
+.welcome-page main.welcome-layout {
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 6rem 1.5rem;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+.welcome-copy {
+    text-align: center;
+    max-width: 860px;
+}
+.welcome-copy h1, .welcome-tagline, .welcome-primary {
+    animation: welcome-arrive 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.welcome-tagline { animation-delay: 160ms; }
+.welcome-primary { animation-delay: 320ms; animation-fill-mode: backwards; }
+.welcome-copy h1 {
+    margin: 0;
+    padding-left: 0.12em;
+    color: var(--welcome-accent);
+    font-size: clamp(2rem, 8.5vw, 6.4rem);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.15;
+    text-shadow: 0 4px 35px #0003;
+}
+@supports (background-clip: text) {
+    .welcome-copy h1 {
+        background: linear-gradient(110deg, var(--welcome-accent) 35%, var(--welcome-title-highlight) 48%, var(--welcome-accent) 61%);
+        background-size: 300% 100%;
+        background-clip: text;
+        color: transparent;
+        animation: welcome-arrive 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+            welcome-title-sheen 9s ease-in-out infinite;
+    }
+}
+@keyframes welcome-arrive {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes welcome-title-sheen {
+    0%, 20% { background-position: 100% 50%; }
+    65%, 100% { background-position: 0% 50%; }
+}
+@keyframes welcome-drift {
+    from { transform: translate3d(-1%, -1.5%, 0) rotate(-11deg) scale(1.06); }
+    to { transform: translate3d(1%, 1.5%, 0) rotate(-9deg) scale(1.09); }
+}
+.welcome-tagline {
+    margin: 1.2rem 0 2.4rem;
+    color: var(--welcome-muted);
+    font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+    letter-spacing: 0.06em;
+}
+.welcome-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    min-width: 190px;
+    padding: 0.95rem 1.4rem;
+    border: 1px solid #ffffff30;
+    border-radius: 10px;
+    color: var(--welcome-button-text);
+    background: var(--welcome-button);
+    box-shadow: 0 6px 28px var(--welcome-button-shadow);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.welcome-primary:hover { transform: translateY(-2px); box-shadow: 0 9px 35px var(--welcome-button-shadow); }
+.welcome-primary:focus-visible { outline: 2px solid var(--welcome-accent); outline-offset: 5px; }
+.welcome-primary span { display: inline-block; transition: transform 220ms ease; }
+.welcome-primary:hover span, .welcome-primary:focus-visible span { transform: translate(3px, -3px); }
+.welcome-credit { position: absolute; bottom: 1rem; left: 1rem; margin: 0; color: var(--welcome-muted); font-size: 0.6rem; }
+.welcome-credit a { color: inherit; text-underline-offset: 3px; }
+html[data-theme="light"] .welcome-copy h1 { text-shadow: 0 4px 35px #7042b715; }
+html[data-theme="light"] .welcome-mosaic { filter: blur(6px) saturate(0.65); }
+html[data-theme="light"] .welcome-backdrop::after {
+    background:
+        radial-gradient(ellipse at center, var(--welcome-centre) 0%, #faf8fdf2 18%, #f7f2fba8 42%, transparent 75%),
+        linear-gradient(135deg, #e5d8ef52, transparent 55%, #d5c2eb66),
+        var(--welcome-overlay);
+}
+@media (max-width: 800px) {
+    .welcome-mosaic { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .cover-column:nth-child(n+7) { display: none; }
+}
+@media (max-width: 540px) {
+    .welcome-mosaic { grid-template-columns: repeat(4, minmax(0, 1fr)); inset: -15vh -25vw; }
+    .cover-column:nth-child(n+5) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .welcome-mosaic, .welcome-copy h1, .welcome-tagline, .welcome-primary { animation: none; }
+    .welcome-page, .welcome-primary, .welcome-primary span { transition: none; }
+    .welcome-primary:hover, .welcome-primary:hover span, .welcome-primary:focus-visible span { transform: none; }
+}

@@ -18,8 +18,43 @@
     left: max(0.75rem, env(safe-area-inset-left));
     z-index: 95;
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin: 0;
 }
+.appearance-bar .github-profile {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 10px;
+    border: 1px solid #e3b34155;
+    border-radius: 99px;
+    background: #10151ee6;
+    backdrop-filter: blur(12px);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.github-profile svg { flex: 0 0 20px; color: var(--accent); }
+.github-profile-name {
+    display: grid;
+    grid-template-columns: 0fr;
+    opacity: 0;
+    transition: grid-template-columns 320ms ease, opacity 220ms ease;
+}
+.github-profile-name > span { overflow: hidden; white-space: nowrap; }
+.github-profile-name > span::before { content: ""; display: inline-block; width: 0.6rem; }
+.github-profile:is(:hover, :focus-visible) .github-profile-name { grid-template-columns: 1fr; opacity: 1; }
+.appearance-bar .github-profile:hover { color: var(--accent); border-color: var(--accent); }
+.github-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+html[data-theme="light"] .appearance-bar .github-profile { background: #fff; border-color: var(--light-accent-border); }
+@media (prefers-reduced-motion: reduce) {
+    .github-profile-name { transition: none; }
+}
+.library-navigation { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; font-size: 0.75rem; }
+.library-navigation a { color: var(--text-muted); text-decoration: none; }
+.library-navigation a:hover { color: var(--accent); }
 @media (max-width: 540px) {
     .library-page main.library-layout,
     .workspace-page main.workspace-layout { margin-top: 4.5rem; }
@@ -41,6 +76,24 @@
     font-weight: 600;
 }
 .theme-toggle:hover { background: #e3b34118; border-color: var(--accent); }
+.appearance-bar :is(.theme-toggle, .github-profile) {
+    background: #171820ed;
+    border-color: #e3b34155;
+    backdrop-filter: blur(12px);
+    box-shadow: none;
+}
+.appearance-bar :is(.theme-toggle, .github-profile):hover {
+    background: #242017;
+    border-color: var(--accent);
+}
+html[data-theme="light"] .appearance-bar :is(.theme-toggle, .github-profile) {
+    background: #fff;
+    border-color: var(--light-accent-border);
+}
+html[data-theme="light"] .appearance-bar :is(.theme-toggle, .github-profile):hover {
+    background: var(--light-tint);
+    border-color: var(--accent);
+}
 .theme-toggle[hidden] { display: none; }
 .theme-toggle svg {
     grid-area: 1 / 1;
