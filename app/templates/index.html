@@ -8,6 +8,7 @@
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 <body class="library-page">
     {% include '_brand_easter_egg.html' %}
@@ -24,9 +25,9 @@
                     This is where you keep yours.</p>
                 <div class="hero-actions">
                     <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
-                        <span aria-hidden="true">＋</span> Add game
+                        <span aria-hidden="true">＋</span> Add game <span class="hero-action-arrow" aria-hidden="true">↗</span>
                     </a>
-                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}">What should I play?</a>
+                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h1m8 0h1M11.5 12h1M7 17h1m8 0h1" stroke-linecap="round"/></svg>What should I play?</a>
                 </div>
             </div>
             <div class="hero-emblem" data-hero-logo aria-hidden="true">

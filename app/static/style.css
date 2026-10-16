@@ -1694,7 +1694,7 @@ a:focus-visible {
 .is-complete .roulette-tile:not(.is-winner) { opacity: 0.45; }
 .roulette-tile.is-winner { border-color: #f9dc85; box-shadow: 0 0 18px #edc65d40; }
 .adventure-preferences button:disabled { opacity: 0.5; cursor: wait; }
-#adventure-result { min-width: 0; }
+#adventure-result { min-width: 0; padding: clamp(0.75rem, 2vw, 1.25rem); }
 #adventure-result:focus-visible { outline: 1px solid #edc65d55; outline-offset: 5px; border-radius: 12px; }
 
 .adventure-preferences {
@@ -1711,7 +1711,31 @@ a:focus-visible {
     margin: 0;
 }
 .adventure-preferences .form-actions { grid-column: 1 / -1; }
-.adventure-match-count { color: #edd18a; font-size: 0.75rem; letter-spacing: 0.025em; }
+.adventure-result-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem 1rem;
+    margin-bottom: 1.25rem;
+}
+.adventure-result-heading h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    letter-spacing: -0.025em;
+    line-height: 1.4;
+}
+.adventure-result-heading .adventure-match-count {
+    margin: 0;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    color: var(--accent);
+    background: var(--surface);
+    font-size: 0.7rem;
+    line-height: 1.4;
+}
 
 .collection-view-switch {
     display: flex;

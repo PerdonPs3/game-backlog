@@ -52,7 +52,10 @@
         </section>
         <script id="roulette-data" type="application/json">{{ roulette|tojson }}</script>
         <div id="adventure-result" tabindex="-1" aria-label="Your chosen adventure">
-        <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }} · Your next adventure awaits</p>
+        <header class="adventure-result-heading">
+            <h2>Your next adventure awaits</h2>
+            <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }}</p>
+        </header>
         {% include '_game_collection.html' %}
         <div class="page-actions">
             <a class="button-link" href="{{ url_for('main.pick_game', platform=selected_platform, genre=selected_genre, pick=1) }}">Pick again</a>

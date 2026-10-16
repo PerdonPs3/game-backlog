@@ -6,6 +6,9 @@
       <stop offset="1" stop-color="#d99b27"/>
     </linearGradient>
   </defs>
-  <path d="M365 54 272 126 307 114 72 394 246 262 199 278 291 160 301 168 315 153 296 224 349 186 363 96 312 136Z" fill="url(#accent)"/>
+  <g fill="url(#accent)">
+    <path d="M65 85 150 110 166 140 153 135 220 253 287 135 274 140 290 110 375 85 337 151 295 171 273 216 295 207 315 190 220 360 125 190 145 207 167 216 145 171 103 151Z"/>
+    <path d="M65 85 150 110 220 278 290 110 375 85 287 135 220 253 153 135 166 140 150 110Z" fill="#fff" fill-opacity=".2"/>
+  </g>
   <style>@media(prefers-color-scheme:light){rect{fill:#faf8fd}stop:first-child{stop-color:#ae7be2}stop:last-child{stop-color:#613297}}</style>
 </svg>

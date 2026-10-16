@@ -29,6 +29,7 @@ def test_dashboard_retains_all_live_controls_and_existing_features(client):
         assert f'id="{element_id}"' in page
     assert 'id="filter-reset" hidden' in page
     assert "cursor-glow.js" in page
+    assert "dashboard.css" in page
     assert "collection-filters.js" in page
     assert "delete-confirmation.js" in page
 
@@ -36,4 +37,5 @@ def test_dashboard_retains_all_live_controls_and_existing_features(client):
 def test_library_layout_does_not_replace_other_form_layouts(client):
     page = client.get("/games/new").get_data(as_text=True)
     assert "library-hero" not in page
+    assert "dashboard.css" not in page
     assert "catalog-picker" in page
