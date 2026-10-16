@@ -12,6 +12,66 @@
     box-sizing: border-box;
 }
 
+.appearance-bar {
+    position: fixed;
+    top: max(0.75rem, env(safe-area-inset-top));
+    left: max(0.75rem, env(safe-area-inset-left));
+    z-index: 95;
+    display: flex;
+    margin: 0;
+}
+@media (max-width: 540px) {
+    .library-page main.library-layout,
+    .workspace-page main.workspace-layout { margin-top: 4.5rem; }
+}
+.theme-toggle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #e3b34155;
+    border-radius: 99px;
+    background: #e3b3410a;
+    color: #f1d58c;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.theme-toggle:hover { background: #e3b34118; border-color: var(--accent); }
+.theme-toggle[hidden] { display: none; }
+.theme-toggle svg {
+    grid-area: 1 / 1;
+    width: 19px;
+    height: 19px;
+    transform-origin: center;
+    transition: opacity 450ms ease, transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.theme-sun { opacity: 1; transform: rotate(0) scale(1); }
+.theme-moon { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+html[data-theme="light"] .theme-sun { opacity: 0; transform: rotate(90deg) scale(0.4); }
+html[data-theme="light"] .theme-moon { opacity: 1; transform: rotate(0) scale(1); }
+
+/* Snapshot crossfade also blends gradients, which CSS colors alone cannot. */
+::view-transition { pointer-events: none; }
+::view-transition-old(root) { animation: theme-fade-out 900ms cubic-bezier(0.4, 0, 0.2, 1) both; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: theme-fade-in 900ms cubic-bezier(0.4, 0, 0.2, 1) both; mix-blend-mode: normal; }
+@keyframes theme-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes theme-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+@supports not (view-transition-name: root) {
+    html[data-theme-ready] :is(body, .library-hero, .workspace-hero, .workspace-panel, .workspace-aside, .summary-stat, .game-card, .theme-toggle, input, select, textarea, button, a) {
+        transition: background-color 700ms ease, color 700ms ease, border-color 700ms ease, box-shadow 700ms ease;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .theme-toggle svg { transition: none; }
+    ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+    html[data-theme-ready] :is(body, .library-hero, .workspace-hero, .workspace-panel, .workspace-aside, .summary-stat, .game-card, .theme-toggle, input, select, textarea, button, a) { transition: none; }
+}
+
 body {
     margin: 0;
     background: var(--background);

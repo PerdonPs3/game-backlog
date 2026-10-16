@@ -41,6 +41,7 @@ input validation, and automated testing.
 - Confirm deletion in a small accessible dialog without leaving the collection (with a separate-page fallback without JavaScript).
 - Store the collection locally in SQLite, including across server restarts.
 - Use a dark interface with gold accents and wrapping for long text.
+- Switch between the original dark/gold design and a warm-white/purple light theme on every page. Your browser remembers the choice; before you choose, the app follows your system theme. Covers and personal data are unchanged.
 - Use a consistent dashboard-inspired workspace for adding, editing, deleting, importing, and picking games.
 
 ## Tech stack
@@ -147,7 +148,7 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs tests/list-editor.test.cjs
+node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs tests/list-editor.test.cjs tests/theme.test.cjs
 ```
 
 Each test uses a separate temporary SQLite database rather than the real

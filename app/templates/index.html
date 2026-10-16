@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Backlog</title>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
 </head>
 <body class="library-page">
     {% include '_brand_easter_egg.html' %}
     <main class="library-layout">
+        <div class="appearance-bar">{% include '_theme_toggle.html' %}</div>
         <header class="library-hero">
             <div class="hero-copy">
                 <p class="hero-kicker">Your personal gaming library</p>
