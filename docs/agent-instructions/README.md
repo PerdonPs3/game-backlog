@@ -1,22 +1,27 @@
-# Instrucciones esenciales para la IA
+# Essential instructions for AI agents
 
-Leer estas reglas antes de planear, crear o modificar cualquier parte del proyecto.
-Se aplican a código, pruebas, documentación y configuración.
+Read these rules before planning, creating, or changing any part of the project.
+They apply to code, tests, documentation, and configuration.
 
-## Git Flow y responsabilidades
+## Language
 
-- `main` es la rama de producción y `develop` es la rama de integración del desarrollo y las pruebas. Usar estos nombres en minúsculas.
-- La IA trabaja de forma autónoma sobre el desarrollo basado en `develop`. Nunca hacer merge ni push a `main` sin permiso explícito del usuario para esa operación. No interpretar el permiso para trabajar o subir `develop` como permiso para publicar en producción.
-- Por cada cambio, crear desde `develop` una subrama local con un prefijo descriptivo: `feat/`, `fix/`, `docs/`, `refactor/`, `test/` o `chore/`, según corresponda. No hacer cambios directamente en `develop` o `main`.
-- Hacer commits atómicos: cada commit debe representar un cambio coherente y tener un mensaje descriptivo. No mezclar trabajo ajeno al objetivo.
-- Permanecer en la subrama hasta cumplir su objetivo, incluidas las validaciones pertinentes, o hasta que el usuario indique expresamente salir, cancelar o cambiar de tarea. Si hay un bloqueo, informarlo y conservar la subrama; no integrarla como si estuviera terminada.
-- Al completar el objetivo, integrar la subrama en `develop` mediante `git merge --no-ff`, con un mensaje que identifique el cambio. Subir `develop` al remoto y verificar el resultado.
-- Las subramas son locales: no hacerles push ni crear ramas remotas para ellas. Solo se suben `develop` y `main`; para `main` sigue siendo obligatorio el permiso explícito del usuario.
+- Use English for all work: plans, explanations, documentation, agent instructions, code comments, identifiers, tests, commit messages, branch names, and merge messages.
+- Write new or updated user-facing application text in English.
 
-## Conservar el historial visual
+## Git Flow and responsibilities
 
-- Conservar siempre los commits y la bifurcación de cada subrama en el grafo de Git. Usar merges con `--no-ff`, incluso cuando Git permita un fast-forward.
-- No usar squash, fast-forward ni rebase para integrar una subrama en `develop`, porque eliminarían la bifurcación que se quiere visualizar.
-- Después del merge y de verificar el push de `develop`, se puede eliminar la referencia local de la subrama con `git branch -d`. Nunca eliminar commits ni reescribir el historial para ocultarla.
-- El commit de merge y sus dos padres conservan la bifurcación para las aplicaciones que muestran el grafo. Al borrar la referencia local, su etiqueta puede desaparecer según la aplicación; el mensaje del merge debe conservar el nombre de la subrama. Git no garantiza que todas las aplicaciones muestren una etiqueta de rama eliminada.
-- No hacer force-push ni reescribir historia compartida. Conservar siempre los cambios existentes del usuario.
+- `main` is the production branch; `develop` is the integration branch for development and testing. Use these lowercase names.
+- Work autonomously on development based on `develop`. Never merge into or push to `main` without the user's explicit permission for that operation. Permission to work on or push `develop` does not authorize production publication.
+- For each change, create a local branch from `develop` with a descriptive prefix such as `feat/`, `fix/`, `docs/`, `refactor/`, `test/`, or `chore/`. Do not make changes directly on `develop` or `main`.
+- Make atomic commits: each commit must represent one coherent change with a descriptive message. Do not include unrelated work.
+- Stay on the local branch until its objective, including relevant validation, is complete, or the user explicitly asks to leave, cancel, or switch tasks. If blocked, report the blocker and retain the branch; do not integrate unfinished work as complete.
+- Once the objective is complete, merge the branch into `develop` using `git merge --no-ff`, with a message identifying the change. Push `develop` to the remote and verify the result.
+- Change branches stay local: do not push them or create remote branches for them. Only push `develop` and `main`; pushing `main` still requires the user's explicit permission.
+
+## Preserve the visual history
+
+- Always preserve each branch's commits and divergence in the Git graph. Use `--no-ff` merges even when a fast-forward is possible.
+- Do not use squash, fast-forward, or rebase to integrate a change branch into `develop`, because they would remove the branch divergence the user wants to visualize.
+- After merging and verifying the push to `develop`, the local branch reference may be deleted with `git branch -d`. Never delete commits or rewrite history to hide the branch.
+- The merge commit and its two parents preserve the divergence in applications that display the graph. Deleting a local branch reference may remove its label depending on the application; preserve the branch name in the merge message. Git cannot guarantee that every application displays a deleted branch's label.
+- Do not force-push or rewrite shared history. Always preserve the user's existing changes.
