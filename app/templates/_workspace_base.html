@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block page_title %}Game Backlog{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <title>{% block page_title %}Vestigium{% endblock %}</title>
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
@@ -11,9 +12,9 @@
 <body class="library-page workspace-page">
     {% include '_brand_easter_egg.html' %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
-        <div class="appearance-bar">{% include '_theme_toggle.html' %}</div>
+        {% include '_appearance_bar.html' %}
         <nav class="workspace-nav" aria-label="Collection navigation">
-            <a class="workspace-brand" href="{{ url_for('main.index') }}">Game <span>Backlog</span></a>
+            <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
             <a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>
         </nav>
         <header class="workspace-hero">
@@ -32,7 +33,7 @@
             </section>
             {% block aside %}{% endblock %}
         </div>
-        <footer class="workspace-footer">Your games. Your stories. Your own pace.</footer>
+        <footer class="workspace-footer">Every game leaves a mark. · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></footer>
     </main>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     {% block page_scripts %}{% endblock %}

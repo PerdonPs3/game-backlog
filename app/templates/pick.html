@@ -1,5 +1,5 @@
 {% extends '_workspace_base.html' %}
-{% block page_title %}Your next adventure · Game Backlog{% endblock %}
+{% block page_title %}Your next adventure · Vestigium{% endblock %}
 {% block page_kicker %}A little less indecision{% endblock %}
 {% block page_heading %}Your next <span>adventure</span>{% endblock %}
 {% block page_description %}Choose your mood. Let your Backlog handle the rest. No status changes, just a suggestion.{% endblock %}
@@ -52,7 +52,10 @@
         </section>
         <script id="roulette-data" type="application/json">{{ roulette|tojson }}</script>
         <div id="adventure-result" tabindex="-1" aria-label="Your chosen adventure">
-        <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }} · Your next adventure awaits</p>
+        <header class="adventure-result-heading">
+            <h2>Your next adventure awaits</h2>
+            <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }}</p>
+        </header>
         {% include '_game_collection.html' %}
         <div class="page-actions">
             <a class="button-link" href="{{ url_for('main.pick_game', platform=selected_platform, genre=selected_genre, pick=1) }}">Pick again</a>

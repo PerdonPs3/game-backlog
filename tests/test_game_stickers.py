@@ -23,7 +23,7 @@ def test_stickers_are_independent_and_visible(client, post_form, game_data, stor
     assert saved["is_favorite"] == int(favorite)
     assert saved["is_goty"] == int(goty)
     for headers in [{}, {"Accept": "application/json"}]:
-        page = client.get("/", headers=headers)
+        page = client.get("/library", headers=headers)
         html = page.json["html"] if page.is_json else page.get_data(as_text=True)
         assert ('class="game-sticker sticker-favorite"' in html) is favorite
         assert ('class="game-sticker sticker-goty"' in html) is goty
