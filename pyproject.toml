@@ -1,5 +1,0 @@
-[tool.vercel]
-entrypoint = "wsgi:app"
-
-[tool.vercel.scripts]
-build = "python scripts/build_vercel.py"
