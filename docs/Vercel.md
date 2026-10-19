@@ -7,9 +7,11 @@ explicit user authorization.
 
 ## Application configuration
 
-- `wsgi.py` exports the Flask application as `app`.
-- `pyproject.toml` identifies the entrypoint and runs
-  `python scripts/build_vercel.py` during the build.
+- `wsgi.py` exports the Flask application as `app` at an entrypoint Vercel detects
+  automatically.
+- `requirements.txt` provides runtime dependencies. There is no `pyproject.toml`
+  dependency source, so Vercel installs the pinned requirements directly.
+- `vercel.json` runs `python scripts/build_vercel.py` during the build.
 - `.python-version` selects Python 3.14.
 - `vercel.json` selects the Flask preset and a 60-second function duration.
 - Function execution uses `gru1` (São Paulo), matching the current Supabase
