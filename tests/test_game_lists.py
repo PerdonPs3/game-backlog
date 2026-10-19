@@ -107,7 +107,8 @@ def test_list_routes_require_csrf_and_missing_list_is_404(client):
 def test_list_limit_and_foreign_keys(app, post_form):
     with app.app_context():
         db = get_db()
-        assert db.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        if not app.config.get("DATABASE_URL"):
+            assert db.execute("PRAGMA foreign_keys").fetchone()[0] == 1
         db.executemany("INSERT INTO game_lists (name, name_key) VALUES (?, ?)", [(f"List {i}", f"list {i}") for i in range(100)])
         db.commit()
     assert b"up to 100" in post_form("/lists", {"name": "Too many"}).data

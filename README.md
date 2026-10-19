@@ -1,6 +1,6 @@
 # Game Backlog
 
-A personal video game tracker built with Python, Flask, and SQLite. Keep track of
+A personal video game tracker built with Python, Flask, and SQLite or PostgreSQL. Keep track of
 what you want to play, what you are playing, and what you have finished, with
 optional ratings and reviews.
 
@@ -48,6 +48,7 @@ input validation, and automated testing.
 
 - **Python and Flask** for routes and application logic.
 - **SQLite** for persistence through Python's built-in `sqlite3` module.
+- **PostgreSQL / Supabase** as an opt-in hosted database through Psycopg 3.
 - **Jinja, HTML, and CSS** for server-rendered pages and styling.
 - **Flask-WTF** for CSRF protection on forms.
 - **pytest** for automated tests.
@@ -130,6 +131,16 @@ while using the application; press **Ctrl+C** to stop the server.
 The Flask development server and debugger are for local development only. Do not
 expose them publicly or use them as a production deployment.
 
+## PostgreSQL and Supabase
+
+For PostgreSQL configuration, explicit schema migrations, safe transfer of an
+existing SQLite collection, and PostgreSQL integration tests, see the
+[PostgreSQL and Supabase guide](docs/PostgreSQL.md). SQLite remains the default
+for local use. Database support alone does not deploy or secure a public site.
+
+For the Flask entrypoint, generated CDN assets, environment variables, and
+protected Preview setup, see the [Vercel configuration guide](docs/Vercel.md).
+
 ## Run the tests
 
 Install the development dependencies, which also include the application dependencies:
@@ -165,6 +176,9 @@ game-backlog/
 │   ├── backups.py        # Portable backup format and strict local validation
 │   ├── game_fields.py    # Shared statuses and play-history validation
 │   ├── db.py             # Database connection lifecycle and init-db command
+│   ├── postgres.py       # Psycopg connection and result compatibility
+│   ├── migrations.py     # Explicit migrations and read-only SQLite transfer
+│   ├── migrations/       # Versioned PostgreSQL schema files
 │   ├── routes.py         # Collection, forms, validation, and CRUD routes
 │   ├── schema.sql        # SQLite table definition
 │   ├── static/
