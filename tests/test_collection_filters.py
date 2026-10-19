@@ -6,7 +6,7 @@ def test_live_filter_combines_title_and_status(client, seed_game, stored_games):
     seed_game(title="Resident Pending", status="Backlog")
     seed_game(title="Portal Finished", status="Completed")
     before = stored_games()
-    response = client.get("/?q=res&status=Completed", headers={"Accept": "application/json"})
+    response = client.get("/library?q=res&status=Completed", headers={"Accept": "application/json"})
     assert response.status_code == 200
     assert response.json["count"] == 1
     assert "Resident Finished" in response.json["html"]
@@ -20,20 +20,20 @@ def test_live_filter_combines_title_and_status(client, seed_game, stored_games):
 def test_live_filter_can_restore_entire_collection(client, seed_game):
     seed_game(title="Portal 2")
     seed_game(title="Resident Evil")
-    response = client.get("/", headers={"Accept": "application/json"})
+    response = client.get("/library", headers={"Accept": "application/json"})
     assert response.json["count"] == 2
 
 
 def test_live_filter_empty_result_is_helpful(client, seed_game):
     seed_game()
-    response = client.get("/?q=no-match", headers={"Accept": "application/json"})
+    response = client.get("/library?q=no-match", headers={"Accept": "application/json"})
     assert response.json["count"] == 0
     assert "No games match your search" in response.json["html"]
 
 
 def test_live_filter_escapes_untrusted_text(client, seed_game):
     seed_game(title='<img src=x onerror="alert(1)">', review="<script>alert(1)</script>")
-    html = client.get("/", headers={"Accept": "application/json"}).json["html"]
+    html = client.get("/library", headers={"Accept": "application/json"}).json["html"]
     assert "<script>" not in html
     assert "<img src=x" not in html
     assert "&lt;script&gt;" in html
@@ -42,11 +42,11 @@ def test_live_filter_escapes_untrusted_text(client, seed_game):
 
 @pytest.mark.parametrize("query", [{"status": "Invalid"}, {"q": "x" * 201}])
 def test_live_filter_keeps_server_validation(client, query):
-    assert client.get("/", query_string=query, headers={"Accept": "application/json"}).status_code == 400
+    assert client.get("/library", query_string=query, headers={"Accept": "application/json"}).status_code == 400
 
 
 def test_full_page_keeps_non_javascript_filter_fallback(client):
-    response = client.get("/")
+    response = client.get("/library")
     assert response.mimetype == "text/html"
     assert "Accept" in response.vary
     assert b'id="collection-filters" method="get"' in response.data

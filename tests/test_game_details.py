@@ -79,13 +79,13 @@ def test_profile_invalid_optional_data():
 
 def test_details_links_survive_live_filter(client, seed_game):
     game_id = seed_game()
-    page = client.get("/")
+    page = client.get("/library")
     assert b'id="game-details-dialog"' in page.data
     assert b"game-details.js" in page.data
     assert b'id="collection-view-switch"' in page.data
     assert b'data-collection-view="shelf"' in page.data
     assert b"collection-view.js" in page.data
-    html = client.get("/?q=Portal", headers={"Accept": "application/json"}).json["html"]
+    html = client.get("/library?q=Portal", headers={"Accept": "application/json"}).json["html"]
     assert f'href="/games/{game_id}"' in html
     assert html.count("data-game-details") == 2
 

@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local Vercel metadata and generated CDN assets
+.vercel/
+public/static/

@@ -1,6 +1,12 @@
-# Game Backlog
+# Vestigium
 
-A personal video game tracker built with Python, Flask, and SQLite. Keep track of
+*Every game leaves a mark.*
+
+Formerly **Game Backlog**. The repository name and portable backup format remain
+unchanged, so existing installations, collections, and JSON exports still work.
+The welcome page is at `/`; open `/library` to go straight to your collection.
+
+A personal video game tracker built with Python, Flask, and SQLite or PostgreSQL. Keep track of
 what you want to play, what you are playing, and what you have finished, with
 optional ratings and reviews.
 
@@ -48,6 +54,7 @@ input validation, and automated testing.
 
 - **Python and Flask** for routes and application logic.
 - **SQLite** for persistence through Python's built-in `sqlite3` module.
+- **PostgreSQL / Supabase** as an opt-in hosted database through Psycopg 3.
 - **Jinja, HTML, and CSS** for server-rendered pages and styling.
 - **Flask-WTF** for CSRF protection on forms.
 - **pytest** for automated tests.
@@ -130,6 +137,16 @@ while using the application; press **Ctrl+C** to stop the server.
 The Flask development server and debugger are for local development only. Do not
 expose them publicly or use them as a production deployment.
 
+## PostgreSQL and Supabase
+
+For PostgreSQL configuration, explicit schema migrations, safe transfer of an
+existing SQLite collection, and PostgreSQL integration tests, see the
+[PostgreSQL and Supabase guide](docs/PostgreSQL.md). SQLite remains the default
+for local use. Database support alone does not deploy or secure a public site.
+
+For the Flask entrypoint, generated CDN assets, environment variables, and
+protected Preview setup, see the [Vercel configuration guide](docs/Vercel.md).
+
 ## Run the tests
 
 Install the development dependencies, which also include the application dependencies:
@@ -165,6 +182,9 @@ game-backlog/
 │   ├── backups.py        # Portable backup format and strict local validation
 │   ├── game_fields.py    # Shared statuses and play-history validation
 │   ├── db.py             # Database connection lifecycle and init-db command
+│   ├── postgres.py       # Psycopg connection and result compatibility
+│   ├── migrations.py     # Explicit migrations and read-only SQLite transfer
+│   ├── migrations/       # Versioned PostgreSQL schema files
 │   ├── routes.py         # Collection, forms, validation, and CRUD routes
 │   ├── schema.sql        # SQLite table definition
 │   ├── static/
@@ -238,61 +258,7 @@ by the browser from IGDB's image host and require an internet connection.
   including On hold and Dropped entries. Their counts appear below the four
   main statistic cards when present.
 
-## Roadmap
+## Project wiki
 
-The long-term idea is a personal gaming library where finishing adventures also
-helps your player profile grow. The stages below describe a proposed direction,
-not a release schedule. Checked items are implemented; unchecked items are planned.
-
-### 1. Make the collection easier to manage
-
-- [x] Search your own collection by title, alongside the existing status filter.
-- [x] Add **On hold** and **Dropped** statuses for paused and abandoned games.
-- [x] Record optional start and completion dates to build a personal play history.
-- [x] Add a **What should I play next?** picker that randomly suggests a Backlog entry.
-- [x] Export and import JSON backups, without overwriting existing entries.
-- [ ] Add monthly history charts based on recorded completion dates.
-
-### 2. Find games in a shared catalog
-
-- [x] Search an external game catalog instead of typing every detail manually.
-      For example, searching **Resident** would return matching titles to choose from.
-- [x] Display covers and release years in suggestions, with available platforms after selection.
-- [x] Store catalog identifiers and validate the selected game and platform.
-- [x] Display game covers in the collection.
-- [x] Block duplicate catalog game/platform combinations and link to the existing entry.
-
-Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
-
-### 3. Connect Steam
-
-- [ ] Link a Steam account through Steam's official sign-in flow, without asking
-      users to enter their Steam password on this application.
-- [ ] Import available library data, with user control over which games to add.
-- [ ] Show playtime and achievements where the API and privacy settings allow it.
-- [ ] Match imported games to existing entries without overwriting personal
-      ratings, reviews, or completion status.
-
-Steam integration will depend on API access and account privacy settings. Importing
-a game or detecting playtime will not automatically mark it as completed.
-Games from other platforms remain supported through the catalog.
-
-### 4. Build a personal player profile
-
-- [ ] Add an avatar, a short bio, and a shelf of favorite games.
-- [x] Show collection statistics: totals, status counts, completion progress, and average rating.
-- [ ] Introduce accounts and separate collections before supporting multiple users.
-- [ ] Let users choose which profile information and activity to make public.
-
-### 5. Add progression and customization
-
-- [ ] Earn experience points (XP) for completing games and meeting optional challenges.
-- [ ] Explore capped XP rewards based on game length and verifiable achievements,
-      once suitable data sources are available.
-- [ ] Level up a player profile and unlock customizable avatar frames and other
-      cosmetic rewards through levels or milestones.
-- [ ] Prevent repeatedly toggling a game's status from granting duplicate completion rewards.
-
-The reward rules are still to be designed. Raw playtime alone should not grant XP:
-leaving a game running is not the same as making progress. Manually reported
-completions and externally verified achievements will need clear distinctions.
+See the [project wiki](docs/wiki/README.md) for the
+[roadmap and future plans](docs/wiki/Roadmap.md).

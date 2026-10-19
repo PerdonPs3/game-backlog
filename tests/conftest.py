@@ -1,6 +1,10 @@
 from html.parser import HTMLParser
+import os
+from uuid import uuid4
 
 import pytest
+import psycopg
+from psycopg import sql
 
 from app import create_app
 from app.db import get_db
@@ -17,14 +21,35 @@ class CSRFTokenParser(HTMLParser):
             self.token = attributes.get("value")
 
 
+def pytest_addoption(parser):
+    parser.addoption("--postgres-url", default=os.environ.get("TEST_DATABASE_URL"),
+                     help="Run app tests in disposable schemas on a dedicated PostgreSQL test database.")
+
+
 @pytest.fixture
-def app(tmp_path):
+def postgres_config(request):
+    url = request.config.getoption("--postgres-url")
+    if not url:
+        yield {}
+        return
+    schema = "test_" + uuid4().hex
+    with psycopg.connect(url, autocommit=True, prepare_threshold=None) as admin:
+        admin.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema)))
+        try:
+            yield {"DATABASE_URL": url, "POSTGRES_TEST_SCHEMA": schema}
+        finally:
+            admin.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(sql.Identifier(schema)))
+
+
+@pytest.fixture
+def app(tmp_path, postgres_config):
     application = create_app({
         "TESTING": True,
         "SECRET_KEY": "test-only-not-for-deployment",
         "DATABASE": str(tmp_path / "test.sqlite"),
+        **postgres_config,
     })
-    result = application.test_cli_runner().invoke(args=["init-db"])
+    result = application.test_cli_runner().invoke(args=["migrate-db" if postgres_config else "init-db"])
     assert result.exit_code == 0, result.output
     yield application
 
@@ -75,12 +100,13 @@ def seed_game(app, game_data):
             db = get_db()
             cursor = db.execute(
                 "INSERT INTO games (title, platform, status, rating, review) "
-                "VALUES (?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?) RETURNING id",
                 (data["title"], data["platform"], data["status"],
                  data["rating"], data["review"]),
             )
+            game_id = cursor.fetchone()["id"]
             db.commit()
-            return cursor.lastrowid
+            return game_id
 
     return insert
 

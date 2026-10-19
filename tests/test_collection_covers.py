@@ -32,7 +32,7 @@ def test_create_persists_trusted_cover_and_collection_uses_it(
     # Index must not call the API, even if the catalog is offline.
     catalog_cover.get_game.side_effect = catalog.CatalogError("offline")
     for browser in [client, app.test_client()]:
-        page = browser.get("/").get_data(as_text=True)
+        page = browser.get("/library").get_data(as_text=True)
         assert 'src="https://images.igdb.com/igdb/image/upload/t_cover_big/co_test.jpg"' in page
         assert 'loading="lazy"' in page
         assert "evil.example" not in page
@@ -49,7 +49,7 @@ def test_edit_backfills_cover_for_existing_catalog_game(
     assert stored_games()[0]["cover_image_id"] is None
     assert post_form(f"/games/{game_id}/edit", game_data).status_code == 302
     assert stored_games()[0]["cover_image_id"] == "co_test"
-    assert b"t_cover_big/co_test.jpg" in client.get("/").data
+    assert b"t_cover_big/co_test.jpg" in client.get("/library").data
 
 
 def test_invalid_edit_preserves_saved_cover(post_form, game_data, catalog_cover, stored_games):
@@ -62,7 +62,7 @@ def test_invalid_edit_preserves_saved_cover(post_form, game_data, catalog_cover,
 def test_missing_catalog_cover_has_placeholder(post_form, game_data, client, stored_games):
     assert post_form("/games/new", game_data).status_code == 302
     assert stored_games()[0]["cover_image_id"] is None
-    page = client.get("/").get_data(as_text=True)
+    page = client.get("/library").get_data(as_text=True)
     assert "No cover available" in page
     assert '<img src=' not in page
 

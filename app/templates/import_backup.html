@@ -1,12 +1,12 @@
 {% extends '_workspace_base.html' %}
-{% block page_title %}Import backup · Game Backlog{% endblock %}
+{% block page_title %}Import backup · Vestigium{% endblock %}
 {% block page_kicker %}Bring your library home{% endblock %}
 {% block page_heading %}Import a <span>backup</span>{% endblock %}
 {% block page_description %}Restore your adventures without replacing the stories already in your collection.{% endblock %}
 {% block panel_label %}Import a collection backup{% endblock %}
 {% block panel %}
     <h2 class="panel-heading">Choose your backup</h2>
-    <p class="form-note">Use a Game Backlog JSON export. Existing game/platform entries are skipped, never overwritten.</p>
+    <p class="form-note">Use a Vestigium or legacy Game Backlog JSON export. Existing game/platform entries are skipped, never overwritten.</p>
     <p class="form-note">Saved lists are restored too. Lists with the same name are merged additively: existing memberships are never removed.</p>
     {% if error %}<p role="alert">{{ error }}</p>{% endif %}
     {% if result is not none %}
