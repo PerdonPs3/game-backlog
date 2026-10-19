@@ -57,4 +57,12 @@ The reward rules are still to be designed. Raw playtime alone should not grant X
 leaving a game running is not the same as making progress. Manually reported
 completions and externally verified achievements will need clear distinctions.
 
+### 6. Automate wiki publication
+
+- [ ] Add a GitHub Actions workflow that publishes changes under `docs/wiki/`
+      to the GitHub wiki when they reach `main`, keeping these files as the
+      source of truth and mapping the wiki index to `Home.md`.
+- [ ] Enable the GitHub wiki and create its first page before the first sync.
+- [ ] Store a token with wiki write access as an Actions secret for publication.
+
 [Back to the wiki](README.md)
