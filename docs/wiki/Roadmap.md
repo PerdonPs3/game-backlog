@@ -65,4 +65,14 @@ completions and externally verified achievements will need clear distinctions.
 - [ ] Enable the GitHub wiki and create its first page before the first sync.
 - [ ] Store a token with wiki write access as an Actions secret for publication.
 
+### 7. Deploy with Vercel and Supabase
+
+- [ ] Deploy the web application on Vercel.
+- [ ] Use Supabase PostgreSQL as the hosted database, migrating the current
+      SQLite schema and data while preserving existing collections.
+- [ ] Adapt and validate the Flask application for Vercel's runtime and
+      Supabase database connections, including persistent data across requests.
+- [ ] Configure deployment credentials securely and verify the hosted workflow
+      before publishing to production, with explicit user approval.
+
 [Back to the wiki](README.md)
