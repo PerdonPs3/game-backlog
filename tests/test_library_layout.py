@@ -11,7 +11,7 @@ class LibraryParser(HTMLParser):
 
 
 def test_library_has_single_wordmark_primary_action_and_reusable_emblem(client):
-    page = client.get("/").get_data(as_text=True)
+    page = client.get("/library").get_data(as_text=True)
     parser = LibraryParser()
     parser.feed(page)
     assert sum(tag == "h1" for tag, _ in parser.tags) == 1
@@ -23,12 +23,13 @@ def test_library_has_single_wordmark_primary_action_and_reusable_emblem(client):
 
 
 def test_dashboard_retains_all_live_controls_and_existing_features(client):
-    page = client.get("/").get_data(as_text=True)
+    page = client.get("/library").get_data(as_text=True)
     for element_id in ["collection-summary", "title-search", "status-filter", "collection-sort",
                        "game-collection", "delete-game-dialog"]:
         assert f'id="{element_id}"' in page
     assert 'id="filter-reset" hidden' in page
     assert "cursor-glow.js" in page
+    assert "dashboard.css" in page
     assert "collection-filters.js" in page
     assert "delete-confirmation.js" in page
 
@@ -36,4 +37,5 @@ def test_dashboard_retains_all_live_controls_and_existing_features(client):
 def test_library_layout_does_not_replace_other_form_layouts(client):
     page = client.get("/games/new").get_data(as_text=True)
     assert "library-hero" not in page
+    assert "dashboard.css" not in page
     assert "catalog-picker" in page

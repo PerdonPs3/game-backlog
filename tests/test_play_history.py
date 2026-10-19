@@ -11,8 +11,8 @@ from app.routes import collection_statistics
 def test_new_status_is_saved_filtered_and_counted(app, client, post_form, game_data, stored_games, status):
     assert post_form("/games/new", {**game_data, "status": status}).status_code == 302
     assert stored_games()[0]["status"] == status
-    assert b"Portal 2" in client.get("/", query_string={"status": status}).data
-    assert client.get("/", query_string={"status": status}, headers={"Accept": "application/json"}).json["count"] == 1
+    assert b"Portal 2" in client.get("/library", query_string={"status": status}).data
+    assert client.get("/library", query_string={"status": status}, headers={"Accept": "application/json"}).json["count"] == 1
     with app.app_context():
         stats = collection_statistics(get_db())
     assert stats["on_hold" if status == "On hold" else "dropped"] == 1
@@ -24,7 +24,7 @@ def test_dates_can_be_created_displayed_edited_and_cleared(client, post_form, ga
     game = stored_games()[0]
     assert game["started_on"] == dates["started_on"]
     assert game["completed_on"] == dates["completed_on"]
-    assert b'<time datetime="2026-02-05">' in client.get("/").data
+    assert b'<time datetime="2026-02-05">' in client.get("/library").data
     url = f"/games/{game['id']}/edit"
     assert b'value="2026-01-01"' in client.get(url).data
     assert post_form(url, {**game_data, "started_on": "", "completed_on": ""}).status_code == 302

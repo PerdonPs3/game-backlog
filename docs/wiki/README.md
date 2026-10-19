@@ -1,4 +1,4 @@
-# Game Backlog wiki
+# Vestigium wiki
 
 This wiki documents the project’s future direction and planned work. For current
 features, installation, and testing, see the [project README](../../README.md).

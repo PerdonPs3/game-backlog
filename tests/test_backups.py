@@ -109,7 +109,7 @@ def test_confirmation_and_csrf_are_required(client, backup_entry, stored_games):
 
 def test_imported_text_is_escaped(client, backup_entry):
     import_file(client, encoded([{**backup_entry, "title": "<script>alert(1)</script>"}]))
-    assert b"&lt;script&gt;" in client.get("/").data
+    assert b"&lt;script&gt;" in client.get("/library").data
 
 
 def test_empty_backup_is_valid(client, stored_games):

@@ -3,26 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Backlog</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <title>Your library · Vestigium</title>
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 <body class="library-page">
     {% include '_brand_easter_egg.html' %}
     <main class="library-layout">
-        <div class="appearance-bar">{% include '_theme_toggle.html' %}</div>
+        {% include '_appearance_bar.html' %}
+        <nav class="library-navigation" aria-label="Project navigation">
+            <a href="{{ url_for('main.welcome') }}">← Home</a>
+        </nav>
         <header class="library-hero">
             <div class="hero-copy">
                 <p class="hero-kicker">Your personal gaming library</p>
-                <h1 class="library-wordmark">Game <span>Backlog</span></h1>
-                <p class="hero-description">Less scrolling. More playing.<br>
-                    Your next adventure starts here.</p>
+                <h1 class="library-wordmark"><span>Vestigium</span></h1>
+                <p class="hero-description">Every game leaves a mark.<br>
+                    This is where you keep yours.</p>
                 <div class="hero-actions">
                     <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
-                        <span aria-hidden="true">＋</span> Add game
+                        <span aria-hidden="true">＋</span> Add game <span class="hero-action-arrow" aria-hidden="true">↗</span>
                     </a>
-                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}">What should I play?</a>
+                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h1m8 0h1M11.5 12h1M7 17h1m8 0h1" stroke-linecap="round"/></svg>What should I play?</a>
                 </div>
             </div>
             <div class="hero-emblem" data-hero-logo aria-hidden="true">

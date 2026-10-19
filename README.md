@@ -1,4 +1,10 @@
-# Game Backlog
+# Vestigium
+
+*Every game leaves a mark.*
+
+Formerly **Game Backlog**. The repository name and portable backup format remain
+unchanged, so existing installations, collections, and JSON exports still work.
+The welcome page is at `/`; open `/library` to go straight to your collection.
 
 A personal video game tracker built with Python, Flask, and SQLite or PostgreSQL. Keep track of
 what you want to play, what you are playing, and what you have finished, with

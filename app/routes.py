@@ -70,6 +70,17 @@ def collection_statistics(db):
 
 
 @main.get("/")
+def welcome():
+    # Keep bookmarked filters and older live-filter requests working.
+    keys = ("q", "status", "sort", "list")
+    if request.accept_mimetypes.best == "application/json" or any(key in request.args for key in keys):
+        return redirect(url_for("main.index", **{key: request.args[key] for key in keys if key in request.args}))
+    # Public decorative covers, independent of the user's collection and API access.
+    image_ids = ("co4jni", "cocpbl", "co1rs4", "cob9kr", "cob9dh", "coaih8", "coaarl", "co1q1f")
+    return render_template("welcome.html", welcome_covers=[collection_cover_url(value) for value in image_ids])
+
+
+@main.get("/library")
 def index():
     selected_list = request.args.get("list", "")
     if selected_list:
