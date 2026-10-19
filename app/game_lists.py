@@ -16,7 +16,7 @@ def all_lists(db):
     return db.execute(
         "SELECT l.id, l.name, COUNT(m.game_id) AS game_count FROM game_lists l "
         "LEFT JOIN game_list_members m ON m.list_id = l.id "
-        "GROUP BY l.id ORDER BY l.name COLLATE NOCASE, l.id"
+        "GROUP BY l.id ORDER BY lower(l.name), l.id"
     ).fetchall()
 
 
@@ -26,8 +26,8 @@ def list_cards(db):
     rows = db.execute(
         "SELECT list_id, cover_image_id FROM ("
         "SELECT m.list_id, g.cover_image_id, ROW_NUMBER() OVER "
-        "(PARTITION BY m.list_id ORDER BY g.title COLLATE NOCASE, g.id) AS position "
-        "FROM game_list_members m JOIN games g ON g.id = m.game_id) WHERE position <= 4"
+        "(PARTITION BY m.list_id ORDER BY lower(g.title), g.id) AS position "
+        "FROM game_list_members m JOIN games g ON g.id = m.game_id) AS ranked_covers WHERE position <= 4"
     )
     for row in rows:
         previews.setdefault(row["list_id"], []).append(collection_cover_url(row["cover_image_id"]))

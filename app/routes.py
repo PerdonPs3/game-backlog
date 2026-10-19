@@ -1,11 +1,10 @@
 import json
-import sqlite3
 from random import choice, sample
 
 from flask import Blueprint, abort, flash, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
-from app.db import get_db
+from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
 from app.game_fields import STATUSES, validate_dates
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
 
@@ -16,7 +15,7 @@ DUPLICATE_GAME_ERROR = "This game is already in your collection for this platfor
 COLLECTION_SORTS = {
     "newest": ("Recently added", "created_at DESC, id DESC"),
     "oldest": ("Oldest added", "created_at ASC, id ASC"),
-    "title": ("Title (A–Z)", "title COLLATE NOCASE ASC, id ASC"),
+    "title": ("Title (A–Z)", "lower(title) ASC, id ASC"),
     "rating": ("Highest rated", "rating IS NULL ASC, rating DESC, created_at DESC, id DESC"),
 }
 
@@ -24,12 +23,12 @@ COLLECTION_SORTS = {
 def find_duplicate_game(db, igdb_id, title, platform, exclude_id=None):
     """Prefer catalog identity; compare names only between legacy manual entries."""
     parameters = [platform.strip()]
-    conditions = ["trim(platform) = ? COLLATE NOCASE"]
+    conditions = ["lower(trim(platform)) = lower(?)"]
     if igdb_id is not None:
         conditions.append("igdb_id = ?")
         parameters.append(igdb_id)
     else:
-        conditions.extend(["igdb_id IS NULL", "trim(title) = ? COLLATE NOCASE"])
+        conditions.extend(["igdb_id IS NULL", "lower(trim(title)) = lower(?)"])
         parameters.append(title.strip())
     if exclude_id is not None:
         conditions.append("id != ?")
@@ -57,11 +56,11 @@ def collection_statistics(db):
     """Global entry counts; unrated games do not contribute to the average."""
     row = db.execute(
         "SELECT COUNT(*) AS total, "
-        "COALESCE(SUM(status = 'Completed'), 0) AS completed, "
-        "COALESCE(SUM(status = 'Playing'), 0) AS playing, "
-        "COALESCE(SUM(status = 'Backlog'), 0) AS backlog, "
-        "COALESCE(SUM(status = 'On hold'), 0) AS on_hold, "
-        "COALESCE(SUM(status = 'Dropped'), 0) AS dropped, "
+        "COALESCE(SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END), 0) AS completed, "
+        "COALESCE(SUM(CASE WHEN status = 'Playing' THEN 1 ELSE 0 END), 0) AS playing, "
+        "COALESCE(SUM(CASE WHEN status = 'Backlog' THEN 1 ELSE 0 END), 0) AS backlog, "
+        "COALESCE(SUM(CASE WHEN status = 'On hold' THEN 1 ELSE 0 END), 0) AS on_hold, "
+        "COALESCE(SUM(CASE WHEN status = 'Dropped' THEN 1 ELSE 0 END), 0) AS dropped, "
         "COUNT(rating) AS rated, AVG(rating) AS average "
         "FROM games"
     ).fetchone()
@@ -103,7 +102,7 @@ def index():
 
     if search_query:
         # Literal substring search: % and _ are not treated as wildcards.
-        conditions.append("instr(lower(title), lower(?)) > 0")
+        conditions.append(title_contains_sql())
         parameters.append(search_query)
 
     query = "SELECT id, title, platform, status, rating, review, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
@@ -142,16 +141,16 @@ def lists():
         except ValueError as problem:
             error = str(problem)
         else:
-            db.execute("BEGIN IMMEDIATE")
+            begin_write(db)
             if db.execute("SELECT COUNT(*) FROM game_lists").fetchone()[0] >= MAX_LISTS:
                 db.rollback()
                 error = "You can create up to 100 lists."
             else:
                 try:
-                    cursor = db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?)", (name, name.casefold()))
+                    list_id = db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) RETURNING id", (name, name.casefold())).fetchone()["id"]
                     db.commit()
-                    return redirect(url_for("main.edit_list", list_id=cursor.lastrowid))
-                except sqlite3.IntegrityError:
+                    return redirect(url_for("main.edit_list", list_id=list_id))
+                except INTEGRITY_ERRORS:
                     db.rollback()
                     error = "A list with this name already exists."
     return render_template("lists.html", lists=list_cards(db), error=error)
@@ -175,7 +174,7 @@ def edit_list(list_id):
                 raise ValueError("Please choose games from your collection.")
             selected = {int(value) for value in raw_ids}
             name = clean_list_name(request.form.get("name", ""))
-            db.execute("BEGIN IMMEDIATE")
+            begin_write(db)
             existing = {row[0] for row in db.execute("SELECT id FROM games")}
             if not selected <= existing:
                 raise ValueError("Some selected games are no longer in your collection. Please review your choices.")
@@ -191,11 +190,11 @@ def edit_list(list_id):
         except ValueError as problem:
             db.rollback()
             error = str(problem)
-        except sqlite3.IntegrityError:
+        except INTEGRITY_ERRORS:
             db.rollback()
             error = "A list with this name already exists. Your changes were not saved."
     games = [{**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
-             for row in db.execute("SELECT * FROM games ORDER BY title COLLATE NOCASE, platform, id")]
+             for row in db.execute("SELECT * FROM games ORDER BY lower(title), platform, id")]
     return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
 
 
@@ -206,6 +205,7 @@ def delete_list(list_id):
     if item is None:
         abort(404)
     if request.method == "POST":
+        begin_write(db)
         db.execute("DELETE FROM game_lists WHERE id = ?", (list_id,))
         db.commit()
         return redirect(url_for("main.lists"))
@@ -307,7 +307,7 @@ def pick_game():
 def export_backup():
     db = get_db()
     # Keep games and membership indices in the same read snapshot.
-    db.execute("BEGIN")
+    begin_snapshot(db)
     rows = db.execute("SELECT * FROM games ORDER BY id").fetchall()
     positions = {row["id"]: index for index, row in enumerate(rows)}
     memberships = {}
@@ -339,12 +339,12 @@ def import_backup():
                 error = str(problem)
             else:
                 db = get_db()
-                db.execute("BEGIN IMMEDIATE")
+                begin_write(db)
                 imported = skipped = 0
                 try:
                     existing_keys = {row[0] for row in db.execute("SELECT name_key FROM game_lists")}
                     if len(existing_keys | {item["name"].casefold() for item in backup_lists}) > MAX_LISTS:
-                        raise sqlite3.IntegrityError("List limit")
+                        raise ValueError("List limit")
                     saved_ids = []
                     for game in games:
                         duplicate = find_duplicate_game(db, game["igdb_id"], game["title"], game["platform"])
@@ -354,19 +354,19 @@ def import_backup():
                             continue
                         cursor = db.execute(
                             "INSERT INTO games (" + ", ".join(BACKUP_FIELDS) + ") "
-                            "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ")",
+                            "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ") RETURNING id",
                             [game[field] for field in BACKUP_FIELDS],
                         )
-                        saved_ids.append(cursor.lastrowid)
+                        saved_ids.append(cursor.fetchone()["id"])
                         imported += 1
                     for item in backup_lists:
-                        db.execute("INSERT OR IGNORE INTO game_lists (name, name_key) VALUES (?, ?)", (item["name"], item["name"].casefold()))
+                        db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) ON CONFLICT (name_key) DO NOTHING", (item["name"], item["name"].casefold()))
                         list_id = db.execute("SELECT id FROM game_lists WHERE name_key = ?", (item["name"].casefold(),)).fetchone()[0]
-                        db.executemany("INSERT OR IGNORE INTO game_list_members (list_id, game_id) VALUES (?, ?)",
+                        db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?) ON CONFLICT (list_id, game_id) DO NOTHING",
                                        [(list_id, saved_ids[index]) for index in item["games"]])
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
-                except sqlite3.DatabaseError:
+                except DATABASE_ERRORS + (ValueError,):
                     db.rollback()
                     error = "The backup could not be saved. Nothing was imported. Please try again."
     return render_template("import_backup.html", error=error, result=result)
@@ -424,7 +424,7 @@ def create():
         if error is None:
             db = get_db()
             # Serialize check + write so simultaneous submissions cannot both pass.
-            db.execute("BEGIN IMMEDIATE")
+            begin_write(db)
             duplicate = find_duplicate_game(
                 db, selected_game["id"], selected_game["name"], platform,
             )
@@ -506,7 +506,7 @@ def edit(game_id):
             error = "Review must contain no more than 2000 characters."
 
         if error is None:
-            db.execute("BEGIN IMMEDIATE")
+            begin_write(db)
             current_identity = db.execute(
                 "SELECT title, platform FROM games WHERE id = ?", (game_id,),
             ).fetchone()
@@ -564,6 +564,7 @@ def delete(game_id):
         abort(404)
 
     if request.method == "POST":
+        begin_write(db)
         db.execute(
             "DELETE FROM games WHERE id = ?",
             (game_id,),
