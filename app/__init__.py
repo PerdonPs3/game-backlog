@@ -5,13 +5,14 @@ from secrets import token_hex
 from flask_wtf.csrf import CSRFProtect
 
 def create_app(test_config=None):
+    hosted = test_config is None and bool(os.environ.get("VERCEL"))
     app = Flask(__name__)
 
     instance_path = Path(app.instance_path)
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
     app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
 
-    if test_config is None:
+    if test_config is None and not hosted:
         app.config.from_pyfile(
             str(instance_path / "config.py"),
             silent=True,
@@ -25,7 +26,7 @@ def create_app(test_config=None):
                 app.config[name] = os.environ[name]
 
     database_url = app.config.get("DATABASE_URL")
-    if test_config is None and os.environ.get("VERCEL") and not database_url:
+    if hosted and not database_url:
         raise ValueError("Set DATABASE_URL before running on Vercel; SQLite is local-only.")
     if database_url and not database_url.startswith(("postgresql://", "postgres://")):
         raise ValueError("DATABASE_URL must be a PostgreSQL connection URL.")
@@ -39,6 +40,12 @@ def create_app(test_config=None):
         app.config["SECRET_KEY"] = secret_path.read_text(encoding="utf-8")
     elif not database_url:
         instance_path.mkdir(parents=True, exist_ok=True)
+    if hosted:
+        app.config.update(
+            SESSION_COOKIE_SECURE=True,
+            SESSION_COOKIE_HTTPONLY=True,
+            SESSION_COOKIE_SAMESITE="Lax",
+        )
     CSRFProtect(app)
 
     from app import db

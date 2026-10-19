@@ -138,6 +138,9 @@ existing SQLite collection, and PostgreSQL integration tests, see the
 [PostgreSQL and Supabase guide](docs/PostgreSQL.md). SQLite remains the default
 for local use. Database support alone does not deploy or secure a public site.
 
+For the Flask entrypoint, generated CDN assets, environment variables, and
+protected Preview setup, see the [Vercel configuration guide](docs/Vercel.md).
+
 ## Run the tests
 
 Install the development dependencies, which also include the application dependencies:
