@@ -20,8 +20,41 @@
     const placeholder = editor.querySelector('[data-avatar-placeholder]');
     const savedPhoto = photoPreview.getAttribute('src');
     const avatarEditor = editor.querySelector('[data-avatar-editor]');
+    const cropDialog = editor.querySelector('[data-avatar-crop]');
     const avatarTrigger = avatarEditor.querySelector('summary');
+    let selectedFile = null;
+    let selectedCrop = null;
     let previewUrl = null;
+    const cropper = window.AvatarCrop.create(editor, (file, crop, preview) => {
+        selectedFile = file;
+        selectedCrop = crop;
+        previewUrl = preview;
+        removePhoto.value = '';
+        removePhoto.disabled = true;
+        updatePhoto();
+        updatePreview();
+        photoFeedback.textContent = 'Photo ready. Save your profile to keep this crop.';
+        avatarTrigger.focus();
+    }, (message) => {
+        photoFeedback.textContent = message;
+        avatarEditor.open = true;
+    });
+    for (const swatch of editor.querySelectorAll('[data-avatar-color]')) {
+        swatch.addEventListener('click', () => {
+            color.value = swatch.dataset.avatarColor;
+            for (const option of editor.querySelectorAll('[data-avatar-color]')) option.setAttribute('aria-pressed', String(option === swatch));
+            updatePreview();
+        });
+    }
+    form.addEventListener('formdata', (event) => {
+        if (selectedFile) {
+            event.formData.set('photo', selectedFile, selectedFile.name);
+            event.formData.set('photo_crop', JSON.stringify(selectedCrop));
+        } else {
+            event.formData.delete('photo');
+            event.formData.delete('photo_crop');
+        }
+    });
 
     document.addEventListener('pointerdown', (event) => {
         if (!avatarEditor.contains(event.target)) avatarEditor.open = false;
@@ -36,21 +69,7 @@
     photo.addEventListener('invalid', () => { avatarEditor.open = true; });
 
     function updatePhoto() {
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        previewUrl = null;
-        const file = photo.files[0];
         photo.setCustomValidity('');
-        photoFeedback.textContent = '';
-        if (file && removePhoto.value !== 'yes') {
-            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
-                const message = 'Choose a JPG, PNG, or WebP photo smaller than 2 MB.';
-                photo.setCustomValidity(message);
-                photoFeedback.textContent = message;
-            } else {
-                previewUrl = URL.createObjectURL(file);
-                photoFeedback.textContent = 'Preview only. Save changes to keep your photo.';
-            }
-        }
         const src = removePhoto.value === 'yes' ? null : (previewUrl || savedPhoto);
         photoPreview.hidden = !src;
         removeButton.hidden = !src;
@@ -59,17 +78,21 @@
         else photoPreview.removeAttribute('src');
     }
     photo.addEventListener('change', () => {
-        removePhoto.value = '';
-        removePhoto.disabled = true;
-        updatePhoto();
+        const candidate = photo.files[0];
+        photo.value = '';
+        if (!candidate) return;
+        avatarEditor.open = false;
+        cropper.open(candidate);
     });
     removeButton.addEventListener('click', () => {
+        selectedFile = selectedCrop = previewUrl = null;
         removePhoto.value = 'yes';
         removePhoto.disabled = false;
         photo.value = '';
         updatePhoto();
         updatePreview();
         photoFeedback.textContent = 'Photo removed. Save your profile to keep this change.';
+        avatarTrigger.focus();
     });
     photoPreview.addEventListener('error', () => {
         photoPreview.hidden = true;
@@ -79,10 +102,6 @@
             photo.setCustomValidity(message);
             photoFeedback.textContent = message;
         }
-    });
-    window.addEventListener('pagehide', () => {
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        previewUrl = null;
     });
     const counter = form.querySelector('[data-bio-counter]');
     let saving = false;
@@ -98,8 +117,12 @@
             delete feedback.dataset.saved;
         }
     }
-    editor.addEventListener('input', updatePreview);
-    editor.addEventListener('change', updatePreview);
+    function onEdit(event) {
+        if (event?.target === photo || cropDialog.contains(event?.target)) return;
+        updatePreview();
+    }
+    editor.addEventListener('input', onEdit);
+    editor.addEventListener('change', onEdit);
     form.addEventListener('submit', (event) => {
         if (saving) { event.preventDefault(); return; }
         saving = true;
@@ -110,7 +133,7 @@
         feedback.textContent = 'Saving your profile…';
     });
     window.addEventListener('pageshow', () => {
-        if (photo.files.length) updatePhoto();
+        updatePhoto();
         if (!saving) return;
         saving = false;
         save.disabled = false;

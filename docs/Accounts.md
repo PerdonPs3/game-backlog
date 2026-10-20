@@ -183,6 +183,13 @@ before publishing this version to Preview. Production migration requires a
 separate authorized release.
 
 Users can upload a still JPG, PNG, or WebP up to 2 MB and 12 million pixels.
+Selecting a photo opens a circular crop preview with drag, arrow-key positioning,
+zoom, centering, cancel, and Use photo actions. Only a confirmed photo and its crop
+coordinates are submitted. Cancelling a replacement preserves the previous
+selection. The server validates the crop against the oriented source dimensions
+before resizing; the original remains subject to the same upload validation.
+The default silhouette uses eight preset color swatches instead of the native
+color picker.
 Pillow validates the decoded format, rejects animation, normalizes orientation,
 crops to 256 by 256 pixels, and re-encodes a metadata-free JPEG. Original uploads
 are never stored or served. The small normalized photo is stored in PostgreSQL

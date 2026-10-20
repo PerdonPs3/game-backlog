@@ -333,7 +333,7 @@ def profile():
         else:
             try:
                 if upload and upload.filename and not remove_photo:
-                    photo = normalize_avatar(upload)
+                    photo = normalize_avatar(upload, request.form.get("photo_crop"))
             except ValueError as exc:
                 error = str(exc)
         if not error:

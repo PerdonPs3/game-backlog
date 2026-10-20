@@ -425,3 +425,23 @@ def test_photo_requests_keep_csrf_size_and_color_validation(accounts):
     oversized = submit(client, "/account/profile", {"display_name": "Alice", "photo": (BytesIO(b"x" * (4 * 1024 * 1024)), "huge.jpg")})
     assert oversized.status_code == 303
     assert "Your previous profile has been kept" in client.get(oversized.location).get_data(as_text=True)
+
+
+def test_profile_saves_chosen_crop_and_rejects_invalid_crop_without_replacing_photo(accounts):
+    from PIL import Image
+    client = sign_in(accounts, "alice")
+    def photo():
+        stream = BytesIO()
+        source = Image.new("RGB", (400, 200), "red")
+        source.paste(Image.new("RGB", (200, 200), "blue"), (200, 0))
+        source.save(stream, format="PNG")
+        stream.seek(0)
+        return stream, "split.png"
+    result = submit(client, "/account/profile", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":200}'})
+    assert result.status_code == 303
+    saved = client.get("/account/profile/photo").data
+    with Image.open(BytesIO(saved)) as image:
+        assert image.getpixel((128,128))[2] > 230
+    result = submit(client, "/account/profile", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":400}'})
+    assert "Choose a crop inside" in result.get_data(as_text=True)
+    assert client.get("/account/profile/photo").data == saved
