@@ -259,6 +259,3 @@ html[data-theme="light"] .welcome-community { color: #226a40; border-color: #226
 
 .welcome-copy .catalog-public-search > div:focus-within { outline: 2px solid var(--welcome-accent); outline-offset: 3px; }
 .welcome-copy .catalog-public-search input:focus-visible { outline: none; }
-.welcome-document { scroll-snap-type: y proximity; }
-.welcome-hero, .welcome-story { scroll-snap-align: start; }
-@media (prefers-reduced-motion: reduce) { .welcome-document { scroll-snap-type: none; } }
