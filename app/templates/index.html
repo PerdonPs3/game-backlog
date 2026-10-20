@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
 </head>
 <body class="library-page">
     {% include '_brand_easter_egg.html' %}
     <main class="library-layout">
         {% include '_appearance_bar.html' %}
+        {% include '_account_nav.html' %}
         <nav class="library-navigation" aria-label="Project navigation">
             <a href="{{ url_for('main.welcome') }}">← Home</a>
         </nav>

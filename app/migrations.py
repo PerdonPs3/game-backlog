@@ -78,7 +78,7 @@ def check_db_command():
         applied = {row["version"] for row in db.execute("SELECT version FROM schema_migrations")}
         if applied != {path.stem for path in MIGRATIONS.glob("[0-9]*.sql")}:
             raise click.ClickException("Run migrate-db with this application version before serving requests.")
-        for table in ("games", "game_lists", "game_list_members"):
+        for table in ("games", "game_lists", "game_list_members", "profiles", "account_sessions"):
             db.execute(f"SELECT 1 FROM {table} LIMIT 0")
     except DATABASE_ERRORS:
         raise click.ClickException("Database check failed. Check DATABASE_URL, network access, and migrate-db status.") from None

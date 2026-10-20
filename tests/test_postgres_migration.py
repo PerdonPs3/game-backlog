@@ -59,7 +59,7 @@ def test_migrations_are_repeatable_and_health_check_is_read_only(postgres_app):
     assert runner.invoke(args=["init-db"]).exit_code != 0
     with postgres_app.app_context():
         db = get_db()
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 1
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 2
         assert db.execute("SELECT COUNT(*) FROM games").fetchone()[0] == 0
         assert all(row[0] for row in db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('games', 'game_lists', 'game_list_members')"))
 
@@ -67,18 +67,20 @@ def test_migrations_are_repeatable_and_health_check_is_read_only(postgres_app):
 def test_failed_schema_migration_rolls_back_ddl_and_version(postgres_app, tmp_path, monkeypatch):
     original = migrations.MIGRATIONS
     (tmp_path / "001_initial.sql").write_text((original / "001_initial.sql").read_text(encoding="utf-8"), encoding="utf-8")
-    (tmp_path / "002_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
+    (tmp_path / "002_private_accounts.sql").write_bytes((original / "002_private_accounts.sql").read_bytes())
+    (tmp_path / "003_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "rolled back" in result.output
     with postgres_app.app_context():
         db = get_db()
         assert db.execute("SELECT to_regclass('rollback_probe')").fetchone()[0] is None
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 1
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 2
 
 
 def test_changed_applied_migration_is_rejected(postgres_app, tmp_path, monkeypatch):
     (tmp_path / "001_initial.sql").write_text("SELECT 1;", encoding="utf-8")
+    (tmp_path / "002_private_accounts.sql").write_bytes((migrations.MIGRATIONS / "002_private_accounts.sql").read_bytes())
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "has changed" in result.output
@@ -93,9 +95,10 @@ def test_transfer_preserves_fields_relationships_and_next_ids(postgres_app, sqli
     with postgres_app.app_context():
         db = get_db()
         source_games, source_lists, source_members = read_sqlite_collection(sqlite_source)
-        assert [dict(row) for row in db.execute("SELECT * FROM games")] == source_games
-        assert [dict(row) for row in db.execute("SELECT * FROM game_lists")] == source_lists
-        assert [tuple(row) for row in db.execute("SELECT * FROM game_list_members")] == source_members
+        assert [{key: row[key] for key in source_games[0]} for row in db.execute("SELECT * FROM games")] == source_games
+        assert [{key: row[key] for key in source_lists[0]} for row in db.execute("SELECT * FROM game_lists")] == source_lists
+        assert [tuple(row) for row in db.execute("SELECT list_id, game_id FROM game_list_members")] == source_members
+        assert db.execute("SELECT owner_id FROM games").fetchone()[0] is None
         assert db.execute("INSERT INTO games (title, platform) VALUES ('Next', 'PC') RETURNING id").fetchone()[0] == 43
         assert db.execute("INSERT INTO game_lists (name, name_key) VALUES ('Next', 'next') RETURNING id").fetchone()[0] == 18
     assert runner.invoke(args=args).exit_code != 0

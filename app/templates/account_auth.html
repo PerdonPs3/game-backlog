@@ -1,0 +1,34 @@
+{% extends '_workspace_base.html' %}
+{% set titles = {'login': 'Sign in', 'register': 'Create your account', 'recover': 'Recover your account', 'verify-recovery': 'Enter your recovery code', 'password': 'Choose a new password'} %}
+{% block page_title %}{{ titles[mode] }} · Vestigium{% endblock %}
+{% block page_kicker %}Your games. Your space.{% endblock %}
+{% block page_heading %}{{ titles[mode] }}{% endblock %}
+{% block page_description %}Keep your library, lists, and gaming memories in your own private account.{% endblock %}
+{% block panel_label %}Account access{% endblock %}
+{% block panel %}
+{% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+{% if message %}<p role="status">{{ message }}</p>{% endif %}
+<form method="post" class="workspace-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if mode != 'password' %}
+    <div><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254" required value="{{ request.form.get('email', '') }}"></div>
+    {% endif %}
+    {% if mode in ('login', 'register', 'password') %}
+    <div><label for="password">Password</label><input type="password" id="password" name="password" autocomplete="{{ 'current-password' if mode == 'login' else 'new-password' }}" minlength="8" maxlength="128" required></div>
+    {% endif %}
+    {% if mode == 'password' %}
+    <div><label for="confirmation">Confirm password</label><input type="password" id="confirmation" name="confirmation" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+    {% endif %}
+    {% if mode == 'verify-recovery' %}
+    <div><label for="code">Recovery code</label><input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required></div>
+    {% endif %}
+    <button type="submit">{{ 'Send recovery email' if mode == 'recover' else titles[mode] }}</button>
+</form>
+<nav class="account-links" aria-label="Account options">
+    {% if mode != 'login' %}<a href="{{ url_for('auth.login') }}">Sign in</a>{% endif %}
+    {% if mode == 'login' %}<a href="{{ url_for('auth.register') }}">Create account</a><a href="{{ url_for('auth.recover') }}">Forgot password?</a>{% endif %}
+    {% if mode == 'recover' %}<a href="{{ url_for('auth.verify_recovery') }}">I have a recovery code</a>{% endif %}
+    {% if mode == 'verify-recovery' %}<a href="{{ url_for('auth.recover') }}">Request a new code</a>{% endif %}
+</nav>
+{% endblock %}

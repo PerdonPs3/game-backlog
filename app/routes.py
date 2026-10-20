@@ -8,6 +8,8 @@ from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_writ
 from app.game_fields import STATUSES, validate_dates
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
 
+from app.ownership import owned, member_owned, insert_owned, insert_members
+
 main = Blueprint("main", __name__)
 
 DUPLICATE_GAME_ERROR = "This game is already in your collection for this platform."
@@ -23,7 +25,7 @@ COLLECTION_SORTS = {
 def find_duplicate_game(db, igdb_id, title, platform, exclude_id=None):
     """Prefer catalog identity; compare names only between legacy manual entries."""
     parameters = [platform.strip()]
-    conditions = ["lower(trim(platform)) = lower(?)"]
+    conditions = [owned(), "lower(trim(platform)) = lower(?)"]
     if igdb_id is not None:
         conditions.append("igdb_id = ?")
         parameters.append(igdb_id)
@@ -62,7 +64,7 @@ def collection_statistics(db):
         "COALESCE(SUM(CASE WHEN status = 'On hold' THEN 1 ELSE 0 END), 0) AS on_hold, "
         "COALESCE(SUM(CASE WHEN status = 'Dropped' THEN 1 ELSE 0 END), 0) AS dropped, "
         "COUNT(rating) AS rated, AVG(rating) AS average "
-        "FROM games"
+        f"FROM games WHERE {owned()}"
     ).fetchone()
     stats = dict(row)
     stats["completion_percent"] = int(stats["completed"] * 100 / stats["total"] + 0.5) if stats["total"] else 0
@@ -86,7 +88,7 @@ def index():
     if selected_list:
         if not selected_list.isascii() or not selected_list.isdigit() or len(selected_list) > 18:
             abort(400)
-        if get_db().execute("SELECT 1 FROM game_lists WHERE id = ?", (int(selected_list),)).fetchone() is None:
+        if get_db().execute(f"SELECT 1 FROM game_lists WHERE id = ? AND {owned()}", (int(selected_list),)).fetchone() is None:
             abort(404)
     status = request.args.get("status", "")
     search_query = request.args.get("q", "").strip()
@@ -101,7 +103,7 @@ def index():
     if len(search_query) > 200:
         abort(400)
 
-    conditions = []
+    conditions = [owned()]
     parameters = []
     if selected_list:
         conditions.append("id IN (SELECT game_id FROM game_list_members WHERE list_id = ?)")
@@ -153,12 +155,12 @@ def lists():
             error = str(problem)
         else:
             begin_write(db)
-            if db.execute("SELECT COUNT(*) FROM game_lists").fetchone()[0] >= MAX_LISTS:
+            if db.execute(f"SELECT COUNT(*) FROM game_lists WHERE {owned()}").fetchone()[0] >= MAX_LISTS:
                 db.rollback()
                 error = "You can create up to 100 lists."
             else:
                 try:
-                    list_id = db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) RETURNING id", (name, name.casefold())).fetchone()["id"]
+                    list_id = insert_owned(db, "game_lists", ("name", "name_key"), (name, name.casefold())).fetchone()["id"]
                     db.commit()
                     return redirect(url_for("main.edit_list", list_id=list_id))
                 except INTEGRITY_ERRORS:
@@ -170,14 +172,14 @@ def lists():
 @main.route("/lists/<int:list_id>/edit", methods=["GET", "POST"])
 def edit_list(list_id):
     db = get_db()
-    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
     if item is None:
         abort(404)
     error = None
     view = request.values.get("view", "all")
     if view not in ("all", "selected"):
         view = "all"
-    selected = {row[0] for row in db.execute("SELECT game_id FROM game_list_members WHERE list_id = ?", (list_id,))}
+    selected = {row[0] for row in db.execute(f"SELECT game_id FROM game_list_members WHERE list_id = ? AND {member_owned()}", (list_id,))}
     if request.method == "POST":
         try:
             raw_ids = request.form.getlist("games")
@@ -186,15 +188,15 @@ def edit_list(list_id):
             selected = {int(value) for value in raw_ids}
             name = clean_list_name(request.form.get("name", ""))
             begin_write(db)
-            existing = {row[0] for row in db.execute("SELECT id FROM games")}
+            existing = {row[0] for row in db.execute(f"SELECT id FROM games WHERE {owned()}")}
             if not selected <= existing:
                 raise ValueError("Some selected games are no longer in your collection. Please review your choices.")
-            if db.execute("SELECT 1 FROM game_lists WHERE id = ?", (list_id,)).fetchone() is None:
+            if db.execute(f"SELECT 1 FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone() is None:
                 db.rollback()
                 abort(404)
-            db.execute("UPDATE game_lists SET name = ?, name_key = ? WHERE id = ?", (name, name.casefold(), list_id))
-            db.execute("DELETE FROM game_list_members WHERE list_id = ?", (list_id,))
-            db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?)", [(list_id, value) for value in selected])
+            db.execute(f"UPDATE game_lists SET name = ?, name_key = ? WHERE id = ? AND {owned()}", (name, name.casefold(), list_id))
+            db.execute(f"DELETE FROM game_list_members WHERE list_id = ? AND {member_owned()}", (list_id,))
+            insert_members(db, [(list_id, value) for value in selected])
             db.commit()
             flash("List saved. Your games are right where you left them.", "list_saved")
             return redirect(url_for("main.edit_list", list_id=list_id, view=view, _anchor="list-feedback"))
@@ -205,19 +207,19 @@ def edit_list(list_id):
             db.rollback()
             error = "A list with this name already exists. Your changes were not saved."
     games = [{**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
-             for row in db.execute("SELECT * FROM games ORDER BY lower(title), platform, id")]
+             for row in db.execute(f"SELECT * FROM games WHERE {owned()} ORDER BY lower(title), platform, id")]
     return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
 
 
 @main.route("/lists/<int:list_id>/delete", methods=["GET", "POST"])
 def delete_list(list_id):
     db = get_db()
-    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
     if item is None:
         abort(404)
     if request.method == "POST":
         begin_write(db)
-        db.execute("DELETE FROM game_lists WHERE id = ?", (list_id,))
+        db.execute(f"DELETE FROM game_lists WHERE id = ? AND {owned()}", (list_id,))
         db.commit()
         return redirect(url_for("main.lists"))
     return render_template("delete_list.html", item=item)
@@ -225,7 +227,7 @@ def delete_list(list_id):
 
 @main.get("/games/<int:game_id>")
 def game_details(game_id):
-    row = get_db().execute("SELECT * FROM games WHERE id = ?", (game_id,)).fetchone()
+    row = get_db().execute(f"SELECT * FROM games WHERE id = ? AND {owned()}", (game_id,)).fetchone()
     if row is None:
         abort(404)
     game = {**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
@@ -271,7 +273,7 @@ def pick_game():
     selected_genre = request.args.get("genre", "")
     if len(selected_platform) > 80 or len(selected_genre) > 100:
         abort(400)
-    backlog = get_db().execute("SELECT * FROM games WHERE status = 'Backlog'").fetchall()
+    backlog = get_db().execute(f"SELECT * FROM games WHERE status = 'Backlog' AND {owned()}").fetchall()
     platforms = sorted({row["platform"] for row in backlog}, key=str.casefold)
     if selected_platform and selected_platform not in platforms:
         abort(400)
@@ -319,10 +321,10 @@ def export_backup():
     db = get_db()
     # Keep games and membership indices in the same read snapshot.
     begin_snapshot(db)
-    rows = db.execute("SELECT * FROM games ORDER BY id").fetchall()
+    rows = db.execute(f"SELECT * FROM games WHERE {owned()} ORDER BY id").fetchall()
     positions = {row["id"]: index for index, row in enumerate(rows)}
     memberships = {}
-    for member in db.execute("SELECT list_id, game_id FROM game_list_members ORDER BY game_id"):
+    for member in db.execute(f"SELECT list_id, game_id FROM game_list_members WHERE {member_owned()} ORDER BY game_id"):
         memberships.setdefault(member["list_id"], []).append(positions[member["game_id"]])
     lists = [{"name": item["name"], "games": memberships.get(item["id"], [])} for item in all_lists(db)]
     db.commit()
@@ -353,7 +355,7 @@ def import_backup():
                 begin_write(db)
                 imported = skipped = 0
                 try:
-                    existing_keys = {row[0] for row in db.execute("SELECT name_key FROM game_lists")}
+                    existing_keys = {row[0] for row in db.execute(f"SELECT name_key FROM game_lists WHERE {owned()}")}
                     if len(existing_keys | {item["name"].casefold() for item in backup_lists}) > MAX_LISTS:
                         raise ValueError("List limit")
                     saved_ids = []
@@ -363,17 +365,14 @@ def import_backup():
                             skipped += 1
                             saved_ids.append(duplicate["id"])
                             continue
-                        cursor = db.execute(
-                            "INSERT INTO games (" + ", ".join(BACKUP_FIELDS) + ") "
-                            "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ") RETURNING id",
-                            [game[field] for field in BACKUP_FIELDS],
-                        )
+                        cursor = insert_owned(db, "games", BACKUP_FIELDS, [game[field] for field in BACKUP_FIELDS])
                         saved_ids.append(cursor.fetchone()["id"])
                         imported += 1
                     for item in backup_lists:
-                        db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) ON CONFLICT (name_key) DO NOTHING", (item["name"], item["name"].casefold()))
-                        list_id = db.execute("SELECT id FROM game_lists WHERE name_key = ?", (item["name"].casefold(),)).fetchone()[0]
-                        db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?) ON CONFLICT (list_id, game_id) DO NOTHING",
+                        if db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone() is None:
+                            insert_owned(db, "game_lists", ("name", "name_key"), (item["name"], item["name"].casefold()))
+                        list_id = db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone()[0]
+                        insert_members(db,
                                        [(list_id, saved_ids[index]) for index in item["games"]])
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
@@ -444,9 +443,8 @@ def create():
                 db.rollback()
                 error = DUPLICATE_GAME_ERROR
             else:
-                db.execute(
-                    "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                insert_owned(
+                    db, "games", ("title", "platform", "status", "rating", "review", "igdb_id", "cover_image_id", "started_on", "completed_on", "is_favorite", "is_goty"),
                     (selected_game["name"], platform, status, rating, review, selected_game["id"],
                      cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
                 )
@@ -463,7 +461,7 @@ def edit(game_id):
     db = get_db()
     game = db.execute(
         "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty "
-        "FROM games WHERE id = ?",
+        f"FROM games WHERE id = ? AND {owned()}",
         (game_id,),
     ).fetchone()
 
@@ -519,7 +517,7 @@ def edit(game_id):
         if error is None:
             begin_write(db)
             current_identity = db.execute(
-                "SELECT title, platform FROM games WHERE id = ?", (game_id,),
+                f"SELECT title, platform FROM games WHERE id = ? AND {owned()}", (game_id,),
             ).fetchone()
             if current_identity is None:
                 db.rollback()
@@ -538,7 +536,7 @@ def edit(game_id):
                 db.execute(
                     "UPDATE games SET title = ?, platform = ?, status = ?, "
                     "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
-                    "WHERE id = ?",
+                    f"WHERE id = ? AND {owned()}",
                     (title, platform, status, rating, review,
                      cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
                      started_on, completed_on, is_favorite, is_goty, game_id),
@@ -567,7 +565,7 @@ def catalog_game_details(catalog_id):
 def delete(game_id):
     db = get_db()
     game = db.execute(
-        "SELECT id, title FROM games WHERE id = ?",
+        f"SELECT id, title FROM games WHERE id = ? AND {owned()}",
         (game_id,),
     ).fetchone()
 
@@ -577,7 +575,7 @@ def delete(game_id):
     if request.method == "POST":
         begin_write(db)
         db.execute(
-            "DELETE FROM games WHERE id = ?",
+            f"DELETE FROM games WHERE id = ? AND {owned()}",
             (game_id,),
         )
         db.commit()

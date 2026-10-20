@@ -22,6 +22,8 @@ def test_hosted_entrypoint_never_reads_local_secrets_or_writes_files(monkeypatch
     monkeypatch.setenv("VERCEL", "1")
     monkeypatch.setenv("DATABASE_URL", "postgresql://example.invalid/backlog")
     monkeypatch.setenv("SECRET_KEY", "hosted-test-secret")
+    monkeypatch.setenv("SUPABASE_URL", "https://auth.example.invalid")
+    monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "public-test-key")
     def unexpected_file_access(*args, **kwargs):
         raise AssertionError("Hosted startup must use environment configuration")
     monkeypatch.setattr("flask.config.Config.from_pyfile", unexpected_file_access)

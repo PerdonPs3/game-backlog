@@ -1,0 +1,14 @@
+.account-navigation, .account-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-block: 1rem;
+}
+.account-navigation form { margin: 0; }
+.account-navigation button { padding: .5rem 1rem; }
+.profile-summary { display: flex; align-items: center; gap: 1rem; }
+.profile-avatar { font-size: 3rem; }
+.account-links a, .account-navigation a { text-underline-offset: .2em; }
+.account-form .account-wide, .account-form .account-submit { grid-column: 1 / -1; }
+.account-form .account-submit { justify-self: start; }
