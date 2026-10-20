@@ -118,7 +118,7 @@ def index():
         conditions.append(title_contains_sql())
         parameters.append(search_query)
 
-    query = "SELECT id, title, platform, status, rating, review, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
+    query = "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     # Only fixed, allowlisted SQL can become an ORDER BY clause.
@@ -387,6 +387,18 @@ def create():
     error = None
     selected_game = None
     duplicate_game_id = None
+
+    if request.method == 'GET' and 'igdb_id' in request.args:
+        raw_id = request.args['igdb_id']
+        if not raw_id.isascii() or not raw_id.isdigit() or len(raw_id) > 19 or not 0 < int(raw_id) < 2**63:
+            abort(400)
+        try:
+            catalog_game = get_catalog().get_game(int(raw_id))
+            if catalog_game is None:
+                abort(404)
+            selected_game = game_suggestion(catalog_game)
+        except CatalogError:
+            error = 'The catalog is unavailable. Please try again shortly.'
 
     if request.method == "POST":
         title = request.form.get("title", "").strip()

@@ -4,6 +4,7 @@
 {% block page_heading %}Add a <span>game</span>{% endblock %}
 {% block page_description %}Find your next adventure. Make it part of your collection.{% endblock %}
 {% block panel %}
+        <p class="catalog-message"><a href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a> · Choose a platform and confirm below to add a game.</p>
         {% if error %}
             <p role="alert">{{ error }}</p>
         {% endif %}
@@ -23,7 +24,7 @@
                         type="text"
                         id="title"
                         name="title"
-                        value="{{ request.form.get('title', '') }}"
+                        value="{{ request.form.get('title', selected_game.name if selected_game else '') }}"
                         maxlength="200"
                         autocomplete="off"
                         role="combobox"

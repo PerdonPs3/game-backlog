@@ -165,3 +165,5 @@ html[data-theme="light"] .welcome-backdrop::after {
     .welcome-page, .welcome-primary, .welcome-primary span { transition: none; }
     .welcome-primary:hover, .welcome-primary:hover span, .welcome-primary:focus-visible span { transform: none; }
 }
+
+.welcome-explore { display: block; width: fit-content; margin: 1.25rem auto 0; color: var(--welcome-accent); font-size: .85rem; text-underline-offset: .3em; }
