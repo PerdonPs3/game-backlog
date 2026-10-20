@@ -9,8 +9,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
+    {% block page_styles %}{% endblock %}
 </head>
-<body class="library-page workspace-page">
+<body class="{% block body_class %}library-page workspace-page{% endblock %}">
     {% include '_brand_easter_egg.html' %}
     {% include '_appearance_bar.html' %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">

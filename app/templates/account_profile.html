@@ -3,6 +3,8 @@
 {% set bio = request.form.get('bio', profile.bio) %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
 {% block page_title %}{{ 'Create your profile' if is_setup else 'My profile' }} · Vestigium{% endblock %}
+{% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
 {% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block page_kicker %}{{ 'A new player. A new story.' if is_setup else 'Your player identity' }}{% endblock %}
