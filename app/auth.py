@@ -100,10 +100,12 @@ def start_session(payload, recovery=False):
                (fingerprint(opaque), user["id"], access, refresh, expiry, int(time()) + SESSION_SECONDS, int(recovery)))
     session.clear()
     session["account_session"] = opaque
+    return user
 
 
 def load_user():
     g.user = None
+    g.profile = None
     g.account_session = None
     if not current_app.config.get("AUTH_ENABLED") or request.endpoint == "static":
         return
@@ -131,6 +133,7 @@ def load_user():
         if user["id"] != str(stored["user_id"]):
             raise AuthError()
         g.user = user
+        g.profile = db.execute("SELECT display_name, bio, avatar FROM profiles WHERE id = ?", (user["id"],)).fetchone()
         g.account_session = {"id_hash": key, "access_token": access, "recovery": bool(stored["recovery"])}
         db.commit()
     except AuthError as error:
@@ -154,6 +157,10 @@ def protect_collection():
             return redirect(url_for("auth.login"))
         if g.account_session["recovery"]:
             return redirect(url_for("auth.password"))
+        if not g.profile or not g.profile["display_name"].strip():
+            if request.accept_mimetypes.best == "application/json" or request.path.startswith("/catalog/"):
+                return jsonify(error="Create your profile before opening your library.", profile_url=url_for("auth.profile")), 409
+            return redirect(url_for("auth.profile"))
 
 
 @auth.before_request
@@ -178,8 +185,9 @@ def login():
     status = 200
     if request.method == "POST":
         try:
-            start_session(provider().call("token?grant_type=password", credentials()))
-            return redirect(url_for("main.index"))
+            user = start_session(provider().call("token?grant_type=password", credentials()))
+            saved = get_db().execute("SELECT display_name FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+            return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile"))
         except ValueError as problem:
             error = str(problem)
         except AuthError as problem:
@@ -215,7 +223,11 @@ def register():
     error = message = None
     if request.method == "POST":
         try:
-            provider().call("signup", credentials())
+            payload = provider().call("signup", credentials())
+            if payload.get("access_token") and payload.get("refresh_token"):
+                # Only a provider-verified, confirmed identity may enter setup.
+                start_session(payload)
+                return redirect(url_for("auth.profile"))
             message = "Check your email to confirm your account, then sign in. If you already have an account, use Sign in."
         except ValueError as problem:
             error = str(problem)
@@ -302,7 +314,9 @@ def profile():
     if g.account_session["recovery"]:
         return redirect(url_for("auth.password"))
     db = get_db()
-    error = message = None
+    error = None
+    item = db.execute("SELECT display_name, bio, avatar FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
         avatar = request.form.get("avatar", "controller")
@@ -310,10 +324,10 @@ def profile():
             error = "Choose a name with 1 to 60 characters, a bio up to 500 characters, and an available avatar."
         else:
             db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ? WHERE id = ?", (name, bio, avatar, g.user["id"]))
-            message = "Profile saved. Your profile and library are private."
-    item = db.execute("SELECT display_name, bio, avatar FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+            flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
+            return redirect(url_for("auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
-    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, message=message)
+    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup)
 
 
 @click.command("assign-legacy-collection")

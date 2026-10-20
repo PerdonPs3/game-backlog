@@ -1,20 +1,57 @@
 {% extends '_workspace_base.html' %}
-{% block page_title %}My profile · Vestigium{% endblock %}
-{% block page_kicker %}Your private space{% endblock %}
-{% block page_heading %}My profile{% endblock %}
-{% block page_description %}Make this space yours. Your profile and collection are only visible to you.{% endblock %}
-{% block panel_label %}Profile settings{% endblock %}
+{% from '_profile_avatars.html' import avatar_symbol, avatar_definitions %}
+{% set avatars = {'controller': 'Controller', 'star': 'Star', 'ghost': 'Ghost', 'rocket': 'Rocket'} %}
+{% set selected_avatar = request.form.get('avatar', profile.avatar) %}
+{% if selected_avatar not in avatars %}{% set selected_avatar = profile.avatar %}{% endif %}
+{% set display_name = request.form.get('display_name', profile.display_name) %}
+{% set bio = request.form.get('bio', profile.bio) %}
+{% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
+{% block page_title %}{{ 'Create your profile' if is_setup else 'My profile' }} · Vestigium{% endblock %}
+{% block layout_class %}profile-workspace{% endblock %}
+{% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block page_kicker %}{{ 'A new player. A new story.' if is_setup else 'Your player identity' }}{% endblock %}
+{% block page_heading %}{{ 'Make your' if is_setup else 'Leave your' }} <span>mark.</span>{% endblock %}
+{% block page_description %}{{ 'Choose a name and an avatar to make this space yours. Your library is waiting.' if is_setup else 'A little of who you are. A record of what you play.' }}{% endblock %}
+{% block panel_label %}{{ 'Create your profile' if is_setup else 'Profile settings' }}{% endblock %}
 {% block panel %}
-{% if error %}<p role="alert">{{ error }}</p>{% endif %}
-{% if message %}<p role="status">{{ message }}</p>{% endif %}
-{% set avatars = {'controller': '🎮', 'star': '⭐', 'ghost': '👻', 'rocket': '🚀'} %}
-<div class="profile-summary"><span role="img" aria-label="{{ profile.avatar }}" class="profile-avatar">{{ avatars[profile.avatar] }}</span><h2>{{ profile.display_name or 'Your next adventure starts here' }}</h2></div>
-<p>{{ stats.total }} games · {{ stats.completed }} completed · {{ stats.playing }} playing</p>
-<form method="post" class="workspace-form account-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div><label for="display-name">Display name</label><input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ request.form.get('display_name', profile.display_name) }}"></div>
-    <div><label for="avatar">Avatar</label><select id="avatar" name="avatar">{% for value, symbol in avatars.items() %}<option value="{{ value }}" {% if request.form.get('avatar', profile.avatar) == value %}selected{% endif %}>{{ symbol }} {{ value|capitalize }}</option>{% endfor %}</select></div>
-    <div class="account-wide"><label for="bio">About you</label><textarea id="bio" name="bio" maxlength="500" rows="4">{{ request.form.get('bio', profile.bio) }}</textarea></div>
-    <button class="account-submit" type="submit">Save profile</button>
-</form>
+{{ avatar_definitions() }}
+<div class="profile-editor" data-profile-editor>
+    <aside class="player-card" aria-label="Your player card preview">
+        <div class="player-card-cover"><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Private</span></div>
+        <div class="player-card-content">
+            <div class="player-avatar" data-avatar="{{ selected_avatar }}">{{ avatar_symbol(selected_avatar, 'player-avatar-icon') }}</div>
+            <p class="player-card-kicker">{{ 'Your story starts here' if is_setup else 'Every game leaves a mark' }}</p>
+            <h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>
+            <p class="player-bio" data-profile-bio>{{ bio.strip() or 'Your next adventure is just the beginning.' }}</p>
+            <div class="player-card-rule"></div>
+            <dl class="player-stats">
+                <div><dt>Games</dt><dd>{{ stats.total }}</dd></div>
+                <div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div>
+                <div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div>
+            </dl>
+            <p class="player-card-note">Your profile and library are only visible to you.</p>
+        </div>
+    </aside>
+    <form method="post" class="workspace-form profile-editor-form" data-profile-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <header class="profile-form-heading"><p class="profile-eyebrow">{{ 'WELCOME TO VESTIGIUM' if is_setup else 'MAKE IT PERSONAL' }}</p><h2>{{ 'Create your profile' if is_setup else 'Edit your profile' }}</h2><p>{{ 'A few details before your first adventure.' if is_setup else 'Your player card updates as you make changes.' }}</p></header>
+        {% if error %}<p class="profile-error" role="alert">{{ error }}</p>{% endif %}
+        <div class="profile-field">
+            <label for="display-name">Display name <span>Required</span></label>
+            <input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ display_name }}" aria-describedby="display-name-hint">
+            <p id="display-name-hint" class="profile-field-hint">The name on your player card. You can change it anytime.</p>
+        </div>
+        <fieldset class="profile-avatar-picker"><legend>Choose your avatar</legend><div class="profile-avatar-options">
+            {% for value, label in avatars.items() %}
+            <label class="profile-avatar-option"><input type="radio" name="avatar" value="{{ value }}" {% if selected_avatar == value %}checked{% endif %}><span class="profile-avatar-tile">{{ avatar_symbol(value) }}<span>{{ label }}</span><span class="avatar-selected" aria-hidden="true">✓</span></span></label>
+            {% endfor %}
+        </div></fieldset>
+        <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span>A few words about the player behind the library.</span><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
+        <footer class="profile-save-bar">
+            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">→</span></a>{% endif %}</div>
+            <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Your changes will be saved to your private profile.' }}{% endif %}</p>
+        </footer>
+    </form>
+</div>
 {% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script>{% endblock %}

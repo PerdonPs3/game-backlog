@@ -143,6 +143,14 @@ appear in exported backups.
   provider code; missing, expired, replayed, or mismatched requests fail closed.
 - Profiles have a display name, an optional bio, and a built-in avatar. Profiles
   and libraries are private; public profiles and uploaded avatars are future work.
+- The first confirmed sign-in opens the profile creator. A blank display name
+  identifies unfinished setup; collection routes redirect to the creator until a
+  valid name is saved. Existing named profiles open the library as usual. No
+  schema migration or reset of existing profiles is required for this behavior.
+- The editor previews the player card as fields change. Saving uses a regular
+  CSRF-protected form and redirects after success, with a visible confirmation
+  beside the save button. Reloading does not repeat the write. Without JavaScript,
+  avatar selection, validation, saving, and confirmation continue to work.
 
 ## Verification checklist
 
