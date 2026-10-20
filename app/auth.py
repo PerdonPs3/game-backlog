@@ -16,6 +16,7 @@ from flask.cli import with_appcontext
 
 from app.profile_images import normalize_avatar
 from app.db import get_db, INTEGRITY_ERRORS
+from app.catalog_journey import clear_auth_keep_selection, take_selection, pending_selection
 
 
 auth = Blueprint("auth", __name__, url_prefix="/account")
@@ -100,7 +101,7 @@ def start_session(payload, recovery=False):
     db.execute("DELETE FROM account_sessions WHERE valid_until <= ?", (int(time()),))
     db.execute("INSERT INTO account_sessions (id_hash, user_id, access_token, refresh_token, expires_at, valid_until, recovery) VALUES (?, ?, ?, ?, ?, ?, ?)",
                (fingerprint(opaque), user["id"], access, refresh, expiry, int(time()) + SESSION_SECONDS, int(recovery)))
-    session.clear()
+    clear_auth_keep_selection()
     session["account_session"] = opaque
     return user
 
@@ -189,6 +190,10 @@ def login():
         try:
             user = start_session(provider().call("token?grant_type=password", credentials()))
             saved = get_db().execute("SELECT display_name FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+            if saved['display_name'].strip():
+                selected_id = take_selection()
+                if selected_id:
+                    return redirect(url_for('main.create', igdb_id=selected_id))
             return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile"))
         except ValueError as problem:
             error = str(problem)
@@ -290,7 +295,7 @@ def password():
             try:
                 provider().call("user", {"password": value}, token=g.account_session["access_token"], method="PUT")
                 get_db().execute("DELETE FROM account_sessions WHERE user_id = ?", (g.user["id"],))
-                session.clear()
+                clear_auth_keep_selection()
                 return redirect(url_for("auth.login"))
             except AuthError:
                 error = "Could not update your password. Try again or request a new code."
@@ -364,6 +369,10 @@ def profile():
                 raise
             if not error:
                 flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
+                if is_setup:
+                    selected_id = take_selection()
+                    if selected_id:
+                        return redirect(url_for('main.create', igdb_id=selected_id), code=303)
                 return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
     return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
@@ -476,7 +485,8 @@ def init_app(app):
 
     @app.context_processor
     def account_context():
-        return {"accounts_enabled": app.config.get("AUTH_ENABLED", False), "account_user": getattr(g, "user", None)}
+        return {"accounts_enabled": app.config.get("AUTH_ENABLED", False), "account_user": getattr(g, "user", None),
+                "pending_catalog_selection": pending_selection()}
 
     @app.after_request
     def private_responses(response):

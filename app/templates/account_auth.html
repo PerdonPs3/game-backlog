@@ -6,6 +6,7 @@
 {% block page_description %}Keep your library, lists, and gaming memories in your own private account.{% endblock %}
 {% block panel_label %}Account access{% endblock %}
 {% block panel %}
+{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game is waiting. After signing in and completing your profile, choose a platform and confirm to add it.</p>{% endif %}
 {% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
 {% if error %}<p role="alert">{{ error }}</p>{% endif %}
 {% if message %}<p role="status">{{ message }}</p>{% endif %}

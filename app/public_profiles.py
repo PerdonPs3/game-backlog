@@ -107,8 +107,8 @@ def public_profile(username):
     item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
-    games = db.execute('SELECT g.title, g.platform, g.cover_image_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()
-    showcase = [{'title': row['title'], 'platform': row['platform'], 'position': row['position'], 'cover_url': collection_cover_url(row['cover_image_id'])} for row in games]
+    games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()
+    showcase = [{'title': row['title'], 'platform': row['platform'], 'position': row['position'], 'catalog_id': row['igdb_id'], 'cover_url': collection_cover_url(row['cover_image_id'])} for row in games]
     return render_template('public_profile.html', profile=item, showcase=showcase)
 
 

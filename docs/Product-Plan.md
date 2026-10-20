@@ -45,8 +45,8 @@ refreshing it, or using a new tab must show the same public game information
 without signing in. Library covers should provide access to this page. The
 current library modal may remain as an optional quick view, but must not be the
 only way to inspect a game. Personal notes, ratings, and progress stay private.
-This change is deferred to the public catalog phase; keep the modal unchanged
-while completing the profile milestone.
+This experience is implemented on the public catalog task branch. Private notes
+remain available through My entry; catalog-linked covers open the public page.
 
 Reuse this search and detail experience from the homepage, an Explore entry in
 the app, and Discover. Keep Add game as a convenient shortcut into the same
@@ -93,8 +93,7 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Review username changes with a 30-day cooldown and reserved-link redirects on the
-profile task branch, then validate publication, selective sharing, and revocation
-in Preview after authorized integration and migration. Uploaded photos remain
-private pending reporting and moderation work. Continue real-account Preview validation. The
-shareable game page remains queued for the subsequent public catalog phase.
+Review the public catalog, shareable game pages, and preserved selection through
+authentication on the public catalog task branch. Validate the complete journey
+in Preview after authorized integration. Continue real-account profile validation.
+The scrolling product homepage follows acceptance of the catalog milestone.

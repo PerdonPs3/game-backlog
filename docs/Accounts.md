@@ -57,8 +57,9 @@ make an enabled public URL secret or prevent others from copying its content.
 Public queries project only selected fields. They do not include account IDs,
 emails, sessions, uploaded photos, game entry IDs, reviews, ratings, progress,
 lists, statistics, or unselected library entries. Public showcase cards do not
-link to private game routes. The public catalog detail destination is a later
-roadmap item. Authenticated settings require a normal, completed-profile session
+link to private game routes. When available, they link to a public catalog page
+using the IGDB ID. See [Public catalog](Public-Catalog.md). Authenticated settings
+require a normal, completed-profile session
 and CSRF protection; recovery sessions cannot change publication settings.
 
 Uploaded photos remain private in this increment. The sharing form explains
