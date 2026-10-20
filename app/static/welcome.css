@@ -7,7 +7,10 @@
     --welcome-button: linear-gradient(135deg, #f3d27c, #ddb042);
     --welcome-button-text: #211b0c;
     --welcome-button-shadow: #e3b34128;
-    --welcome-title-highlight: #fff7d9;
+    --welcome-title-color: #f5a623;
+    --welcome-title-gold: #ffc857;
+    --welcome-title-highlight: #ffddb4;
+    --welcome-title-glow: #f5a62340;
     min-height: 100dvh;
     position: relative;
     isolation: isolate;
@@ -20,7 +23,10 @@ html[data-theme="light"] .welcome-page {
     --welcome-muted: #574766;
     --welcome-overlay: #ede5f43d;
     --welcome-centre: #faf8fd;
-    --welcome-title-highlight: #ae7be2;
+    --welcome-title-color: #835500;
+    --welcome-title-gold: #b8891a;
+    --welcome-title-highlight: #835500;
+    --welcome-title-glow: #b8891a20;
     --welcome-button: linear-gradient(135deg, #8250bf, #613297);
     --welcome-button-text: #fff;
     --welcome-button-shadow: #7042b728;
@@ -81,16 +87,17 @@ html[data-theme="light"] .welcome-page {
 .welcome-copy h1 {
     margin: 0;
     padding-left: 0.12em;
-    color: var(--welcome-accent);
+    color: var(--welcome-title-color);
     font-size: clamp(2rem, 8.5vw, 6.4rem);
     font-weight: 800;
     letter-spacing: 0.12em;
     line-height: 1.15;
-    text-shadow: 0 4px 35px #0003;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px var(--welcome-title-glow));
 }
 @supports (background-clip: text) {
     .welcome-copy h1 {
-        background: linear-gradient(110deg, var(--welcome-accent) 35%, var(--welcome-title-highlight) 48%, var(--welcome-accent) 61%);
+        background: linear-gradient(110deg, var(--welcome-title-color) 12%, var(--welcome-title-gold) 35%, var(--welcome-title-highlight) 48%, var(--welcome-title-gold) 61%, var(--welcome-title-color) 88%);
         background-size: 300% 100%;
         background-clip: text;
         color: transparent;
@@ -139,7 +146,6 @@ html[data-theme="light"] .welcome-page {
 .welcome-primary:hover span, .welcome-primary:focus-visible span { transform: translate(3px, -3px); }
 .welcome-credit { position: absolute; bottom: 1rem; left: 1rem; margin: 0; color: var(--welcome-muted); font-size: 0.6rem; }
 .welcome-credit a { color: inherit; text-underline-offset: 3px; }
-html[data-theme="light"] .welcome-copy h1 { text-shadow: 0 4px 35px #7042b715; }
 html[data-theme="light"] .welcome-mosaic { filter: blur(6px) saturate(0.65); }
 html[data-theme="light"] .welcome-backdrop::after {
     background:
