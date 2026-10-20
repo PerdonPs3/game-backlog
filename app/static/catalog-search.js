@@ -45,7 +45,12 @@
 
     async function selectGame(game) {
         if (browsing) {
-            window.location.assign(picker.dataset.browseUrl.replace(/0$/, String(game.id)));
+            clearTimeout(timer);
+            controller?.abort();
+            revision += 1;
+            closeResults();
+            const url = picker.dataset.browseUrl.replace(/0$/, String(game.id));
+            if (!window.VestigiumCatalogNavigation?.go(url)) window.location.assign(url);
             return;
         }
         clearTimeout(timer);

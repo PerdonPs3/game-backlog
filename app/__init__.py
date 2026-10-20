@@ -22,7 +22,7 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.update(test_config)
     else:
-        for name in ("DATABASE_URL", "SECRET_KEY", "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"):
+        for name in ("DATABASE_URL", "SECRET_KEY", "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "PUBLIC_MEMBER_COUNT_EXCLUDED_IDS"):
             if name in os.environ:
                 app.config[name] = os.environ[name]
 
@@ -78,6 +78,9 @@ def create_app(test_config=None):
     init_public_profiles(app)
     from app.public_catalog import init_app as init_public_catalog
     init_public_catalog(app)
+
+    from app.community import init_app as init_community
+    init_community(app)
 
     from app.game_fields import STATUSES
 

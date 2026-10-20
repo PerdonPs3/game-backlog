@@ -74,7 +74,9 @@ Build a normal scrolling page with section links and restrained transitions:
 
 Capture examples from a dedicated demo account with fictional or explicitly
 approved data. Keep screenshots synchronized with the actual product. Maintain
-normal browser scrolling, keyboard access, and reduced-motion preferences.
+normal browser scrolling inside the introduction, keyboard access, and reduced-motion preferences.
+The cover advances to the introduction after downward wheel intent, PageDown, or
+a vertical swipe; only the cover transition is guided.
 
 Treat a user count as a secondary enhancement. Define whether it means confirmed
 accounts or completed profiles, use a real server-side aggregate, exclude test
@@ -93,7 +95,55 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Review the public catalog, shareable game pages, and preserved selection through
-authentication on the public catalog task branch. Validate the complete journey
-in Preview after authorized integration. Continue real-account profile validation.
-The scrolling product homepage follows acceptance of the catalog milestone.
+The scrolling homepage is implemented on `feature/scrolling-homepage` for review.
+It preserves the existing animated cover background and reuses the public catalog
+picker. A shared homepage header separates the top-left appearance controls from
+account actions. Visitors see Sign in and Create account; the final invitation
+says Start your collection, while signed-in members see Open your library.
+A gradient blends the hero into the page, and supported browsers reveal sections
+as they enter view; reduced-motion preferences keep the content static.
+Library and profile sections use illustrated product sequences with public covers
+and fictional example content, followed by three steps and account-aware actions.
+The library example moves a game from Backlog to Playing to Completed; the profile
+example reveals a five-game showcase. Each sequence plays once when it enters view,
+with pause and replay controls. Offscreen and hidden-tab playback stops, while
+reduced-motion preferences and unavailable JavaScript retain a static final example.
+These illustrations do not read or modify account data.
+No production data, database migrations, external counters, or future integrations
+are introduced. Desktop and 390 px mobile layouts, light and dark themes, section navigation,
+and anonymous search have been checked locally. Preview validation follows
+authorized integration into develop and publication.
+
+## Public community count
+
+The homepage person icon reports activated player accounts: profiles created after
+verified-email authentication, counted once per identity, including private or
+unfinished profiles. It does not count pending sign-ups, online visitors, or every
+Supabase Auth row. Deleted application profiles cease contributing; this is not
+an audit of deleted provider accounts. No user records are returned to visitors.
+The server uses COUNT(*) with a 60-second process-local cache; visible pages poll
+once a minute. Changes can take up to two minutes to appear. Zero is displayed
+only after a successful count; unavailable totals hide the badge. Offline mode
+has no population and hides it too.
+
+Optional server variable PUBLIC_MEMBER_COUNT_EXCLUDED_IDS accepts comma-separated
+account UUIDs to omit explicit demo/test identities. Production and development
+populations are separate because their databases are separate. Local preview uses
+an isolated PostgreSQL schema and fake accounts, so its count is demonstration
+data, not the production total. No new database migration or privileged Supabase
+API key is required.
+
+## Navigation motion refinement
+
+The cover uses a one-screen advance into the introduction, followed by free
+scrolling. Scrolling upward near the introduction's top smoothly returns to the
+cover; deeper sections retain native scrolling in both directions. Keyboard and
+vertical touch gestures support the same boundary transition.
+Document-wide CSS snapping is disabled so the browser cannot add a
+second alignment movement near section boundaries. Search fields and suggestion lists keep their own wheel/keyboard
+behavior. Reduced-motion users retain native scrolling without automatic snaps.
+Public game selections use a short exit fade and slide, followed by an entrance
+on the game detail page. Modified clicks and new-tab targets remain native, and
+back/forward navigation resets pending animations. The search focus ring wraps
+the complete input and search button. The light-theme wordmark uses the existing
+purple palette; dark mode retains the amber wordmark.
