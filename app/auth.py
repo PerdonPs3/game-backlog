@@ -348,9 +348,14 @@ def profile():
                            "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
                            (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
                 if is_setup and not identity['username']:
-                    db.execute('UPDATE profiles SET username = ?, is_public = ? WHERE id = ?',
-                               (username, request.form.get('is_public', 'yes') == 'yes', g.user['id']))
+                    from app.public_profiles import claim_username, username_clock
+                    claim_username(db, g.user['id'], username)
+                    db.execute('UPDATE profiles SET username = ?, is_public = ?, username_changed_at = ? WHERE id = ?',
+                               (username, request.form.get('is_public', 'yes') == 'yes', username_clock(db), g.user['id']))
                 db.commit()
+            except ValueError as exc:
+                db.rollback()
+                error = str(exc)
             except INTEGRITY_ERRORS:
                 db.rollback()
                 error = 'That username is already taken. Choose another one.'

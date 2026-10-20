@@ -93,8 +93,8 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Review the implemented stable username and optional public profile URL on the
+Review username changes with a 30-day cooldown and reserved-link redirects on the
 profile task branch, then validate publication, selective sharing, and revocation
-in Preview after authorized integration. Uploaded photos remain private pending
-reporting and moderation work. Continue real-account Preview validation. The
+in Preview after authorized integration and migration. Uploaded photos remain
+private pending reporting and moderation work. Continue real-account Preview validation. The
 shareable game page remains queued for the subsequent public catalog phase.

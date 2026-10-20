@@ -288,8 +288,8 @@ def test_database_tables_remain_denied_to_public_api_roles(accounts):
     with accounts.app_context():
         db = get_db()
         assert db.execute("SELECT COUNT(*) FROM pg_policies WHERE schemaname = current_schema()").fetchone()[0] == 0
-        rows = db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('profiles', 'account_sessions', 'games', 'game_lists', 'game_list_members', 'profile_showcase')").fetchall()
-        assert len(rows) == 6 and all(row[0] for row in rows)
+        rows = db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('profiles', 'account_sessions', 'games', 'game_lists', 'game_list_members', 'profile_showcase', 'profile_usernames')").fetchall()
+        assert len(rows) == 7 and all(row[0] for row in rows)
 
 
 def test_game_create_update_delete_and_list_limits_use_current_owner(accounts):

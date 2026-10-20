@@ -58,7 +58,7 @@ def test_username_validation_uniqueness_and_owner_binding(accounts):
         assert response.status_code == 200 and 'role="alert"' in response.get_data(as_text=True)
     assert submit(alice, PATH, {'username': 'one_player'}).status_code == 303
     assert 'already taken' in submit(bob, PATH, {'username': 'ONE_PLAYER'}).get_data(as_text=True)
-    assert 'permanent' in submit(alice, PATH, {'username': 'another_player'}).get_data(as_text=True)
+    assert 'change your username again on' in submit(alice, PATH, {'username': 'another_player'}).get_data(as_text=True)
     submit(bob, PATH, {'username': 'bob_player', 'is_public': 'yes', 'user_id': ALICE})
     with accounts.app_context():
         db = get_db()

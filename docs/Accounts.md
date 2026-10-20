@@ -9,7 +9,8 @@ Migration `005_public_profiles.sql` adds a unique, nullable username and three
 sharing flags, all disabled at the database level before setup. It does not publish
 existing accounts. The application now selects Public when creating a new profile;
 the user can choose Private before saving. Setup reserves a required username and
-saves the profile and its visibility atomically. No additional migration is needed.
+saves the profile and its visibility atomically. Username history also requires
+`006_username_history.sql`, described below.
 Apply it explicitly to the isolated development database before deploying this
 version, following the environment checks below. Production needs separate
 authorization.
@@ -17,10 +18,31 @@ authorization.
 After completing profile setup, open **My profile → Profile sharing**. Usernames
 accept 3–24 ASCII letters, numbers, or underscores, start with a letter, and exclude
 reserved service names. Both the browser and server accept capitals; the saved
-identity and link are normalized to lowercase. The first save reserves the username
-permanently, including while the page is private, so links cannot be reassigned.
-Display names remain editable. A database unique constraint resolves concurrent
-claims; a row lock serializes settings changes for one account.
+identity and link are normalized to lowercase. Migration `006_username_history.sql`
+adds a shared reservation registry and the last username assignment time. Apply
+it explicitly to development before publishing this version. Existing names are
+backfilled without changing publication settings. Existing accounts may rename
+immediately once because the previous assignment time was not recorded.
+
+New assignments and renames start a 30-day cooldown, measured in exact seconds by
+the database clock after locking the account row. Saving the same normalized
+username, editing other profile fields, or changing visibility never restarts it.
+The form displays the next available date and time in UTC; changing visibility
+and display names remains possible during the cooldown. Rename attempts during
+the cooldown or claims of unavailable names roll back every setting in that save.
+
+The registry reserves current and past usernames in one namespace. Other accounts
+cannot claim old links, including through profile setup. The owner may reuse an
+old name after the cooldown. A composite foreign key binds the current username
+to its registry owner, and a database unique constraint resolves concurrent
+claims. Names remain reserved while the profile is private.
+
+Old `/players/<username>` URLs issue a temporary, non-cacheable redirect directly
+to the latest public username, without chains. Current and old URLs all return
+404 while the profile is private. Renaming never publishes a private profile
+unless the owner also chooses Public in that save. Historical names and timestamps
+are not included in public profile markup. Registry RLS is enabled without
+granting public Data API access.
 
 Public is the default for new profiles. Existing saved privacy choices are preserved.
 Older named profiles without usernames stay unpublished until their first sharing
