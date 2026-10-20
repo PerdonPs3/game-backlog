@@ -97,7 +97,7 @@
         input.removeAttribute("aria-activedescendant");
         if (!games.length) {
             closeResults();
-            message.textContent = "No matching games found. Try a longer title.";
+            message.textContent = browsing ? "No matching games." : "No matching games found. Try a longer title.";
             return;
         }
 
@@ -137,7 +137,7 @@
         });
         results.hidden = false;
         input.setAttribute("aria-expanded", "true");
-        message.textContent = `${games.length} suggestions. Use arrow keys and Enter, or click a game.`;
+        message.textContent = browsing ? `${games.length} matches.` : `${games.length} suggestions. Use arrow keys and Enter, or click a game.`;
     }
 
     input.addEventListener("input", () => {
@@ -149,7 +149,7 @@
         closeResults();
         const term = input.value.trim();
         if (term.length < 2) {
-            message.textContent = "Type at least 2 characters to search IGDB.";
+            message.textContent = browsing ? "Type at least 2 characters." : "Type at least 2 characters to search IGDB.";
             return;
         }
         message.textContent = "Searching the catalog...";
@@ -182,7 +182,7 @@
             if (loadingDetails) resetSelection();
             loadingDetails = false;
             closeResults();
-            message.textContent = "Suggestions closed. Keep typing to search again.";
+            message.textContent = browsing ? "Suggestions closed." : "Suggestions closed. Keep typing to search again.";
             return;
         }
         if (results.hidden) return;
