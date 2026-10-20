@@ -61,6 +61,9 @@ Games from other platforms remain supported through the catalog.
 - [ ] Let users choose which profile information and activity to make public.
 - [x] Implement unique, permanent usernames and optional public profile links
       with separate bio and showcase sharing controls; keep uploaded photos private.
+- [x] Default new profile setup to Public with a Private option, accept uppercase
+      username input while keeping lowercase links, and organize sharing controls
+      into identity, visibility, and shared-content sections.
 - [ ] Validate public profile publication, anonymous viewing, and revocation in
       Preview before release. Add reporting and moderation before public photos
       or profile discovery.

@@ -167,3 +167,10 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 .avatar-crop-error { color: var(--text-muted); font-size: .75rem; }
 .avatar-crop-error:empty { display: none; }
 html[data-theme="light"] .avatar-crop-actions [data-crop-apply] { color: white; }
+
+.profile-setup-visibility { border: 1px solid var(--border); border-radius: 12px; margin: 0; padding: 1rem; min-width: 0; }
+.profile-setup-visibility legend { color: var(--text); padding: 0 .4rem; font-size: .8rem; }
+.workspace-form .profile-setup-visibility label { display: flex; align-items: flex-start; gap: .7rem; padding: .6rem 0; cursor: pointer; }
+.workspace-form .profile-setup-visibility input[type="radio"] { flex: 0 0 18px; width: 18px; height: 18px; margin: .15rem 0 0; padding: 0; accent-color: var(--accent); }
+.profile-setup-visibility label span { font-size: .85rem; color: var(--text); }
+.profile-setup-visibility small { display: block; margin-top: .3rem; color: var(--text-muted); font-size: .7rem; font-weight: 400; line-height: 1.5; }

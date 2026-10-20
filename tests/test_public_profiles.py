@@ -79,7 +79,7 @@ def test_sharing_requires_normal_completed_session_and_public_output_escapes_tex
     assert anon.get(PATH).location.endswith('/account/login')
     alice = sign_in(accounts, 'alice', complete_profile=False)
     assert alice.get(PATH).location.endswith('/account/profile/edit')
-    submit(alice, '/account/profile/edit', {'display_name': '<script>alert(1)</script>', 'bio': '<img src=x onerror=alert(1)>'})
+    submit(alice, '/account/profile/edit', {'display_name': '<script>alert(1)</script>', 'username':'safe_player', 'bio': '<img src=x onerror=alert(1)>'})
     submit(alice, PATH, {'username': 'safe_player', 'is_public': 'yes', 'share_bio': 'yes'})
     page = anon.get('/players/safe_player').get_data(as_text=True)
     assert '<script>alert(1)</script>' not in page and '<img src=x' not in page
@@ -93,3 +93,32 @@ def test_sharing_requires_normal_completed_session_and_public_output_escapes_tex
 def test_public_routes_are_unavailable_in_offline_mode(client):
     assert client.get('/players/offline_player').status_code == 404
     assert client.get(PATH).status_code == 404
+
+
+def test_setup_publishes_by_default_and_accepts_capitals_without_publishing_extra_fields(accounts):
+    alice = sign_in(accounts, 'alice', complete_profile=False)
+    response = submit(alice, '/account/profile/edit', {'display_name':'Alice', 'username':'PerdonPs3', 'bio':'Private until selected'})
+    assert response.status_code == 303
+    anon = accounts.test_client()
+    page = anon.get('/players/perdonps3')
+    assert page.status_code == 200 and '@perdonps3' in page.get_data(as_text=True)
+    assert 'Private until selected' not in page.get_data(as_text=True)
+    # Editing an established profile does not reset a deliberately private choice.
+    submit(alice, PATH, {'username':'PERDONPS3', 'is_public':'no'})
+    submit(alice, '/account/profile/edit', {'display_name':'Renamed Alice', 'is_public':'yes'})
+    assert anon.get('/players/perdonps3').status_code == 404
+    assert 'value="no" checked' in alice.get(PATH).get_data(as_text=True)
+
+
+def test_setup_can_be_private_and_taken_username_rolls_back_all_profile_changes(accounts):
+    alice, bob = sign_in(accounts, 'alice', complete_profile=False), sign_in(accounts, 'bob', complete_profile=False)
+    assert submit(alice, '/account/profile/edit', {'display_name':'Alice','username':'same_name', 'is_public':'no'}).status_code == 303
+    response = submit(bob, '/account/profile/edit', {'display_name':'Bob','username':'Same_Name','bio':'Must roll back'})
+    assert response.status_code == 200 and 'already taken' in response.get_data(as_text=True)
+    with accounts.app_context():
+        row = get_db().execute('SELECT display_name, username, is_public, bio FROM profiles WHERE id = ?', (BOB,)).fetchone()
+        assert row['display_name'] == '' and row['username'] is None and not row['is_public'] and row['bio'] == ''
+    assert bob.get('/library').location.endswith('/account/profile/edit')
+    assert accounts.test_client().get('/players/same_name').status_code == 404
+    assert submit(bob, '/account/profile/edit', {'display_name':'Bob','username':'bob_player','is_public':'no'}).status_code == 303
+    assert accounts.test_client().get('/players/bob_player').status_code == 404

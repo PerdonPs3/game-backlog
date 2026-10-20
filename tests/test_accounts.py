@@ -325,7 +325,7 @@ def test_first_login_requires_profile_before_library_and_saved_profile_unlocks_i
     assert response.status_code == 409 and response.json["profile_url"] == "/account/profile/edit"
     page = client.get("/account/profile/edit")
     assert "Create your profile" in page.get_data(as_text=True)
-    result = submit(client, "/account/profile/edit", {"display_name": "New player", "bio": "", "avatar": "rocket"})
+    result = submit(client, "/account/profile/edit", {"display_name": "New player", "username": "New_Player", "bio": "", "avatar": "rocket"})
     assert result.status_code == 303 and result.location.endswith("#profile-feedback")
     saved = client.get(result.location)
     assert "Your profile is ready" in saved.get_data(as_text=True)

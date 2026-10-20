@@ -6,20 +6,26 @@ single-user mode. Account pages are under `/account`; `/` remains public.
 ## Optional public player identity
 
 Migration `005_public_profiles.sql` adds a unique, nullable username and three
-sharing flags, all disabled by default. It does not publish existing accounts.
+sharing flags, all disabled at the database level before setup. It does not publish
+existing accounts. The application now selects Public when creating a new profile;
+the user can choose Private before saving. Setup reserves a required username and
+saves the profile and its visibility atomically. No additional migration is needed.
 Apply it explicitly to the isolated development database before deploying this
 version, following the environment checks below. Production needs separate
 authorization.
 
 After completing profile setup, open **My profile → Profile sharing**. Usernames
-contain 3–24 lowercase ASCII letters, numbers, or underscores, start with a
-letter, and exclude reserved service names. The first save reserves the username
+accept 3–24 ASCII letters, numbers, or underscores, start with a letter, and exclude
+reserved service names. Both the browser and server accept capitals; the saved
+identity and link are normalized to lowercase. The first save reserves the username
 permanently, including while the page is private, so links cannot be reassigned.
 Display names remain editable. A database unique constraint resolves concurrent
 claims; a row lock serializes settings changes for one account.
 
-Publication is opt-in. `/players/<username>` works without signing in only when
-the owner enables **Make my profile public**. The owner chooses separately whether
+Public is the default for new profiles. Existing saved privacy choices are preserved.
+Older named profiles without usernames stay unpublished until their first sharing
+save, where Public is initially selected. `/players/<username>` works without
+signing in only when the profile is Public. The owner chooses separately whether
 to share the bio and ordered showcase. Display name, username, and silhouette
 color form the minimum public identity. Subsequent changes to shared fields also
 update the public page. Unpublishing returns the same 404 as an unknown username,
@@ -176,12 +182,14 @@ appear in exported backups.
   completing recovery deletes all application sessions for that account. Recovery
   links require the originating browser, the expected email, and a valid one-use
   provider code; missing, expired, replayed, or mismatched requests fail closed.
-- Profiles have a display name, an optional bio, and a built-in avatar. Profiles
-  and libraries are private; public profiles and uploaded avatars are future work.
+- Profiles have a display name, an optional bio, and a private uploaded avatar or
+  built-in silhouette. Public profiles expose only the projection described above;
+  libraries and uploaded photos remain private.
 - The first confirmed sign-in opens the profile creator. A blank display name
   identifies unfinished setup; collection routes redirect to the creator until a
-  valid name is saved. Existing named profiles open the library as usual. No
-  schema migration or reset of existing profiles is required for this behavior.
+  valid name and unique username are saved. Public is selected initially, with a
+  Private option available before creation. Existing named profiles open the
+  library as usual and retain their current visibility.
 - The editor previews the player card as fields change. Saving uses a regular
   CSRF-protected form and redirects after success, with a visible confirmation
   beside the save button. Reloading does not repeat the write. Without JavaScript,
@@ -240,7 +248,7 @@ it. These controls submit with the profile form, even when the disclosure is
 closed. Nothing is persisted until the profile is saved.
 
 These checks validate files, not visual content. Automatic detection of abusive,
-sexual, or copyrighted imagery is not implemented. Profiles remain private;
+sexual, or copyrighted imagery is not implemented. Uploaded photos remain private;
 before introducing public avatars, define a content policy and add appropriate
 moderation and reporting tools.
 
@@ -265,7 +273,8 @@ publishing this version to Preview. It stores ordered slots with a five-position
 limit and a composite game/owner foreign key. Replacement happens in a transaction
 with an account row lock. Invalid selections preserve the previous showcase.
 RLS remains enabled without public Data API policies. All reads and writes use
-the verified account; there is no public profile endpoint in this increment.
+the verified account for this private overview. The separate public profile
+endpoint exposes only the selected projection described above.
 
 Recent completions use recorded completion dates, not guessed activity times.
 The Playing section shows up to three entries; collection statistics still cover
