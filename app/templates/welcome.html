@@ -10,10 +10,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
 </head>
 <body class="library-page welcome-page">
     {% include '_brand_easter_egg.html' %}
     {% include '_appearance_bar.html' %}
+    {% include '_account_nav.html' %}
     <div class="welcome-backdrop" aria-hidden="true">
         <div class="welcome-mosaic">
             {% for column in range(8) %}

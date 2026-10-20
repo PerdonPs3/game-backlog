@@ -37,6 +37,8 @@ these server-side variables for **Preview**:
 | --- | --- |
 | `DATABASE_URL` | The tested PostgreSQL transaction-pooler URI with `sslmode=require` |
 | `SECRET_KEY` | A stable Flask session secret generated independently of Supabase keys |
+| `SUPABASE_URL` | The development Supabase project's HTTPS URL |
+| `SUPABASE_PUBLISHABLE_KEY` | That same project's publishable API key |
 | `IGDB_CLIENT_ID` | The Twitch application's client ID |
 | `IGDB_CLIENT_SECRET` | The Twitch application's client secret |
 
@@ -60,8 +62,8 @@ Do not give application secrets a `NEXT_PUBLIC_` prefix.
    other framework overrides if the project previously used them. Do not set an
    output directory override intended for a frontend-only project.
 2. Keep `main` as the production branch and use `develop` for integration and
-   Preview testing. Keep Preview deployment protection enabled while the
-   application has no account system.
+   Preview testing. Keep Preview deployment protection enabled while testing
+   account registration and collection isolation.
 3. Task branches remain local. Merge into `develop` only after explicit user
    approval, then push `develop` only when publication is authorized. The current
    deployment changes must reach the selected source before a Git-triggered
@@ -77,6 +79,11 @@ Do not give application secrets a `NEXT_PUBLIC_` prefix.
 The development Supabase database must already pass the `migrate-db` and
 `check-db` workflow in the [PostgreSQL guide](PostgreSQL.md). A Preview build must
 not create or change tables automatically.
+
+Follow [the account setup guide](Accounts.md), including the recovery email
+template and two-account isolation checks. Preview and Production must reference
+different Supabase projects. Hosted startup fails if account configuration is
+missing, instead of exposing the previous shared collection.
 
 Check the deployed library, lists, forms, and backup export. Confirm the page is
 styled and `/static/style.css`, `/static/theme.js`, and other referenced assets

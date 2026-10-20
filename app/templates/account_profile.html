@@ -1,0 +1,20 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}My profile · Vestigium{% endblock %}
+{% block page_kicker %}Your private space{% endblock %}
+{% block page_heading %}My profile{% endblock %}
+{% block page_description %}Make this space yours. Your profile and collection are only visible to you.{% endblock %}
+{% block panel_label %}Profile settings{% endblock %}
+{% block panel %}
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+{% if message %}<p role="status">{{ message }}</p>{% endif %}
+{% set avatars = {'controller': '🎮', 'star': '⭐', 'ghost': '👻', 'rocket': '🚀'} %}
+<div class="profile-summary"><span role="img" aria-label="{{ profile.avatar }}" class="profile-avatar">{{ avatars[profile.avatar] }}</span><h2>{{ profile.display_name or 'Your next adventure starts here' }}</h2></div>
+<p>{{ stats.total }} games · {{ stats.completed }} completed · {{ stats.playing }} playing</p>
+<form method="post" class="workspace-form account-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div><label for="display-name">Display name</label><input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ request.form.get('display_name', profile.display_name) }}"></div>
+    <div><label for="avatar">Avatar</label><select id="avatar" name="avatar">{% for value, symbol in avatars.items() %}<option value="{{ value }}" {% if request.form.get('avatar', profile.avatar) == value %}selected{% endif %}>{{ symbol }} {{ value|capitalize }}</option>{% endfor %}</select></div>
+    <div class="account-wide"><label for="bio">About you</label><textarea id="bio" name="bio" maxlength="500" rows="4">{{ request.form.get('bio', profile.bio) }}</textarea></div>
+    <button class="account-submit" type="submit">Save profile</button>
+</form>
+{% endblock %}

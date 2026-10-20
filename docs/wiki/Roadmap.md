@@ -42,9 +42,11 @@ Games from other platforms remain supported through the catalog.
 
 ### 4. Build a personal player profile
 
-- [ ] Add an avatar, a short bio, and a shelf of favorite games.
+- [x] Add a private profile with a display name, a short bio, and a built-in avatar.
+- [ ] Add a profile shelf of favorite games and uploaded avatars.
 - [x] Show collection statistics: totals, status counts, completion progress, and average rating.
-- [ ] Introduce accounts and separate collections before supporting multiple users.
+- [x] Implement accounts and separate collections with automated two-account isolation tests.
+- [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
 - [ ] Let users choose which profile information and activity to make public.
 
 ### 5. Add progression and customization
@@ -70,22 +72,25 @@ completions and externally verified achievements will need clear distinctions.
 
 ### 7. Deploy with Vercel and Supabase
 
-- [ ] Deploy the web application on Vercel.
-- [ ] Use Supabase PostgreSQL as the hosted database, migrating the current
+- [x] Deploy the web application on Vercel.
+- [x] Use Supabase PostgreSQL as the hosted database, migrating the current
       SQLite schema and data while preserving existing collections.
-- [ ] Adapt and validate the Flask application for Vercel's runtime and
+- [x] Adapt and validate the Flask application for Vercel's runtime and
       Supabase database connections, including persistent data across requests.
-- [ ] Configure deployment credentials securely and verify the hosted workflow
+- [x] Configure deployment credentials securely and verify the hosted workflow
       before publishing to production, with explicit user approval.
 
 ### 8. Prepare for a safe public release
 
+Account implementation and local tests are complete in the feature branch. Real
+Preview acceptance and production rollout remain pending; see [account setup](../Accounts.md).
+
 Public access requires accounts, data ownership, and reliable storage. These
 requirements take priority over optional integrations and progression.
 
-- [ ] Add registration, sign-in, sign-out, secure password storage, and account recovery.
-- [ ] Associate games, lists, backups, and statistics with their owning account.
-- [ ] Enforce ownership on the server: users must never edit or delete another
+- [x] Implement registration, sign-in, sign-out, and recovery through Supabase Auth; passwords are managed by the provider.
+- [x] Associate games, lists, backups, and statistics with their owning account.
+- [x] Enforce ownership on the server: users must never edit or delete another
       user's data, even by changing a URL or submitting a crafted request.
 - [ ] Add public/private profiles and allow viewing only information the owner
       explicitly shares. Viewing a profile must never grant editing access.

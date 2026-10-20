@@ -8,11 +8,13 @@
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
 </head>
 <body class="library-page workspace-page">
     {% include '_brand_easter_egg.html' %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
         {% include '_appearance_bar.html' %}
+        {% include '_account_nav.html' %}
         <nav class="workspace-nav" aria-label="Collection navigation">
             <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
             <a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>

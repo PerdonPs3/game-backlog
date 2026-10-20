@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from flask import Flask
 from secrets import token_hex
+from urllib.parse import urlsplit
 from flask_wtf.csrf import CSRFProtect
 
 def create_app(test_config=None):
@@ -21,7 +22,7 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.update(test_config)
     else:
-        for name in ("DATABASE_URL", "SECRET_KEY", "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET"):
+        for name in ("DATABASE_URL", "SECRET_KEY", "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"):
             if name in os.environ:
                 app.config[name] = os.environ[name]
 
@@ -46,6 +47,16 @@ def create_app(test_config=None):
             SESSION_COOKIE_HTTPONLY=True,
             SESSION_COOKIE_SAMESITE="Lax",
         )
+    app.config.setdefault("AUTH_ENABLED", bool(database_url) and not app.testing)
+    if app.config["AUTH_ENABLED"]:
+        auth_url = urlsplit(app.config.get("SUPABASE_URL", ""))
+        if not database_url or auth_url.scheme != "https" or not auth_url.hostname or auth_url.username or auth_url.password or auth_url.query or auth_url.fragment or auth_url.path not in ("", "/"):
+            raise ValueError("Accounts require PostgreSQL and an HTTPS SUPABASE_URL without credentials or a path.")
+        if not app.config.get("SUPABASE_PUBLISHABLE_KEY"):
+            raise ValueError("Set SUPABASE_PUBLISHABLE_KEY to enable accounts.")
+    if hosted and not app.config["AUTH_ENABLED"]:
+        raise ValueError("Accounts cannot be disabled on Vercel.")
+    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
     CSRFProtect(app)
 
     from app import db
@@ -61,6 +72,8 @@ def create_app(test_config=None):
 
     from app.routes import main
     app.register_blueprint(main)
+    from app.auth import init_app as init_auth
+    init_auth(app)
 
     from app.game_fields import STATUSES
 
