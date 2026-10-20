@@ -38,7 +38,7 @@
                 <h1 id="welcome-title">VESTIGIUM</h1>
                 <p class="welcome-tagline">Every game leaves a mark.</p>
                 {% with compact_search=true %}{% include '_public_catalog_search.html' %}{% endwith %}
-                <a class="welcome-primary" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open library' if account_user else 'Create account' if accounts_enabled else 'Explore games' }} <span aria-hidden="true">↗</span></a>
+                {% if account_user %}<a class="welcome-primary" href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">↗</span></a>{% endif %}
                 {% if accounts_enabled %}<span class="welcome-community" data-member-count-url="{{ url_for('community.count') }}" title="Confirmed accounts that have signed in to Vestigium. Updated every minute." aria-label="{{ member_count if member_count is not none else '' }} activated player {{ 'account' if member_count == 1 else 'accounts' }}"{% if member_count is not defined or member_count is none %} hidden{% endif %}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5 22v-3a7 7 0 0 1 14 0v3"/></svg><span data-member-count-value>{{ member_count if member_count is defined and member_count is not none else '' }}</span></span>{% endif %}
             </div>
             <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
