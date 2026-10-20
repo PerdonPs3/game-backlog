@@ -120,10 +120,10 @@ html[data-theme="light"] .welcome-page {
     to { transform: translate3d(1%, 1.5%, 0) rotate(-9deg) scale(1.09); }
 }
 .welcome-tagline {
-    margin: 1.25rem 0 1.5rem;
+    margin: .85rem 0 0;
     color: var(--welcome-muted);
-    font-size: clamp(0.85rem, 1.5vw, 1.1rem);
-    letter-spacing: 0.06em;
+    font-size: clamp(.8rem, 1.2vw, .95rem);
+    letter-spacing: .035em;
 }
 .welcome-primary {
     display: inline-flex;
@@ -185,7 +185,8 @@ html[data-theme="light"] .welcome-backdrop::after {
 .welcome-skip:focus { top: 4rem; }
 .welcome-page :is(a, button, input):focus-visible { outline: 2px solid var(--welcome-accent); outline-offset: 4px; }
 .welcome-copy { width: 100%; }
-.welcome-copy .catalog-public-search { display: block; max-width: 460px; margin: 2rem auto 0; padding: 0; border: 0; background: transparent; text-align: left; }
+.welcome-copy > .welcome-primary { margin-top: 1.25rem; }
+.welcome-copy .catalog-public-search { display: block; max-width: 420px; margin: 2.25rem auto 0; padding: 0; border: 0; background: transparent; text-align: left; }
 .welcome-copy .catalog-public-search > label, .welcome-search-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .welcome-copy .catalog-public-search > div { display: flex; flex-direction: row; align-items: center; gap: 0; padding: 5px; border: 1px solid #efcc7938; border-radius: 12px; background: #101923e8; box-shadow: 0 8px 28px #0002; }
 .welcome-copy .catalog-public-search input { height: 38px; padding: .5rem .75rem; border: 0; border-radius: 8px; background: transparent; font-size: .85rem; }
