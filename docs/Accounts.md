@@ -173,3 +173,25 @@ python -m pytest --postgres-url YOUR_DISPOSABLE_LOCAL_DATABASE_URL -q
 References: [password authentication](https://supabase.com/docs/guides/auth/passwords),
 [email templates](https://supabase.com/docs/guides/auth/auth-email-templates),
 [Auth HTTP API](https://github.com/supabase/auth/blob/master/openapi.yaml).
+
+
+## Private profile photos
+
+Migration `003_profile_photos.sql` adds a color and an optional photo to each
+profile. Apply it to the isolated development database with `flask migrate-db`
+before publishing this version to Preview. Production migration requires a
+separate authorized release.
+
+Users can upload a still JPG, PNG, or WebP up to 2 MB and 12 million pixels.
+Pillow validates the decoded format, rejects animation, normalizes orientation,
+crops to 256 by 256 pixels, and re-encodes a metadata-free JPEG. Original uploads
+are never stored or served. The small normalized photo is stored in PostgreSQL
+(maximum 100 KB), so Vercel needs no writable disk or public storage bucket.
+The authenticated `/account/profile/photo` endpoint serves only the current
+account's photo, with private no-store caching and content sniffing disabled.
+Removing a photo restores a silhouette with the selected background color.
+
+These checks validate files, not visual content. Automatic detection of abusive,
+sexual, or copyrighted imagery is not implemented. Profiles remain private;
+before introducing public avatars, define a content policy and add appropriate
+moderation and reporting tools.

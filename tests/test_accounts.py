@@ -344,7 +344,7 @@ def test_invalid_setup_preserves_fields_and_does_not_unlock_collection(accounts)
     body = response.get_data(as_text=True)
     assert response.status_code == 200 and "Choose a name" in body
     assert "A story in progress" in body
-    assert 'value="ghost" checked' in body
+    assert 'name="avatar_color" value="#64748b"' in body
     assert client.get("/library").location.endswith("/account/profile")
 
 
@@ -387,3 +387,41 @@ def test_profile_save_feedback_is_specific_to_current_account_and_not_query_para
     assert 'data-saved="true"' in alice.get(response.location).get_data(as_text=True)
     assert 'data-saved="true"' not in bob.get("/account/profile?saved=1").get_data(as_text=True)
     assert 'data-saved="true"' not in alice.get("/account/profile?saved=1").get_data(as_text=True)
+
+
+def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
+    from PIL import Image
+    alice, bob = sign_in(accounts, "alice"), sign_in(accounts, "bob")
+    image = BytesIO()
+    Image.new("RGB", (400, 200), "blue").save(image, format="PNG")
+    image.seek(0)
+    result = submit(alice, "/account/profile", {"display_name": "Alice", "avatar_color": "#aa44bb", "photo": (image, "photo.png")})
+    assert result.status_code == 303
+    photo = alice.get("/account/profile/photo")
+    assert photo.status_code == 200 and photo.mimetype == "image/jpeg"
+    assert photo.headers["Cache-Control"] == "private, no-store"
+    assert photo.headers["X-Content-Type-Options"] == "nosniff"
+    assert Image.open(BytesIO(photo.data)).size == (256, 256)
+    assert bob.get("/account/profile/photo").status_code == 404
+    assert accounts.test_client().get("/account/profile/photo").status_code == 401
+    assert alice.get("/account/profile/photo?user_id=" + BOB).data == photo.data
+    invalid = submit(alice, "/account/profile", {"display_name": "Changed", "photo": (BytesIO(b"<svg/>"), "bad.png")})
+    assert "Choose a valid" in invalid.get_data(as_text=True)
+    assert alice.get("/account/profile/photo").data == photo.data
+    with accounts.app_context():
+        row = get_db().execute("SELECT display_name, avatar_color FROM profiles WHERE id = ?", (ALICE,)).fetchone()
+        assert row["display_name"] == "Alice" and row["avatar_color"] == "#aa44bb"
+    result = submit(alice, "/account/profile", {"display_name": "Alice", "remove_photo": "yes", "avatar_color": "#228844"})
+    assert result.status_code == 303
+    assert alice.get("/account/profile/photo").status_code == 404
+    assert 'name="avatar_color" value="#228844"' in alice.get("/account/profile").get_data(as_text=True)
+
+
+def test_photo_requests_keep_csrf_size_and_color_validation(accounts):
+    client = sign_in(accounts, "alice")
+    assert client.post("/account/profile", data={"display_name": "Alice"}).status_code == 400
+    invalid = submit(client, "/account/profile", {"display_name": "Alice", "avatar_color": "red; background:url(evil)"})
+    assert "Choose a valid profile color" in invalid.get_data(as_text=True)
+    oversized = submit(client, "/account/profile", {"display_name": "Alice", "photo": (BytesIO(b"x" * (4 * 1024 * 1024)), "huge.jpg")})
+    assert oversized.status_code == 303
+    assert "Your previous profile has been kept" in client.get(oversized.location).get_data(as_text=True)

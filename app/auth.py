@@ -3,6 +3,7 @@
 from hashlib import sha256
 from base64 import urlsafe_b64encode
 import json
+import re
 from secrets import token_urlsafe
 from time import time
 from urllib.error import HTTPError, URLError
@@ -10,9 +11,10 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import UUID
 
 import click
-from flask import Blueprint, abort, current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
+from flask import Response, Blueprint, abort, current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
 from flask.cli import with_appcontext
 
+from app.profile_images import normalize_avatar
 from app.db import get_db
 
 
@@ -133,7 +135,7 @@ def load_user():
         if user["id"] != str(stored["user_id"]):
             raise AuthError()
         g.user = user
-        g.profile = db.execute("SELECT display_name, bio, avatar FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+        g.profile = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo FROM profiles WHERE id = ?", (user["id"],)).fetchone()
         g.account_session = {"id_hash": key, "access_token": access, "recovery": bool(stored["recovery"])}
         db.commit()
     except AuthError as error:
@@ -315,19 +317,48 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
         avatar = request.form.get("avatar", "controller")
+        color = request.form.get("avatar_color", item["avatar_color"])
+        photo = None
+        upload = request.files.get("photo")
+        remove_photo = request.form.get("remove_photo") == "yes"
         if not 1 <= len(name) <= 60 or len(bio) > 500 or avatar not in ("controller", "star", "ghost", "rocket") or any(ord(char) < 32 for char in name):
             error = "Choose a name with 1 to 60 characters, a bio up to 500 characters, and an available avatar."
+        elif not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+            error = "Choose a valid profile color."
         else:
-            db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ? WHERE id = ?", (name, bio, avatar, g.user["id"]))
+            try:
+                if upload and upload.filename and not remove_photo:
+                    photo = normalize_avatar(upload)
+            except ValueError as exc:
+                error = str(exc)
+        if not error:
+            db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, "
+                       "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
+                       (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
             flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
             return redirect(url_for("auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
-    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup)
+    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
+                           avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
+
+
+@auth.get("/profile/photo")
+def profile_photo():
+    if not g.user:
+        abort(401)
+    if g.account_session["recovery"]:
+        abort(403)
+    image = get_db().execute("SELECT avatar_image FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    if not image or not image["avatar_image"]:
+        abort(404)
+    response = Response(bytes(image["avatar_image"]), mimetype="image/jpeg")
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @click.command("assign-legacy-collection")
@@ -366,6 +397,13 @@ def init_app(app):
     app.before_request(load_user)
     app.before_request(protect_collection)
     app.cli.add_command(assign_legacy)
+
+    @app.errorhandler(413)
+    def upload_too_large(error):
+        if request.endpoint == "auth.profile":
+            flash("Choose a photo smaller than 2 MB. Your previous profile has been kept.", "profile_error")
+            return redirect(url_for("auth.profile"), code=303)
+        return error
 
     @app.context_processor
     def account_context():

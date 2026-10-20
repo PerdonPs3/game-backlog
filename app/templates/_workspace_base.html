@@ -13,12 +13,16 @@
 <body class="library-page workspace-page">
     {% include '_brand_easter_egg.html' %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
-        {% include '_appearance_bar.html' %}
-        {% include '_account_nav.html' %}
-        <nav class="workspace-nav" aria-label="Collection navigation">
-            <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
-            {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
-        </nav>
+        <div class="workspace-topbar">
+            <nav class="workspace-nav" aria-label="Collection navigation">
+                <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
+                {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
+            </nav>
+            <div class="workspace-header-actions">
+                {% include '_account_nav.html' %}
+                {% include '_appearance_bar.html' %}
+            </div>
+        </div>
         <header class="workspace-hero">
             <div>
                 <p class="hero-kicker">{% block page_kicker %}Your personal gaming library{% endblock %}</p>
@@ -35,7 +39,7 @@
             </section>
             {% block aside %}{% endblock %}
         </div>
-        <footer class="workspace-footer">Every game leaves a mark. · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></footer>
+        <footer class="workspace-footer"><span>Every game leaves a mark.</span><a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></footer>
     </main>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     {% block page_scripts %}{% endblock %}
