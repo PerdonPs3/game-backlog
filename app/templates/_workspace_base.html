@@ -12,6 +12,7 @@
 </head>
 <body class="library-page workspace-page">
     {% include '_brand_easter_egg.html' %}
+    {% include '_appearance_bar.html' %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
         <div class="workspace-topbar">
             <nav class="workspace-nav" aria-label="Collection navigation">
@@ -20,7 +21,6 @@
             </nav>
             <div class="workspace-header-actions">
                 {% include '_account_nav.html' %}
-                {% include '_appearance_bar.html' %}
             </div>
         </div>
         <header class="workspace-hero">

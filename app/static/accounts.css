@@ -91,11 +91,10 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 }
 
 /* Keep workspace navigation and footer in the same content grid. */
-.workspace-page main.workspace-layout { margin-top: 1.5rem; }
+.workspace-page main.workspace-layout { margin-top: 4.5rem; }
 .workspace-topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
 .workspace-topbar .workspace-nav { margin: 0; gap: 1.5rem; flex: 1; }
 .workspace-header-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.workspace-header-actions .appearance-bar { position: static; z-index: auto; }
 .workspace-header-actions .account-navigation { margin: 0; gap: .8rem; }
 .workspace-header-actions .account-navigation a { color: var(--text-muted); font-size: .8rem; text-decoration: none; }
 .workspace-header-actions .account-navigation button { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: .75rem; border-radius: 9px; }
