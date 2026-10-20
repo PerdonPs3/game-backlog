@@ -20,9 +20,10 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert 'action="/explore"' in html and 'data-catalog-url="/explore/suggestions"' in html
     assert 'href="#your-library"' in html and 'id="how-it-works"' in html
     assert 'class="welcome-header"' in html
-    for image in ('home-library.png', 'home-profile.png'):
-        assert image in html
-        assert client.get('/static/images/' + image).status_code == 200
+    assert 'Illustrative demo' in html
+    assert 'Track your progress' in html and 'Build your showcase' in html
+    assert 'home-library.png' not in html and 'home-profile.png' not in html
+    assert 'Finished it? Leave your own rating and notes.' in html
     assert "id=\"game-collection\"" not in html
     assert "Sign up" not in html
     assert "theme.js" in html and "light-theme.css" in html

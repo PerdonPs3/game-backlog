@@ -1,3 +1,4 @@
+{% from '_welcome_demos.html' import product_demo %}
 <!DOCTYPE html>
 <html lang="en" class="welcome-document">
 <head>
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='public-catalog.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='product-demos.css') }}">
 </head>
 <body class="library-page welcome-page">
     {% include '_brand_easter_egg.html' %}
@@ -46,11 +48,11 @@
         <div class="welcome-story">
             <section class="welcome-section" id="your-library" aria-labelledby="library-intro-title">
                 <div class="welcome-section-copy"><p class="welcome-eyebrow">01 / YOUR COLLECTION</p><h2 id="library-intro-title">A place for every adventure.</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
-                <figure class="welcome-product"><img src="{{ url_for('static', filename='images/home-library.png') }}" alt="Example Vestigium library with game covers, playing statuses, and collection filters." width="1265" height="713" loading="lazy"><figcaption>Inside Vestigium · Sample library</figcaption></figure>
+                {{ product_demo('library') }}
             </section>
             <section class="welcome-section welcome-section-profile" aria-labelledby="profile-intro-title">
                 <div class="welcome-section-copy"><p class="welcome-eyebrow">02 / YOUR PLAYER IDENTITY</p><h2 id="profile-intro-title">Make your profile yours.</h2><p>Choose your favorites, build your showcase, and decide what to share. Your library and personal notes stay private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
-                <figure class="welcome-product"><img src="{{ url_for('static', filename='images/home-profile.png') }}" alt="Example player profile with a five-game showcase and gaming progress." width="1265" height="713" loading="lazy"><figcaption>Inside Vestigium · Demo player profile</figcaption></figure>
+                {{ product_demo('profile') }}
             </section>
             <section class="welcome-steps-section" id="how-it-works" aria-labelledby="steps-title">
                 <p class="welcome-eyebrow">YOUR NEXT CHAPTER</p><h2 id="steps-title">Find it. Play it. Remember it.</h2>
@@ -66,5 +68,6 @@
     <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='welcome-scroll.js') }}" defer></script>
     <script src="{{ url_for('static', filename='community-count.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='product-demos.js') }}" defer></script>
 </body>
 </html>

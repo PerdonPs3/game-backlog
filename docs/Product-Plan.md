@@ -102,8 +102,13 @@ account actions. Visitors see Sign in and Create account; the final invitation
 says Start your collection, while signed-in members see Open your library.
 A gradient blends the hero into the page, and supported browsers reveal sections
 as they enter view; reduced-motion preferences keep the content static.
-Library and profile sections use real application screenshots
-with fictional local demo data, followed by three steps and account-aware actions.
+Library and profile sections use illustrated product sequences with public covers
+and fictional example content, followed by three steps and account-aware actions.
+The library example moves a game from Backlog to Playing to Completed; the profile
+example reveals a five-game showcase. Each sequence plays once when it enters view,
+with pause and replay controls. Offscreen and hidden-tab playback stops, while
+reduced-motion preferences and unavailable JavaScript retain a static final example.
+These illustrations do not read or modify account data.
 No production data, database migrations, external counters, or future integrations
 are introduced. Desktop and 390 px mobile layouts, light and dark themes, section navigation,
 and anonymous search have been checked locally. Preview validation follows
