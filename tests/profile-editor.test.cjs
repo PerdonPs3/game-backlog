@@ -7,6 +7,10 @@ function setup(saved = false) {
     const events = {}, windowEvents = {}, documentEvents = {}, avatarEvents = {}, attributes = {}, iconAttributes = {};
     const avatarTrigger = { focus() { this.focused = true; } };
     const avatarEditor = { open: false, querySelector() { return avatarTrigger; }, contains(target) { return target === avatarTrigger; }, addEventListener(key, cb) { avatarEvents[key] = cb; } };
+    const crop = { open(file) { crop.file = file; }, accept() { crop.apply(crop.file, { x: 0, y: 0, size: 200 }, 'data:image/jpeg;base64,preview'); } };
+    const swatchEvents = {};
+    const swatch = { dataset: { avatarColor: '#7c3aed' }, addEventListener(key, cb) { swatchEvents[key] = cb; }, setAttribute(key, value) { this[key] = value; } };
+    const cropDialog = { contains() { return false; } };
     const photoEvents = {}, removeEvents = {}, imageEvents = {}, revoked = [];
     const color = { value: '#64748b' };
     const photo = { files: [], setCustomValidity(value) { this.validation = value; }, addEventListener(key, cb) { photoEvents[key] = cb; } };
@@ -24,13 +28,13 @@ function setup(saved = false) {
         '[name="avatar_color"]': color, '[name="photo"]': photo, '[name="remove_photo"]': removePhoto, '[data-remove-photo]': removeButton, '[data-photo-feedback]': photoFeedback, '[data-profile-feedback]': feedback, '[data-save-profile]': save, '[data-bio-counter]': counter };
     const form = { querySelector: (key) => fields[key], addEventListener(key, callback) { events[key] = callback; },
         setAttribute(key, value) { attributes[key] = value; }, removeAttribute(key) { delete attributes[key]; } };
-    const nodes = { '[data-profile-form]': form, '[data-profile-name]': previewName, '[data-profile-bio]': previewBio, '.player-avatar': avatar, '[data-avatar-photo]': photoPreview, '[data-avatar-placeholder]': placeholder, '[data-avatar-editor]': avatarEditor, ...fields };
-    const editor = { querySelector: (key) => nodes[key], addEventListener(key, cb) { events[key] = cb; } };
+    const nodes = { '[data-profile-form]': form, '[data-profile-name]': previewName, '[data-profile-bio]': previewBio, '.player-avatar': avatar, '[data-avatar-photo]': photoPreview, '[data-avatar-placeholder]': placeholder, '[data-avatar-editor]': avatarEditor, '[data-avatar-crop]': cropDialog, ...fields };
+    const editor = { querySelector: (key) => nodes[key], querySelectorAll: () => [swatch], addEventListener(key, cb) { events[key] = cb; } };
     runInNewContext(readFileSync('app/static/profile-editor.js', 'utf8'), {
         URL: { createObjectURL() { return 'blob:preview'; }, revokeObjectURL(value) { revoked.push(value); } },
-        document: { querySelector: () => editor, addEventListener(key, cb) { documentEvents[key] = cb; } }, window: { addEventListener(key, callback) { windowEvents[key] = callback; } },
+        document: { querySelector: () => editor, addEventListener(key, cb) { documentEvents[key] = cb; } }, window: { AvatarCrop: { create(editor, apply, error) { crop.apply = apply; crop.error = error; return crop; } }, addEventListener(key, callback) { windowEvents[key] = callback; } },
     });
-    return { removeButton, documentEvents, avatarEvents, avatarEditor, avatarTrigger, photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
+    return { crop, swatch, swatchEvents, removeButton, documentEvents, avatarEvents, avatarEditor, avatarTrigger, photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
 }
 
 test('updates the player card as text, avatar, and biography change without claiming a save', () => {
@@ -76,13 +80,15 @@ test('focuses only server-confirmed save feedback and handles empty preview fiel
 });
 
 
-test('previews a bounded raster upload and revokes its URL when removed', () => {
+test('applies the chosen crop and restores the silhouette when removed', () => {
     const ui = setup();
     ui.photo.files = [{ type: 'image/png', size: 1000 }];
     ui.photoEvents.change();
-    assert.equal(ui.photoPreview.src, 'blob:preview');
+    assert.equal(ui.photoPreview.hidden, true);
+    ui.crop.accept();
+    assert.equal(ui.photoPreview.src, 'data:image/jpeg;base64,preview');
     assert.equal(ui.placeholder.hidden, true);
-    assert.match(ui.photoFeedback.textContent, /Preview only/);
+    assert.match(ui.photoFeedback.textContent, /Photo ready/);
     assert.equal(ui.removeButton.hidden, false);
     ui.photo.files = [];
     ui.removeEvents.click();
@@ -91,19 +97,21 @@ test('previews a bounded raster upload and revokes its URL when removed', () => 
     assert.equal(ui.removeButton.hidden, true);
     assert.equal(ui.photoPreview.hidden, true);
     assert.equal(ui.placeholder.hidden, false);
-    assert.deepEqual(ui.revoked, ['blob:preview']);
+
 });
 
-test('rejects oversized and unsupported files before creating a preview', () => {
-    for (const file of [{ type: 'image/svg+xml', size: 100 }, { type: 'image/jpeg', size: 3 * 1024 * 1024 }]) {
-        const ui = setup();
-        ui.photo.files = [file];
-        ui.photoEvents.change();
-        assert.match(ui.photo.validation, /smaller than 2 MB/);
-        assert.equal(ui.photoPreview.hidden, true);
-    }
+test('a cancelled or invalid candidate leaves the previously applied crop intact', () => {
+    const ui = setup();
+    ui.photo.files = [{ type: 'image/png', size: 1000 }];
+    ui.photoEvents.change();
+    ui.crop.accept();
+    ui.photo.files = [{ type: 'image/png', size: 2000 }];
+    ui.photoEvents.change();
+    ui.crop.error('Could not open this photo.');
+    assert.equal(ui.photoPreview.src, 'data:image/jpeg;base64,preview');
+    assert.equal(ui.avatarEditor.open, true);
+    assert.equal(ui.photoFeedback.textContent, 'Could not open this photo.');
 });
-
 
 test('Escape closes avatar options and restores keyboard focus to the picture', () => {
     const ui = setup();
@@ -137,8 +145,33 @@ test('remove action is absent without a photo and a replacement cancels pending 
     ui.removeEvents.click();
     ui.photo.files = [{ type: 'image/png', size: 1000 }];
     ui.photoEvents.change();
+    ui.crop.accept();
     assert.equal(ui.removePhoto.value, '');
     assert.equal(ui.removePhoto.disabled, true);
     assert.equal(ui.removeButton.hidden, false);
     assert.equal(ui.photoPreview.hidden, false);
+});
+
+
+test('submits only the confirmed photo and crop, not an unconfirmed candidate', () => {
+    const ui = setup();
+    const data = new Map([['photo', 'unconfirmed']]);
+    const event = { formData: { set(key, value) { data.set(key, value); }, delete(key) { data.delete(key); } } };
+    ui.events.formdata(event);
+    assert.equal(data.has('photo'), false);
+    const file = { type: 'image/png', name: 'chosen.png', size: 1000 };
+    ui.photo.files = [file];
+    ui.photoEvents.change();
+    ui.crop.accept();
+    ui.events.formdata(event);
+    assert.equal(data.get('photo'), file);
+    assert.deepEqual(JSON.parse(data.get('photo_crop')), { x: 0, y: 0, size: 200 });
+});
+
+test('preset swatches update the silhouette color and selected state', () => {
+    const ui = setup();
+    ui.swatchEvents.click();
+    assert.equal(ui.color.value, '#7c3aed');
+    assert.equal(ui.swatch['aria-pressed'], 'true');
+    assert.equal(ui.iconAttributes['--avatar-color'], '#7c3aed');
 });

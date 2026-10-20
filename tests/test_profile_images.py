@@ -45,3 +45,24 @@ def test_animated_photo_is_rejected():
 def test_excessive_pixel_count_is_rejected_before_decoding():
     with pytest.raises(ValueError, match="12 million"):
         normalize_avatar(image_file(size=(4000, 3001)))
+
+
+@pytest.mark.parametrize("crop", ['{}', '{"x":-1,"y":0,"size":100}', '{"x":0,"y":0,"size":0}', '{"x":300,"y":0,"size":200}', '{"x":0,"y":0,"size":NaN}', '{"x":true,"y":0,"size":100}', '[' * 600])
+def test_invalid_crop_cannot_escape_photo_bounds(crop):
+    with pytest.raises(ValueError, match="crop inside"):
+        normalize_avatar(image_file(), crop)
+
+
+def test_selected_crop_and_exif_orientation_are_applied_before_resizing():
+    image = Image.new("RGB", (400, 200), "red")
+    image.paste(Image.new("RGB", (200, 200), "blue"), (200, 0))
+    exif = Image.Exif()
+    exif[274] = 6
+    data = BytesIO()
+    image.save(data, format="JPEG", exif=exif)
+    data.seek(0)
+    output = normalize_avatar(FileStorage(stream=data, filename="rotated.jpg"), '{"x":0,"y":200,"size":200}')
+    with Image.open(BytesIO(output)) as result:
+        r, g, b = result.getpixel((128, 128))
+        assert b > 230 and r < 20 and g < 20
+        assert result.size == (256, 256) and not result.getexif()
