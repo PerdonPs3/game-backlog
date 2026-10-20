@@ -96,7 +96,11 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 The scrolling homepage is implemented on `feature/scrolling-homepage` for review.
 It preserves the existing animated cover background and reuses the public catalog
 picker. A shared homepage header separates the top-left appearance controls from
-account actions. Library and profile sections use real application screenshots
+account actions. Visitors see Sign in and Create account; the final invitation
+says Start your collection, while signed-in members see Open your library.
+A gradient blends the hero into the page, and supported browsers reveal sections
+as they enter view; reduced-motion preferences keep the content static.
+Library and profile sections use real application screenshots
 with fictional local demo data, followed by three steps and account-aware actions.
 No production data, database migrations, external counters, or future integrations
 are introduced. Desktop and 390 px mobile layouts, light and dark themes, section navigation,

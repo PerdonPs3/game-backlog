@@ -7,6 +7,7 @@
     --welcome-button: linear-gradient(135deg, #f3d27c, #ddb042);
     --welcome-button-text: #211b0c;
     --welcome-button-shadow: #e3b34128;
+    --welcome-story-surface: #101116;
     --welcome-title-color: #f5a623;
     --welcome-title-gold: #ffc857;
     --welcome-title-highlight: #ffddb4;
@@ -23,6 +24,7 @@ html[data-theme="light"] .welcome-page {
     --welcome-muted: #574766;
     --welcome-overlay: #ede5f43d;
     --welcome-centre: #faf8fd;
+    --welcome-story-surface: #faf8fd;
     --welcome-title-color: #835500;
     --welcome-title-gold: #b8891a;
     --welcome-title-highlight: #835500;
@@ -73,7 +75,7 @@ html[data-theme="light"] .welcome-page {
     width: 100%; max-width: none; margin: 0; padding: 0;
     display: block; border: 0; border-radius: 0; background: transparent;
 }
-.welcome-hero { position: relative; min-height: 100dvh; padding: 8rem 1.5rem 6rem; display: grid; place-items: center; }
+.welcome-hero { isolation: isolate; position: relative; min-height: 100dvh; padding: 8rem 1.5rem 6rem; display: grid; place-items: center; }
 
 .welcome-copy {
     text-align: center;
@@ -174,6 +176,8 @@ html[data-theme="light"] .welcome-backdrop::after {
 .welcome-header .appearance-bar { position: static; justify-self: start; }
 .welcome-header .account-navigation { margin: 0; justify-self: end; justify-content: flex-end; gap: 1rem; font-size: .8rem; }
 .welcome-header a { color: var(--welcome-accent); }
+.welcome-header .account-navigation > a { padding: .5rem .65rem; border: 1px solid #efcc7938; border-radius: 8px; text-decoration: none; line-height: 1.3; }
+.welcome-header .account-navigation > a:last-child { background: var(--welcome-button); color: var(--welcome-button-text); border-color: transparent; }
 .welcome-header .account-navigation button { margin: 0; font-size: .8rem; }
 .welcome-navigation { display: flex; gap: 1.5rem; align-items: center; justify-content: center; margin: 0; font-size: .8rem; }
 .welcome-navigation a { text-decoration: none; padding: .5rem 0; }
@@ -191,7 +195,18 @@ html[data-theme="light"] .welcome-backdrop::after {
 .welcome-copy .catalog-public-search .catalog-option:hover, .welcome-copy .catalog-public-search .catalog-option[aria-selected="true"] { background: #283545; }
 .welcome-scroll { position: absolute; bottom: 1.75rem; left: 50%; transform: translateX(-50%); display: grid; justify-items: center; gap: .6rem; color: var(--welcome-muted); text-decoration: none; font-size: .75rem; white-space: nowrap; }
 .welcome-scroll span { color: var(--welcome-accent); font-size: 1.3rem; }
-.welcome-story { background: #101116eb; border-top: 1px solid #efcc7926; }
+.welcome-hero::after { content: ""; position: absolute; inset: auto 0 -1px; height: clamp(100px, 22vh, 240px); background: linear-gradient(to bottom, transparent, var(--welcome-story-surface)); z-index: -1; pointer-events: none; }
+.welcome-story { position: relative; background: var(--welcome-story-surface); }
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        .welcome-section-copy, .welcome-product, .welcome-steps-section, .welcome-join {
+            animation: welcome-reveal linear both;
+            animation-timeline: view();
+            animation-range: entry 0% entry 32%;
+        }
+    }
+}
+@keyframes welcome-reveal { from { opacity: .25; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
 .welcome-section { max-width: 1240px; margin: 0 auto; padding: 7rem 2rem; scroll-margin-top: 2rem; }
 .welcome-section-copy { max-width: 650px; margin-bottom: 2.5rem; }
 .welcome-eyebrow { color: var(--welcome-accent); font-size: .65rem; letter-spacing: .14em; font-weight: 700; }
@@ -217,7 +232,7 @@ html[data-theme="light"] .welcome-backdrop::after {
 html[data-theme="light"] .welcome-copy .catalog-public-search > div { background: #faf8fdf2; border-color: #7042b738; }
 html[data-theme="light"] .welcome-copy .catalog-public-search input { background: transparent; }
 html[data-theme="light"] .welcome-copy .catalog-public-search { background: transparent; }
-html[data-theme="light"] .welcome-story { background: #faf8fdf5; }
+html[data-theme="light"] .welcome-story { background: var(--welcome-story-surface); }
 html[data-theme="light"] .welcome-product, html[data-theme="light"] .welcome-footer { background: #f3eef9; }
 html[data-theme="light"] .welcome-copy .catalog-option { background: var(--surface); }
 html[data-theme="light"] .welcome-copy .catalog-option:hover, html[data-theme="light"] .welcome-copy .catalog-option[aria-selected="true"] { background: #eee5f8; }

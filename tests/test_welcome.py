@@ -1,5 +1,7 @@
 import pytest
 
+from tests.test_accounts import accounts, sign_in
+
 
 def test_welcome_is_private_by_default_and_does_not_access_collection(client, monkeypatch):
     def forbidden():
@@ -10,7 +12,7 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert page.status_code == 200
     html = page.get_data(as_text=True)
     assert "VESTIGIUM" in html and "Every game" in html
-    assert 'href="/library"' in html
+    assert 'href="/explore"' in html
     assert 'href="https://github.com/PerdonPs3"' in html
     assert html.count('class="welcome-primary"') == 1
     assert 'class="welcome-backdrop" aria-hidden="true"' in html
@@ -53,3 +55,14 @@ def test_workspace_has_vestigium_brand_and_home_link(client, path):
     assert "Vestigium" in html
     assert 'href="/library"' in html
     assert "View on GitHub" in html
+
+
+def test_homepage_actions_distinguish_visitors_from_signed_in_members(accounts):
+    guest = accounts.test_client().get('/').get_data(as_text=True)
+    assert 'href="/account/login"' in guest and 'href="/account/register"' in guest
+    assert 'Start your collection' in guest
+    assert 'Back to your library' not in guest and 'Open your library' not in guest
+    member = sign_in(accounts, 'alice').get('/').get_data(as_text=True)
+    assert 'My profile' in member and 'Sign out' in member
+    assert 'Open your library' in member
+    assert 'alice@example.test' not in member

@@ -38,7 +38,7 @@
                 <h1 id="welcome-title">VESTIGIUM</h1>
                 <p class="welcome-tagline">Every game leaves a mark.</p>
                 {% with compact_search=true %}{% include '_public_catalog_search.html' %}{% endwith %}
-                <a class="welcome-primary" href="{{ url_for('main.index') if account_user or not accounts_enabled else url_for('auth.register') }}">{{ 'Open library' if account_user or not accounts_enabled else 'Create account' }} <span aria-hidden="true">↗</span></a>
+                <a class="welcome-primary" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open library' if account_user else 'Create account' if accounts_enabled else 'Explore games' }} <span aria-hidden="true">↗</span></a>
             </div>
             <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
         </section>
@@ -55,7 +55,7 @@
                 <p class="welcome-eyebrow">YOUR NEXT CHAPTER</p><h2 id="steps-title">Find it. Play it. Remember it.</h2>
                 <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3><p>Explore the catalog. No account needed.</p></li><li><span>02</span><h3>Make it part of your library</h3><p>Choose your platform and add it to your collection.</p></li><li><span>03</span><h3>Keep your story</h3><p>Track your progress, leave a rating, and save your memories.</p></li></ol>
             </section>
-            <section class="welcome-join" aria-labelledby="join-title"><p class="welcome-eyebrow">EVERY GAME LEAVES A MARK</p><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user or not accounts_enabled else url_for('auth.register') }}">{{ 'Back to your library' if account_user or not accounts_enabled else 'Create your account' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
+            <section class="welcome-join" aria-labelledby="join-title"><p class="welcome-eyebrow">EVERY GAME LEAVES A MARK</p><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
         </div>
     </main>
     <footer class="welcome-footer"><span>Vestigium · Every game leaves a mark.</span><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span></footer>
