@@ -1,7 +1,8 @@
 # Product direction: profile, public catalog, homepage, and Discover
 
-This is a proposed implementation order, not a release schedule. The current
-implementation is limited to a dark profile palette pilot. Each phase should be
+This is a proposed implementation order, not a release schedule. The dark profile
+palette is approved in Preview. A private profile overview and five-game showcase
+are implemented on the profile task branch for review. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
 ## 0. Validate the profile palette
@@ -84,7 +85,7 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Review the profile palette pilot first. Then implement the private profile
-overview and favorite-game showcase. Complete and validate each step on the
-existing profile task branch before requesting integration into develop. Public
+Validate the private profile overview and five-game showcase in Preview. Complete
+and validate each step on the existing profile task branch before requesting
+integration into develop. Public
 catalog work can begin after the profile milestone is accepted.

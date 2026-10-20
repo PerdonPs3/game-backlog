@@ -309,7 +309,7 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
-@auth.route("/profile", methods=["GET", "POST"])
+@auth.route("/profile/edit", methods=["GET", "POST"])
 def profile():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -341,10 +341,56 @@ def profile():
                        "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
                        (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
             flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
-            return redirect(url_for("auth.profile", _anchor="profile-feedback"), code=303)
+            return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
     return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
+
+
+@auth.route("/profile", methods=["GET", "POST"])
+def profile_overview():
+    if not g.user:
+        return redirect(url_for("auth.login"))
+    if g.account_session["recovery"]:
+        return redirect(url_for("auth.password"))
+    # Keep forms opened before the editor moved compatible with this deployment.
+    if request.method == "POST":
+        return profile()
+    if not g.profile or not g.profile["display_name"].strip():
+        return redirect(url_for("auth.profile"))
+    from app.profile_showcase import game_cards, showcase_games
+    from app.routes import collection_statistics
+    db = get_db()
+    user_id = g.user["id"]
+    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at FROM profiles WHERE id = ?", (user_id,)).fetchone()
+    playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed))
+
+
+@auth.route("/profile/showcase", methods=["GET", "POST"])
+def edit_showcase():
+    if not g.user:
+        return redirect(url_for("auth.login"))
+    if g.account_session["recovery"]:
+        return redirect(url_for("auth.password"))
+    if not g.profile or not g.profile["display_name"].strip():
+        return redirect(url_for("auth.profile"))
+    from app.profile_showcase import game_cards, save_showcase, showcase_games
+    db = get_db()
+    user_id = g.user["id"]
+    error = None
+    selected = [str(game["id"]) for game in showcase_games(db, user_id)]
+    if request.method == "POST":
+        selected = request.form.getlist("games")
+        try:
+            save_showcase(db, user_id, selected)
+            flash("Showcase saved. Your featured games are up to date.", "profile_saved")
+            return redirect(url_for("auth.profile_overview", _anchor="profile-feedback"), code=303)
+        except ValueError as exc:
+            error = str(exc)
+    games = db.execute("SELECT id, title, platform, status, cover_image_id FROM games WHERE owner_id = ? ORDER BY is_favorite DESC, LOWER(title), platform, id", (user_id,)).fetchall()
+    return render_template("profile_showcase.html", games=game_cards(games), selected=(selected + [""] * 5)[:5], error=error)
 
 
 @auth.get("/profile/photo")

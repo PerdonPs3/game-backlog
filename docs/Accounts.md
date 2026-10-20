@@ -208,3 +208,30 @@ These checks validate files, not visual content. Automatic detection of abusive,
 sexual, or copyrighted imagery is not implemented. Profiles remain private;
 before introducing public avatars, define a content policy and add appropriate
 moderation and reporting tools.
+
+
+## Profile overview and game showcase
+
+`/account/profile` displays the signed-in player's identity, progress, selected
+showcase, currently playing entries, and dated completions. `/account/profile/edit`
+contains the name, bio, avatar, and crop editor. New accounts must finish this
+editor before browsing their library; successful setup opens the profile overview.
+Existing sign-ins still open the library. Previously opened forms posting to
+`/account/profile` remain compatible during deployment.
+
+`/account/profile/showcase` lets the owner select up to five distinct library
+entries and order them with position fields or move buttons. The selection is
+independent of the library's Favorite marker and never changes it implicitly.
+Empty positions are skipped; saving five empty positions clears the showcase.
+Deleting a library entry automatically removes it from the showcase.
+
+Apply `004_profile_showcase.sql` to the isolated development database before
+publishing this version to Preview. It stores ordered slots with a five-position
+limit and a composite game/owner foreign key. Replacement happens in a transaction
+with an account row lock. Invalid selections preserve the previous showcase.
+RLS remains enabled without public Data API policies. All reads and writes use
+the verified account; there is no public profile endpoint in this increment.
+
+Recent completions use recorded completion dates, not guessed activity times.
+The Playing section shows up to three entries; collection statistics still cover
+all the owner's entries. Empty profiles include guidance for adding a first game.

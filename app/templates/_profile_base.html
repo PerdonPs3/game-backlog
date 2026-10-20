@@ -1,0 +1,7 @@
+{% extends '_workspace_base.html' %}
+{% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
+{% block layout_class %}profile-workspace profile-overview{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='profile-overview.css') }}">
+{% endblock %}
