@@ -6,7 +6,7 @@
 {% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
-{% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ url_for('auth.profile_overview') }}">← Back to profile</a>{% endif %}{% endblock %}
 {% block page_kicker %}{{ 'A new player. A new story.' if is_setup else 'Your player identity' }}{% endblock %}
 {% block page_heading %}{{ 'Make your' if is_setup else 'Leave your' }} <span>mark.</span>{% endblock %}
 {% block page_description %}{{ 'Choose a name and a photo to make this space yours. Your library is waiting.' if is_setup else 'A little of who you are. A record of what you play.' }}{% endblock %}
@@ -56,7 +56,7 @@
             <p class="player-card-note">Your profile and library are only visible to you.</p>
         </div>
     </aside>
-    <form id="profile-form" method="post" enctype="multipart/form-data" class="workspace-form profile-editor-form" data-profile-form>
+    <form id="profile-form" action="{{ url_for('auth.profile') }}" method="post" enctype="multipart/form-data" class="workspace-form profile-editor-form" data-profile-form>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <header class="profile-form-heading"><p class="profile-eyebrow">{{ 'WELCOME TO VESTIGIUM' if is_setup else 'MAKE IT PERSONAL' }}</p><h2>{{ 'Create your profile' if is_setup else 'Edit your profile' }}</h2><p>{{ 'A few details before your first adventure.' if is_setup else 'Your player card updates as you make changes.' }}</p></header>
         {% set upload_errors = get_flashed_messages(category_filter=['profile_error']) %}
@@ -69,7 +69,7 @@
         </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span>A few words about the player behind the library.</span><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
         <footer class="profile-save-bar">
-            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">→</span></a>{% endif %}</div>
+            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('auth.profile_overview') }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Your changes will be saved to your private profile.' }}{% endif %}</p>
         </footer>
     </form>

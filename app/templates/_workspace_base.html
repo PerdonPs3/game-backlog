@@ -24,6 +24,7 @@
                 {% include '_account_nav.html' %}
             </div>
         </div>
+        {% block workspace_hero %}
         <header class="workspace-hero">
             <div>
                 <p class="hero-kicker">{% block page_kicker %}Your personal gaming library{% endblock %}</p>
@@ -34,6 +35,7 @@
                 <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false"><use href="#brand-symbol" /></svg>
             </div>
         </header>
+        {% endblock %}
         <div class="workspace-body">
             <section class="workspace-panel" aria-label="{% block panel_label %}Game details{% endblock %}">
                 {% block panel %}{% endblock %}

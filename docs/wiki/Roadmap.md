@@ -48,8 +48,9 @@ Games from other platforms remain supported through the catalog.
 
 - [x] Add a private profile with a display name, a short bio, and a built-in avatar.
 - [x] Upload profile photos with an adjustable circular crop and preset avatar colors.
-- [ ] Validate the Obsidian palette pilot on the dark profile before wider adoption.
-- [ ] Separate a profile overview from the editor and add an ordered favorite-game showcase.
+- [x] Validate the Obsidian palette pilot on the dark profile before wider adoption.
+- [x] Separate a private profile overview from the editor and add an ordered five-game showcase.
+- [ ] Validate the overview, showcase ordering, and empty states in Preview before release.
 - [x] Show collection statistics: totals, status counts, completion progress, and average rating.
 - [x] Implement accounts and separate collections with automated two-account isolation tests.
 - [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
