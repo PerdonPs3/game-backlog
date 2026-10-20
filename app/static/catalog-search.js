@@ -4,7 +4,8 @@
     const picker = document.querySelector("[data-catalog-url]");
     if (!picker) return;
 
-    const input = picker.querySelector("#title");
+    const browsing = Boolean(picker.dataset.browseUrl);
+    const input = picker.querySelector(browsing ? "#catalog-query" : "#title");
     const results = picker.querySelector("#catalog-results");
     const message = picker.querySelector("#catalog-message");
     const platform = document.querySelector("#platform");
@@ -27,11 +28,13 @@
         platformMessage.textContent = "Only platforms listed for the selected game can be used.";
     }
 
-    platform.addEventListener("change", () => {
+    if (!browsing) {
+        platform.addEventListener("change", () => {
+            submit.disabled = !gameId.value || !platform.value;
+        });
         submit.disabled = !gameId.value || !platform.value;
-    });
-    submit.disabled = !gameId.value || !platform.value;
-    if (!gameId.value) input.setCustomValidity("Choose a game from the catalog suggestions.");
+        if (!gameId.value) input.setCustomValidity("Choose a game from the catalog suggestions.");
+    }
 
     function closeResults() {
         results.hidden = true;
@@ -41,6 +44,10 @@
     }
 
     async function selectGame(game) {
+        if (browsing) {
+            window.location.assign(picker.dataset.browseUrl.replace(/0$/, String(game.id)));
+            return;
+        }
         clearTimeout(timer);
         controller?.abort();
         const currentRevision = ++revision;
@@ -138,7 +145,7 @@
         controller?.abort();
         const currentRevision = ++revision;
         loadingDetails = false;
-        resetSelection();
+        if (!browsing) resetSelection();
         closeResults();
         const term = input.value.trim();
         if (term.length < 2) {

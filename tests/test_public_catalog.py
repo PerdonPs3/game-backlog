@@ -169,3 +169,28 @@ def test_public_showcase_links_use_catalog_identity_not_private_entry_id(account
     submit(alice,'/account/profile/sharing',{'username':'alice_player','is_public':'yes','share_showcase':'yes'})
     page=accounts.test_client().get('/players/alice_player').get_data(as_text=True)
     assert 'href="/explore/games/123"' in page and f'href="/games/{game_id}"' not in page and ALICE not in page
+
+
+def test_public_suggestions_are_bounded_and_share_the_provider_budget(app):
+    catalog = fake_catalog(app)
+    client = app.test_client()
+    for query in ('', 'g', 'x' * 201):
+        response = client.get('/explore/suggestions', query_string={'q': query})
+        assert response.status_code == (400 if len(query) > 200 else 200)
+    catalog.search_games.assert_not_called()
+    catalog.search_games.return_value = [{**GAME, 'id': number} for number in range(1, 15)]
+    app.config['PUBLIC_CATALOG_REQUEST_LIMIT'] = 2
+    response = client.get('/explore/suggestions?q=god')
+    assert response.status_code == 200
+    assert len(response.json['games']) == 10
+    assert 'summary' not in response.json['games'][0]
+    assert response.json['games'][0]['name'] == 'Portal 2'
+    assert response.headers['Cache-Control'] == 'private, no-store'
+    catalog.search_games.side_effect = CatalogError('private provider credentials')
+    failed = client.get('/explore/suggestions?q=gods')
+    assert failed.status_code == 503
+    assert 'private provider' not in failed.get_data(as_text=True)
+    limited = client.get('/explore/suggestions?q=god')
+    assert limited.status_code == 429 and limited.headers['Retry-After'] == '60'
+    assert catalog.search_games.call_count == 2
+    assert 'data-browse-url="/explore/games/0"' in client.get('/explore').get_data(as_text=True)

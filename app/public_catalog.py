@@ -4,7 +4,7 @@ from collections import deque
 from threading import Lock
 from time import monotonic
 
-from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request
+from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
 from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id
 from app.catalog_journey import remember_selection, take_selection
@@ -59,6 +59,23 @@ def index():
             except CatalogError:
                 error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
     return render_template('explore.html', query=term[:200], games=games, error=error), status
+
+
+@explore.get('/suggestions')
+def suggestions():
+    term = request.args.get('q', '').strip()
+    if len(term) > 200:
+        return jsonify(error='Search must contain no more than 200 characters.'), 400
+    if len(term) < 2:
+        return jsonify(games=[])
+    if not public_request_allowed():
+        return jsonify(error='The catalog is busy. Please wait a minute and try again.'), 429
+    try:
+        games = [catalog_card(game) for game in get_catalog().search_games(term)[:10]
+                 if type(game.get('id')) is int and 0 < game['id'] < 2**63]
+    except CatalogError:
+        return jsonify(error='The catalog is temporarily unavailable. Please try again shortly.'), 503
+    return jsonify(games=games)
 
 
 @explore.get('/games/<int:catalog_id>')
