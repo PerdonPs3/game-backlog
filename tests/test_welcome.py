@@ -15,7 +15,12 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert html.count('class="welcome-primary"') == 1
     assert 'class="welcome-backdrop" aria-hidden="true"' in html
     assert "t_cover_big/co4jni.jpg" in html
-    assert "welcome-features" not in html
+    assert 'action="/explore"' in html and 'data-catalog-url="/explore/suggestions"' in html
+    assert 'href="#your-library"' in html and 'id="how-it-works"' in html
+    assert 'class="welcome-header"' in html
+    for image in ('home-library.png', 'home-profile.png'):
+        assert image in html
+        assert client.get('/static/images/' + image).status_code == 200
     assert "id=\"game-collection\"" not in html
     assert "Sign up" not in html
     assert "theme.js" in html and "light-theme.css" in html

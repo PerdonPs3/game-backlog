@@ -9,13 +9,18 @@
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='public-catalog.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
 </head>
 <body class="library-page welcome-page">
     {% include '_brand_easter_egg.html' %}
-    {% include '_appearance_bar.html' %}
-    {% include '_account_nav.html' %}
+    <a class="welcome-skip" href="#welcome-title">Skip to content</a>
+    <header class="welcome-header">
+        {% include '_appearance_bar.html' %}
+        <nav class="welcome-navigation" aria-label="Homepage navigation"><a href="{{ url_for('explore.index') }}">Explore</a><a href="#how-it-works">How it works</a></nav>
+        {% include '_account_nav.html' %}
+    </header>
     <div class="welcome-backdrop" aria-hidden="true">
         <div class="welcome-mosaic">
             {% for column in range(8) %}
@@ -28,14 +33,33 @@
         </div>
     </div>
     <main class="welcome-layout">
-        <section class="welcome-copy" aria-labelledby="welcome-title">
-            <h1 id="welcome-title">VESTIGIUM</h1>
-            <p class="welcome-tagline">Every game leaves a mark.</p>
-            <a class="welcome-primary" href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">↗</span></a>
-            <a class="welcome-explore" href="{{ url_for('explore.index') }}">Explore games · No account needed ↗</a>
+        <section class="welcome-hero" aria-labelledby="welcome-title">
+            <div class="welcome-copy">
+                <h1 id="welcome-title">VESTIGIUM</h1>
+                <p class="welcome-tagline">Every game leaves a mark.</p>
+                {% include '_public_catalog_search.html' %}
+                <a class="welcome-primary" href="{{ url_for('main.index') if account_user or not accounts_enabled else url_for('auth.register') }}">{{ 'Open library' if account_user or not accounts_enabled else 'Create account' }} <span aria-hidden="true">↗</span></a>
+            </div>
+            <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
         </section>
+        <div class="welcome-story">
+            <section class="welcome-section" id="your-library" aria-labelledby="library-intro-title">
+                <div class="welcome-section-copy"><p class="welcome-eyebrow">01 / YOUR COLLECTION</p><h2 id="library-intro-title">A place for every adventure.</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
+                <figure class="welcome-product"><img src="{{ url_for('static', filename='images/home-library.png') }}" alt="Example Vestigium library with game covers, playing statuses, and collection filters." width="1265" height="713" loading="lazy"><figcaption>Inside Vestigium · Sample library</figcaption></figure>
+            </section>
+            <section class="welcome-section welcome-section-profile" aria-labelledby="profile-intro-title">
+                <div class="welcome-section-copy"><p class="welcome-eyebrow">02 / YOUR PLAYER IDENTITY</p><h2 id="profile-intro-title">Make your profile yours.</h2><p>Choose your favorites, build your showcase, and decide what to share. Your library and personal notes stay private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
+                <figure class="welcome-product"><img src="{{ url_for('static', filename='images/home-profile.png') }}" alt="Example player profile with a five-game showcase and gaming progress." width="1265" height="713" loading="lazy"><figcaption>Inside Vestigium · Demo player profile</figcaption></figure>
+            </section>
+            <section class="welcome-steps-section" id="how-it-works" aria-labelledby="steps-title">
+                <p class="welcome-eyebrow">YOUR NEXT CHAPTER</p><h2 id="steps-title">Find it. Play it. Remember it.</h2>
+                <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3><p>Explore the catalog. No account needed.</p></li><li><span>02</span><h3>Make it part of your library</h3><p>Choose your platform and add it to your collection.</p></li><li><span>03</span><h3>Keep your story</h3><p>Track your progress, leave a rating, and save your memories.</p></li></ol>
+            </section>
+            <section class="welcome-join" aria-labelledby="join-title"><p class="welcome-eyebrow">EVERY GAME LEAVES A MARK</p><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user or not accounts_enabled else url_for('auth.register') }}">{{ 'Back to your library' if account_user or not accounts_enabled else 'Create your account' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
+        </div>
     </main>
-    <p class="welcome-credit">Covers by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a></p>
+    <footer class="welcome-footer"><span>Vestigium · Every game leaves a mark.</span><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span></footer>
+    <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
 </body>

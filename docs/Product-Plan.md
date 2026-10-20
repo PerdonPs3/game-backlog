@@ -93,7 +93,12 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Review the public catalog, shareable game pages, and preserved selection through
-authentication on the public catalog task branch. Validate the complete journey
-in Preview after authorized integration. Continue real-account profile validation.
-The scrolling product homepage follows acceptance of the catalog milestone.
+The scrolling homepage is implemented on `feature/scrolling-homepage` for review.
+It preserves the existing animated cover background and reuses the public catalog
+picker. A shared homepage header separates the top-left appearance controls from
+account actions. Library and profile sections use real application screenshots
+with fictional local demo data, followed by three steps and account-aware actions.
+No production data, database migrations, external counters, or future integrations
+are introduced. Desktop and 390 px mobile layouts, light and dark themes, section navigation,
+and anonymous search have been checked locally. Preview validation follows
+authorized integration into develop and publication.

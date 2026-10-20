@@ -134,7 +134,7 @@ requirements take priority over optional integrations and progression.
       the project name, tagline, and links to the library and GitHub. Personal
       collection entries are never used in the welcome screen.
 - [x] Add a discreet GitHub link inside the application.
-- [ ] Build a scrolling product introduction with real demo screenshots and clear account actions.
+- [x] Build a scrolling product introduction with real demo screenshots and clear account actions (implemented locally; Preview validation pending).
 - [ ] Consider a real aggregate user count after defining the metric and excluding test accounts.
 - [ ] Review naming availability before a public launch and add real product
       screenshots to the showcase when the interface is ready.
