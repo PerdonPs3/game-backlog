@@ -1,8 +1,8 @@
 # Product direction: profile, public catalog, homepage, and Discover
 
 This is a proposed implementation order, not a release schedule. The dark profile
-palette is approved in Preview. A private profile overview and five-game showcase
-are implemented on the profile task branch for review. Each phase should be
+palette and the private profile overview design are approved in Preview. The
+five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
 ## 0. Validate the profile palette
@@ -39,6 +39,14 @@ separate reviewable step. Progression, XP, social feeds, and comments can follow
 Visitors should be able to search and inspect catalog games without registering.
 Create a public catalog detail page that contains game metadata, artwork, and
 platforms. Keep it distinct from an owner's private library entry and notes.
+
+Give every catalog game a stable, shareable URL. Opening that URL directly,
+refreshing it, or using a new tab must show the same public game information
+without signing in. Library covers should provide access to this page. The
+current library modal may remain as an optional quick view, but must not be the
+only way to inspect a game. Personal notes, ratings, and progress stay private.
+This change is deferred to the public catalog phase; keep the modal unchanged
+while completing the profile milestone.
 
 Reuse this search and detail experience from the homepage, an Explore entry in
 the app, and Discover. Keep Add game as a convenient shortcut into the same
@@ -85,7 +93,8 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Validate the private profile overview and five-game showcase in Preview. Complete
-and validate each step on the existing profile task branch before requesting
-integration into develop. Public
-catalog work can begin after the profile milestone is accepted.
+Add a stable profile identity and optional public profile URL as the next
+reviewable profile increment. Keep publication opt-in and define the shared
+fields and uploaded-image rules before exposing profiles. Continue real-account
+Preview validation. The shareable game page remains queued for the subsequent
+public catalog phase.
