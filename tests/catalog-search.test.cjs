@@ -27,23 +27,25 @@ class Element {
     scrollIntoView() {}
 }
 
-function setup() {
+function setup(browsing = false) {
     const elements = Object.fromEntries([
-        "title", "catalog-results", "catalog-message", "platform", "igdb-id",
+        "title", "catalog-query", "catalog-results", "catalog-message", "platform", "igdb-id",
         "add-game-button", "platform-message",
     ].map((id) => [`#${id}`, new Element()]));
     const picker = new Element();
     picker.dataset = { catalogUrl: "/catalog/search", detailsUrl: "/catalog/games/0" };
+    if (browsing) picker.dataset = { catalogUrl: "/explore/suggestions", browseUrl: "/explore/games/0" };
     picker.querySelector = (selector) => elements[selector];
     picker.contains = () => true;
     const document = new Element();
     document.querySelector = (selector) => selector === "[data-catalog-url]" ? picker : elements[selector];
     document.createElement = () => new Element();
     const requests = [];
+    const navigations = [];
     let scheduled;
     const context = {
         document, URL, AbortController,
-        window: { location: { origin: "http://localhost" } },
+        window: { location: { origin: "http://localhost", assign: (url) => navigations.push(url) } },
         Option: class extends Element {
             constructor(text, value) { super(); this.textContent = text; this.value = value; }
         },
@@ -59,10 +61,12 @@ function setup() {
     runInNewContext(readFileSync(join(__dirname, "../app/static/catalog-search.js"), "utf8"), context);
     return {
         ...Object.fromEntries(Object.entries(elements).map(([key, value]) => [key.slice(1), value])),
-        requests,
+        requests, navigations,
+        flush: () => scheduled(),
         async search(games) {
-            elements["#title"].value = "Resident";
-            elements["#title"].fire("input");
+            const input = elements[browsing ? "#catalog-query" : "#title"];
+            input.value = "Resident";
+            input.fire("input");
             const pending = scheduled();
             requests.at(-1).reply({ games });
             await pending;
@@ -140,4 +144,40 @@ test("moving focus while platforms load does not discard the selection", async (
     ui.requests.at(-1).reply({ game: original });
     await pending;
     assert.equal(ui["igdb-id"].value, "1");
+});
+
+
+test("public suggestions open a game by click or keyboard without resolving private form details", async () => {
+    for (const keyboard of [false, true]) {
+        const ui = setup(true);
+        await ui.search([original, remake]);
+        assert.match(ui.requests[0].url, /explore\/suggestions\?q=Resident/);
+        if (keyboard) {
+            ui["catalog-query"].fire("keydown", { key: "ArrowDown" });
+            ui["catalog-query"].fire("keydown", { key: "Enter" });
+        } else {
+            ui["catalog-results"].children[0].fire("click");
+        }
+        assert.deepEqual(ui.navigations, ["/explore/games/1"]);
+        assert.equal(ui.requests.length, 1);
+    }
+});
+
+test("public suggestions discard stale searches and remain closed after Escape", async () => {
+    const ui = setup(true);
+    const input = ui["catalog-query"];
+    input.value = "god";
+    input.fire("input");
+    const pending = ui.flush();
+    input.value = "gods";
+    input.fire("input");
+    assert.equal(ui.requests[0].options.signal.aborted, true);
+    ui.requests[0].reply({ games: [original] });
+    await pending;
+    assert.equal(ui["catalog-results"].hidden, true);
+    await ui.search([original]);
+    input.fire("keydown", { key: "Escape" });
+    assert.equal(ui["catalog-results"].hidden, true);
+    input.fire("keydown", { key: "Enter" });
+    assert.deepEqual(ui.navigations, []);
 });

@@ -68,3 +68,13 @@ schema already introduced by migrations 001–006. Integrate and publish to deve
 only after explicit authorization; production publication remains a separate step.
 Vercel Preview protection is a separate hosting gate; anonymous application access
 does not change that protection.
+
+## Search suggestions
+
+Explore reuses the Add game picker: after 2 characters and a 450 ms pause,
+`GET /explore/suggestions?q=...` returns up to 10 public catalog matches with
+covers and release years. Clicking or using arrow keys and Enter opens the
+selected public game page. Escape, blur, and outside clicks close suggestions;
+outdated requests are cancelled and ignored. The normal Search form still works
+without JavaScript. Suggestions share the public request budget and IGDB cache;
+provider errors return generic messages and never expose collection data.

@@ -5,8 +5,9 @@
 {% block page_heading %}Find your next <span>chapter.</span>{% endblock %}
 {% block page_description %}Explore games, discover their worlds, and find something worth playing. No account needed to browse.{% endblock %}
 {% block panel %}
-<form class="catalog-public-search" method="get" action="{{ url_for('explore.index') }}" role="search">
-    <label for="catalog-query">Search games</label><div><input id="catalog-query" type="search" name="q" value="{{ query }}" minlength="2" maxlength="200" required placeholder="A title, a series, a world to return to…" autocomplete="off" aria-describedby="catalog-search-help"><button type="submit">Search ↗</button></div><p id="catalog-search-help">Search by title using at least 2 characters. <a href="{{ url_for('explore.index') }}">Clear search</a></p>
+<form class="catalog-public-search" data-catalog-url="{{ url_for('explore.suggestions') }}" data-browse-url="{{ url_for('explore.game', catalog_id=0) }}" method="get" action="{{ url_for('explore.index') }}" role="search">
+    <label for="catalog-query">Search games</label><div><div class="catalog-input-wrapper"><input id="catalog-query" type="search" name="q" value="{{ query }}" minlength="2" maxlength="200" required placeholder="A title, a series, a world to return to…" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="catalog-results" aria-describedby="catalog-search-help catalog-message"><div id="catalog-results" class="catalog-results" role="listbox" aria-label="Matching games" hidden></div></div><button type="submit">Search ↗</button></div><p id="catalog-search-help">Search by title using at least 2 characters. <a href="{{ url_for('explore.index') }}">Clear search</a></p>
+<p id="catalog-message" role="status">Type at least 2 characters to see matching games.</p>
 </form>
 {% if error %}<div class="catalog-empty" role="alert"><h2>Let's try that again.</h2><p>{{ error }}</p></div>
 {% elif games %}<header class="catalog-results-heading"><h2>Results for “{{ query }}”</h2><p>{{ games|length }} {{ 'game' if games|length == 1 else 'games' }} · Up to 30 results. Refine your search to find more.</p></header>
@@ -14,4 +15,4 @@
 {% else %}<section class="catalog-empty"><span class="catalog-empty-symbol" aria-hidden="true">✦</span><h2>{{ 'No games found.' if query|length >= 2 else 'Your next adventure starts with a search.' }}</h2><p>{{ 'Try another title or a shorter search.' if query|length >= 2 else 'Open a game to explore its story, release date, genres, and platforms. Start a collection when you find your next favorite.' }}</p><div class="catalog-search-ideas">{% for term in ['Portal', 'Hollow Knight', 'Zelda'] %}<a href="{{ url_for('explore.index', q=term) }}">{{ term }} ↗</a>{% endfor %}</div></section>{% endif %}
 <p class="catalog-attribution">Game data and covers provided by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.</p>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script><script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}
