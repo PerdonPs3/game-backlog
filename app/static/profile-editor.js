@@ -10,14 +10,28 @@
     const previewName = editor.querySelector('[data-profile-name]');
     const previewBio = editor.querySelector('[data-profile-bio]');
     const avatar = editor.querySelector('.player-avatar');
-    const color = form.querySelector('[name="avatar_color"]');
-    const photo = form.querySelector('[name="photo"]');
-    const removePhoto = form.querySelector('[name="remove_photo"]');
-    const photoFeedback = form.querySelector('[data-photo-feedback]');
+    const color = editor.querySelector('[name="avatar_color"]');
+    const photo = editor.querySelector('[name="photo"]');
+    const removePhoto = editor.querySelector('[name="remove_photo"]');
+    const photoFeedback = editor.querySelector('[data-photo-feedback]');
     const photoPreview = editor.querySelector('[data-avatar-photo]');
     const placeholder = editor.querySelector('[data-avatar-placeholder]');
     const savedPhoto = photoPreview.getAttribute('src');
+    const avatarEditor = editor.querySelector('[data-avatar-editor]');
+    const avatarTrigger = avatarEditor.querySelector('summary');
     let previewUrl = null;
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!avatarEditor.contains(event.target)) avatarEditor.open = false;
+    });
+    avatarEditor.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && avatarEditor.open) {
+            event.preventDefault();
+            avatarEditor.open = false;
+            avatarTrigger.focus();
+        }
+    });
+    photo.addEventListener('invalid', () => { avatarEditor.open = true; });
 
     function updatePhoto() {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -73,8 +87,8 @@
             delete feedback.dataset.saved;
         }
     }
-    form.addEventListener('input', updatePreview);
-    form.addEventListener('change', updatePreview);
+    editor.addEventListener('input', updatePreview);
+    editor.addEventListener('change', updatePreview);
     form.addEventListener('submit', (event) => {
         if (saving) { event.preventDefault(); return; }
         saving = true;

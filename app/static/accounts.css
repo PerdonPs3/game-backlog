@@ -106,16 +106,38 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 .profile-workspace .player-avatar { border-radius: 50%; background: var(--avatar-color, #64748b); color: #fff; overflow: hidden; }
 .player-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .player-avatar [hidden] { display: none; }
-.profile-editor-form .profile-photo-field input[type="file"] { padding: .65rem; max-width: 100%; }
-.profile-photo-field input::file-selector-button { color: var(--text); background: var(--profile-cover); border: 1px solid var(--border); border-radius: 6px; padding: .4rem .65rem; margin-right: .75rem; cursor: pointer; }
-.profile-editor-form label.profile-remove-photo { justify-content: start; font-size: .75rem; margin-top: .75rem; }
-.profile-editor-form .profile-remove-photo input { width: 1rem; height: 1rem; accent-color: var(--accent); }
-.profile-color-control { display: flex; align-items: center; gap: .75rem; }
-.profile-editor-form .profile-color-control input { width: 3.25rem; height: 2.75rem; padding: .25rem; cursor: pointer; flex-shrink: 0; }
-.profile-color-control span { color: var(--text-muted); font-size: .7rem; line-height: 1.5; }
 @media (max-width: 600px) {
     .workspace-topbar { align-items: stretch; }
     .workspace-topbar .workspace-nav { flex-basis: 100%; }
     .workspace-header-actions { width: 100%; justify-content: space-between; gap: .5rem; }
     .workspace-layout > .workspace-footer { justify-content: center; text-align: center; font-size: .7rem; }
 }
+
+/* Avatar editing stays on the player card instead of in the details form. */
+.player-card { overflow: visible; }
+.player-card-cover { border-radius: 17px 17px 0 0; }
+.avatar-editor { position: relative; width: 86px; margin-top: -43px; margin-bottom: 1.5rem; z-index: 4; }
+.avatar-edit-trigger { position: relative; display: block; width: 86px; height: 86px; border-radius: 50%; list-style: none; cursor: pointer; }
+.avatar-edit-trigger::-webkit-details-marker { display: none; }
+.avatar-edit-trigger .player-avatar { position: static; margin: 0; }
+.avatar-edit-overlay { position: absolute; inset: 5px; border-radius: 50%; display: grid; place-items: center; background: #0009; color: #fff; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.avatar-edit-overlay svg { width: 26px; height: 26px; }
+.avatar-edit-trigger:hover .avatar-edit-overlay, .avatar-edit-trigger:focus-visible .avatar-edit-overlay, .avatar-editor[open] .avatar-edit-overlay { opacity: 1; }
+.avatar-edit-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.avatar-edit-panel { position: absolute; top: calc(100% + .65rem); left: 0; width: min(260px, calc(100vw - 5.5rem)); padding: 1rem; background: var(--profile-panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 35px #0005; }
+.avatar-edit-heading { margin: 0 0 .85rem; font-size: .85rem; font-weight: 700; }
+.avatar-file-input { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.avatar-upload-button { display: flex; justify-content: space-between; align-items: center; padding: .7rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--profile-field); font-size: .75rem; cursor: pointer; }
+.avatar-upload-button:hover { border-color: var(--accent); color: var(--accent); }
+.avatar-file-input:focus-visible + .avatar-upload-button { outline: 2px solid var(--accent); outline-offset: 3px; }
+.avatar-edit-panel .profile-field-hint { font-size: .6rem; }
+.avatar-edit-panel [data-photo-feedback]:empty { display: none; }
+.avatar-color-label { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--profile-line); font-size: .75rem; }
+.avatar-color-label small { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .6rem; }
+.avatar-color-label input { width: 2.6rem; height: 2.35rem; border: 1px solid var(--border); border-radius: 7px; padding: .2rem; background: var(--profile-field); cursor: pointer; }
+.avatar-reset-control { display: flex; align-items: center; gap: .5rem; margin-top: .85rem; font-size: .7rem; cursor: pointer; }
+.avatar-reset-control input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--accent); }
+.avatar-save-hint { color: var(--text-muted); font-size: .6rem; line-height: 1.5; margin: .9rem 0 0; }
+@media (max-width: 760px) { .avatar-editor { position: absolute; left: 1.25rem; top: 0; } }
+@media (hover: none), (pointer: coarse) { .avatar-edit-overlay { opacity: 1; inset: auto 0 0 auto; width: 28px; height: 28px; border: 2px solid var(--profile-panel); background: var(--profile-cover); } .avatar-edit-overlay svg { width: 15px; height: 15px; } }
+@media (prefers-reduced-motion: reduce) { .avatar-edit-overlay { transition: none; } }

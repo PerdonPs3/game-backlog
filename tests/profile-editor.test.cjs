@@ -4,7 +4,9 @@ const { readFileSync } = require('node:fs');
 const { runInNewContext } = require('node:vm');
 
 function setup(saved = false) {
-    const events = {}, windowEvents = {}, attributes = {}, iconAttributes = {};
+    const events = {}, windowEvents = {}, documentEvents = {}, avatarEvents = {}, attributes = {}, iconAttributes = {};
+    const avatarTrigger = { focus() { this.focused = true; } };
+    const avatarEditor = { open: false, querySelector() { return avatarTrigger; }, contains(target) { return target === avatarTrigger; }, addEventListener(key, cb) { avatarEvents[key] = cb; } };
     const photoEvents = {}, removeEvents = {}, imageEvents = {}, revoked = [];
     const color = { value: '#64748b' };
     const photo = { files: [], setCustomValidity(value) { this.validation = value; }, addEventListener(key, cb) { photoEvents[key] = cb; } };
@@ -21,13 +23,13 @@ function setup(saved = false) {
         '[name="avatar_color"]': color, '[name="photo"]': photo, '[name="remove_photo"]': removePhoto, '[data-photo-feedback]': photoFeedback, '[data-profile-feedback]': feedback, '[data-save-profile]': save, '[data-bio-counter]': counter };
     const form = { querySelector: (key) => fields[key], addEventListener(key, callback) { events[key] = callback; },
         setAttribute(key, value) { attributes[key] = value; }, removeAttribute(key) { delete attributes[key]; } };
-    const nodes = { '[data-profile-form]': form, '[data-profile-name]': previewName, '[data-profile-bio]': previewBio, '.player-avatar': avatar, '[data-avatar-photo]': photoPreview, '[data-avatar-placeholder]': placeholder };
-    const editor = { querySelector: (key) => nodes[key] };
+    const nodes = { '[data-profile-form]': form, '[data-profile-name]': previewName, '[data-profile-bio]': previewBio, '.player-avatar': avatar, '[data-avatar-photo]': photoPreview, '[data-avatar-placeholder]': placeholder, '[data-avatar-editor]': avatarEditor, ...fields };
+    const editor = { querySelector: (key) => nodes[key], addEventListener(key, cb) { events[key] = cb; } };
     runInNewContext(readFileSync('app/static/profile-editor.js', 'utf8'), {
         URL: { createObjectURL() { return 'blob:preview'; }, revokeObjectURL(value) { revoked.push(value); } },
-        document: { querySelector: () => editor }, window: { addEventListener(key, callback) { windowEvents[key] = callback; } },
+        document: { querySelector: () => editor, addEventListener(key, cb) { documentEvents[key] = cb; } }, window: { addEventListener(key, callback) { windowEvents[key] = callback; } },
     });
-    return { photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
+    return { documentEvents, avatarEvents, avatarEditor, avatarTrigger, photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
 }
 
 test('updates the player card as text, avatar, and biography change without claiming a save', () => {
@@ -95,4 +97,30 @@ test('rejects oversized and unsupported files before creating a preview', () => 
         assert.match(ui.photo.validation, /smaller than 2 MB/);
         assert.equal(ui.photoPreview.hidden, true);
     }
+});
+
+
+test('Escape closes avatar options and restores keyboard focus to the picture', () => {
+    const ui = setup();
+    ui.avatarEditor.open = true;
+    let prevented = false;
+    ui.avatarEvents.keydown({ key: 'Escape', preventDefault() { prevented = true; } });
+    assert.equal(ui.avatarEditor.open, false);
+    assert.equal(ui.avatarTrigger.focused, true);
+    assert.equal(prevented, true);
+});
+
+test('outside pointer closes options while interacting inside keeps them open', () => {
+    const ui = setup();
+    ui.avatarEditor.open = true;
+    ui.documentEvents.pointerdown({ target: ui.avatarTrigger });
+    assert.equal(ui.avatarEditor.open, true);
+    ui.documentEvents.pointerdown({ target: {} });
+    assert.equal(ui.avatarEditor.open, false);
+});
+
+test('invalid upload opens its options so the browser can show the validation error', () => {
+    const ui = setup();
+    ui.photoEvents.invalid();
+    assert.equal(ui.avatarEditor.open, true);
 });
