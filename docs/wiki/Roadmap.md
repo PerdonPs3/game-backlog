@@ -3,6 +3,8 @@
 The long-term idea is a personal gaming library where finishing adventures also
 helps your player profile grow. The stages below describe a proposed direction,
 not a release schedule. Checked items are implemented; unchecked items are planned.
+For the current proposed execution order, see the [product plan](../Product-Plan.md):
+profile palette pilot, player profile, public catalog, guided homepage, and Discover.
 
 ### 1. Make the collection easier to manage
 
@@ -24,6 +26,8 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 - [x] Store catalog identifiers and validate the selected game and platform.
 - [x] Display game covers in the collection.
 - [x] Block duplicate catalog game/platform combinations and link to the existing entry.
+- [ ] Allow anonymous catalog search and public game detail pages, independent of private library entries.
+- [ ] Reuse the same catalog flow from the homepage, Add game, and Discover.
 
 Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
 
@@ -43,7 +47,9 @@ Games from other platforms remain supported through the catalog.
 ### 4. Build a personal player profile
 
 - [x] Add a private profile with a display name, a short bio, and a built-in avatar.
-- [ ] Add a profile shelf of favorite games and uploaded avatars.
+- [x] Upload profile photos with an adjustable circular crop and preset avatar colors.
+- [ ] Validate the Obsidian palette pilot on the dark profile before wider adoption.
+- [ ] Separate a profile overview from the editor and add an ordered favorite-game showcase.
 - [x] Show collection statistics: totals, status counts, completion progress, and average rating.
 - [x] Implement accounts and separate collections with automated two-account isolation tests.
 - [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
@@ -109,6 +115,8 @@ requirements take priority over optional integrations and progression.
       the project name, tagline, and links to the library and GitHub. Personal
       collection entries are never used in the welcome screen.
 - [x] Add a discreet GitHub link inside the application.
+- [ ] Build a scrolling product introduction with real demo screenshots and clear account actions.
+- [ ] Consider a real aggregate user count after defining the metric and excluding test accounts.
 - [ ] Review naming availability before a public launch and add real product
       screenshots to the showcase when the interface is ready.
 - [ ] Optionally publish a static project showcase on GitHub Pages, with a
@@ -118,5 +126,11 @@ GitHub Pages can host a static showcase, not the Python server or writable
 database. A public working application requires suitable hosting and the
 public-release safeguards above. Keep secrets and real collection data out of
 public demonstration bundles.
+
+### 10. Discover releases and updates
+
+- [ ] Add upcoming and recent releases with dates and platform filters.
+- [ ] Reuse Discover content in a small homepage preview and link to shared catalog details.
+- [ ] Add dated, attributed news only after selecting a suitable source and freshness rules.
 
 [Back to the wiki](README.md)

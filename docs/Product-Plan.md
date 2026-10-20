@@ -1,0 +1,90 @@
+# Product direction: profile, public catalog, homepage, and Discover
+
+This is a proposed implementation order, not a release schedule. The current
+implementation is limited to a dark profile palette pilot. Each phase should be
+reviewed in Preview before moving to the next one or expanding its scope.
+
+## 0. Validate the profile palette
+
+Use the supplied Vestigium Obsidian reference for a profile-only experiment:
+`#111317` canvas, `#1a1c1f` cards, `#0c0e11` fields, `#e2e2e6` main text,
+`#d7c3ae` secondary text, `#ffc880` primary highlights, and `#f5a623` action fills.
+Treat the structured color roles as the source of truth where the prose offers
+different shades. Use restrained glows and readable control borders. Preserve
+the current light theme, typography, layout, and top-left utility controls.
+
+Acceptance: the profile, avatar menu, crop dialog, and save feedback are readable
+on desktop and mobile; other pages retain their current appearance. Broader
+palette adoption follows explicit design approval.
+
+## 1. Make the player profile worth visiting
+
+- Separate a profile overview from the profile editor.
+- Add an ordered showcase of up to five games selected from the owner's library.
+- Show currently playing games, recent completions, and meaningful statistics
+  from existing statuses and recorded dates. Provide useful empty states.
+- Add a stable profile identity and an optional public URL. Keep profiles private
+  until the owner explicitly chooses what to share. Public viewing must expose
+  only the selected profile fields and showcase, never account email, tokens,
+  private lists, or the entire collection by implication.
+- Define the rules for publicly visible uploaded images and reporting before
+  opening public profiles broadly. Validate viewing and editing with two accounts.
+
+Start with the private overview and showcase; introduce public visibility as a
+separate reviewable step. Progression, XP, social feeds, and comments can follow.
+
+## 2. Build one public catalog and game detail experience
+
+Visitors should be able to search and inspect catalog games without registering.
+Create a public catalog detail page that contains game metadata, artwork, and
+platforms. Keep it distinct from an owner's private library entry and notes.
+
+Reuse this search and detail experience from the homepage, an Explore entry in
+the app, and Discover. Keep Add game as a convenient shortcut into the same
+catalog flow instead of building another competing search interface.
+
+The primary journey is search -> game detail -> Add to my library. When sign-in
+is required, preserve the selected catalog game and return to the add flow after
+authentication. Adding always requires the user's confirmation; browsing or
+signing in must not silently add games. Bound and cache public catalog requests.
+
+Acceptance: anonymous users can browse catalog data, private collection routes
+remain protected, and a signed-in user can add a selected game without repeating
+the search or creating duplicate game/platform entries.
+
+## 3. Turn the homepage into a guided product introduction
+
+Build a normal scrolling page with section links and restrained transitions:
+
+1. A clear promise, a public game search entry, Create account, and Sign in.
+2. A real library screenshot explaining organization and progress tracking.
+3. A real profile screenshot explaining the showcase and player identity.
+4. A short three-step explanation: find a game, add it, track your progress.
+5. A small upcoming-release preview that opens the shared Discover experience.
+6. A final registration action.
+
+Capture examples from a dedicated demo account with fictional or explicitly
+approved data. Keep screenshots synchronized with the actual product. Maintain
+normal browser scrolling, keyboard access, and reduced-motion preferences.
+
+Treat a user count as a secondary enhancement. Define whether it means confirmed
+accounts or completed profiles, use a real server-side aggregate, exclude test
+accounts, and never send user records to the browser to calculate it. The wording
+must match the chosen definition; do not invent numbers or imply online activity.
+
+## 4. Add a focused Discover section
+
+Begin with upcoming and recent releases, release dates, platform filters, and
+links to the same catalog detail pages. A homepage preview and an in-app Discover
+entry should reuse the same content and components.
+
+Add news in a later increment after selecting a suitable source, freshness rules,
+and attribution. Show original dates and links; distinguish announcements from
+confirmed release dates. Avoid starting with an unmaintained general news feed.
+
+## Next concrete delivery
+
+Review the profile palette pilot first. Then implement the private profile
+overview and favorite-game showcase. Complete and validate each step on the
+existing profile task branch before requesting integration into develop. Public
+catalog work can begin after the profile milestone is accepted.
