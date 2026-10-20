@@ -106,3 +106,22 @@ No production data, database migrations, external counters, or future integratio
 are introduced. Desktop and 390 px mobile layouts, light and dark themes, section navigation,
 and anonymous search have been checked locally. Preview validation follows
 authorized integration into develop and publication.
+
+## Public community count
+
+The homepage person icon reports activated player accounts: profiles created after
+verified-email authentication, counted once per identity, including private or
+unfinished profiles. It does not count pending sign-ups, online visitors, or every
+Supabase Auth row. Deleted application profiles cease contributing; this is not
+an audit of deleted provider accounts. No user records are returned to visitors.
+The server uses COUNT(*) with a 60-second process-local cache; visible pages poll
+once a minute. Changes can take up to two minutes to appear. Zero is displayed
+only after a successful count; unavailable totals hide the badge. Offline mode
+has no population and hides it too.
+
+Optional server variable PUBLIC_MEMBER_COUNT_EXCLUDED_IDS accepts comma-separated
+account UUIDs to omit explicit demo/test identities. Production and development
+populations are separate because their databases are separate. Local preview uses
+an isolated PostgreSQL schema and fake accounts, so its count is demonstration
+data, not the production total. No new database migration or privileged Supabase
+API key is required.
