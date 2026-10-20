@@ -59,18 +59,6 @@
 .profile-editor-form .profile-field input, .profile-editor-form .profile-field textarea { background: var(--profile-field); border-color: var(--border); font-size: .85rem; }
 .profile-editor-form .profile-field textarea { min-height: 90px; }
 .profile-field-hint { color: var(--text-muted); font-size: .65rem; margin: .5rem 0 0; line-height: 1.5; }
-.profile-editor-form .profile-avatar-picker { margin: 0; padding: 0; border: 0; min-width: 0; }
-.profile-avatar-picker legend { margin-bottom: .65rem; font-size: .8rem; font-weight: 600; }
-.profile-avatar-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
-.profile-editor-form .profile-avatar-option { position: relative; display: block; margin: 0; cursor: pointer; }
-.profile-editor-form .profile-avatar-option input { position: absolute; opacity: 0; width: 1px; height: 1px; padding: 0; margin: 0; border: 0; clip-path: inset(50%); }
-.profile-avatar-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: .9rem .25rem .65rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-field); color: var(--text-muted); font-size: .65rem; font-weight: 400; transition: border-color .15s, background .15s; }
-.profile-avatar-tile > svg { width: 34px; height: 34px; }
-.profile-avatar-option input:checked + .profile-avatar-tile { color: var(--accent); border-color: var(--accent); background: var(--profile-tint); }
-.profile-avatar-option input:focus-visible + .profile-avatar-tile { outline: 2px solid var(--accent); outline-offset: 4px; }
-.profile-avatar-option:hover .profile-avatar-tile { border-color: var(--accent); }
-.avatar-selected { display: none; position: absolute; right: .4rem; top: .2rem; font-size: .7rem; }
-.profile-avatar-option input:checked + .profile-avatar-tile .avatar-selected { display: block; }
 .profile-bio-footer { display: flex; justify-content: space-between; gap: .75rem; font-size: .6rem; line-height: 1.5; color: var(--text-muted); margin-top: .4rem; }
 .profile-bio-footer > span:last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .profile-save-bar { padding-top: 1.25rem; border-top: 1px solid var(--profile-line); }
@@ -97,8 +85,59 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
     .workspace-form.profile-editor-form { padding: 1.25rem; }
 }
 @media (max-width: 400px) {
-    .profile-avatar-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .player-card-content { padding: 4rem 1.25rem 1.25rem; }
     .profile-bio-footer > span:first-child { max-width: 70%; }
     .profile-workspace .workspace-hero { padding: 1.25rem; }
 }
-@media (prefers-reduced-motion: reduce) { .profile-avatar-tile { transition: none; } }
+
+/* Keep workspace navigation and footer in the same content grid. */
+.workspace-page main.workspace-layout { margin-top: 4.5rem; }
+.workspace-topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.workspace-topbar .workspace-nav { margin: 0; gap: 1.5rem; flex: 1; }
+.workspace-header-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.workspace-header-actions .account-navigation { margin: 0; gap: .8rem; }
+.workspace-header-actions .account-navigation a { color: var(--text-muted); font-size: .8rem; text-decoration: none; }
+.workspace-header-actions .account-navigation button { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: .75rem; border-radius: 9px; }
+.workspace-header-actions .account-navigation button:hover { color: var(--accent); border-color: var(--accent); }
+.workspace-layout > .workspace-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; width: 100%; margin: 1.75rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--border); font-size: .75rem; text-align: left; }
+.workspace-footer a { color: var(--text-muted); text-underline-offset: .25em; }
+.workspace-footer a:hover { color: var(--accent); }
+.profile-workspace .player-avatar { border-radius: 50%; background: var(--avatar-color, #64748b); color: #fff; overflow: hidden; }
+.player-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.player-avatar [hidden] { display: none; }
+@media (max-width: 600px) {
+    .workspace-topbar { align-items: stretch; }
+    .workspace-topbar .workspace-nav { flex-basis: 100%; }
+    .workspace-header-actions { width: 100%; justify-content: space-between; gap: .5rem; }
+    .workspace-layout > .workspace-footer { justify-content: center; text-align: center; font-size: .7rem; }
+}
+
+/* Avatar editing stays on the player card instead of in the details form. */
+.player-card { overflow: visible; }
+.player-card-cover { border-radius: 17px 17px 0 0; }
+.avatar-editor { position: relative; width: 86px; margin-top: -43px; margin-bottom: 1.5rem; z-index: 4; }
+.avatar-edit-trigger { position: relative; display: block; width: 86px; height: 86px; border-radius: 50%; list-style: none; cursor: pointer; }
+.avatar-edit-trigger::-webkit-details-marker { display: none; }
+.avatar-edit-trigger .player-avatar { position: static; margin: 0; }
+.avatar-edit-overlay { position: absolute; inset: 5px; border-radius: 50%; display: grid; place-items: center; background: #0009; color: #fff; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.avatar-edit-overlay svg { width: 26px; height: 26px; }
+.avatar-edit-trigger:hover .avatar-edit-overlay, .avatar-edit-trigger:focus-visible .avatar-edit-overlay, .avatar-editor[open] .avatar-edit-overlay { opacity: 1; }
+.avatar-edit-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.avatar-edit-panel { position: absolute; top: calc(100% + .65rem); left: 0; width: min(260px, calc(100vw - 5.5rem)); padding: 1rem; background: var(--profile-panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 35px #0005; }
+.avatar-edit-heading { margin: 0 0 .85rem; font-size: .85rem; font-weight: 700; }
+.avatar-file-input { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.avatar-upload-button { display: flex; justify-content: space-between; align-items: center; padding: .7rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--profile-field); font-size: .75rem; cursor: pointer; }
+.avatar-upload-button:hover { border-color: var(--accent); color: var(--accent); }
+.avatar-file-input:focus-visible + .avatar-upload-button { outline: 2px solid var(--accent); outline-offset: 3px; }
+.avatar-edit-panel .profile-field-hint { font-size: .6rem; }
+.avatar-edit-panel [data-photo-feedback]:empty { display: none; }
+.avatar-color-label { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--profile-line); font-size: .75rem; }
+.avatar-color-label small { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .6rem; }
+.avatar-color-label input { width: 2.6rem; height: 2.35rem; border: 1px solid var(--border); border-radius: 7px; padding: .2rem; background: var(--profile-field); cursor: pointer; }
+.avatar-remove-button { display: block; width: 100%; margin-top: .85rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: .7rem; text-align: left; cursor: pointer; }
+.avatar-remove-button:hover { color: var(--accent); border-color: var(--accent); }
+.avatar-remove-button[hidden] { display: none; }
+.avatar-save-hint { color: var(--text-muted); font-size: .6rem; line-height: 1.5; margin: .9rem 0 0; }
+@media (max-width: 760px) { .avatar-editor { position: absolute; left: 1.25rem; top: 0; } }
+@media (hover: none), (pointer: coarse) { .avatar-edit-overlay { opacity: 1; inset: auto 0 0 auto; width: 28px; height: 28px; border: 2px solid var(--profile-panel); background: var(--profile-cover); } .avatar-edit-overlay svg { width: 15px; height: 15px; } }
+@media (prefers-reduced-motion: reduce) { .avatar-edit-overlay { transition: none; } }

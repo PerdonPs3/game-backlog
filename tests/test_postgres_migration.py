@@ -59,7 +59,7 @@ def test_migrations_are_repeatable_and_health_check_is_read_only(postgres_app):
     assert runner.invoke(args=["init-db"]).exit_code != 0
     with postgres_app.app_context():
         db = get_db()
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 2
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 3
         assert db.execute("SELECT COUNT(*) FROM games").fetchone()[0] == 0
         assert all(row[0] for row in db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('games', 'game_lists', 'game_list_members')"))
 
@@ -68,19 +68,21 @@ def test_failed_schema_migration_rolls_back_ddl_and_version(postgres_app, tmp_pa
     original = migrations.MIGRATIONS
     (tmp_path / "001_initial.sql").write_text((original / "001_initial.sql").read_text(encoding="utf-8"), encoding="utf-8")
     (tmp_path / "002_private_accounts.sql").write_bytes((original / "002_private_accounts.sql").read_bytes())
-    (tmp_path / "003_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
+    (tmp_path / "003_profile_photos.sql").write_bytes((original / "003_profile_photos.sql").read_bytes())
+    (tmp_path / "004_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "rolled back" in result.output
     with postgres_app.app_context():
         db = get_db()
         assert db.execute("SELECT to_regclass('rollback_probe')").fetchone()[0] is None
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 2
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 3
 
 
 def test_changed_applied_migration_is_rejected(postgres_app, tmp_path, monkeypatch):
     (tmp_path / "001_initial.sql").write_text("SELECT 1;", encoding="utf-8")
     (tmp_path / "002_private_accounts.sql").write_bytes((migrations.MIGRATIONS / "002_private_accounts.sql").read_bytes())
+    (tmp_path / "003_profile_photos.sql").write_bytes((migrations.MIGRATIONS / "003_profile_photos.sql").read_bytes())
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "has changed" in result.output
