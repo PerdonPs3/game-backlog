@@ -53,7 +53,7 @@
                 <div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div>
                 <div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div>
             </dl>
-            <p class="player-card-note">Your profile and library are only visible to you.</p>
+            <p class="player-card-note">Your library stays private. Manage public fields in Profile sharing.</p>
         </div>
     </aside>
     <form id="profile-form" action="{{ url_for('auth.profile') }}" method="post" enctype="multipart/form-data" class="workspace-form profile-editor-form" data-profile-form>
@@ -70,7 +70,7 @@
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span>A few words about the player behind the library.</span><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
         <footer class="profile-save-bar">
             <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('auth.profile_overview') }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
-            <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Your changes will be saved to your private profile.' }}{% endif %}</p>
+            <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Save changes to update your profile. Shared details update your public page too.' }}{% endif %}</p>
         </footer>
     </form>
     <dialog class="avatar-crop-dialog" data-avatar-crop aria-labelledby="avatar-crop-title" aria-describedby="avatar-crop-help">

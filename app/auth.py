@@ -459,6 +459,6 @@ def init_app(app):
     def private_responses(response):
         if app.config.get("AUTH_ENABLED") and request.endpoint != "static":
             response.headers["Cache-Control"] = "private, no-store"
-            response.headers["Referrer-Policy"] = "same-origin"
+            response.headers.setdefault("Referrer-Policy", "same-origin")
             response.vary.add("Cookie")
         return response

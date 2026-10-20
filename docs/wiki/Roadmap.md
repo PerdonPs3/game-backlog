@@ -59,6 +59,11 @@ Games from other platforms remain supported through the catalog.
 - [x] Implement accounts and separate collections with automated two-account isolation tests.
 - [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
 - [ ] Let users choose which profile information and activity to make public.
+- [x] Implement unique, permanent usernames and optional public profile links
+      with separate bio and showcase sharing controls; keep uploaded photos private.
+- [ ] Validate public profile publication, anonymous viewing, and revocation in
+      Preview before release. Add reporting and moderation before public photos
+      or profile discovery.
 
 ### 5. Add progression and customization
 

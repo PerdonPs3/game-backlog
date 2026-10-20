@@ -3,6 +3,41 @@
 Hosted PostgreSQL installations require Supabase Auth. SQLite remains an offline,
 single-user mode. Account pages are under `/account`; `/` remains public.
 
+## Optional public player identity
+
+Migration `005_public_profiles.sql` adds a unique, nullable username and three
+sharing flags, all disabled by default. It does not publish existing accounts.
+Apply it explicitly to the isolated development database before deploying this
+version, following the environment checks below. Production needs separate
+authorization.
+
+After completing profile setup, open **My profile → Profile sharing**. Usernames
+contain 3–24 lowercase ASCII letters, numbers, or underscores, start with a
+letter, and exclude reserved service names. The first save reserves the username
+permanently, including while the page is private, so links cannot be reassigned.
+Display names remain editable. A database unique constraint resolves concurrent
+claims; a row lock serializes settings changes for one account.
+
+Publication is opt-in. `/players/<username>` works without signing in only when
+the owner enables **Make my profile public**. The owner chooses separately whether
+to share the bio and ordered showcase. Display name, username, and silhouette
+color form the minimum public identity. Subsequent changes to shared fields also
+update the public page. Unpublishing returns the same 404 as an unknown username,
+even to the owner. Responses use `no-store` and `noindex, nofollow`; these do not
+make an enabled public URL secret or prevent others from copying its content.
+
+Public queries project only selected fields. They do not include account IDs,
+emails, sessions, uploaded photos, game entry IDs, reviews, ratings, progress,
+lists, statistics, or unselected library entries. Public showcase cards do not
+link to private game routes. The public catalog detail destination is a later
+roadmap item. Authenticated settings require a normal, completed-profile session
+and CSRF protection; recovery sessions cannot change publication settings.
+
+Uploaded photos remain private in this increment. The sharing form explains
+basic content rules. Public image publication, reporting, and moderation require
+a separately reviewed workflow before uploaded images or profile discovery are
+opened broadly. There is no profile directory or social feed in this increment.
+
 ## First configure an isolated development project
 
 1. Open the Supabase dashboard, return to the project list, and select **New

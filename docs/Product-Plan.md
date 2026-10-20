@@ -93,8 +93,8 @@ confirmed release dates. Avoid starting with an unmaintained general news feed.
 
 ## Next concrete delivery
 
-Add a stable profile identity and optional public profile URL as the next
-reviewable profile increment. Keep publication opt-in and define the shared
-fields and uploaded-image rules before exposing profiles. Continue real-account
-Preview validation. The shareable game page remains queued for the subsequent
-public catalog phase.
+Review the implemented stable username and optional public profile URL on the
+profile task branch, then validate publication, selective sharing, and revocation
+in Preview after authorized integration. Uploaded photos remain private pending
+reporting and moderation work. Continue real-account Preview validation. The
+shareable game page remains queued for the subsequent public catalog phase.
