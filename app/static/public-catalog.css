@@ -1,5 +1,6 @@
 .catalog-workspace { max-width: 1240px; }
-.catalog-workspace .workspace-panel { padding: 0; border: 0; background: transparent; box-shadow: none; min-width: 0; }
+.catalog-workspace .workspace-panel,
+html[data-theme="light"] .catalog-workspace .workspace-panel { padding: 0; border: 0; background: transparent; box-shadow: none; min-width: 0; }
 .catalog-workspace .workspace-body { display: block; }
 .catalog-public-search { margin: 0 0 2rem; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: #17222e; }
 .catalog-public-search > label { display: block; margin-bottom: .75rem; color: var(--text); font-size: .85rem; font-weight: 600; }
