@@ -135,8 +135,9 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 .avatar-color-label { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--profile-line); font-size: .75rem; }
 .avatar-color-label small { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .6rem; }
 .avatar-color-label input { width: 2.6rem; height: 2.35rem; border: 1px solid var(--border); border-radius: 7px; padding: .2rem; background: var(--profile-field); cursor: pointer; }
-.avatar-reset-control { display: flex; align-items: center; gap: .5rem; margin-top: .85rem; font-size: .7rem; cursor: pointer; }
-.avatar-reset-control input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--accent); }
+.avatar-remove-button { display: block; width: 100%; margin-top: .85rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: .7rem; text-align: left; cursor: pointer; }
+.avatar-remove-button:hover { color: var(--accent); border-color: var(--accent); }
+.avatar-remove-button[hidden] { display: none; }
 .avatar-save-hint { color: var(--text-muted); font-size: .6rem; line-height: 1.5; margin: .9rem 0 0; }
 @media (max-width: 760px) { .avatar-editor { position: absolute; left: 1.25rem; top: 0; } }
 @media (hover: none), (pointer: coarse) { .avatar-edit-overlay { opacity: 1; inset: auto 0 0 auto; width: 28px; height: 28px; border: 2px solid var(--profile-panel); background: var(--profile-cover); } .avatar-edit-overlay svg { width: 15px; height: 15px; } }

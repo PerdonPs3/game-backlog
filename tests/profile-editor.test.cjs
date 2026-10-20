@@ -10,7 +10,8 @@ function setup(saved = false) {
     const photoEvents = {}, removeEvents = {}, imageEvents = {}, revoked = [];
     const color = { value: '#64748b' };
     const photo = { files: [], setCustomValidity(value) { this.validation = value; }, addEventListener(key, cb) { photoEvents[key] = cb; } };
-    const removePhoto = { checked: false, addEventListener(key, cb) { removeEvents[key] = cb; } };
+    const removePhoto = { value: '', disabled: true };
+    const removeButton = { hidden: true, addEventListener(key, cb) { removeEvents[key] = cb; } };
     const photoFeedback = {}, placeholder = { hidden: false };
     const photoPreview = { hidden: true, getAttribute() { return null; }, removeAttribute() { delete this.src; }, addEventListener(key, cb) { imageEvents[key] = cb; } };
     const name = { value: 'Alice' }, bio = { value: '' }, selected = { value: 'controller' };
@@ -20,7 +21,7 @@ function setup(saved = false) {
     const avatar = { style: { setProperty(key, value) { iconAttributes[key] = value; } } };
     const previewName = {}, previewBio = {}, counter = {};
     const fields = { '[name="display_name"]': name, '[name="bio"]': bio, '[name="avatar"]:checked': selected,
-        '[name="avatar_color"]': color, '[name="photo"]': photo, '[name="remove_photo"]': removePhoto, '[data-photo-feedback]': photoFeedback, '[data-profile-feedback]': feedback, '[data-save-profile]': save, '[data-bio-counter]': counter };
+        '[name="avatar_color"]': color, '[name="photo"]': photo, '[name="remove_photo"]': removePhoto, '[data-remove-photo]': removeButton, '[data-photo-feedback]': photoFeedback, '[data-profile-feedback]': feedback, '[data-save-profile]': save, '[data-bio-counter]': counter };
     const form = { querySelector: (key) => fields[key], addEventListener(key, callback) { events[key] = callback; },
         setAttribute(key, value) { attributes[key] = value; }, removeAttribute(key) { delete attributes[key]; } };
     const nodes = { '[data-profile-form]': form, '[data-profile-name]': previewName, '[data-profile-bio]': previewBio, '.player-avatar': avatar, '[data-avatar-photo]': photoPreview, '[data-avatar-placeholder]': placeholder, '[data-avatar-editor]': avatarEditor, ...fields };
@@ -29,7 +30,7 @@ function setup(saved = false) {
         URL: { createObjectURL() { return 'blob:preview'; }, revokeObjectURL(value) { revoked.push(value); } },
         document: { querySelector: () => editor, addEventListener(key, cb) { documentEvents[key] = cb; } }, window: { addEventListener(key, callback) { windowEvents[key] = callback; } },
     });
-    return { documentEvents, avatarEvents, avatarEditor, avatarTrigger, photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
+    return { removeButton, documentEvents, avatarEvents, avatarEditor, avatarTrigger, photo, color, removePhoto, photoEvents, removeEvents, imageEvents, photoPreview, placeholder, photoFeedback, revoked, name, bio, selected, feedback, save, avatar, previewName, previewBio, counter, events, windowEvents, attributes, iconAttributes };
 }
 
 test('updates the player card as text, avatar, and biography change without claiming a save', () => {
@@ -82,8 +83,12 @@ test('previews a bounded raster upload and revokes its URL when removed', () => 
     assert.equal(ui.photoPreview.src, 'blob:preview');
     assert.equal(ui.placeholder.hidden, true);
     assert.match(ui.photoFeedback.textContent, /Preview only/);
-    ui.removePhoto.checked = true;
-    ui.removeEvents.change();
+    assert.equal(ui.removeButton.hidden, false);
+    ui.photo.files = [];
+    ui.removeEvents.click();
+    assert.equal(ui.removePhoto.value, 'yes');
+    assert.equal(ui.removePhoto.disabled, false);
+    assert.equal(ui.removeButton.hidden, true);
     assert.equal(ui.photoPreview.hidden, true);
     assert.equal(ui.placeholder.hidden, false);
     assert.deepEqual(ui.revoked, ['blob:preview']);
@@ -123,4 +128,17 @@ test('invalid upload opens its options so the browser can show the validation er
     const ui = setup();
     ui.photoEvents.invalid();
     assert.equal(ui.avatarEditor.open, true);
+});
+
+
+test('remove action is absent without a photo and a replacement cancels pending removal', () => {
+    const ui = setup();
+    assert.equal(ui.removeButton.hidden, true);
+    ui.removeEvents.click();
+    ui.photo.files = [{ type: 'image/png', size: 1000 }];
+    ui.photoEvents.change();
+    assert.equal(ui.removePhoto.value, '');
+    assert.equal(ui.removePhoto.disabled, true);
+    assert.equal(ui.removeButton.hidden, false);
+    assert.equal(ui.photoPreview.hidden, false);
 });

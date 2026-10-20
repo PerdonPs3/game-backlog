@@ -13,6 +13,8 @@
     const color = editor.querySelector('[name="avatar_color"]');
     const photo = editor.querySelector('[name="photo"]');
     const removePhoto = editor.querySelector('[name="remove_photo"]');
+    const removeButton = editor.querySelector('[data-remove-photo]');
+    removeButton.type = 'button';
     const photoFeedback = editor.querySelector('[data-photo-feedback]');
     const photoPreview = editor.querySelector('[data-avatar-photo]');
     const placeholder = editor.querySelector('[data-avatar-placeholder]');
@@ -39,7 +41,7 @@
         const file = photo.files[0];
         photo.setCustomValidity('');
         photoFeedback.textContent = '';
-        if (file && !removePhoto.checked) {
+        if (file && removePhoto.value !== 'yes') {
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
                 const message = 'Choose a JPG, PNG, or WebP photo smaller than 2 MB.';
                 photo.setCustomValidity(message);
@@ -49,17 +51,26 @@
                 photoFeedback.textContent = 'Preview only. Save changes to keep your photo.';
             }
         }
-        const src = removePhoto.checked ? null : (previewUrl || savedPhoto);
+        const src = removePhoto.value === 'yes' ? null : (previewUrl || savedPhoto);
         photoPreview.hidden = !src;
+        removeButton.hidden = !src;
         placeholder.hidden = Boolean(src);
         if (src) photoPreview.src = src;
         else photoPreview.removeAttribute('src');
     }
     photo.addEventListener('change', () => {
-        removePhoto.checked = false;
+        removePhoto.value = '';
+        removePhoto.disabled = true;
         updatePhoto();
     });
-    removePhoto.addEventListener('change', updatePhoto);
+    removeButton.addEventListener('click', () => {
+        removePhoto.value = 'yes';
+        removePhoto.disabled = false;
+        photo.value = '';
+        updatePhoto();
+        updatePreview();
+        photoFeedback.textContent = 'Photo removed. Save your profile to keep this change.';
+    });
     photoPreview.addEventListener('error', () => {
         photoPreview.hidden = true;
         placeholder.hidden = false;

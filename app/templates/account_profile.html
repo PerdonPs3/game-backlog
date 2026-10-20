@@ -29,7 +29,8 @@
                     <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 2 MB. Cropped to a square.</p>
                     <p id="photo-feedback" class="profile-field-hint" role="status" aria-live="polite" data-photo-feedback></p>
                     <label class="avatar-color-label" for="avatar-color"><span>Background color<small>For your default avatar</small></span><input type="color" id="avatar-color" name="avatar_color" value="{{ avatar_color }}" form="profile-form"></label>
-                    <label class="avatar-reset-control"><input type="checkbox" name="remove_photo" value="yes" form="profile-form"> Use default avatar</label>
+                    <input type="hidden" name="remove_photo" value="" form="profile-form" disabled>
+                    <button class="avatar-remove-button" type="submit" name="remove_photo" value="yes" form="profile-form" data-remove-photo {% if not profile.has_photo %}hidden{% endif %}>Remove photo</button>
                     <p class="avatar-save-hint">Save your profile below to keep your changes.</p>
                 </div>
             </details>

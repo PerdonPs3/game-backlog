@@ -191,7 +191,8 @@ The authenticated `/account/profile/photo` endpoint serves only the current
 account's photo, with private no-store caching and content sniffing disabled.
 Removing a photo restores a silhouette with the selected background color.
 On the player card, hovering over the avatar reveals an edit pencil. Clicking it
-opens photo upload, background color, and default-avatar controls. The same
+opens photo upload and background color controls. A Remove photo button appears
+only when a photo is present and restores the colored silhouette. The same
 native disclosure works with a tap or keyboard; Escape and outside clicks close
 it. These controls submit with the profile form, even when the disclosure is
 closed. Nothing is persisted until the profile is saved.
