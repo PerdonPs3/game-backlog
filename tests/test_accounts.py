@@ -59,10 +59,13 @@ def submit(client, path, data, source=None):
     return client.post(path, data={**data, "csrf_token": parser.token})
 
 
-def sign_in(application, name):
+def sign_in(application, name, complete_profile=True):
     client = application.test_client()
     response = submit(client, "/account/login", {"email": name + "@example.test", "password": "test-password"})
     assert response.status_code == 302, response.get_data(as_text=True)
+    if complete_profile:
+        with application.app_context():
+            get_db().execute("UPDATE profiles SET display_name = ? WHERE id = ?", (name.capitalize(), ALICE if name == "alice" else BOB))
     return client
 
 
@@ -113,7 +116,7 @@ def test_private_collections_lists_statistics_and_exports(libraries):
         assert len(backup["games"]) == 1
         assert len(backup["lists"]) == 1
         assert "owner_id" not in json.dumps(backup)
-        assert "1 games" in client.get("/account/profile").get_data(as_text=True)
+        assert '<dd>1</dd>' in client.get("/account/profile").get_data(as_text=True)
 
 
 def test_tampered_game_and_list_ids_cannot_read_or_write(libraries):
@@ -156,7 +159,9 @@ def test_import_deduplication_and_memberships_are_per_account(libraries):
 def test_profile_is_private_validated_and_escaped(libraries):
     alice, bob, _ = libraries
     response = submit(alice, "/account/profile", {"display_name": "<script>Alice</script>", "bio": "<b>Hello</b>", "avatar": "ghost"})
-    assert "Profile saved" in response.get_data(as_text=True)
+    assert response.status_code == 303
+    response = alice.get(response.location)
+    assert "Changes saved" in response.get_data(as_text=True)
     assert "&lt;script&gt;Alice&lt;/script&gt;" in response.get_data(as_text=True)
     assert "Alice" not in bob.get("/account/profile").get_data(as_text=True)
     response = submit(alice, "/account/profile", {"display_name": "x" * 61, "avatar": "invalid"})
@@ -310,3 +315,75 @@ def test_game_create_update_delete_and_list_limits_use_current_owner(accounts):
     assert submit(alice, f"/games/{alice_id}/delete", {}).status_code == 302
     assert len(alice.get("/backups/export").json["games"]) == 0
     assert len(bob.get("/backups/export").json["games"]) == 1
+
+
+def test_first_login_requires_profile_before_library_and_saved_profile_unlocks_it(accounts):
+    client = sign_in(accounts, "alice", complete_profile=False)
+    for path in ("/library", "/lists", "/games/new", "/games/pick", "/backups/export"):
+        assert client.get(path).location.endswith("/account/profile")
+    response = client.get("/catalog/search?q=Portal", headers={"Accept": "application/json"})
+    assert response.status_code == 409 and response.json["profile_url"] == "/account/profile"
+    page = client.get("/account/profile")
+    assert "Create your profile" in page.get_data(as_text=True)
+    result = submit(client, "/account/profile", {"display_name": "New player", "bio": "", "avatar": "rocket"})
+    assert result.status_code == 303 and result.location.endswith("#profile-feedback")
+    saved = client.get(result.location)
+    assert "Your profile is ready" in saved.get_data(as_text=True)
+    assert 'data-saved="true"' in saved.get_data(as_text=True)
+    assert "Open library" in saved.get_data(as_text=True)
+    assert client.get("/library").status_code == 200
+    assert "Your profile is ready" not in client.get("/account/profile").get_data(as_text=True)
+    submit(client, "/account/logout", {}, source="/account/profile")
+    result = submit(client, "/account/login", {"email": "alice@example.test", "password": "test-password"})
+    assert result.location.endswith("/library")
+
+
+def test_invalid_setup_preserves_fields_and_does_not_unlock_collection(accounts):
+    client = sign_in(accounts, "alice", complete_profile=False)
+    response = submit(client, "/account/profile", {"display_name": "   ", "bio": "A story in progress", "avatar": "ghost"})
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200 and "Choose a name" in body
+    assert "A story in progress" in body
+    assert 'value="ghost" checked' in body
+    assert client.get("/library").location.endswith("/account/profile")
+
+
+def test_confirmed_registration_with_provider_session_goes_to_creator(accounts):
+    fake = accounts.extensions["supabase_auth"]
+    original = fake.call
+    def confirmed_signup(path, payload=None, token=None, method=None):
+        if path == "signup":
+            return {"access_token": "alice-access", "refresh_token": "alice-refresh", "expires_in": 3600}
+        return original(path, payload, token, method)
+    fake.call = confirmed_signup
+    client = accounts.test_client()
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    assert response.location.endswith("/account/profile")
+    assert "Create your profile" in client.get(response.location).get_data(as_text=True)
+
+
+def test_registration_still_requires_a_provider_confirmed_email(accounts):
+    fake = accounts.extensions["supabase_auth"]
+    original = fake.call
+    def unconfirmed_signup(path, payload=None, token=None, method=None):
+        if path == "signup":
+            return {"access_token": "alice-access", "refresh_token": "alice-refresh", "expires_in": 3600}
+        if path == "user":
+            return {"id": ALICE, "email_confirmed_at": None}
+        return original(path, payload, token, method)
+    fake.call = unconfirmed_signup
+    client = accounts.test_client()
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    assert "Registration could not be completed" in response.get_data(as_text=True)
+    assert client.get("/account/profile").location.endswith("/account/login")
+    with accounts.app_context():
+        assert get_db().execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 0
+
+
+def test_profile_save_feedback_is_specific_to_current_account_and_not_query_parameters(libraries):
+    alice, bob, _ = libraries
+    response = submit(alice, "/account/profile", {"display_name": "Alice", "avatar": "star", "bio": "Saved biography"})
+    assert response.status_code == 303
+    assert 'data-saved="true"' in alice.get(response.location).get_data(as_text=True)
+    assert 'data-saved="true"' not in bob.get("/account/profile?saved=1").get_data(as_text=True)
+    assert 'data-saved="true"' not in alice.get("/account/profile?saved=1").get_data(as_text=True)

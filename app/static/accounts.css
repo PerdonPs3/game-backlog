@@ -12,3 +12,93 @@
 .account-links a, .account-navigation a { text-underline-offset: .2em; }
 .account-form .account-wide, .account-form .account-submit { grid-column: 1 / -1; }
 .account-form .account-submit { justify-self: start; }
+
+/* Player identity: live card and an accessible, progressively enhanced editor. */
+.profile-workspace {
+    --profile-panel: #17222e;
+    --profile-field: #101923;
+    --profile-cover: #263443;
+    --profile-line: #ffffff14;
+    --profile-tint: #e3b34114;
+    --profile-success: #a1e5bd;
+}
+.profile-workspace .workspace-panel { padding: 0; border: 0; background: none; box-shadow: none; }
+.profile-workspace .workspace-hero { padding: 1.5rem 2rem; }
+.profile-workspace .workspace-hero h1 { font-size: clamp(2rem, 4vw, 2.75rem); }
+.profile-setup-badge { color: var(--text-muted); font-size: .7rem; border: 1px solid var(--border); border-radius: 20px; padding: .35rem .75rem; }
+.profile-editor { display: grid; grid-template-columns: minmax(240px, 310px) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.profile-symbols { position: absolute; pointer-events: none; }
+.player-card, .profile-editor-form { min-width: 0; border: 1px solid var(--border); border-radius: 18px; background: var(--profile-panel); overflow: hidden; box-shadow: 0 12px 32px #0002; }
+.player-card { position: sticky; top: 1.5rem; }
+.player-card-cover {
+    display: flex; justify-content: space-between; gap: .5rem; align-items: start;
+    min-height: 105px; padding: 1.1rem;
+    background: linear-gradient(135deg, transparent 45%, var(--profile-tint) 45%, var(--profile-tint) 65%, transparent 65%), linear-gradient(150deg, var(--profile-cover), var(--profile-panel));
+    border-bottom: 1px solid var(--profile-line);
+}
+.player-card-label { padding-top: .25rem; font-size: .55rem; letter-spacing: .12em; color: var(--text-muted); }
+.player-private { border: 1px solid var(--profile-line); border-radius: 20px; padding: .25rem .5rem; font-size: .6rem; color: var(--text-muted); }
+.player-card-content { padding: 0 1.5rem 1.25rem; }
+.player-avatar { width: 86px; height: 86px; display: grid; place-items: center; position: relative; margin-top: -43px; margin-bottom: 1.5rem; border: 5px solid var(--profile-panel); border-radius: 24px; background: var(--profile-cover); color: var(--accent); box-shadow: 0 6px 20px #0002; }
+.player-avatar svg { width: 53px; height: 53px; }
+.player-card-kicker, .profile-eyebrow { color: var(--accent); font-size: .6rem; letter-spacing: .13em; font-weight: 700; text-transform: uppercase; }
+.player-card h2 { margin: .6rem 0; font-size: 1.6rem; letter-spacing: -.04em; overflow-wrap: anywhere; line-height: 1.2; }
+.player-bio { min-height: 3rem; margin: .75rem 0 1.5rem; color: var(--text-muted); font-size: .85rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.player-card-rule { height: 1px; background: var(--profile-line); }
+.player-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.25rem 0; }
+.player-stats div { display: flex; flex-direction: column-reverse; gap: .25rem; }
+.player-stats dt { color: var(--text-muted); font-size: .6rem; }
+.player-stats dd { margin: 0; font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.player-card-note { margin: 0; color: var(--text-muted); font-size: .65rem; line-height: 1.6; }
+.workspace-form.profile-editor-form { display: flex; flex-direction: column; gap: 1.4rem; padding: 1.75rem; margin: 0; }
+.profile-form-heading h2 { margin: .4rem 0; font-size: 1.3rem; letter-spacing: -.03em; }
+.profile-form-heading p { margin: 0; }
+.profile-form-heading > p:last-child { color: var(--text-muted); font-size: .8rem; margin-top: .5rem; }
+.profile-field label { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.profile-field label > span { color: var(--text-muted); font-size: .65rem; font-weight: 400; }
+.profile-editor-form .profile-field input, .profile-editor-form .profile-field textarea { background: var(--profile-field); border-color: var(--border); font-size: .85rem; }
+.profile-editor-form .profile-field textarea { min-height: 90px; }
+.profile-field-hint { color: var(--text-muted); font-size: .65rem; margin: .5rem 0 0; line-height: 1.5; }
+.profile-editor-form .profile-avatar-picker { margin: 0; padding: 0; border: 0; min-width: 0; }
+.profile-avatar-picker legend { margin-bottom: .65rem; font-size: .8rem; font-weight: 600; }
+.profile-avatar-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
+.profile-editor-form .profile-avatar-option { position: relative; display: block; margin: 0; cursor: pointer; }
+.profile-editor-form .profile-avatar-option input { position: absolute; opacity: 0; width: 1px; height: 1px; padding: 0; margin: 0; border: 0; clip-path: inset(50%); }
+.profile-avatar-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: .9rem .25rem .65rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-field); color: var(--text-muted); font-size: .65rem; font-weight: 400; transition: border-color .15s, background .15s; }
+.profile-avatar-tile > svg { width: 34px; height: 34px; }
+.profile-avatar-option input:checked + .profile-avatar-tile { color: var(--accent); border-color: var(--accent); background: var(--profile-tint); }
+.profile-avatar-option input:focus-visible + .profile-avatar-tile { outline: 2px solid var(--accent); outline-offset: 4px; }
+.profile-avatar-option:hover .profile-avatar-tile { border-color: var(--accent); }
+.avatar-selected { display: none; position: absolute; right: .4rem; top: .2rem; font-size: .7rem; }
+.profile-avatar-option input:checked + .profile-avatar-tile .avatar-selected { display: block; }
+.profile-bio-footer { display: flex; justify-content: space-between; gap: .75rem; font-size: .6rem; line-height: 1.5; color: var(--text-muted); margin-top: .4rem; }
+.profile-bio-footer > span:last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.profile-save-bar { padding-top: 1.25rem; border-top: 1px solid var(--profile-line); }
+.profile-save-actions { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.profile-save-actions button { margin: 0; padding: .8rem 1.25rem; display: inline-flex; justify-content: center; gap: 1.75rem; align-items: center; font-size: .8rem; }
+.profile-save-actions a { color: var(--text-muted); font-size: .75rem; text-decoration: none; }
+.profile-save-actions a:hover { color: var(--accent); }
+.profile-save-actions button:disabled { opacity: .7; cursor: wait; }
+.profile-feedback { margin: .9rem 0 0; color: var(--text-muted); font-size: .7rem; line-height: 1.6; scroll-margin-block: 2rem; }
+.profile-feedback.is-saved { padding: .65rem .8rem; border: 1px solid color-mix(in srgb, var(--profile-success) 35%, transparent); border-radius: 9px; color: var(--profile-success); background: color-mix(in srgb, var(--profile-success) 7%, transparent); }
+.profile-feedback:focus { outline: 2px solid var(--accent); outline-offset: 4px; }
+.profile-editor-form .profile-error { margin: 0; }
+html[data-theme="light"] .profile-workspace { --profile-panel: #ffffff; --profile-field: #fcfaff; --profile-cover: #eee5f8; --profile-line: #7042b722; --profile-tint: #7042b711; --profile-success: #246741; }
+html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; border: 0; background: transparent; box-shadow: none; }
+@media (max-width: 760px) {
+    .profile-editor { grid-template-columns: minmax(0, 1fr); }
+    .player-card { position: static; }
+    .player-card-cover { min-height: 80px; }
+    .player-card-content { position: relative; padding: 1.25rem; padding-left: 125px; min-height: 175px; }
+    .player-avatar { position: absolute; left: 1.25rem; top: 0; }
+    .player-card-kicker { margin: 0; }
+    .player-bio { min-height: 0; margin-bottom: 1rem; }
+    .player-stats { margin-bottom: .75rem; }
+    .workspace-form.profile-editor-form { padding: 1.25rem; }
+}
+@media (max-width: 400px) {
+    .profile-avatar-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-bio-footer > span:first-child { max-width: 70%; }
+    .profile-workspace .workspace-hero { padding: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) { .profile-avatar-tile { transition: none; } }

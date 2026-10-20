@@ -17,7 +17,7 @@
         {% include '_account_nav.html' %}
         <nav class="workspace-nav" aria-label="Collection navigation">
             <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
-            <a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>
+            {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
         </nav>
         <header class="workspace-hero">
             <div>
