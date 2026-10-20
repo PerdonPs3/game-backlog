@@ -32,7 +32,8 @@ class FakeAuth:
             name = payload.get("email", payload.get("refresh_token", "alice")).split("@")[0].split("-")[0]
             return {"access_token": name + "-access", "refresh_token": name + "-refresh", "expires_in": 3600}
         if path == "user" and method != "PUT":
-            return {"id": ALICE if token.startswith("alice") else BOB, "email_confirmed_at": "2026-10-19T00:00:00Z"}
+            name = "alice" if token.startswith("alice") else "bob"
+            return {"id": ALICE if name == "alice" else BOB, "email": name + "@example.test", "email_confirmed_at": "2026-10-19T00:00:00Z"}
         return {}
 
 
@@ -235,6 +236,47 @@ def test_legacy_collection_requires_explicit_assignment(libraries, accounts):
     result = runner.invoke(args=["assign-legacy-collection", "--user-id", ALICE, "--apply"])
     assert result.exit_code == 0, result.output
     assert "Legacy private game" in alice.get("/library").get_data(as_text=True)
+
+
+def test_default_recovery_email_uses_browser_bound_pkce(accounts):
+    from base64 import urlsafe_b64encode
+    from hashlib import sha256
+    client = accounts.test_client()
+    submit(client, "/account/recover", {"email": "alice@example.test"})
+    fake = accounts.extensions["supabase_auth"]
+    call = next(call for call in fake.calls if call[0] == "recover")
+    with client.session_transaction() as cookie:
+        verifier = cookie["recovery_verifier"]
+    assert call[1]["code_challenge_method"] == "s256"
+    assert call[1]["code_challenge"] == urlsafe_b64encode(sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+    assert verifier not in str(call)
+    code = "33333333-3333-4333-8333-333333333333"
+    unrelated = accounts.test_client()
+    assert unrelated.get("/account/login?code=" + code).location.endswith("/account/recover")
+    assert not any(call[0] == "token?grant_type=pkce" for call in fake.calls)
+    response = client.get("/account/login?code=" + code)
+    assert response.location.endswith("/account/password")
+    assert "code=" not in response.location
+    assert client.get("/library").location.endswith("/account/password")
+    assert client.get("/account/login?code=" + code).location.endswith("/account/recover")
+
+
+@pytest.mark.parametrize("failure", ["expired", "malformed", "provider", "wrong-email"])
+def test_recovery_links_fail_closed(accounts, failure):
+    client = accounts.test_client()
+    submit(client, "/account/recover", {"email": "bob@example.test" if failure == "wrong-email" else "alice@example.test"})
+    if failure == "expired":
+        with client.session_transaction() as cookie:
+            cookie["recovery_started"] = 0
+    if failure == "provider":
+        accounts.extensions["supabase_auth"].invalid = True
+    code = "invalid" if failure == "malformed" else "33333333-3333-4333-8333-333333333333"
+    response = client.get("/account/login?code=" + code)
+    assert response.location.endswith("/account/recover")
+    assert client.get("/library").location.endswith("/account/login")
+    with client.session_transaction() as cookie:
+        assert "recovery_verifier" not in cookie
+        assert "account_session" not in cookie
 
 
 def test_database_tables_remain_denied_to_public_api_roles(accounts):

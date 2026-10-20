@@ -1,6 +1,7 @@
 """Supabase password authentication with opaque, server-side sessions."""
 
 from hashlib import sha256
+from base64 import urlsafe_b64encode
 import json
 from secrets import token_urlsafe
 from time import time
@@ -9,7 +10,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import UUID
 
 import click
-from flask import Blueprint, abort, current_app, g, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
 from flask.cli import with_appcontext
 
 from app.db import get_db
@@ -171,6 +172,8 @@ def credentials():
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "GET" and "code" in request.args:
+        return complete_recovery_link()
     error = None
     status = 200
     if request.method == "POST":
@@ -183,6 +186,28 @@ def login():
             status = 503 if problem.unavailable else 400
             error = "Account services are temporarily unavailable. Try again shortly." if problem.unavailable else "Could not sign in. Check your credentials and confirm your email."
     return render_template("account_auth.html", mode="login", error=error), status
+
+
+def complete_recovery_link():
+    """Exchange a one-use code bound to this browser's recovery request."""
+    verifier = session.pop("recovery_verifier", None)
+    started = session.pop("recovery_started", None)
+    email = session.pop("recovery_email", None)
+    try:
+        code = str(UUID(request.args.get("code", "")))
+        if not isinstance(verifier, str) or not 43 <= len(verifier) <= 128 or type(started) is not int or not 0 <= time() - started <= 1800 or not isinstance(email, str):
+            raise ValueError("No active recovery request")
+        payload = provider().call("token?grant_type=pkce", {"auth_code": code, "code_verifier": verifier})
+        access, _, _ = token_fields(payload)
+        user = verified_user(access)
+        if user.get("email", "").casefold() != email.casefold():
+            raise AuthError()
+        start_session(payload, recovery=True)
+        return redirect(url_for("auth.password"))
+    except (ValueError, AuthError):
+        flash("This recovery link is invalid, expired, or unavailable. Request a new link and open it in the same browser.", "account")
+        # Remove the code from the address bar, including on failed exchanges.
+        return redirect(url_for("auth.recover"))
 
 
 @auth.route("/register", methods=["GET", "POST"])
@@ -208,11 +233,16 @@ def recover():
         if not email or len(email) > 254 or "@" not in email:
             error = "Enter a valid email address."
         else:
+            verifier = token_urlsafe(48)
+            session["recovery_verifier"] = verifier
+            session["recovery_started"] = int(time())
+            session["recovery_email"] = email
+            challenge = urlsafe_b64encode(sha256(verifier.encode()).digest()).rstrip(b"=").decode()
             try:
-                provider().call("recover", {"email": email})
+                provider().call("recover", {"email": email, "code_challenge": challenge, "code_challenge_method": "s256"})
             except AuthError:
                 pass
-            message = "If an account exists, a recovery email will arrive shortly. Enter its code below."
+            message = "If an account exists, a recovery email will arrive shortly. Open its link in this browser within 30 minutes. If the email contains a code instead, use I have a recovery code."
     return render_template("account_auth.html", mode="recover", error=error, message=message)
 
 

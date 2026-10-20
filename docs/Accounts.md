@@ -44,9 +44,14 @@ In the **development** project:
 3. The standard signup confirmation link can stay in the confirmation email.
    After confirming, users sign in with their email and password. The application
    does not accept tokens from URL fragments as authenticated server sessions.
-4. In **Authentication → Email templates → Reset password**, use the code-based
-   template below. Recovery uses an email plus a one-time code instead of a URL
-   carrying credentials. Do not keep a default reset link as the only action.
+4. Keep the default **Reset password** email for initial testing. Recovery uses a
+   PKCE link bound to the browser that requested it. Open the email link in that
+   browser within 30 minutes. The callback exchanges a one-use authorization code
+   on the server and removes it from the address bar before showing the password
+   form. Access and refresh tokens do not travel in the callback URL.
+
+   After configuring custom SMTP, you may optionally replace the reset email
+   with the code-based template below. The application supports both flows.
 
 ```html
 <h2>Reset your Vestigium password</h2>
@@ -55,7 +60,8 @@ In the **development** project:
 <p>If you did not request this email, you can ignore it.</p>
 ```
 
-5. Configure SMTP for reliable registration and recovery emails. Supabase's
+5. Configure SMTP for reliable registration and recovery emails and to customize
+   templates where the dashboard requires it. Supabase's
    default mail service is limited and may restrict delivery to organization
    members; verify its current dashboard limits before inviting testers. Provider
    rate limits remain active. CAPTCHA is not integrated in this delivery.
@@ -114,8 +120,10 @@ appear in exported backups.
 
 - The server validates Supabase's current user before each authenticated request.
   It refreshes expiring access tokens while holding a database session-row lock.
-- Browser cookies contain a random session reference, not access/refresh tokens,
-  user IDs, passwords, or database credentials. The database stores a hash of the
+- Browser cookies contain a random account session reference, not access/refresh
+  tokens, user IDs, passwords, or database credentials. A pending recovery request
+  additionally stores a temporary PKCE verifier, its email, and its creation time
+  in the signed, HttpOnly cookie. The database stores a hash of the
   reference and the provider tokens. Sessions expire after twelve hours; signing
   out removes the local session even if the provider is unavailable.
 - Provider tokens are sensitive server-side database records. RLS with no public
@@ -130,7 +138,9 @@ appear in exported backups.
   remain available only to offline administration until assigned.
 - Private responses use `private, no-store`; writes use CSRF-protected POST.
   Authentication outages fail closed. Recovery sessions cannot browse a library;
-  completing recovery deletes all application sessions for that account.
+  completing recovery deletes all application sessions for that account. Recovery
+  links require the originating browser, the expected email, and a valid one-use
+  provider code; missing, expired, replayed, or mismatched requests fail closed.
 - Profiles have a display name, an optional bio, and a built-in avatar. Profiles
   and libraries are private; public profiles and uploaded avatars are future work.
 

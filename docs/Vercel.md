@@ -80,8 +80,8 @@ The development Supabase database must already pass the `migrate-db` and
 `check-db` workflow in the [PostgreSQL guide](PostgreSQL.md). A Preview build must
 not create or change tables automatically.
 
-Follow [the account setup guide](Accounts.md), including the recovery email
-template and two-account isolation checks. Preview and Production must reference
+Follow [the account setup guide](Accounts.md), including same-browser recovery
+links and two-account isolation checks. Preview and Production must reference
 different Supabase projects. Hosted startup fails if account configuration is
 missing, instead of exposing the previous shared collection.
 

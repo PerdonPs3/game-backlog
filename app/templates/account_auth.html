@@ -6,6 +6,7 @@
 {% block page_description %}Keep your library, lists, and gaming memories in your own private account.{% endblock %}
 {% block panel_label %}Account access{% endblock %}
 {% block panel %}
+{% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
 {% if error %}<p role="alert">{{ error }}</p>{% endif %}
 {% if message %}<p role="status">{{ message }}</p>{% endif %}
 <form method="post" class="workspace-form">

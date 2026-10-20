@@ -15,7 +15,7 @@ input validation, and automated testing.
 
 ## Features
 
-- Hosted accounts with Supabase email/password authentication, recovery codes, and private libraries. See [account and environment setup](docs/Accounts.md) before deploying this version.
+- Hosted accounts with Supabase email/password authentication, recovery links and codes, and private libraries. See [account and environment setup](docs/Accounts.md) before deploying this version.
 - Private profiles with a display name, bio, built-in avatar, and personal collection counts.
 - Add, view, edit, and delete games.
 - Create and rename personal lists, include a game in several lists, and filter the library by list alongside search and status. Removing a list never removes its games.
