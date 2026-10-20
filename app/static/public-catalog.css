@@ -55,5 +55,14 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 
 .catalog-public-search .catalog-input-wrapper { flex: 1; min-width: 0; }
 .catalog-public-search input { width: 100%; box-sizing: border-box; }
+.catalog-public-search .catalog-search-filters { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.catalog-search-filters label { margin: 0; font-size: .8rem; }
+.catalog-search-filters select { width: auto; max-width: 100%; padding: .5rem .7rem; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; font-size: .8rem; }
+.catalog-search-filters a { margin-left: auto; font-size: .75rem; }
+.catalog-public-search .catalog-filter-note { margin: .6rem 0 0; color: var(--text-muted); font-size: .7rem; }
+.catalog-public-search p:has(#catalog-message:empty) { display: none; }
+.catalog-pagination { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin: 2rem 0; font-size: .85rem; }
+.catalog-pagination a { padding: .65rem .9rem; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--accent); }
+.catalog-result-copy .catalog-community-tag { display: inline-block; margin-top: .5rem; padding: .2rem .5rem; border: 1px solid var(--border); border-radius: 20px; color: var(--accent); font-size: .6rem; }
 .catalog-public-search .catalog-option { padding: .75rem; font-size: .85rem; }
 .catalog-public-search .catalog-option strong { display: block; }

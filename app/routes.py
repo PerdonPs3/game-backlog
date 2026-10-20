@@ -256,12 +256,15 @@ def game_details(game_id):
 @main.get("/catalog/search")
 def catalog_search():
     term = request.args.get("q", "").strip()
+    content = request.args.get("content", "official")
+    if content not in ("official", "all"):
+        return jsonify(error="Choose a valid catalog filter."), 400
     if len(term) > 200:
         return jsonify(error="Search must contain no more than 200 characters."), 400
     if len(term) < 2:
         return jsonify(games=[])
     try:
-        games = get_catalog().search_games(term)
+        games = get_catalog().search_games(term, include_community=content == "all")[:10]
     except CatalogError:
         return jsonify(error="The catalog is unavailable. Please try again shortly."), 503
     return jsonify(games=[game_suggestion(game) for game in games])

@@ -6,7 +6,7 @@ from time import monotonic
 
 from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
-from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id
+from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game
 from app.catalog_journey import remember_selection, take_selection
 
 
@@ -39,6 +39,7 @@ def public_request_allowed():
 def catalog_card(game):
     suggestion = game_suggestion(game)
     return {**suggestion, 'name': suggestion['name'][:200],
+            'community': is_community_game(game),
             'platforms': suggestion['platforms'][:60],
             'cover_url': collection_cover_url(cover_image_id(game))}
 
@@ -46,6 +47,14 @@ def catalog_card(game):
 @explore.get('')
 def index():
     term = request.args.get('q', '').strip()
+    content = request.args.get('content', 'official')
+    try:
+        page = int(request.args.get('page', '1'))
+    except ValueError:
+        abort(400)
+    if content not in ('official', 'all') or not 1 <= page <= 17:
+        abort(400)
+    total = 0
     games, error, status = [], None, 200
     if len(term) > 200:
         error, status = 'Search must contain no more than 200 characters.', 400
@@ -54,16 +63,25 @@ def index():
             error, status = 'The catalog is busy. Please wait a minute and try again.', 429
         else:
             try:
-                games = [catalog_card(game) for game in get_catalog().search_games(term)[:30]
+                results = get_catalog().search_games(term, include_community=content == 'all')[:500]
+                total = len(results)
+                if page > max(1, (total + 29) // 30):
+                    abort(404)
+                games = [catalog_card(game) for game in results[(page - 1) * 30:page * 30]
                          if type(game.get('id')) is int and 0 < game['id'] < 2**63]
             except CatalogError:
                 error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
-    return render_template('explore.html', query=term[:200], games=games, error=error), status
+    return render_template('explore.html', query=term[:200], games=games, error=error,
+                           content=content, page=page, total=total,
+                           pages=max(1, (total + 29) // 30)), status
 
 
 @explore.get('/suggestions')
 def suggestions():
     term = request.args.get('q', '').strip()
+    content = request.args.get('content', 'official')
+    if content not in ('official', 'all'):
+        return jsonify(error='Choose a valid catalog filter.'), 400
     if len(term) > 200:
         return jsonify(error='Search must contain no more than 200 characters.'), 400
     if len(term) < 2:
@@ -71,7 +89,7 @@ def suggestions():
     if not public_request_allowed():
         return jsonify(error='The catalog is busy. Please wait a minute and try again.'), 429
     try:
-        games = [catalog_card(game) for game in get_catalog().search_games(term)[:10]
+        games = [catalog_card(game) for game in get_catalog().search_games(term, include_community=content == 'all')[:10]
                  if type(game.get('id')) is int and 0 < game['id'] < 2**63]
     except CatalogError:
         return jsonify(error='The catalog is temporarily unavailable. Please try again shortly.'), 503

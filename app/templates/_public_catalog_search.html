@@ -8,5 +8,8 @@
         </div>
         <button type="submit"{% if compact_search %} aria-label="Search games"{% endif %}>{% if compact_search %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>{% else %}Search ↗{% endif %}</button>
     </div>
-    {% if compact_search %}<p class="welcome-search-status"><span id="catalog-message" role="status"></span></p>{% else %}<p><span id="catalog-message" role="status">Type at least 2 characters.</span> <a href="{{ url_for('explore.index') }}">Clear search</a></p>{% endif %}
+    {% if compact_search %}<p class="welcome-search-status"><span id="catalog-message" role="status"></span></p>{% else %}
+    <div class="catalog-search-filters"><label for="catalog-content">Show</label><select id="catalog-content" name="content" data-catalog-content><option value="official"{% if content|default('official') == 'official' %} selected{% endif %}>Official games</option><option value="all"{% if content == 'all' %} selected{% endif %}>Include mods &amp; fan games</option></select><a href="{{ url_for('explore.index') }}">Clear search</a></div>
+    <p class="catalog-filter-note">Based on IGDB types and tags; untagged community games may still appear.</p>
+    <p><span id="catalog-message" role="status"></span></p>{% endif %}
 </form>

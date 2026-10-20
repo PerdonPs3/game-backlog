@@ -8,6 +8,7 @@
     const input = picker.querySelector(browsing ? "#catalog-query" : "#title");
     const results = picker.querySelector("#catalog-results");
     const message = picker.querySelector("#catalog-message");
+    const content = picker.querySelector("[data-catalog-content]");
     const platform = document.querySelector("#platform");
     const gameId = document.querySelector("#igdb-id");
     const submit = document.querySelector("#add-game-button");
@@ -145,7 +146,7 @@
         message.textContent = browsing ? `${games.length} matches.` : `${games.length} suggestions. Use arrow keys and Enter, or click a game.`;
     }
 
-    input.addEventListener("input", () => {
+    function search() {
         clearTimeout(timer);
         controller?.abort();
         const currentRevision = ++revision;
@@ -163,6 +164,7 @@
             try {
                 const url = new URL(picker.dataset.catalogUrl, window.location.origin);
                 url.searchParams.set("q", term);
+                if (content) url.searchParams.set("content", content.value);
                 const response = await fetch(url, {
                     signal: controller.signal,
                     headers: { Accept: "application/json" },
@@ -177,7 +179,9 @@
                 message.textContent = "Could not load suggestions. Please try again shortly.";
             }
         }, 450);
-    });
+    }
+    input.addEventListener("input", search);
+    content?.addEventListener("change", search);
 
     input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {

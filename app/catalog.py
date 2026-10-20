@@ -79,7 +79,7 @@ class IGDBClient:
         self._expires_at = monotonic() + max(0, lifetime - 30)
         return token
 
-    def search_games(self, term):
+    def search_games(self, term, *, include_community=False):
         """Cache short-lived results and serialize this process's API requests."""
         term = term.strip()
         if len(term) > 200:
@@ -87,35 +87,46 @@ class IGDBClient:
         if len(term) < 2:
             return []
         with self._lock:
-            cached = self._search_cache.get(term.casefold())
+            cache_key = (term.casefold(), include_community)
+            cached = self._search_cache.get(cache_key)
             if cached and monotonic() < cached[0]:
                 return cached[1]
-            games = self._search_games(term)
+            games = self._search_games(term, include_community=include_community)
             if len(self._search_cache) >= 64:
                 self._search_cache.clear()
-            self._search_cache[term.casefold()] = (monotonic() + 30, games)
+            self._search_cache[cache_key] = (monotonic() + 30, games)
             return games
 
-    def _search_games(self, term):
+    def _search_games(self, term, *, include_community=False):
         term = term.strip()
         if len(term) > 200:
             raise CatalogError("Search must contain no more than 200 characters.")
         if len(term) < 2:
             return []
 
-        # JSON quoting escapes quotes/backslashes in the API's query language.
+        # Match every word, including aliases, without requiring an exact phrase.
+        words = list(dict.fromkeys(re.findall(r"[^\W_]+", term, re.UNICODE)))
+        if not words:
+            return []
+        matches = " & ".join(
+            f"(name ~ *{json.dumps(word)}* | alternative_names.name ~ *{json.dumps(word)}*)"
+            for word in words
+        )
+        excluded = ["Bundle", "Pack", "Pack / Addon", "Port", "bundle", "pack", "port"]
+        if not include_community:
+            excluded.extend(["Mod", "mod", "Fan Game", "fan game"])
         query = (
-            f"search {json.dumps(term)}; "
-            f"fields {GAME_FIELDS}; "
-            'where version_parent = null & game_type.type != '
-            '("Bundle","Pack","Port","bundle","pack","port"); '
-            "limit 30;"
+            f"fields {GAME_FIELDS},total_rating_count,keywords.name; "
+            f"where ({matches}) & version_parent = null & game_type.type != "
+            f"({','.join(json.dumps(value) for value in excluded)}); "
+            "sort total_rating_count desc; limit 500;"
         )
         games = self._query_games(query)
         # Keep distinct remakes/remasters, but never repeat the same catalog ID.
         unique = {}
         for game in games:
-            if not is_game_pack(game) and not is_game_variant(game):
+            if (not is_game_pack(game) and not is_game_variant(game)
+                    and (include_community or not is_community_game(game))):
                 unique.setdefault(game["id"], game)
         return sorted(unique.values(), key=lambda game: search_sort_key(game, term))
 
@@ -209,11 +220,28 @@ GAME_FIELDS = (
 
 
 def search_sort_key(game, term):
-    """Exact titles, title prefixes, then other matches; newest within each group."""
+    """Prefer exact titles and official entries, then rating-count popularity."""
     title = " ".join(game["name"].casefold().split())
     search = " ".join(term.casefold().split())
     relevance = 0 if title == search else 1 if title.startswith(search) else 2
-    return (relevance, *release_date_sort_key(game))
+    count = game.get("total_rating_count")
+    popularity = count if type(count) is int and count > 0 else 0
+    return (0 if relevance == 0 else 1, is_community_game(game), -popularity,
+            relevance, *release_date_sort_key(game))
+
+
+def is_community_game(game):
+    """Use provider classification, never infer licensing from a title."""
+    kind = game.get("game_type")
+    if isinstance(kind, dict) and str(kind.get("type", "")).casefold() in ("mod", "fan game", "fangame"):
+        return True
+    keywords = game.get("keywords", [])
+    if not isinstance(keywords, list):
+        return False
+    return any(isinstance(keyword, dict) and any(
+        marker in str(keyword.get("name", "")).casefold()
+        for marker in ("fangame", "fan game", "rom hack", "romhack")
+    ) for keyword in keywords)
 
 
 def release_date_sort_key(game):
@@ -241,7 +269,7 @@ def is_game_variant(game):
 def is_game_pack(game):
     game_type = game.get("game_type")
     return isinstance(game_type, dict) and str(game_type.get("type", "")).casefold() in (
-        "bundle", "pack",
+        "bundle", "pack", "pack / addon",
     )
 
 

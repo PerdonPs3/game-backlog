@@ -27,11 +27,15 @@ class Element {
     scrollIntoView() {}
 }
 
-function setup(browsing = false) {
+function setup(browsing = false, withFilter = false) {
     const elements = Object.fromEntries([
         "title", "catalog-query", "catalog-results", "catalog-message", "platform", "igdb-id",
         "add-game-button", "platform-message",
     ].map((id) => [`#${id}`, new Element()]));
+    if (withFilter) {
+        elements['[data-catalog-content]'] = new Element();
+        elements['[data-catalog-content]'].value = 'official';
+    }
     const picker = new Element();
     picker.dataset = { catalogUrl: "/catalog/search", detailsUrl: "/catalog/games/0" };
     if (browsing) picker.dataset = { catalogUrl: "/explore/suggestions", browseUrl: "/explore/games/0" };
@@ -61,7 +65,7 @@ function setup(browsing = false) {
     runInNewContext(readFileSync(join(__dirname, "../app/static/catalog-search.js"), "utf8"), context);
     return {
         ...Object.fromEntries(Object.entries(elements).map(([key, value]) => [key.slice(1), value])),
-        requests, navigations,
+        requests, navigations, content: elements['[data-catalog-content]'],
         flush: () => scheduled(),
         async search(games) {
             const input = elements[browsing ? "#catalog-query" : "#title"];
@@ -180,4 +184,21 @@ test("public suggestions discard stale searches and remain closed after Escape",
     assert.equal(ui["catalog-results"].hidden, true);
     input.fire("keydown", { key: "Enter" });
     assert.deepEqual(ui.navigations, []);
+});
+
+test('changing the content filter cancels stale suggestions and searches the chosen scope', async () => {
+    const ui = setup(true, true);
+    ui['catalog-query'].value = 'zelda';
+    ui['catalog-query'].fire('input');
+    const originalRequest = ui.flush();
+    assert.match(ui.requests[0].url, /content=official/);
+    ui.content.value = 'all';
+    ui.content.fire('change');
+    const filteredRequest = ui.flush();
+    assert.match(ui.requests[1].url, /content=all/);
+    ui.requests[1].reply({games: [remake]}); await filteredRequest;
+    ui.requests[0].reply({games: [original]}); await originalRequest;
+    assert.equal(ui['catalog-results'].children.length, 1);
+    await ui['catalog-results'].children[0].fire('click');
+    assert.deepEqual(ui.navigations, ['/explore/games/2']);
 });

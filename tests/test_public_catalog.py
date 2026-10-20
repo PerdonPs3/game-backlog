@@ -194,3 +194,24 @@ def test_public_suggestions_are_bounded_and_share_the_provider_budget(app):
     assert limited.status_code == 429 and limited.headers['Retry-After'] == '60'
     assert catalog.search_games.call_count == 2
     assert 'data-browse-url="/explore/games/0"' in client.get('/explore').get_data(as_text=True)
+
+
+def test_filtered_search_paginates_and_preserves_the_filter(app):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [{**GAME, 'id': n, 'name': f'Match {n:03d}'} for n in range(1, 66)]
+    client = app.test_client()
+    first = client.get('/explore?q=zelda&content=all').get_data(as_text=True)
+    assert 'Match 001' in first and 'Match 030' in first and 'Match 031' not in first
+    assert 'content=all' in first and 'page=2' in first
+    second = client.get('/explore?q=zelda&content=all&page=2').get_data(as_text=True)
+    assert 'Match 031' in second and 'Match 060' in second and 'Match 001' not in second
+    catalog.search_games.assert_called_with('zelda', include_community=True)
+    client.get('/explore/suggestions?q=zelda&content=official')
+    catalog.search_games.assert_called_with('zelda', include_community=False)
+
+
+@pytest.mark.parametrize('url', ['/explore?q=zelda&content=invalid', '/explore?q=zelda&page=-1', '/explore?q=zelda&page=oops', '/explore?q=zelda&page=999', '/explore/suggestions?q=zelda&content=invalid', '/catalog/search?q=zelda&content=invalid'])
+def test_invalid_catalog_filters_never_reach_provider(client, app, url):
+    catalog = fake_catalog(app)
+    assert client.get(url).status_code == 400
+    catalog.search_games.assert_not_called()

@@ -23,6 +23,7 @@ profile palette pilot, player profile, public catalog, guided homepage, and Disc
 - [x] Search an external game catalog instead of typing every detail manually.
       For example, searching **Resident** would return matching titles to choose from.
 - [x] Display covers and release years in suggestions, with available platforms after selection.
+- [x] Search title words and aliases with popularity-aware ordering, paginated Explore results, and an official/community content filter based on IGDB types and tags (local validation complete; Preview publication pending).
 - [x] Store catalog identifiers and validate the selected game and platform.
 - [x] Display game covers in the collection.
 - [x] Block duplicate catalog game/platform combinations and link to the existing entry.
