@@ -210,7 +210,7 @@ def test_expired_session_cannot_access_collection(accounts):
 def test_registration_confirmation_login_errors_and_csrf(accounts):
     client = accounts.test_client()
     assert client.post("/account/register", data={"email": "alice@example.test", "password": "test-password"}).status_code == 400
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert "Check your email" in response.get_data(as_text=True)
     assert client.get("/library").status_code == 302
     accounts.extensions["supabase_auth"].invalid = True
@@ -357,7 +357,7 @@ def test_confirmed_registration_with_provider_session_goes_to_creator(accounts):
         return original(path, payload, token, method)
     fake.call = confirmed_signup
     client = accounts.test_client()
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert response.location.endswith("/account/profile/edit")
     assert "Create your profile" in client.get(response.location).get_data(as_text=True)
 
@@ -373,7 +373,7 @@ def test_registration_still_requires_a_provider_confirmed_email(accounts):
         return original(path, payload, token, method)
     fake.call = unconfirmed_signup
     client = accounts.test_client()
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert "Registration could not be completed" in response.get_data(as_text=True)
     assert client.get("/account/profile/edit").location.endswith("/account/login")
     with accounts.app_context():
@@ -445,3 +445,28 @@ def test_profile_saves_chosen_crop_and_rejects_invalid_crop_without_replacing_ph
     result = submit(client, "/account/profile/edit", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":400}'})
     assert "Choose a crop inside" in result.get_data(as_text=True)
     assert client.get("/account/profile/photo").data == saved
+
+@pytest.mark.parametrize('confirmation', ['', 'different-password'])
+def test_registration_rejects_missing_or_mismatched_confirmation_before_provider(accounts, monkeypatch, confirmation):
+    from unittest.mock import Mock
+    call = Mock(side_effect=AssertionError('Invalid registration must not reach Supabase'))
+    monkeypatch.setattr(accounts.extensions['supabase_auth'], 'call', call)
+    response = submit(accounts.test_client(), '/account/register', {
+        'email': 'alice@example.test', 'password': 'test-password', 'confirmation': confirmation,
+    })
+    html = response.get_data(as_text=True)
+    assert 'Passwords do not match.' in html
+    assert 'value="test-password"' not in html
+    call.assert_not_called()
+
+
+def test_registration_accepts_more_than_eight_characters_and_has_matching_fields(accounts):
+    client = accounts.test_client()
+    page = client.get('/account/register').get_data(as_text=True)
+    assert 'id="confirmation"' in page and 'autocomplete="new-password"' in page
+    assert 'Min. 8' in page and 'Max. 128' in page
+    response = submit(client, '/account/register', {
+        'email': 'alice@example.test', 'password': 'a-longer-test-password',
+        'confirmation': 'a-longer-test-password',
+    })
+    assert 'Check your email' in response.get_data(as_text=True)

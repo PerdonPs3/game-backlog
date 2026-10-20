@@ -230,7 +230,10 @@ def register():
     error = message = None
     if request.method == "POST":
         try:
-            payload = provider().call("signup", credentials())
+            values = credentials()
+            if values['password'] != request.form.get('confirmation'):
+                raise ValueError("Passwords do not match. Please enter the same password twice.")
+            payload = provider().call("signup", values)
             if payload.get("access_token") and payload.get("refresh_token"):
                 # Only a provider-verified, confirmed identity may enter setup.
                 start_session(payload)

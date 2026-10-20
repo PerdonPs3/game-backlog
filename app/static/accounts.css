@@ -6,6 +6,16 @@
     margin-block: 1rem;
 }
 .account-navigation form { margin: 0; }
+.auth-workspace { max-width: 800px; }
+.workspace-form.account-access-form { grid-template-columns: minmax(0, 1fr); }
+.account-access-form > button { justify-self: start; align-self: start; }
+.account-password-input { position: relative; }
+.workspace-form .account-password-input input { padding-right: 3.5rem; }
+.workspace-form .account-password-input button { position: absolute; right: .45rem; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 38px; height: 38px; margin: 0; padding: .5rem; border: 0; border-radius: 8px; background: transparent; color: var(--accent); box-shadow: none; cursor: pointer; }
+.account-password-input button[hidden], .account-password-input [data-eye-slash][hidden] { display: none; }
+.account-password-input button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.account-password-hint { margin: .45rem 0 0; color: var(--text-muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
+.account-password-hint:empty { display: none; }
 .account-navigation button { padding: .5rem 1rem; }
 .profile-summary { display: flex; align-items: center; gap: 1rem; }
 .profile-avatar { font-size: 3rem; }

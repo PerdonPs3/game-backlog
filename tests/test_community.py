@@ -21,7 +21,7 @@ def test_member_count_is_public_cached_and_counts_each_confirmed_identity_once(a
     response = client.get('/community/member-count')
     assert response.status_code == 200 and response.json == {'count': 1}
     assert 'no-store' in response.headers['Cache-Control']
-    submit(client, '/account/register', {'email':'bob@example.test','password':'test-password'})
+    submit(client, '/account/register', {'email':'bob@example.test','password':'test-password','confirmation':'test-password'})
     clock[0] += 61
     assert client.get('/community/member-count').json == {'count': 1}
     sign_in(accounts, 'bob')

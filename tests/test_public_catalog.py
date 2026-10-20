@@ -75,7 +75,7 @@ def test_selection_survives_registration_confirmation_and_profile_setup(accounts
     fake_catalog(accounts)
     client=accounts.test_client()
     client.get('/explore/games/123/add')
-    registered=submit(client,'/account/register',{'email':'alice@example.test','password':'test-password'})
+    registered=submit(client,'/account/register',{'email':'alice@example.test','password':'test-password','confirmation':'test-password'})
     assert 'Check your email' in registered.get_data(as_text=True)
     logged_in=submit(client,'/account/login',{'email':'alice@example.test','password':'test-password'})
     assert logged_in.location.endswith('/account/profile/edit')

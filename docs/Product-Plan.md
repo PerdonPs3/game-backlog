@@ -147,3 +147,22 @@ on the game detail page. Modified clicks and new-tab targets remain native, and
 back/forward navigation resets pending animations. The search focus ring wraps
 the complete input and search button. The light-theme wordmark uses the existing
 purple palette; dark mode retains the amber wordmark.
+
+## Account usability follow-up queue
+
+Resolve and review these increments in order:
+
+1. Registration: password visibility controls, required confirmation validated on
+   the server, and a live character count explaining the 8–128 character range.
+   Implemented locally; user review and Preview publication pending.
+2. Avatar editing: hide silhouette color controls while an uploaded photo is in
+   use; restore them when the photo is removed.
+3. Profile setup: display name first, then username, then bio. Suggest a username
+   from the display name without overwriting a manual choice; validate uniqueness
+   on save and preserve existing username-change rules.
+4. New-account navigation: finish setup on the created profile, including when
+   registration began from a catalog game. Offer an explicit continuation to the
+   selected game instead of automatically opening Add game after setup.
+5. Account URLs: introduce username-based library and private profile routes with
+   compatibility redirects. A username in a URL must never grant access to another
+   account's private collection or editor; retain separate public profile routes.
