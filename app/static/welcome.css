@@ -25,10 +25,10 @@ html[data-theme="light"] .welcome-page {
     --welcome-overlay: #ede5f43d;
     --welcome-centre: #faf8fd;
     --welcome-story-surface: #faf8fd;
-    --welcome-title-color: #835500;
-    --welcome-title-gold: #b8891a;
-    --welcome-title-highlight: #835500;
-    --welcome-title-glow: #b8891a20;
+    --welcome-title-color: #7042b7;
+    --welcome-title-gold: #8250bf;
+    --welcome-title-highlight: #ae7be2;
+    --welcome-title-glow: #7042b728;
     --welcome-button: linear-gradient(135deg, #8250bf, #613297);
     --welcome-button-text: #fff;
     --welcome-button-shadow: #7042b728;
@@ -256,3 +256,9 @@ html[data-theme="light"] .welcome-copy .catalog-option:hover, html[data-theme="l
 .welcome-community { display: flex; align-items: center; justify-content: center; gap: .4rem; width: fit-content; min-height: 28px; margin: 1rem auto 0; padding: .25rem .65rem; border: 1px solid #68db972e; border-radius: 99px; background: #68db970a; color: #68db97; font-size: .75rem; font-variant-numeric: tabular-nums; }
 .welcome-community[hidden] { display: none; }
 html[data-theme="light"] .welcome-community { color: #226a40; border-color: #226a4033; background: #effaf2d9; }
+
+.welcome-copy .catalog-public-search > div:focus-within { outline: 2px solid var(--welcome-accent); outline-offset: 3px; }
+.welcome-copy .catalog-public-search input:focus-visible { outline: none; }
+.welcome-document { scroll-snap-type: y proximity; }
+.welcome-hero, .welcome-story { scroll-snap-align: start; }
+@media (prefers-reduced-motion: reduce) { .welcome-document { scroll-snap-type: none; } }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="welcome-document">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,9 +60,11 @@
         </div>
     </main>
     <footer class="welcome-footer"><span>Vestigium · Every game leaves a mark.</span><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span></footer>
+    <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
     <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='welcome-scroll.js') }}" defer></script>
     <script src="{{ url_for('static', filename='community-count.js') }}" defer></script>
 </body>
 </html>

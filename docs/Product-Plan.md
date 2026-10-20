@@ -74,7 +74,9 @@ Build a normal scrolling page with section links and restrained transitions:
 
 Capture examples from a dedicated demo account with fictional or explicitly
 approved data. Keep screenshots synchronized with the actual product. Maintain
-normal browser scrolling, keyboard access, and reduced-motion preferences.
+normal browser scrolling inside the introduction, keyboard access, and reduced-motion preferences.
+The cover advances to the introduction after downward wheel intent, PageDown, or
+a vertical swipe; only the cover transition is guided.
 
 Treat a user count as a secondary enhancement. Define whether it means confirmed
 accounts or completed profiles, use a real server-side aggregate, exclude test
@@ -125,3 +127,14 @@ populations are separate because their databases are separate. Local preview use
 an isolated PostgreSQL schema and fake accounts, so its count is demonstration
 data, not the production total. No new database migration or privileged Supabase
 API key is required.
+
+## Navigation motion refinement
+
+The cover uses a one-screen advance into the introduction, followed by free
+scrolling. Search fields and suggestion lists keep their own wheel/keyboard
+behavior. Reduced-motion users retain native scrolling without automatic snaps.
+Public game selections use a short exit fade and slide, followed by an entrance
+on the game detail page. Modified clicks and new-tab targets remain native, and
+back/forward navigation resets pending animations. The search focus ring wraps
+the complete input and search button. The light-theme wordmark uses the existing
+purple palette; dark mode retains the amber wordmark.

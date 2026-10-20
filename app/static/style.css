@@ -1994,3 +1994,10 @@ body:has(.game-details-dialog[open]) { overflow: hidden; }
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* Public game navigation: short exit and entrance, with native reduced-motion navigation. */
+@media (prefers-reduced-motion: no-preference) {
+    body.is-opening-game main { opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity 170ms ease, transform 170ms ease; }
+    body:has(.catalog-game-hero) main { animation: catalog-page-arrive 260ms ease-out both; }
+}
+@keyframes catalog-page-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
