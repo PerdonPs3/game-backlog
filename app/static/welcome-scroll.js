@@ -7,37 +7,48 @@
     let moving = false, timer, intent = 0, touch = null;
     const interactive = (target) => target.closest("input, textarea, select, [role='listbox'], [contenteditable='true'], .catalog-public-search");
     const onCover = () => hero.getBoundingClientRect().bottom > window.innerHeight * .5;
-    function advance() {
+    const nearCover = () => {
+        const bottom = hero.getBoundingClientRect().bottom;
+        return bottom >= -Math.min(120, window.innerHeight * .15) && bottom < window.innerHeight - 1;
+    };
+    const destination = (direction) => direction > 0 ? (onCover() ? story : null) : (nearCover() ? hero : null);
+    function moveTo(section) {
         moving = true;
         intent = 0;
-        story.scrollIntoView({ behavior: "smooth", block: "start" });
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
         window.clearTimeout(timer);
         timer = window.setTimeout(() => { moving = false; }, 800);
     }
     window.addEventListener("wheel", (event) => {
         if (motion.matches || event.defaultPrevented || event.ctrlKey || interactive(event.target)) return;
-        if (event.deltaY <= 0) { intent = 0; moving = false; return; }
+        if (!event.deltaY) return;
         if (moving) { event.preventDefault(); return; }
-        if (!onCover()) return;
+        const section = destination(event.deltaY);
+        if (!section) { intent = 0; return; }
+        if (Math.sign(intent) !== Math.sign(event.deltaY)) intent = 0;
         intent += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
-        if (intent >= 24) { event.preventDefault(); advance(); }
+        if (Math.abs(intent) >= 24) { event.preventDefault(); moveTo(section); }
     }, { passive: false });
     document.addEventListener("keydown", (event) => {
-        if (motion.matches || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || interactive(event.target) || event.target.closest("button, a")) return;
-        if (["PageDown", " ", "ArrowDown"].includes(event.key) && onCover()) {
+        if (motion.matches || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || (event.shiftKey && event.key !== " ") || interactive(event.target) || event.target.closest("button, a")) return;
+        const direction = ["PageUp", "ArrowUp"].includes(event.key) || (event.key === " " && event.shiftKey) ? -1 : ["PageDown", " ", "ArrowDown"].includes(event.key) ? 1 : 0;
+        if (!direction) return;
+        const section = destination(direction);
+        if (moving || section) {
             event.preventDefault();
-            if (!moving) advance();
+            if (!moving) moveTo(section);
         }
     });
     document.addEventListener("touchstart", (event) => {
         touch = !interactive(event.target) && event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
     }, { passive: true });
     document.addEventListener("touchend", (event) => {
-        if (!touch || motion.matches || moving || !onCover() || !event.changedTouches.length) { touch = null; return; }
+        if (!touch || motion.matches || moving || !event.changedTouches.length) { touch = null; return; }
         const dy = touch.y - event.changedTouches[0].clientY;
         const dx = touch.x - event.changedTouches[0].clientX;
         touch = null;
-        if (dy > 45 && dy > Math.abs(dx)) advance();
+        const section = destination(dy);
+        if (Math.abs(dy) > 45 && Math.abs(dy) > Math.abs(dx) && section) moveTo(section);
     }, { passive: true });
     window.addEventListener("pageshow", () => { window.clearTimeout(timer); moving = false; intent = 0; touch = null; });
 })();

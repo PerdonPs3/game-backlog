@@ -5,7 +5,7 @@ const { join } = require("node:path");
 const { runInNewContext } = require("node:vm");
 function setup(reduced=false) {
     const events={}, calls=[], timers=[];
-    const hero={bottom:800,getBoundingClientRect(){return {bottom:this.bottom};}};
+    const hero={bottom:800,getBoundingClientRect(){return {bottom:this.bottom};},scrollIntoView(options){calls.push({...options,cover:true});}};
     const story={scrollIntoView(options){calls.push(options);}};
     const target={closest:()=>null};
     runInNewContext(readFileSync(join(__dirname,"../app/static/welcome-scroll.js"),"utf8"),{
@@ -35,4 +35,32 @@ test("PageDown and a vertical touch swipe can advance, while horizontal swipes c
     touch.events.touchend({changedTouches:[{clientX:150,clientY:350}]});assert.equal(touch.calls.length,0);
     touch.events.touchstart({target:touch.target,touches:[{clientX:0,clientY:400}]});
     touch.events.touchend({changedTouches:[{clientX:0,clientY:200}]});assert.equal(touch.calls.length,1);
+});
+
+test("upward intent returns to the cover only near the story boundary",()=>{
+    const ui=setup();ui.hero.bottom=-500;
+    assert.equal(ui.wheel({deltaY:-60}),false);assert.equal(ui.calls.length,0);
+    ui.hero.bottom=0;assert.equal(ui.wheel({deltaY:-60}),true);
+    assert.equal(ui.calls.length,1);assert.equal(ui.calls[0].cover,true);
+    assert.equal(ui.calls[0].behavior,"smooth");
+    ui.wheel({deltaY:-60});ui.wheel({deltaY:60});assert.equal(ui.calls.length,1);
+    ui.timers[0]();ui.hero.bottom=800;
+    assert.equal(ui.wheel({deltaY:-60}),false);assert.equal(ui.calls.length,1);
+    assert.equal(ui.wheel(),true);assert.equal(ui.calls.length,2);
+});
+
+test("PageUp, Shift+Space and downward touch swipes can return without hijacking deeper content",()=>{
+    for (const key of [{key:"PageUp"},{key:" ",shiftKey:true}]) {
+        const ui=setup();ui.hero.bottom=0;let prevented=false;
+        ui.events.keydown({...key,target:ui.target,preventDefault(){prevented=true;}});
+        assert.equal(prevented,true);assert.equal(ui.calls[0].cover,true);
+    }
+    const ui=setup();ui.hero.bottom=-500;
+    ui.events.touchstart({target:ui.target,touches:[{clientX:0,clientY:100}]});
+    ui.events.touchend({changedTouches:[{clientX:0,clientY:250}]});assert.equal(ui.calls.length,0);
+    ui.hero.bottom=0;
+    ui.events.touchstart({target:ui.target,touches:[{clientX:0,clientY:100}]});
+    ui.events.touchend({changedTouches:[{clientX:0,clientY:250}]});assert.equal(ui.calls[0].cover,true);
+    const reduced=setup(true);reduced.hero.bottom=0;
+    assert.equal(reduced.wheel({deltaY:-60}),false);assert.equal(reduced.calls.length,0);
 });

@@ -136,7 +136,10 @@ API key is required.
 ## Navigation motion refinement
 
 The cover uses a one-screen advance into the introduction, followed by free
-scrolling. Document-wide CSS snapping is disabled so the browser cannot add a
+scrolling. Scrolling upward near the introduction's top smoothly returns to the
+cover; deeper sections retain native scrolling in both directions. Keyboard and
+vertical touch gestures support the same boundary transition.
+Document-wide CSS snapping is disabled so the browser cannot add a
 second alignment movement near section boundaries. Search fields and suggestion lists keep their own wheel/keyboard
 behavior. Reduced-motion users retain native scrolling without automatic snaps.
 Public game selections use a short exit fade and slide, followed by an entrance
