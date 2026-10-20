@@ -37,7 +37,7 @@
             <div class="welcome-copy">
                 <h1 id="welcome-title">VESTIGIUM</h1>
                 <p class="welcome-tagline">Every game leaves a mark.</p>
-                {% include '_public_catalog_search.html' %}
+                {% with compact_search=true %}{% include '_public_catalog_search.html' %}{% endwith %}
                 <a class="welcome-primary" href="{{ url_for('main.index') if account_user or not accounts_enabled else url_for('auth.register') }}">{{ 'Open library' if account_user or not accounts_enabled else 'Create account' }} <span aria-hidden="true">↗</span></a>
             </div>
             <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
