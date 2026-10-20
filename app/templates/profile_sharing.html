@@ -1,0 +1,24 @@
+{% extends '_profile_base.html' %}
+{% block page_title %}Profile sharing · Vestigium{% endblock %}
+{% block workspace_return %}<a href="{{ url_for('auth.profile_overview') }}">← Back to profile</a>{% endblock %}
+{% block page_kicker %}YOUR PROFILE, YOUR CHOICE{% endblock %}
+{% block page_heading %}Choose what <span>travels.</span>{% endblock %}
+{% block page_description %}Create a lasting player identity. Share a small part of your story when you are ready.{% endblock %}
+{% block panel_label %}Profile sharing settings{% endblock %}
+{% block panel %}
+<section class="profile-section">
+    <header class="profile-section-heading"><div><p class="profile-eyebrow">PLAYER IDENTITY</p><h2>Your public link</h2><p>Your library always stays private. A public profile can be viewed by anyone with its link.</p></div><span class="player-private">{{ 'Public' if sharing.is_public else 'Private' }}</span></header>
+    {% set messages = get_flashed_messages(category_filter=['profile_saved']) %}
+    {% if messages %}<p id="sharing-feedback" class="profile-feedback is-saved" role="status" tabindex="-1">✓ {{ messages[0] }}</p>{% endif %}
+    {% if error %}<p class="profile-error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" class="workspace-form profile-sharing-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="profile-field"><label for="username">Username</label><input id="username" name="username" required minlength="3" maxlength="24" pattern="[a-z][a-z0-9_]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" value="{{ sharing.username or request.form.get('username', '') }}" {% if sharing.username %}readonly{% endif %} aria-describedby="username-help"><p id="username-help" class="profile-field-hint">3–24 lowercase letters, numbers, or underscores. Start with a letter. Once saved, this username cannot be changed.</p></div>
+        {% if sharing.username %}<div class="profile-link-preview"><span>Your profile path</span><code>/players/{{ sharing.username }}</code>{% if sharing.is_public %}<a class="profile-text-link" href="{{ url_for('profiles.public_profile', username=sharing.username) }}">View public profile ↗</a>{% else %}<p>This link will be available after you make your profile public.</p>{% endif %}</div>{% endif %}
+        <fieldset class="profile-sharing-choices"><legend>Visibility</legend><label><input type="checkbox" name="is_public" value="yes" {% if (request.form.get('is_public') == 'yes' if request.method == 'POST' else sharing.is_public) %}checked{% endif %}><span><strong>Make my profile public</strong><small>Publish your display name, username, and avatar color. Uncheck this to hide the page immediately.</small></span></label></fieldset>
+        <fieldset class="profile-sharing-choices"><legend>Optional content</legend>{% for name, title, hint in [('share_bio', 'Share my bio', 'The About you text from your profile.'), ('share_showcase', 'Share my five-game showcase', 'Only your selected games and their order. No ratings, notes, or progress.')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if request.method == 'POST' else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong><small>{{ hint }}</small></span></label>{% endfor %}</fieldset>
+        <p class="profile-empty-note">Uploaded photos stay private in this version. Visitors see your silhouette and chosen color. Use a name and bio you have the right to share; do not include private information, impersonation, hate, or explicit content. Changes to shared fields also update your public profile.</p>
+        <div class="profile-save-actions"><button type="submit">Save sharing settings ↗</button><a href="{{ url_for('auth.profile_overview') }}">Cancel</a></div>
+    </form>
+</section>
+{% endblock %}

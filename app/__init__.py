@@ -74,6 +74,8 @@ def create_app(test_config=None):
     app.register_blueprint(main)
     from app.auth import init_app as init_auth
     init_auth(app)
+    from app.public_profiles import init_app as init_public_profiles
+    init_public_profiles(app)
 
     from app.game_fields import STATUSES
 

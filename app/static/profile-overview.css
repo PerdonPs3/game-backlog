@@ -103,3 +103,15 @@ html:not([data-theme="light"]) .profile-metrics > div:nth-child(2) dd { color: #
 html:not([data-theme="light"]) .profile-metrics > div:nth-child(3) dd { color: #10b981; }
 
 .profile-overview-note a { color: var(--text-muted); text-underline-offset: .2em; }
+.profile-public-handle { color: var(--accent); font-size: .85rem; margin: .6rem 0; overflow-wrap: anywhere; }
+.profile-sharing-form { max-width: 680px; }
+.profile-sharing-choices { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: 1.25rem 0; }
+.profile-sharing-choices legend { color: var(--text); padding: 0 .4rem; font-size: .85rem; font-weight: 600; }
+.profile-sharing-choices label { display: flex; align-items: flex-start; gap: .8rem; padding: .5rem 0; cursor: pointer; }
+.profile-sharing-choices input[type="checkbox"] { flex: 0 0 18px; width: 18px; height: 18px; margin: .15rem 0 0; accent-color: var(--accent); }
+.profile-sharing-choices strong { display: block; color: var(--text); font-size: .85rem; }
+.profile-sharing-choices small, .profile-link-preview { color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
+.profile-sharing-choices small { display: block; margin-top: .3rem; }
+.profile-link-preview { padding: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--profile-cover); }
+.profile-link-preview code { display: block; margin: .4rem 0; color: var(--accent); overflow-wrap: anywhere; }
+.profile-link-preview p { margin: .25rem 0 0; }

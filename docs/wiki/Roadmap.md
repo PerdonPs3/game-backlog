@@ -27,6 +27,10 @@ profile palette pilot, player profile, public catalog, guided homepage, and Disc
 - [x] Display game covers in the collection.
 - [x] Block duplicate catalog game/platform combinations and link to the existing entry.
 - [ ] Allow anonymous catalog search and public game detail pages, independent of private library entries.
+- [ ] Give each catalog game a stable, shareable page URL that opens directly on
+      refresh or in a new tab without signing in. Link to it from library covers;
+      keep the current modal only as an optional quick view. Never include the
+      owner's private notes, rating, or progress in the shared catalog page.
 - [ ] Reuse the same catalog flow from the homepage, Add game, and Discover.
 
 Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
@@ -55,6 +59,11 @@ Games from other platforms remain supported through the catalog.
 - [x] Implement accounts and separate collections with automated two-account isolation tests.
 - [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
 - [ ] Let users choose which profile information and activity to make public.
+- [x] Implement unique, permanent usernames and optional public profile links
+      with separate bio and showcase sharing controls; keep uploaded photos private.
+- [ ] Validate public profile publication, anonymous viewing, and revocation in
+      Preview before release. Add reporting and moderation before public photos
+      or profile discovery.
 
 ### 5. Add progression and customization
 
