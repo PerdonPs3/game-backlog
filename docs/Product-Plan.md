@@ -24,8 +24,8 @@ palette adoption follows explicit design approval.
 - Add an ordered showcase of up to five games selected from the owner's library.
 - Show currently playing games, recent completions, and meaningful statistics
   from existing statuses and recorded dates. Provide useful empty states.
-- Add a stable profile identity and an optional public URL. Keep profiles private
-  until the owner explicitly chooses what to share. Public viewing must expose
+- Add a stable profile identity and a public URL. New profiles default to Public,
+  with a Private option during setup; preserve existing privacy choices. Public viewing must expose
   only the selected profile fields and showcase, never account email, tokens,
   private lists, or the entire collection by implication.
 - Define the rules for publicly visible uploaded images and reporting before

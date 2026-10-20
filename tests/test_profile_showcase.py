@@ -100,7 +100,7 @@ def test_anonymous_setup_recovery_and_empty_library_behaviors(accounts):
     client = sign_in(accounts, 'alice', complete_profile=False)
     assert client.get('/account/profile').location.endswith('/account/profile/edit')
     assert client.get('/account/profile/showcase').location.endswith('/account/profile/edit')
-    result = submit(client, '/account/profile/edit', {'display_name':'Alice'})
+    result = submit(client, '/account/profile/edit', {'display_name':'Alice', 'username':'alice_player'})
     assert result.location.endswith('/account/profile#profile-feedback')
     page = client.get(result.location).get_data(as_text=True)
     assert 'Add your first game' in page and '<dd>0<small>%</small></dd>' in page

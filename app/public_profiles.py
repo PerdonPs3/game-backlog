@@ -13,10 +13,15 @@ profiles = Blueprint('profiles', __name__)
 RESERVED_NAMES = {'admin', 'administrator', 'api', 'auth', 'account', 'accounts', 'discover', 'explore', 'help', 'library', 'login', 'logout', 'moderator', 'official', 'players', 'profile', 'register', 'root', 'security', 'settings', 'staff', 'support', 'system', 'vestigium'}
 
 
-def save_sharing(db, owner, form):
-    username = form.get('username', '').strip().lower()
+def clean_username(value):
+    username = value.strip().lower()
     if not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username) or username in RESERVED_NAMES:
-        raise ValueError('Choose an available username with 3–24 lowercase letters, numbers, or underscores, starting with a letter.')
+        raise ValueError('Choose an available username with 3–24 letters, numbers, or underscores, starting with a letter. Links use lowercase letters.')
+    return username
+
+
+def save_sharing(db, owner, form):
+    username = clean_username(form.get('username', ''))
     db.execute('BEGIN')
     try:
         profile = db.execute('SELECT username FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()

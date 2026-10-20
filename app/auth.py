@@ -15,7 +15,7 @@ from flask import Response, Blueprint, abort, current_app, flash, g, jsonify, re
 from flask.cli import with_appcontext
 
 from app.profile_images import normalize_avatar
-from app.db import get_db
+from app.db import get_db, INTEGRITY_ERRORS
 
 
 auth = Blueprint("auth", __name__, url_prefix="/account")
@@ -317,7 +317,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -332,16 +332,34 @@ def profile():
             error = "Choose a valid profile color."
         else:
             try:
+                if is_setup:
+                    from app.public_profiles import clean_username
+                    username = clean_username(request.form.get('username', ''))
                 if upload and upload.filename and not remove_photo:
                     photo = normalize_avatar(upload, request.form.get("photo_crop"))
             except ValueError as exc:
                 error = str(exc)
         if not error:
-            db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, "
-                       "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
-                       (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
-            flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
-            return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
+            db.execute('BEGIN')
+            try:
+                # Serialize setup with sharing edits; an existing identity is never replaced.
+                identity = db.execute('SELECT username FROM profiles WHERE id = ? FOR UPDATE', (g.user['id'],)).fetchone()
+                db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, "
+                           "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
+                           (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
+                if is_setup and not identity['username']:
+                    db.execute('UPDATE profiles SET username = ?, is_public = ? WHERE id = ?',
+                               (username, request.form.get('is_public', 'yes') == 'yes', g.user['id']))
+                db.commit()
+            except INTEGRITY_ERRORS:
+                db.rollback()
+                error = 'That username is already taken. Choose another one.'
+            except Exception:
+                db.rollback()
+                raise
+            if not error:
+                flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
+                return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
     return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])

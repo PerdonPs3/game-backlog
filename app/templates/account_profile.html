@@ -14,7 +14,7 @@
 {% block panel %}
 <div class="profile-editor" data-profile-editor>
     <aside class="player-card" aria-label="Your player card preview">
-        <div class="player-card-cover"><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Private</span></div>
+        <div class="player-card-cover"><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Editor preview</span></div>
         <div class="player-card-content">
             <details class="avatar-editor" data-avatar-editor>
                 <summary class="avatar-edit-trigger" aria-label="Edit profile picture" title="Edit profile picture">
@@ -68,6 +68,10 @@
             <p id="display-name-hint" class="profile-field-hint">The name on your player card. You can change it anytime.</p>
         </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span>A few words about the player behind the library.</span><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
+        {% if is_setup %}
+        <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username or request.form.get('username', '') }}" {% if profile.username %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores, starting with a letter. Capitals are welcome; your permanent link uses lowercase.</p></div>
+        <fieldset class="profile-setup-visibility"><legend>Profile visibility</legend><label><input type="radio" name="is_public" value="yes" {% if request.form.get('is_public', 'yes') == 'yes' %}checked{% endif %}><span>Public <small>Default · Share your name, username, and avatar color.</small></span></label><label><input type="radio" name="is_public" value="no" {% if request.form.get('is_public') == 'no' %}checked{% endif %}><span>Private <small>Hide your profile link from everyone.</small></span></label><p class="profile-field-hint">Your library always stays private. You can share your bio and showcase later in Profile sharing.</p></fieldset>
+        {% endif %}
         <footer class="profile-save-bar">
             <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('auth.profile_overview') }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Save changes to update your profile. Shared details update your public page too.' }}{% endif %}</p>
