@@ -1,6 +1,7 @@
 """Explicit, minimal public profile projections and owner-controlled publication."""
 
 import re
+from datetime import datetime, timezone
 
 import psycopg
 from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
@@ -10,6 +11,7 @@ from app.db import get_db
 
 
 profiles = Blueprint('profiles', __name__)
+USERNAME_WAIT_SECONDS = 30 * 24 * 60 * 60
 RESERVED_NAMES = {'admin', 'administrator', 'api', 'auth', 'account', 'accounts', 'discover', 'explore', 'help', 'library', 'login', 'logout', 'moderator', 'official', 'players', 'profile', 'register', 'root', 'security', 'settings', 'staff', 'support', 'system', 'vestigium'}
 
 
@@ -20,13 +22,41 @@ def clean_username(value):
     return username
 
 
+def username_clock(db):
+    return db.execute('SELECT FLOOR(EXTRACT(EPOCH FROM clock_timestamp()))::BIGINT').fetchone()[0]
+
+
+def claim_username(db, owner, username):
+    """Reserve current names and aliases in one namespace inside a transaction."""
+    claimed = db.execute('INSERT INTO profile_usernames (username, owner_id) VALUES (?, ?) '
+                         'ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username '
+                         'WHERE profile_usernames.owner_id = EXCLUDED.owner_id RETURNING owner_id',
+                         (username, owner)).fetchone()
+    if not claimed:
+        raise ValueError('That username is already taken or reserved by a previous profile link. Choose another one.')
+
+
+def username_availability(profile, now):
+    available_at = (profile['username_changed_at'] + USERNAME_WAIT_SECONDS) if profile['username_changed_at'] is not None else 0
+    return {
+        'locked': bool(profile['username'] and available_at > now),
+        'available_at': datetime.fromtimestamp(available_at, timezone.utc).strftime('%Y-%m-%d at %H:%M:%S UTC') if available_at else None,
+        'available_iso': datetime.fromtimestamp(available_at, timezone.utc).isoformat() if available_at else None,
+    }
+
+
 def save_sharing(db, owner, form):
     username = clean_username(form.get('username', ''))
     db.execute('BEGIN')
     try:
-        profile = db.execute('SELECT username FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
-        if profile['username'] and profile['username'] != username:
-            raise ValueError('Your username is permanent so your profile link stays stable.')
+        profile = db.execute('SELECT username, username_changed_at FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
+        if profile['username'] != username:
+            now = username_clock(db)
+            availability = username_availability(profile, now)
+            if availability['locked']:
+                raise ValueError('You can change your username again on ' + availability['available_at'] + '. You can still update your sharing settings.')
+            claim_username(db, owner, username)
+            db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
         db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
                    (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
         db.commit()
@@ -57,8 +87,8 @@ def sharing():
             return redirect(url_for('profiles.sharing', _anchor='sharing-feedback'), code=303)
         except ValueError as exc:
             error = str(exc)
-    item = db.execute('SELECT username, is_public, share_bio, share_showcase FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
-    return render_template('profile_sharing.html', sharing=item, error=error)
+    item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
+    return render_template('profile_sharing.html', sharing=item, error=error, username_state=username_availability(item, username_clock(db)))
 
 
 @profiles.get('/players/<username>')
@@ -66,6 +96,13 @@ def public_profile(username):
     if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username):
         abort(404)
     db = get_db()
+    identity = db.execute('SELECT p.username FROM profile_usernames u JOIN profiles p ON p.id = u.owner_id WHERE u.username = ? AND p.is_public = TRUE', (username,)).fetchone()
+    if not identity:
+        abort(404)
+    if identity['username'] != username:
+        # Temporary, non-cacheable redirects respect later privacy changes and
+        # always resolve directly to the current name, never an alias chain.
+        return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
     item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:

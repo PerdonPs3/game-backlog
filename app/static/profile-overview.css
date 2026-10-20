@@ -131,6 +131,12 @@ html:not([data-theme="light"]) .profile-metrics > div:nth-child(3) dd { color: #
 .profile-sharing-guidelines { font-size: .7rem; color: var(--text-muted); }
 .profile-sharing-guidelines summary { cursor: pointer; text-underline-offset: .2em; }
 .profile-sharing-guidelines p { line-height: 1.7; }
+.profile-feedback.profile-sharing-notice { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 1.5rem; padding: .8rem 1rem; }
+.profile-sharing-notice:focus { outline: none; }
+.profile-username-badge { padding: .15rem .45rem; border: 1px solid var(--border); border-radius: 5px; }
+.profile-username-note { margin: .8rem 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
+.profile-username-note a { color: var(--accent); text-underline-offset: .2em; }
+.profile-username-note time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
 @media (max-width: 700px) {
     .profile-sharing-top, .profile-sharing-options { grid-template-columns: minmax(0, 1fr); }
     .profile-sharing-card { padding: 1rem; }
