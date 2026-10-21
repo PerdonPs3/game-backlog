@@ -131,6 +131,22 @@ html[data-theme="light"] .library-layout {
 html[data-theme="light"] .library-cover-scene { opacity: .5; }
 html[data-theme="light"] .library-layout .library-hero::before { background: linear-gradient(90deg, #fff 15%, #fcfaffee 43%, #fcfaff22 90%); }
 
+@media (prefers-reduced-motion: no-preference) {
+    .library-cover-scene { animation: library-scene-drift 20s ease-in-out infinite alternate; }
+    .library-scene-poster { animation: library-poster-float 9s ease-in-out infinite alternate; }
+    .library-scene-poster:nth-child(2) { animation-delay: -5s; animation-duration: 12s; }
+    .library-scene-poster:nth-child(3) { animation-delay: -3s; animation-duration: 10s; }
+    .library-hero:is(:hover, :focus-within) :is(.library-cover-scene, .library-scene-poster) { animation-play-state: paused; }
+}
+@keyframes library-scene-drift {
+    from { transform: rotate(-12deg) translate3d(0, -10px, 0) scale(1.02); }
+    to { transform: rotate(-10deg) translate3d(-12px, 12px, 0) scale(1.06); }
+}
+@keyframes library-poster-float {
+    from { translate: 0 -7px; }
+    to { translate: 0 7px; }
+}
+
 @media (max-width: 760px) {
     .library-cover-scene { left: 35%; opacity: .42; }
     .library-layout .hero-emblem { width: 86px; height: 96px; }
