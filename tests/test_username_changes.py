@@ -55,12 +55,12 @@ def test_sharing_changes_and_capitalization_do_not_extend_wait(accounts, clock):
     with accounts.app_context():
         row = get_db().execute('SELECT username_changed_at, is_public, share_bio FROM profiles WHERE id = ?', (ALICE,)).fetchone()
         assert row['username_changed_at'] == START and not row['is_public'] and row['share_bio']
-    page = alice.get(PATH).get_data(as_text=True)
+    page = alice.get('/account/current_name/profile/sharing').get_data(as_text=True)
     assert 'readonly' in page and 'You can change your username again on' in page and 'datetime=' in page
     assert 'Permanent' not in page
     clock[0] = START + WAIT
-    assert 'name="username"' in alice.get(PATH).get_data(as_text=True)
-    assert 'readonly' not in alice.get(PATH).get_data(as_text=True)
+    assert 'name="username"' in alice.get('/account/current_name/profile/sharing').get_data(as_text=True)
+    assert 'readonly' not in alice.get('/account/current_name/profile/sharing').get_data(as_text=True)
 
 
 def test_aliases_cannot_be_taken_by_other_accounts_but_owner_can_reuse_them(accounts, clock):

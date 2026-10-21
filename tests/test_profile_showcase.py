@@ -101,10 +101,10 @@ def test_anonymous_setup_recovery_and_empty_library_behaviors(accounts):
     assert client.get('/account/profile').location.endswith('/account/profile/edit')
     assert client.get('/account/profile/showcase').location.endswith('/account/profile/edit')
     result = submit(client, '/account/profile/edit', {'display_name':'Alice', 'username':'alice_player'})
-    assert result.location.endswith('/account/profile#profile-feedback')
+    assert result.location.endswith('/account/alice_player/profile#profile-feedback')
     page = client.get(result.location).get_data(as_text=True)
     assert 'Add your first game' in page and '<dd>0<small>%</small></dd>' in page
-    assert 'Your showcase starts with a game' in client.get('/account/profile/showcase').get_data(as_text=True)
+    assert 'Your showcase starts with a game' in client.get('/account/alice_player/profile/showcase').get_data(as_text=True)
     submit(client, '/account/logout', {}, source='/account/profile/edit')
     result = submit(client, '/account/verify-recovery', {'email':'alice@example.test','code':'123456'})
     assert result.location.endswith('/account/password')

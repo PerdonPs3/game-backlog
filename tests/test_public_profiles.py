@@ -107,7 +107,7 @@ def test_setup_publishes_by_default_and_accepts_capitals_without_publishing_extr
     submit(alice, PATH, {'username':'PERDONPS3', 'is_public':'no'})
     submit(alice, '/account/profile/edit', {'display_name':'Renamed Alice', 'is_public':'yes'})
     assert anon.get('/players/perdonps3').status_code == 404
-    assert 'value="no" checked' in alice.get(PATH).get_data(as_text=True)
+    assert 'value="no" checked' in alice.get('/account/perdonps3/profile/sharing').get_data(as_text=True)
 
 
 def test_setup_can_be_private_and_taken_username_rolls_back_all_profile_changes(accounts):

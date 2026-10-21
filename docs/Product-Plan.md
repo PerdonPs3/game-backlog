@@ -186,6 +186,9 @@ Resolve and review these increments in order:
 5. Account URLs: introduce username-based library and private profile routes with
    compatibility redirects. A username in a URL must never grant access to another
    account's private collection or editor; retain separate public profile routes.
+   Implemented locally, including editor, showcase, and sharing subpages, legacy
+   form/JSON compatibility, and owner-only redirects from previous usernames.
+   User review and Preview publication pending.
 6. Profile sharing design: review the light-theme screen against the user's
    reference. Reduce the heavy lavender section fills, improve spacing and visual
    hierarchy, and present the public profile URL as a readable link rather than

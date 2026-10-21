@@ -83,6 +83,7 @@ def sharing():
     if request.method == 'POST':
         try:
             save_sharing(db, g.user['id'], request.form)
+            g.profile = db.execute('SELECT display_name, username FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
             flash('Sharing settings saved. Your profile is public.' if request.form.get('is_public') == 'yes' else 'Sharing settings saved. Your profile is private.', 'profile_saved')
             return redirect(url_for('profiles.sharing', _anchor='sharing-feedback'), code=303)
         except ValueError as exc:

@@ -3,6 +3,26 @@
 Hosted PostgreSQL installations require Supabase Auth. SQLite remains an offline,
 single-user mode. Account pages are under `/account`; `/` remains public.
 
+## Private account addresses
+
+Completed profiles with a username use `/account/<username>/library` and
+`/account/<username>/profile`. The editor, showcase, and sharing settings append
+`/edit`, `/showcase`, and `/sharing` to the private profile address. Navigation and
+successful saves generate the current account's address. Profiles without a
+username retain their existing setup and sharing routes until one is claimed.
+
+Old HTML GET/HEAD links redirect temporarily to the current address, preserving
+query parameters. Old POST forms still run once with CSRF protection; legacy
+`/library` JSON clients remain compatible. Previous usernames redirect only for
+their authenticated owner. Unknown and other users' private addresses return
+404; anonymous requests require sign-in. Every collection query continues to use
+the session's owner ID, never the URL name. Recovery sessions retain their reset
+restriction. Private pages and redirects are not cached. Offline mode keeps
+`/library` and does not expose named account routes.
+
+Public profiles remain separate at `/players/<username>` and retain their
+existing visibility and field-sharing rules. No database migration is needed.
+
 ## Optional public player identity
 
 Migration `005_public_profiles.sql` adds a unique, nullable username and three

@@ -51,7 +51,7 @@ def accounts(postgres_config, tmp_path):
 
 
 def submit(client, path, data, source=None):
-    page = client.get(source or path)
+    page = client.get(source or path, follow_redirects=True)
     assert page.status_code == 200, page.get_data(as_text=True)
     parser = CSRFTokenParser()
     parser.feed(page.get_data(as_text=True))
@@ -333,8 +333,9 @@ def test_first_login_requires_profile_before_library_and_saved_profile_unlocks_i
     assert "Your profile is ready" in saved.get_data(as_text=True)
     assert 'data-saved="true"' in saved.get_data(as_text=True)
     assert "Open library" in saved.get_data(as_text=True)
-    assert client.get("/library").status_code == 200
-    assert "Your profile is ready" not in client.get("/account/profile/edit").get_data(as_text=True)
+    assert client.get("/library").location == "/account/new_player/library"
+    assert client.get("/account/new_player/library").status_code == 200
+    assert "Your profile is ready" not in client.get("/account/new_player/profile/edit").get_data(as_text=True)
     submit(client, "/account/logout", {}, source="/account/profile/edit")
     result = submit(client, "/account/login", {"email": "alice@example.test", "password": "test-password"})
     assert result.location.endswith("/library")
