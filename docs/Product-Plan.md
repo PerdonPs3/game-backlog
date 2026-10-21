@@ -178,5 +178,6 @@ Resolve and review these increments in order:
    design issue, not yet implemented; retain the existing sharing behavior.
 7. Workspace frame: keep the header visible while scrolling and place the footer
    at the end, pushed to the viewport bottom on short pages. The footer must not
-   remain fixed over the form. Implemented locally following the user's choice;
+   remain fixed over the form. The full-width header aligns the brand beside the
+   left utility controls and account actions at the right edge. Implemented locally following the user's choice;
    Preview validation pending.
