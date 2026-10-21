@@ -2,13 +2,11 @@
 {% from '_password_field.html' import password_field %}
 {% set titles = {'login': 'Sign in', 'register': 'Create your account', 'recover': 'Recover your account', 'verify-recovery': 'Enter your recovery code', 'password': 'Choose a new password'} %}
 {% block page_title %}{{ titles[mode] }} · Vestigium{% endblock %}
-{% block page_kicker %}Your games. Your space.{% endblock %}
 {% block page_heading %}{{ titles[mode] }}{% endblock %}
-{% block page_description %}Keep your library, lists, and gaming memories in your own private account.{% endblock %}
 {% block panel_label %}Account access{% endblock %}
 {% block layout_class %}auth-workspace{% endblock %}
 {% block panel %}
-{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game is waiting. After signing in and completing your profile, choose a platform and confirm to add it.</p>{% endif %}
+{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game will be waiting after sign-in.</p>{% endif %}
 {% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
 {% if error %}<p role="alert">{{ error }}</p>{% endif %}
 {% if message %}<p role="status">{{ message }}</p>{% endif %}

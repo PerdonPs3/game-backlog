@@ -1,9 +1,7 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Delete game · Vestigium{% endblock %}
 {% block layout_class %}workspace-compact{% endblock %}
-{% block page_kicker %}Manage your collection{% endblock %}
 {% block page_heading %}Delete <span>game</span>{% endblock %}
-{% block page_description %}One last check before removing this entry from your library.{% endblock %}
 {% block panel_label %}Confirm deletion{% endblock %}
 {% block panel %}
     <p class="confirmation-title">Are you sure you want to delete “<strong>{{ game['title'] }}</strong>”?</p>
@@ -11,7 +9,7 @@
     <form method="post" class="workspace-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-actions">
-            <a href="{{ url_for('main.index') }}">Cancel and return to collection</a>
+            <a href="{{ url_for('main.index') }}">Cancel</a>
             <button type="submit">Yes, delete game</button>
         </div>
     </form>

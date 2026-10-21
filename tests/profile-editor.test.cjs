@@ -76,7 +76,7 @@ test('focuses only server-confirmed save feedback and handles empty preview fiel
     ui.name.value = '  ';
     ui.events.change();
     assert.equal(ui.previewName.textContent, 'Your player name');
-    assert.equal(ui.previewBio.textContent, 'Your next adventure is just the beginning.');
+    assert.equal(ui.previewBio.textContent, '');
 });
 
 

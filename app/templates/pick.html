@@ -1,8 +1,6 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Your next adventure · Vestigium{% endblock %}
-{% block page_kicker %}A little less indecision{% endblock %}
-{% block page_heading %}Your next <span>adventure</span>{% endblock %}
-{% block page_description %}Choose your mood. Let your Backlog handle the rest. No status changes, just a suggestion.{% endblock %}
+{% block page_heading %}What should I <span>play?</span>{% endblock %}
 {% block panel_label %}Your suggested game{% endblock %}
 {% block panel %}
     <form method="get" action="{{ url_for('main.pick_game') }}" class="workspace-form adventure-preferences">
@@ -24,7 +22,7 @@
         </div>
         <p id="pick-genre-help" class="adventure-hint">Genres come from catalog-linked games in your Backlog. Entries without a known genre are included only with Any genre.</p>
         <div class="form-actions">
-            <button type="submit">Find my next adventure <span aria-hidden="true">↗</span></button>
+            <button type="submit">Pick a game <span aria-hidden="true">↗</span></button>
             {% if selected_platform or selected_genre %}<a href="{{ url_for('main.pick_game') }}">Reset preferences</a>{% endif %}
         </div>
     </form>
@@ -48,12 +46,12 @@
                 <div class="roulette-marker"></div>
                 <div class="roulette-track" id="roulette-track"></div>
             </div>
-            <p class="roulette-footnote">Same fair chance. A little more suspense.</p>
+
         </section>
         <script id="roulette-data" type="application/json">{{ roulette|tojson }}</script>
         <div id="adventure-result" tabindex="-1" aria-label="Your chosen adventure">
         <header class="adventure-result-heading">
-            <h2>Your next adventure awaits</h2>
+            <h2>Your pick</h2>
             <p class="adventure-match-count">{{ candidate_count }} matching {{ 'entry' if candidate_count == 1 else 'entries' }}</p>
         </header>
         {% include '_game_collection.html' %}
@@ -65,19 +63,19 @@
     {% else %}
         <div class="workspace-empty">
             {% if not pick_requested and has_backlog %}
-                <p class="aside-kicker">Ready when you are</p>
+
                 <h2>What are you in the mood for?</h2>
-                <p>Choose a platform and genre above, or leave both open for a surprise. Press Find my next adventure when you are ready.</p>
+                <p>Filter by platform or genre, then pick a game.</p>
             {% elif genre_error and selected_genre %}
-                <p class="aside-kicker">Taking a short break</p>
+
                 <h2>We could not check this genre</h2>
                 <p>Try again, or choose Any genre to pick using your saved collection.</p>
             {% elif has_backlog %}
-                <p class="aside-kicker">A different kind of adventure?</p>
+
                 <h2>No matches this time</h2>
                 <p>No Backlog entries match both preferences. Try another genre or platform.</p>
             {% else %}
-            <p class="aside-kicker">Room for a new adventure</p>
+
             <h2>Your Backlog is clear</h2>
             <p>No pending games yet. Add a game to your Backlog to get a suggestion.</p>
             {% endif %}
@@ -90,11 +88,11 @@
 {% endblock %}
 {% block aside %}
     <aside class="workspace-aside" aria-label="How suggestions work">
-        <p class="aside-kicker">Let chance choose</p>
-        <h2>One game. No pressure.</h2>
-        <p class="aside-note">Only Backlog entries are included. Games you are playing, have completed, paused, or dropped stay out of the draw.</p>
-        <p class="aside-note">Not feeling this pick? Try again. Nothing changes in your collection until you decide to edit a game.</p>
-        <p class="aside-note">Platforms refer to the copies you have saved, not every platform a game supports. Each matching platform entry has an equal chance; Pick again may choose the same game.</p>
+
+        <h2>How picks work</h2>
+        <p class="aside-note">Only Backlog entries are included.</p>
+        <p class="aside-note">Picking a game does not change its status.</p>
+        <p class="aside-note">Each matching platform entry has an equal chance. The same game may be picked again.</p>
     </aside>
 {% endblock %}
 {% block page_scripts %}

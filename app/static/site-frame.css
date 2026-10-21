@@ -12,6 +12,10 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .workspace-site-header .account-navigation > .account-create { background: var(--color-action); color: var(--color-on-action); font-weight: 700; }
 .workspace-site-header .account-create:hover { box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 16%, transparent); }
 .library-page main.library-layout { flex: 1; margin-top: 2rem; margin-bottom: 2rem; }
+.workspace-hero:not(:has(.workspace-description)) { padding-block: 1.25rem; }
+.workspace-hero:not(:has(.workspace-description)) .hero-emblem { width: 64px; height: 72px; justify-self: end; }
+.catalog-message:empty, .catalog-copy-feedback:empty, .profile-feedback:empty { display: none; }
+.profile-bio-footer > :only-child { margin-left: auto; }
 .site-footer.workspace-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; width: 100%; margin-top: auto; padding: 1.5rem max(1.5rem, env(safe-area-inset-right)); border-top: 1px solid var(--border); background: var(--color-canvas); color: var(--text-muted); font-size: .7rem; }
 .site-footer a { color: var(--accent); }
 .site-footer-links { display: flex; align-items: center; gap: 1.25rem; max-width: 100%; min-width: 0; }

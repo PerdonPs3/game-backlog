@@ -26,8 +26,8 @@ def stored(application, owner=ALICE):
 def test_profile_overview_and_showcase_editor_have_distinct_private_routes(accounts, players):
     alice, bob, own, _, _ = players
     page = alice.get("/account/profile").get_data(as_text=True)
-    assert "Your showcase" in page and "Playing now" in page and "Recent completions" in page
-    assert "Make room for your favorites" in page and 'name="display_name"' not in page
+    assert "Showcase" in page and "Playing now" in page and "Recent completions" in page
+    assert "Build your showcase" in page and 'name="display_name"' not in page
     assert '/account/profile/edit' in page
     editor = alice.get("/account/profile/showcase").get_data(as_text=True)
     assert editor.count('name="games"') == 5

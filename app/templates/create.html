@@ -1,10 +1,8 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Add a game · Vestigium{% endblock %}
-{% block page_kicker %}Build your library{% endblock %}
 {% block page_heading %}Add a <span>game</span>{% endblock %}
-{% block page_description %}Find your next adventure. Make it part of your collection.{% endblock %}
 {% block panel %}
-        <p class="catalog-message"><a href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a> · Choose a platform and confirm below to add a game.</p>
+        <p class="catalog-message"><a href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a></p>
         {% if error %}
             <p role="alert">{{ error }}</p>
         {% endif %}
@@ -15,7 +13,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="igdb-id" name="igdb_id"
                    value="{{ selected_game['id'] if selected_game else '' }}">
-            
+
             <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
                  data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
                 <label for="title">Title</label>
@@ -23,6 +21,7 @@
                     <input
                         type="text"
                         id="title"
+                        placeholder="Search games…"
                         name="title"
                         value="{{ request.form.get('title', selected_game.name if selected_game else '') }}"
                         maxlength="200"
@@ -39,9 +38,9 @@
                 </div>
                 <p id="catalog-message" class="catalog-message" role="status">
                     {% if selected_game %}
-                        Selected: {{ selected_game['name'] }}. Choose a platform below.
+                        Choose a platform.
                     {% else %}
-                        Type at least 2 characters, then choose a game from the suggestions.
+
                     {% endif %}
                 </p>
                 <label for="catalog-content">Show</label>
@@ -62,7 +61,7 @@
                     {% endif %}
                 </select>
                 <p id="platform-message" class="catalog-message" role="status">
-                    Only platforms listed for the selected game can be used.
+
                 </p>
             </div>
 
@@ -109,21 +108,7 @@
             </div>
         </form>
 
-        <p class="catalog-message">Game data and covers provided by
-            <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.
-        </p>
-{% endblock %}
-{% block aside %}
-    <aside class="workspace-aside" aria-label="Adding a game">
-        <p class="aside-kicker">From discovery to collection</p>
-        <h2>Your next adventure</h2>
-        <ol class="workspace-steps">
-            <li><strong>Find your game</strong><span>Search IGDB and choose the right title.</span></li>
-            <li><strong>Choose your platform</strong><span>Only available platforms appear.</span></li>
-            <li><strong>Make it yours</strong><span>Add a status, dates, rating, or review.</span></li>
-        </ol>
-        <p class="aside-note">Not ready to rate it? Leave the optional fields empty. You can edit them later.</p>
-    </aside>
+
 {% endblock %}
 {% block page_scripts %}
     <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>

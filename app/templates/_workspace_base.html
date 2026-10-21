@@ -21,9 +21,8 @@
         {% block workspace_hero %}
         <header class="workspace-hero">
             <div>
-                <p class="hero-kicker">{% block page_kicker %}Your personal gaming library{% endblock %}</p>
                 <h1>{% block page_heading %}{% endblock %}</h1>
-                <p class="workspace-description">{% block page_description %}{% endblock %}</p>
+                {% set description %}{% block page_description %}{% endblock %}{% endset %}{% if description|trim %}<p class="workspace-description">{{ description }}</p>{% endif %}
             </div>
             <div class="hero-emblem" data-hero-logo aria-hidden="true">
                 <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false"><use href="#brand-symbol" /></svg>

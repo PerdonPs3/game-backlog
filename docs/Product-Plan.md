@@ -5,6 +5,16 @@ palette and the private profile overview design are approved in Preview. The
 five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
+## Interface copy review
+
+Functional pages use one direct task heading. Remove decorative kickers,
+repeated introductions, field-label paraphrases, duplicate tutorials, and
+repeated attribution already supplied by the common footer. Keep contextual
+privacy boundaries, destructive-action consequences, input limits, actionable
+empty states, and live save/error feedback. The homepage retains the brand
+tagline and feature demonstrations. This application-wide copy pass is
+implemented locally; user review and Preview publication are pending.
+
 ## 0. Validate the profile palette
 
 Use the supplied Vestigium Obsidian reference for a profile-only experiment:

@@ -34,7 +34,7 @@
         removePhoto.disabled = true;
         updatePhoto();
         updatePreview();
-        photoFeedback.textContent = 'Photo ready. Save your profile to keep this crop.';
+        photoFeedback.textContent = 'Photo ready to save.';
         avatarTrigger.focus();
     }, (message) => {
         photoFeedback.textContent = message;
@@ -93,7 +93,7 @@
         photo.value = '';
         updatePhoto();
         updatePreview();
-        photoFeedback.textContent = 'Photo removed. Save your profile to keep this change.';
+        photoFeedback.textContent = 'Photo removal pending.';
         avatarTrigger.focus();
     });
     photoPreview.addEventListener('error', () => {
@@ -110,7 +110,7 @@
 
     function updatePreview() {
         previewName.textContent = name.value.trim() || 'Your player name';
-        previewBio.textContent = bio.value.trim() || 'Your next adventure is just the beginning.';
+        previewBio.textContent = bio.value.trim();
         counter.textContent = `${bio.value.length} / 500`;
         if (/^#[0-9a-f]{6}$/i.test(color.value)) avatar.style.setProperty('--avatar-color', color.value);
         if (!saving) {

@@ -7,7 +7,7 @@
         {% endif %}
     </div>
     <div class="profile-info">
-        <p class="aside-kicker">Inside your library</p>
+
         <h2>{{ game.title }}</h2>
         <div class="game-stickers">
             {% if game.is_favorite %}<span class="game-sticker sticker-favorite">★ Favorite</span>{% endif %}
@@ -23,8 +23,8 @@
     <section class="profile-personal" aria-label="Your personal notes">
         <header class="personal-heading">
             <div>
-                <p class="aside-kicker">Your adventure</p>
-                <h3>The personal verdict</h3>
+
+                <h3>Your review</h3>
             </div>
             <span class="personal-status"><span aria-hidden="true">◇</span> {{ game.status }}</span>
         </header>
@@ -36,7 +36,7 @@
                     <div class="score-segments" aria-hidden="true">
                         {% for segment in range(1, 11) %}<span{% if segment <= game.rating %} class="is-filled"{% endif %}></span>{% endfor %}
                     </div>
-                    <span class="score-caption">Your own experience.</span>
+
                 {% else %}
                     <p class="score-value score-unrated" aria-hidden="true">—</p>
                     <span class="score-caption">Not rated yet</span>
@@ -47,7 +47,7 @@
                 {% if game.review %}
                     <blockquote class="verdict-quote"><span class="quote-mark" aria-hidden="true">“</span><p class="profile-text">{{ game.review }}</p></blockquote>
                 {% else %}
-                    <p class="review-empty">No review yet. Every adventure has a story.</p>
+                    <p class="review-empty">No review yet.</p>
                 {% endif %}
             </div>
         </div>
@@ -55,10 +55,10 @@
             <div class="personal-history">
                 {% if game.started_on %}<span>Started <time datetime="{{ game.started_on }}">{{ game.started_on }}</time></span>{% endif %}
                 {% if game.completed_on %}<span>Completed <time datetime="{{ game.completed_on }}">{{ game.completed_on }}</time></span>{% endif %}
-                {% if not game.started_on and not game.completed_on %}<span>Your journey, at your own pace.</span>{% endif %}
+
             </div>
             <a class="verdict-edit" href="{{ url_for('main.edit', game_id=game.id) }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 5 4 4M4 20l5-1L21 7a2.8 2.8 0 0 0-4-4L5 15Z"/></svg>Edit game</a>
         </footer>
     </section>
-    <p class="catalog-message profile-attribution">Game data and covers provided by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.</p>
+
 </article>

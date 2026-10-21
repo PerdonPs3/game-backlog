@@ -108,7 +108,7 @@ html:not([data-theme="light"]) .profile-metrics > div:nth-child(3) dd { color: #
 .workspace-form.profile-sharing-form { display: flex; flex-direction: column; gap: 1.25rem; max-width: none; margin: 0; }
 .profile-sharing-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: start; }
 .profile-sharing-card { min-width: 0; margin: 0; border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; background: var(--profile-panel); }
-.profile-sharing-card h3 { margin: 0 0 1rem; color: var(--text); font-size: 1rem; letter-spacing: -.02em; }
+.profile-sharing-card h2 { margin: 0 0 1rem; color: var(--text); font-size: 1rem; letter-spacing: -.02em; }
 .profile-sharing-card > .profile-eyebrow { margin: 0 0 .6rem; }
 .profile-sharing-card legend { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .profile-sharing-form .profile-field label { margin-bottom: .5rem; font-size: .8rem; }
