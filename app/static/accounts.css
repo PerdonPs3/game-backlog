@@ -25,11 +25,11 @@
 
 /* Player identity: live card and an accessible, progressively enhanced editor. */
 .profile-workspace {
-    --profile-panel: #17222e;
-    --profile-field: #101923;
-    --profile-cover: #263443;
-    --profile-line: #ffffff14;
-    --profile-tint: #e3b34114;
+    --profile-panel: var(--color-panel);
+    --profile-field: var(--color-field);
+    --profile-cover: var(--color-raised);
+    --profile-line: var(--color-border);
+    --profile-tint: color-mix(in srgb, var(--color-accent) 7.84%, transparent);
     --profile-success: #a1e5bd;
 }
 .profile-workspace .workspace-panel { padding: 0; border: 0; background: none; box-shadow: none; }
@@ -138,7 +138,7 @@ body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex
 .avatar-edit-trigger { position: relative; display: block; width: 86px; height: 86px; border-radius: 50%; list-style: none; cursor: pointer; }
 .avatar-edit-trigger::-webkit-details-marker { display: none; }
 .avatar-edit-trigger .player-avatar { position: relative; top: auto; left: auto; margin: 0; }
-.avatar-edit-overlay { position: absolute; inset: 0; border-radius: inherit; display: grid; place-items: center; background: #15191f; color: #fff; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.avatar-edit-overlay { position: absolute; inset: 0; border-radius: inherit; display: grid; place-items: center; background: #1e2023; color: #fff; opacity: 0; transition: opacity .15s; pointer-events: none; }
 .avatar-edit-overlay svg { width: 26px; height: 26px; }
 .avatar-edit-trigger:hover .avatar-edit-overlay, .avatar-edit-trigger:focus-visible .avatar-edit-overlay, .avatar-editor[open] .avatar-edit-overlay { opacity: 1; }
 .avatar-edit-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -176,7 +176,7 @@ body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex
 .avatar-crop-replace { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; margin: 0; padding: .5rem; border: 1px solid var(--border); border-radius: 9px; background: transparent; color: var(--accent); cursor: pointer; }
 .avatar-crop-replace:hover { border-color: var(--accent); }
 .avatar-crop-replace:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.avatar-crop-stage { position: relative; width: min(100%, 320px); aspect-ratio: 1; margin-inline: auto; overflow: hidden; border-radius: 12px; background: #10151e; cursor: grab; touch-action: none; }
+.avatar-crop-stage { position: relative; width: min(100%, 320px); aspect-ratio: 1; margin-inline: auto; overflow: hidden; border-radius: 12px; background: var(--color-surface); cursor: grab; touch-action: none; }
 .avatar-crop-stage:active { cursor: grabbing; }
 .avatar-crop-stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .avatar-crop-stage canvas { display: block; width: 100%; height: 100%; }
@@ -187,7 +187,7 @@ body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex
 .avatar-crop-actions, .avatar-crop-actions > div { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
 .avatar-crop-actions { margin-top: 1.25rem; flex-wrap: wrap; }
 .avatar-crop-actions button { padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-size: .75rem; cursor: pointer; }
-.avatar-crop-actions [data-crop-apply] { background: var(--accent); color: #101116; border-color: var(--accent); font-weight: 700; }
+.avatar-crop-actions [data-crop-apply] { background: var(--accent); color: var(--color-canvas); border-color: var(--accent); font-weight: 700; }
 .avatar-crop-error { color: var(--text-muted); font-size: .75rem; }
 .avatar-crop-error:empty { display: none; }
 html[data-theme="light"] .avatar-crop-actions [data-crop-apply] { color: white; }

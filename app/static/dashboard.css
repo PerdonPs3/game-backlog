@@ -1,7 +1,7 @@
 /* Library-only finishing layer; controls and global statistics stay unchanged. */
 .library-layout {
-    --dashboard-tint: #e3b3410c;
-    --dashboard-line: #e3b34125;
+    --dashboard-tint: color-mix(in srgb, var(--color-accent) 4.71%, transparent);
+    --dashboard-line: color-mix(in srgb, var(--color-accent) 14.51%, transparent);
     --dashboard-shadow: #0002;
 }
 html[data-theme="light"] .library-layout {

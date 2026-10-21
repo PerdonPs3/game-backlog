@@ -112,3 +112,25 @@ test("light theme readable foregrounds contrast with their intended surfaces", (
         assert.ok((levels[1] + 0.05) / (levels[0] + 0.05) >= 4.5, `${foreground}/${background}`);
     }
 });
+
+test("shared theme roles keep text, primary actions, and dark input borders readable", () => {
+    const luminance = (hex) => {
+        const rgb = hex.match(/[a-f\d]{2}/gi).map((part) => parseInt(part, 16) / 255)
+            .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+        return rgb[0] * .2126 + rgb[1] * .7152 + rgb[2] * .0722;
+    };
+    for (const file of ["style.css", "light-theme.css"]) {
+        const css = readFileSync(join(__dirname, "../app/static", file), "utf8");
+        const roles = Object.fromEntries([...css.matchAll(/--color-([\w-]+): #([a-f\d]{6});/g)]
+            .map((match) => [match[1], match[2]]));
+        const pairs = [["text", "canvas", 4.5], ["text", "panel", 4.5],
+            ["muted", "surface", 4.5], ["accent", "panel", 4.5],
+            ["on-action", "action", 4.5], ["outline", "field", 3]];
+        for (const [foreground, background, minimum] of pairs) {
+            assert.ok(roles[foreground] && roles[background], `${file}: missing color role`);
+            const levels = [luminance(roles[foreground]), luminance(roles[background])].sort((a, b) => a - b);
+            assert.ok((levels[1] + .05) / (levels[0] + .05) >= minimum,
+                `${file}: ${foreground}/${background} contrast below ${minimum}`);
+        }
+    }
+});

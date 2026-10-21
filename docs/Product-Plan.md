@@ -18,6 +18,15 @@ Acceptance: the profile, avatar menu, crop dialog, and save feedback are readabl
 on desktop and mobile; other pages retain their current appearance. Broader
 palette adoption follows explicit design approval.
 
+The user has approved extending the palette throughout the application. Shared
+color roles now cover the homepage and its animated demos, library, public
+catalog and game details, account screens, lists, game forms, backups, picker,
+and dialogs. Dark mode uses the approved Obsidian surfaces and amber actions;
+light mode retains white surfaces and purple accents. Profile refinements
+inherit the same roles. Cover artwork, the homepage mosaic, custom avatar
+colors, layout, and navigation behavior are preserved. Implemented locally;
+user review and Preview publication pending.
+
 ## 1. Make the player profile worth visiting
 
 - Separate a profile overview from the profile editor.
