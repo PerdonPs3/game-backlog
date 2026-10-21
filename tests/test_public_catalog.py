@@ -80,8 +80,12 @@ def test_selection_survives_registration_confirmation_and_profile_setup(accounts
     logged_in=submit(client,'/account/login',{'email':'alice@example.test','password':'test-password'})
     assert logged_in.location.endswith('/account/profile/edit')
     setup=submit(client,'/account/profile/edit',{'display_name':'Alice','username':'alice_player'})
-    assert setup.status_code==303 and setup.location.endswith('/games/new?igdb_id=123')
-    assert 'value="Portal 2"' in client.get(setup.location).get_data(as_text=True)
+    assert setup.status_code==303 and setup.location.endswith('/account/profile#profile-feedback')
+    overview = client.get(setup.location).get_data(as_text=True)
+    assert 'Your profile is ready.' in overview and 'Continue to your selected game' in overview
+    continuation = client.get('/explore/games/123/add')
+    assert continuation.location.endswith('/games/new?igdb_id=123')
+    assert 'value="Portal 2"' in client.get(continuation.location).get_data(as_text=True)
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0]==0
 

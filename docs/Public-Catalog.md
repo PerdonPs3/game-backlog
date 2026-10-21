@@ -45,6 +45,11 @@ revalidates the upstream identity and platform, preserves account ownership, and
 retains the existing duplicate game/platform check. Browsing, sign-in, profile
 creation, and GET requests never silently add a game.
 
+New profile setup opens the completed profile overview first. If a catalog game
+was selected before registration, an explicit Continue to your selected game link
+resumes its add flow; the selection remains subject to its original expiry.
+Existing members signing in from a game still return directly to the add form.
+
 The existing `/catalog/search` and `/catalog/games/<id>` JSON picker endpoints
 remain protected on hosted installations. The public HTML pages are separate
 from the private collection routes; both use the same catalog service.

@@ -142,3 +142,5 @@ html:not([data-theme="light"]) .profile-metrics > div:nth-child(3) dd { color: #
     .profile-sharing-card { padding: 1rem; }
     .profile-sharing-footer { align-items: flex-start; flex-direction: column; }
 }
+.profile-catalog-continuation { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem 1rem; margin: 1.25rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-panel); color: var(--text-muted); font-size: .8rem; line-height: 1.6; }
+.profile-catalog-continuation a { color: var(--accent); text-underline-offset: .2em; }

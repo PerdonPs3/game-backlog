@@ -372,13 +372,10 @@ def profile():
                 raise
             if not error:
                 flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
-                if is_setup:
-                    selected_id = take_selection()
-                    if selected_id:
-                        return redirect(url_for('main.create', igdb_id=selected_id), code=303)
                 return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
-    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
+    from app.public_profiles import RESERVED_NAMES
+    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 

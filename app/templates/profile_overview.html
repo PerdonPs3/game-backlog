@@ -14,6 +14,7 @@
 {% block panel_label %}Your profile and featured games{% endblock %}
 {% block panel %}
 {% if saved_messages %}<p id="profile-feedback" class="profile-feedback is-saved profile-overview-feedback" role="status" tabindex="-1" data-saved="true">✓ {{ saved_messages[0] }}</p>{% endif %}
+{% if pending_catalog_selection %}<p class="profile-catalog-continuation"><span>Your selected game is waiting.</span><a href="{{ url_for('explore.add', catalog_id=pending_catalog_selection.id) }}">Continue to your selected game ↗</a></p>{% endif %}
 <dl class="profile-metrics" aria-label="Your gaming progress">
     <div><dt>Games collected</dt><dd>{{ stats.total }}</dd></div><div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div><div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div><div><dt>Completion</dt><dd>{{ stats.completion_percent }}<small>%</small></dd></div>
 </dl>
