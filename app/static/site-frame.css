@@ -1,0 +1,55 @@
+/* One frame for the homepage, library, and every workspace. */
+body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
+.workspace-site-header { position: sticky; top: 0; z-index: 96; flex-shrink: 0; background: var(--color-canvas); border-bottom: 1px solid var(--border); }
+.workspace-site-header .workspace-topbar { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; width: 100%; min-height: 76px; margin: 0; padding: .9rem 1.5rem; border: 0; }
+.workspace-site-header .appearance-bar { position: static; flex: 0 0 auto; }
+.workspace-site-header .workspace-nav { display: flex; align-items: center; flex-wrap: wrap; flex: 1; gap: 1.25rem; min-width: 0; margin: 0; }
+.workspace-site-header .workspace-brand { flex-shrink: 0; }
+.workspace-site-header .workspace-nav > :not(.workspace-brand) { margin-left: 0; font-size: .8rem; }
+.workspace-site-header .workspace-nav > :nth-child(2) { margin-left: auto; }
+.workspace-site-header .workspace-header-actions { margin-left: auto; }
+.workspace-site-header .account-navigation > a { padding: .45rem .65rem; border-radius: 8px; }
+.workspace-site-header .account-navigation > .account-create { background: var(--color-action); color: var(--color-on-action); font-weight: 700; }
+.workspace-site-header .account-create:hover { box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 16%, transparent); }
+.library-page main.library-layout { flex: 1; margin-top: 2rem; margin-bottom: 2rem; }
+.workspace-hero:not(:has(.workspace-description)) { padding-block: 1.25rem; }
+.workspace-hero:not(:has(.workspace-description)) .hero-emblem { width: 64px; height: 72px; justify-self: end; }
+.catalog-message:empty, .catalog-copy-feedback:empty, .profile-feedback:empty { display: none; }
+.profile-bio-footer > :only-child { margin-left: auto; }
+.site-footer.workspace-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; width: 100%; margin-top: auto; padding: 1.5rem max(1.5rem, env(safe-area-inset-right)); border-top: 1px solid var(--border); background: var(--color-canvas); color: var(--text-muted); font-size: .7rem; }
+.site-footer a { color: var(--accent); }
+.site-footer-links { display: flex; align-items: center; gap: 1.25rem; max-width: 100%; min-width: 0; }
+.site-footer-links > span { min-width: 0; }
+.site-footer .brand-easter-egg { position: static; flex: 0 0 30px; width: 30px; height: 34px; opacity: calc(.5 + var(--logo-light) * .5); }
+.welcome-page .welcome-hero { min-height: calc(100dvh - 76px); }
+.welcome-page .welcome-hero, .welcome-page .welcome-story { scroll-margin-top: 76px; }
+.welcome-page .welcome-section, .welcome-page .welcome-steps-section { scroll-margin-top: 7rem; }
+
+/* Preserve the silhouette and its existing pointer glow; lift the metal finish. */
+.hero-emblem { opacity: 1; filter: drop-shadow(0 3px 2px #0006) drop-shadow(0 0 20px rgb(245 166 35 / calc(.15 + var(--logo-light) * .3))); }
+.hero-emblem svg { animation: none; }
+.brand-metal-light { stop-color: #fff2d5; }
+.brand-metal-highlight { stop-color: #ffddb4; }
+.brand-metal-mid { stop-color: #ffc880; }
+.brand-metal-shadow { stop-color: #b97216; }
+.brand-metal-edge { stop-color: #f5a623; }
+html[data-theme="light"] .brand-metal-light { stop-color: #d7bbf4; }
+html[data-theme="light"] .brand-metal-highlight { stop-color: #ae7be2; }
+html[data-theme="light"] .brand-metal-mid { stop-color: #8250bf; }
+html[data-theme="light"] .brand-metal-shadow { stop-color: #4d277f; }
+html[data-theme="light"] .brand-metal-edge { stop-color: #7042b7; }
+html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #7042b72a); }
+
+@media (max-width: 640px) {
+    .workspace-site-header .workspace-topbar { padding: .75rem 1rem; gap: .6rem 1rem; }
+    .workspace-site-header .workspace-nav { gap: .5rem 1rem; }
+    .workspace-site-header .workspace-nav > :nth-child(2) { margin-left: 0; }
+    .workspace-site-header .workspace-header-actions { width: 100%; justify-content: flex-end; }
+    .workspace-site-header .account-navigation { gap: .75rem; }
+    .workspace-site-header .github-profile:is(:hover, :focus-visible) .github-profile-name { max-width: 7rem; }
+    .library-page main.library-layout { margin-top: 1.25rem; }
+    .site-footer.workspace-footer { padding: 1.25rem; font-size: .65rem; }
+    .welcome-page .welcome-hero { min-height: calc(100dvh - 120px); }
+    .welcome-page .welcome-hero, .welcome-page .welcome-story { scroll-margin-top: 120px; }
+    .welcome-page .welcome-section, .welcome-page .welcome-steps-section { scroll-margin-top: 9rem; }
+}

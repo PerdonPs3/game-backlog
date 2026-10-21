@@ -1,8 +1,6 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Edit game · Vestigium{% endblock %}
-{% block page_kicker %}Your library, your story{% endblock %}
 {% block page_heading %}Edit <span>game</span>{% endblock %}
-{% block page_description %}Update your progress and capture what made this adventure yours.{% endblock %}
 {% block panel %}
 
         {% if error %}
@@ -99,13 +97,13 @@
 {% endblock %}
 {% block aside %}
     <aside class="workspace-aside" aria-label="Saved game summary">
-        <p class="aside-kicker">In your collection</p>
+
         <h2>{{ game['title'] }}</h2>
         <p>{{ game['platform'] }}</p>
         <span class="aside-status">{{ game['status'] }}</span>
         <div class="aside-divider"></div>
-        <h3>Keep your story up to date</h3>
-        <p class="aside-note">Your rating and review are personal. Clear either field to remove it.</p>
-        <p class="aside-note">Dates are optional. Changing the status will not invent or erase your history.</p>
+
+        <p class="aside-note">Clear a rating or review to remove it.</p>
+        <p class="aside-note">Changing status keeps your recorded dates.</p>
     </aside>
 {% endblock %}

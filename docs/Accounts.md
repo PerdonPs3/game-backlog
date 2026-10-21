@@ -3,6 +3,26 @@
 Hosted PostgreSQL installations require Supabase Auth. SQLite remains an offline,
 single-user mode. Account pages are under `/account`; `/` remains public.
 
+## Private account addresses
+
+Completed profiles with a username use `/account/<username>/library` and
+`/account/<username>/profile`. The editor, showcase, and sharing settings append
+`/edit`, `/showcase`, and `/sharing` to the private profile address. Navigation and
+successful saves generate the current account's address. Profiles without a
+username retain their existing setup and sharing routes until one is claimed.
+
+Old HTML GET/HEAD links redirect temporarily to the current address, preserving
+query parameters. Old POST forms still run once with CSRF protection; legacy
+`/library` JSON clients remain compatible. Previous usernames redirect only for
+their authenticated owner. Unknown and other users' private addresses return
+404; anonymous requests require sign-in. Every collection query continues to use
+the session's owner ID, never the URL name. Recovery sessions retain their reset
+restriction. Private pages and redirects are not cached. Offline mode keeps
+`/library` and does not expose named account routes.
+
+Public profiles remain separate at `/players/<username>` and retain their
+existing visibility and field-sharing rules. No database migration is needed.
+
 ## Optional public player identity
 
 Migration `005_public_profiles.sql` adds a unique, nullable username and three
@@ -252,8 +272,13 @@ Users can upload a still JPG, PNG, or WebP up to 2 MB and 12 million pixels.
 Selecting a photo opens a circular crop preview with drag, arrow-key positioning,
 zoom, centering, cancel, and Use photo actions. Only a confirmed photo and its crop
 coordinates are submitted. Cancelling a replacement preserves the previous
-selection. The server validates the crop against the oriented source dimensions
-before resizing; the original remains subject to the same upload validation.
+selection.
+The crop dialog's paperclip opens a replacement picker without closing the dialog.
+Cancelling that picker or selecting an invalid replacement preserves the current
+crop; only a valid decoded replacement resets positioning and zoom. No replacement
+is persisted until Use photo and the profile save are confirmed.
+The server validates the crop against the oriented source dimensions before
+resizing; the original remains subject to the same upload validation.
 The default silhouette uses eight preset color swatches instead of the native
 color picker.
 Pillow validates the decoded format, rejects animation, normalizes orientation,

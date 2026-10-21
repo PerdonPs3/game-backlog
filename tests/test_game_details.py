@@ -94,7 +94,7 @@ def test_details_links_survive_live_filter(client, seed_game):
 def test_personal_verdict_design(client, seed_game, rating, filled):
     game_id = seed_game(rating=rating, review="A memory\n" + "x" * 1000)
     html = client.get(f"/games/{game_id}").get_data(as_text=True)
-    assert "The personal verdict" in html
+    assert "Your review" in html
     assert 'class="verdict-quote"' in html
     assert html.count('class="is-filled"') == filled
     assert f'href="/games/{game_id}/edit"' in html

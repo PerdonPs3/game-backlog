@@ -1,6 +1,19 @@
-/* Light theme is scoped: the original dark/gold design remains untouched. */
+/* White and purple counterparts to the shared Obsidian color roles. */
 html[data-theme="light"] {
     color-scheme: light;
+    --color-canvas: #faf8f5;
+    --color-panel: #ffffff;
+    --color-surface: #ffffff;
+    --color-raised: #f2ecfa;
+    --color-field: #fcfaff;
+    --color-border: #ddd4e9;
+    --color-text: #29213d;
+    --color-muted: #665d75;
+    --color-outline: #74677e;
+    --color-accent: #7042b7;
+    --color-accent-soft: #8250bf;
+    --color-action: #7042b7;
+    --color-on-action: #ffffff;
     --background: #faf8f5;
     --surface: #ffffff;
     --text: #29213d;

@@ -23,6 +23,7 @@
         const zoom = dialog.querySelector('[data-crop-zoom]');
         const error = dialog.querySelector('[data-crop-error]');
         const apply = dialog.querySelector('[data-crop-apply]');
+        const replacement = dialog.querySelector('[data-crop-replacement]');
         let image, file, state, url, pointer, generation = 0;
 
         function cleanup() {
@@ -42,34 +43,47 @@
         }
 
         async function open(candidate) {
-            cleanup();
-            const current = generation;
+            const current = ++generation;
+            const report = (message) => {
+                if (dialog.open) error.textContent = message;
+                else onError(message);
+            };
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(candidate.type) || candidate.size > 2 * 1024 * 1024) {
-                onError('Choose a JPG, PNG, or WebP photo up to 2 MB.');
+                report('Choose a JPG, PNG, or WebP photo up to 2 MB.');
                 return;
             }
-            url = URL.createObjectURL(candidate);
+            const candidateUrl = URL.createObjectURL(candidate);
             const loaded = new Image();
-            loaded.src = url;
+            loaded.src = candidateUrl;
             try {
                 await loaded.decode();
-                if (current !== generation) return;
-                if (!loaded.naturalWidth || loaded.naturalWidth * loaded.naturalHeight > 12000000) throw new Error();
+                if (current !== generation) { URL.revokeObjectURL(candidateUrl); return; }
+                if (!loaded.naturalWidth || !loaded.naturalHeight || loaded.naturalWidth * loaded.naturalHeight > 12000000) throw new Error();
+                if (url) URL.revokeObjectURL(url);
+                url = candidateUrl;
                 image = loaded;
                 file = candidate;
+                pointer = null;
                 state = { width: loaded.naturalWidth, height: loaded.naturalHeight, zoom: 1, cx: loaded.naturalWidth / 2, cy: loaded.naturalHeight / 2 };
                 zoom.value = '1';
                 error.textContent = '';
                 apply.disabled = false;
-                dialog.showModal();
+                if (!dialog.open) dialog.showModal();
                 draw();
                 stage.focus();
             } catch (_) {
+                URL.revokeObjectURL(candidateUrl);
                 if (current !== generation) return;
-                cleanup();
-                onError('This photo could not be opened. Use a still JPG, PNG, or WebP up to 12 million pixels.');
+                report('This photo could not be opened. Use a still JPG, PNG, or WebP up to 12 million pixels.');
             }
         }
+
+        dialog.querySelector('[data-crop-replace]').addEventListener('click', () => replacement.click());
+        replacement.addEventListener('change', () => {
+            const candidate = replacement.files[0];
+            replacement.value = '';
+            if (candidate) return open(candidate);
+        });
 
         stage.addEventListener('pointerdown', (event) => {
             if (!state || (event.button !== undefined && event.button !== 0)) return;

@@ -7,9 +7,7 @@
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
 {% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ url_for('auth.profile_overview') }}">← Back to profile</a>{% endif %}{% endblock %}
-{% block page_kicker %}{{ 'A new player. A new story.' if is_setup else 'Your player identity' }}{% endblock %}
-{% block page_heading %}{{ 'Make your' if is_setup else 'Leave your' }} <span>mark.</span>{% endblock %}
-{% block page_description %}{{ 'Choose a name and a photo to make this space yours. Your library is waiting.' if is_setup else 'A little of who you are. A record of what you play.' }}{% endblock %}
+{% block page_heading %}{{ 'Create' if is_setup else 'Edit' }} <span>profile</span>{% endblock %}
 {% block panel_label %}{{ 'Create your profile' if is_setup else 'Profile settings' }}{% endblock %}
 {% block panel %}
 <div class="profile-editor" data-profile-editor>
@@ -21,16 +19,16 @@
                     <span class="player-avatar" style="--avatar-color: {{ avatar_color }}">
                         <span class="avatar-placeholder" data-avatar-placeholder {% if profile.has_photo %}hidden{% endif %}><svg class="player-avatar-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="17" r="9" fill="currentColor"/><path d="M7 44v-5a17 17 0 0 1 34 0v5Z" fill="currentColor"/></svg></span>
                         <img data-avatar-photo alt="Your profile photo" {% if profile.has_photo %}src="{{ url_for('auth.profile_photo') }}"{% else %}hidden{% endif %}>
+                        <span class="avatar-edit-overlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z"/></svg></span>
                     </span>
-                    <span class="avatar-edit-overlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z"/></svg></span>
                 </summary>
                 <div class="avatar-edit-panel" role="group" aria-label="Profile picture options">
                     <p class="avatar-edit-heading">Profile picture</p>
                     <input class="avatar-file-input" type="file" id="profile-photo" name="photo" form="profile-form" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint photo-feedback">
                     <label class="avatar-upload-button" for="profile-photo">Upload photo <span aria-hidden="true">↗</span></label>
-                    <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 2 MB. Move and zoom to choose your crop.</p>
+                    <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 2 MB.</p>
                     <p id="photo-feedback" class="profile-field-hint" role="status" aria-live="polite" data-photo-feedback></p>
-                    <div class="avatar-palette" role="group" aria-label="Default avatar color">
+                    <div class="avatar-palette" data-avatar-palette role="group" aria-label="Default avatar color" {% if profile.has_photo %}hidden{% endif %}>
                         <p>Background color</p>
                         <input type="hidden" name="avatar_color" value="{{ avatar_color }}" form="profile-form">
                         <div class="avatar-swatches">
@@ -41,44 +39,47 @@
                     </div>
                     <input type="hidden" name="remove_photo" value="" form="profile-form" disabled>
                     <button class="avatar-remove-button" type="submit" name="remove_photo" value="yes" form="profile-form" data-remove-photo {% if not profile.has_photo %}hidden{% endif %}>Remove photo</button>
-                    <p class="avatar-save-hint">Save your profile below to keep your changes.</p>
+
                 </div>
             </details>
-            <p class="player-card-kicker">{{ 'Your story starts here' if is_setup else 'Every game leaves a mark' }}</p>
+
             <h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>
-            <p class="player-bio" data-profile-bio>{{ bio.strip() or 'Your next adventure is just the beginning.' }}</p>
+            <p class="player-bio" data-profile-bio>{{ bio.strip() }}</p>
             <div class="player-card-rule"></div>
             <dl class="player-stats">
                 <div><dt>Games</dt><dd>{{ stats.total }}</dd></div>
                 <div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div>
                 <div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div>
             </dl>
-            <p class="player-card-note">Your library stays private. Manage public fields in Profile sharing.</p>
+
         </div>
     </aside>
     <form id="profile-form" action="{{ url_for('auth.profile') }}" method="post" enctype="multipart/form-data" class="workspace-form profile-editor-form" data-profile-form>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <header class="profile-form-heading"><p class="profile-eyebrow">{{ 'WELCOME TO VESTIGIUM' if is_setup else 'MAKE IT PERSONAL' }}</p><h2>{{ 'Create your profile' if is_setup else 'Edit your profile' }}</h2><p>{{ 'A few details before your first adventure.' if is_setup else 'Your player card updates as you make changes.' }}</p></header>
+
         {% set upload_errors = get_flashed_messages(category_filter=['profile_error']) %}
         {% if upload_errors %}<p class="profile-error" role="alert">{{ upload_errors[0] }}</p>{% endif %}
         {% if error %}<p class="profile-error" role="alert">{{ error }} If you selected a new photo, select it again before saving.</p>{% endif %}
         <div class="profile-field">
             <label for="display-name">Display name <span>Required</span></label>
             <input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ display_name }}" aria-describedby="display-name-hint">
-            <p id="display-name-hint" class="profile-field-hint">The name on your player card. You can change it anytime.</p>
+            <p id="display-name-hint" class="profile-field-hint">You can change your display name anytime.</p>
         </div>
-        <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span>A few words about the player behind the library.</span><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
         {% if is_setup %}
-        <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username or request.form.get('username', '') }}" {% if profile.username %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores, starting with a letter. Capitals are welcome; links use lowercase. You can change your username once every 30 days; older links will redirect.</p></div>
+        <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" data-reserved-usernames='{{ username_reserved|tojson }}' name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username or request.form.get('username', '') }}" {% if profile.username %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores; start with a letter. Editable suggestion · Changes allowed every 30 days.</p></div>
+        {% endif %}
+        <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
+        {% if is_setup %}
         <fieldset class="profile-setup-visibility"><legend>Profile visibility</legend><label><input type="radio" name="is_public" value="yes" {% if request.form.get('is_public', 'yes') == 'yes' %}checked{% endif %}><span>Public <small>Default · Share your name, username, and avatar color.</small></span></label><label><input type="radio" name="is_public" value="no" {% if request.form.get('is_public') == 'no' %}checked{% endif %}><span>Private <small>Hide your profile link from everyone.</small></span></label><p class="profile-field-hint">Your library always stays private. You can share your bio and showcase later in Profile sharing.</p></fieldset>
         {% endif %}
         <footer class="profile-save-bar">
             <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('auth.profile_overview') }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
-            <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{{ 'Save your profile to open your library.' if is_setup else 'Save changes to update your profile. Shared details update your public page too.' }}{% endif %}</p>
+            <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{% endif %}</p>
         </footer>
     </form>
     <dialog class="avatar-crop-dialog" data-avatar-crop aria-labelledby="avatar-crop-title" aria-describedby="avatar-crop-help">
-        <header><p class="profile-eyebrow">MAKE IT YOURS</p><h2 id="avatar-crop-title">Adjust your photo</h2><p id="avatar-crop-help">Drag the photo to position it inside the circle.</p></header>
+        <header class="avatar-crop-header"><div><h2 id="avatar-crop-title">Adjust your photo</h2><p id="avatar-crop-help">Drag the photo to position it inside the circle.</p></div><button type="button" class="avatar-crop-replace" data-crop-replace aria-label="Choose another image" title="Choose another image"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 11-8.5 8.5a6 6 0 0 1-8.5-8.5l9-9a4 4 0 0 1 5.7 5.7l-9 9a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button></header>
+        <input type="file" data-crop-replacement accept="image/jpeg,image/png,image/webp" hidden>
         <div class="avatar-crop-stage" data-crop-stage tabindex="0" role="img" aria-label="Photo crop preview. Drag or use arrow keys to move the photo.">
             <canvas width="320" height="320" data-crop-canvas aria-hidden="true"></canvas>
             <span class="avatar-crop-circle" aria-hidden="true"></span>
@@ -90,4 +91,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='avatar-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script>{% endblock %}

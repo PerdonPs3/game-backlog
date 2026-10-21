@@ -26,8 +26,8 @@ def stored(application, owner=ALICE):
 def test_profile_overview_and_showcase_editor_have_distinct_private_routes(accounts, players):
     alice, bob, own, _, _ = players
     page = alice.get("/account/profile").get_data(as_text=True)
-    assert "Your showcase" in page and "Playing now" in page and "Recent completions" in page
-    assert "Make room for your favorites" in page and 'name="display_name"' not in page
+    assert "Showcase" in page and "Playing now" in page and "Recent completions" in page
+    assert "Build your showcase" in page and 'name="display_name"' not in page
     assert '/account/profile/edit' in page
     editor = alice.get("/account/profile/showcase").get_data(as_text=True)
     assert editor.count('name="games"') == 5
@@ -101,10 +101,10 @@ def test_anonymous_setup_recovery_and_empty_library_behaviors(accounts):
     assert client.get('/account/profile').location.endswith('/account/profile/edit')
     assert client.get('/account/profile/showcase').location.endswith('/account/profile/edit')
     result = submit(client, '/account/profile/edit', {'display_name':'Alice', 'username':'alice_player'})
-    assert result.location.endswith('/account/profile#profile-feedback')
+    assert result.location.endswith('/account/alice_player/profile#profile-feedback')
     page = client.get(result.location).get_data(as_text=True)
     assert 'Add your first game' in page and '<dd>0<small>%</small></dd>' in page
-    assert 'Your showcase starts with a game' in client.get('/account/profile/showcase').get_data(as_text=True)
+    assert 'Your showcase starts with a game' in client.get('/account/alice_player/profile/showcase').get_data(as_text=True)
     submit(client, '/account/logout', {}, source='/account/profile/edit')
     result = submit(client, '/account/verify-recovery', {'email':'alice@example.test','code':'123456'})
     assert result.location.endswith('/account/password')

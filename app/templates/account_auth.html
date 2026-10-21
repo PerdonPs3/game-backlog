@@ -1,25 +1,25 @@
 {% extends '_workspace_base.html' %}
+{% from '_password_field.html' import password_field %}
 {% set titles = {'login': 'Sign in', 'register': 'Create your account', 'recover': 'Recover your account', 'verify-recovery': 'Enter your recovery code', 'password': 'Choose a new password'} %}
 {% block page_title %}{{ titles[mode] }} · Vestigium{% endblock %}
-{% block page_kicker %}Your games. Your space.{% endblock %}
 {% block page_heading %}{{ titles[mode] }}{% endblock %}
-{% block page_description %}Keep your library, lists, and gaming memories in your own private account.{% endblock %}
 {% block panel_label %}Account access{% endblock %}
+{% block layout_class %}auth-workspace{% endblock %}
 {% block panel %}
-{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game is waiting. After signing in and completing your profile, choose a platform and confirm to add it.</p>{% endif %}
+{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game will be waiting after sign-in.</p>{% endif %}
 {% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
 {% if error %}<p role="alert">{{ error }}</p>{% endif %}
 {% if message %}<p role="status">{{ message }}</p>{% endif %}
-<form method="post" class="workspace-form">
+<form method="post" class="workspace-form account-access-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {% if mode != 'password' %}
     <div><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254" required value="{{ request.form.get('email', '') }}"></div>
     {% endif %}
     {% if mode in ('login', 'register', 'password') %}
-    <div><label for="password">Password</label><input type="password" id="password" name="password" autocomplete="{{ 'current-password' if mode == 'login' else 'new-password' }}" minlength="8" maxlength="128" required></div>
+    {{ password_field('password', 'Password', 'current-password' if mode == 'login' else 'new-password', counter=mode != 'login') }}
     {% endif %}
-    {% if mode == 'password' %}
-    <div><label for="confirmation">Confirm password</label><input type="password" id="confirmation" name="confirmation" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+    {% if mode in ('register', 'password') %}
+    {{ password_field('confirmation', 'Confirm password', 'new-password') }}
     {% endif %}
     {% if mode == 'verify-recovery' %}
     <div><label for="code">Recovery code</label><input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required></div>
@@ -33,3 +33,4 @@
     {% if mode == 'verify-recovery' %}<a href="{{ url_for('auth.recover') }}">Request a new code</a>{% endif %}
 </nav>
 {% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='account-password.js') }}" defer></script>{% endblock %}

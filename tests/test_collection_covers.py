@@ -64,7 +64,8 @@ def test_missing_catalog_cover_has_placeholder(post_form, game_data, client, sto
     assert stored_games()[0]["cover_image_id"] is None
     page = client.get("/library").get_data(as_text=True)
     assert "No cover available" in page
-    assert '<img src=' not in page
+    collection = page.split('<section id="game-collection"', 1)[1].split('</section>', 1)[0]
+    assert '<img src=' not in collection
 
 
 @pytest.mark.parametrize("image_id", [None, "../evil", 'x" onerror="alert(1)', "https://evil.example", ""])

@@ -136,7 +136,7 @@ def load_user():
         if user["id"] != str(stored["user_id"]):
             raise AuthError()
         g.user = user
-        g.profile = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+        g.profile = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username FROM profiles WHERE id = ?", (user["id"],)).fetchone()
         g.account_session = {"id_hash": key, "access_token": access, "recovery": bool(stored["recovery"])}
         db.commit()
     except AuthError as error:
@@ -189,12 +189,17 @@ def login():
     if request.method == "POST":
         try:
             user = start_session(provider().call("token?grant_type=password", credentials()))
-            saved = get_db().execute("SELECT display_name FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+            saved = get_db().execute("SELECT display_name, username FROM profiles WHERE id = ?", (user["id"],)).fetchone()
+            # Link generation must follow the newly authenticated account even
+            # when this request started in a different account's session.
+            g.user, g.profile = user, saved
+            g.account_session = {"recovery": False}
             if saved['display_name'].strip():
                 selected_id = take_selection()
                 if selected_id:
                     return redirect(url_for('main.create', igdb_id=selected_id))
-            return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile"))
+            identity = {"username": saved["username"]} if saved["display_name"].strip() and saved["username"] else {}
+            return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile", **identity))
         except ValueError as problem:
             error = str(problem)
         except AuthError as problem:
@@ -230,7 +235,10 @@ def register():
     error = message = None
     if request.method == "POST":
         try:
-            payload = provider().call("signup", credentials())
+            values = credentials()
+            if values['password'] != request.form.get('confirmation'):
+                raise ValueError("Passwords do not match. Please enter the same password twice.")
+            payload = provider().call("signup", values)
             if payload.get("access_token") and payload.get("refresh_token"):
                 # Only a provider-verified, confirmed identity may enter setup.
                 start_session(payload)
@@ -368,14 +376,12 @@ def profile():
                 db.rollback()
                 raise
             if not error:
+                g.profile = db.execute("SELECT display_name, username FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
                 flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
-                if is_setup:
-                    selected_id = take_selection()
-                    if selected_id:
-                        return redirect(url_for('main.create', igdb_id=selected_id), code=303)
                 return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
-    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup,
+    from app.public_profiles import RESERVED_NAMES
+    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 

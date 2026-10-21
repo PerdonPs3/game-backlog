@@ -1,3 +1,4 @@
+{% from '_site_frame.html' import site_header, site_footer with context %}
 {% from '_welcome_demos.html' import product_demo %}
 <!DOCTYPE html>
 <html lang="en" class="welcome-document">
@@ -14,15 +15,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='product-demos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
 <body class="library-page welcome-page">
-    {% include '_brand_easter_egg.html' %}
     <a class="welcome-skip" href="#welcome-title">Skip to content</a>
-    <header class="welcome-header">
-        {% include '_appearance_bar.html' %}
-        <nav class="welcome-navigation" aria-label="Homepage navigation"><a href="{{ url_for('explore.index') }}">Explore</a><a href="#how-it-works">How it works</a></nav>
-        {% include '_account_nav.html' %}
-    </header>
+    {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore</a><a href="#how-it-works">How it works</a>{% endcall %}
     <div class="welcome-backdrop" aria-hidden="true">
         <div class="welcome-mosaic">
             {% for column in range(8) %}
@@ -47,21 +44,21 @@
         </section>
         <div class="welcome-story">
             <section class="welcome-section" id="your-library" aria-labelledby="library-intro-title">
-                <div class="welcome-section-copy"><p class="welcome-eyebrow">01 / YOUR COLLECTION</p><h2 id="library-intro-title">A place for every adventure.</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
+                <div class="welcome-section-copy"><h2 id="library-intro-title">Organize your games</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
                 {{ product_demo('library') }}
             </section>
             <section class="welcome-section welcome-section-profile" aria-labelledby="profile-intro-title">
-                <div class="welcome-section-copy"><p class="welcome-eyebrow">02 / YOUR PLAYER IDENTITY</p><h2 id="profile-intro-title">Make your profile yours.</h2><p>Choose your favorites, build your showcase, and decide what to share. Your library and personal notes stay private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
+                <div class="welcome-section-copy"><h2 id="profile-intro-title">Show your favorites</h2><p>Build a five-game showcase and choose what to share. Your library stays private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
                 {{ product_demo('profile') }}
             </section>
             <section class="welcome-steps-section" id="how-it-works" aria-labelledby="steps-title">
-                <p class="welcome-eyebrow">YOUR NEXT CHAPTER</p><h2 id="steps-title">Find it. Play it. Remember it.</h2>
-                <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3><p>Explore the catalog. No account needed.</p></li><li><span>02</span><h3>Make it part of your library</h3><p>Choose your platform and add it to your collection.</p></li><li><span>03</span><h3>Keep your story</h3><p>Track your progress, leave a rating, and save your memories.</p></li></ol>
+                <h2 id="steps-title">How it works</h2>
+                <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3></li><li><span>02</span><h3>Make it part of your library</h3></li><li><span>03</span><h3>Keep your story</h3></li></ol>
             </section>
-            <section class="welcome-join" aria-labelledby="join-title"><p class="welcome-eyebrow">EVERY GAME LEAVES A MARK</p><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
+            <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
         </div>
     </main>
-    <footer class="welcome-footer"><span>Vestigium · Every game leaves a mark.</span><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span></footer>
+    {{ site_footer() }}
     <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
     <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>

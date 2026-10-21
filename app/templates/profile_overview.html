@@ -7,27 +7,28 @@
     <div class="profile-portrait" style="--avatar-color: {{ profile.avatar_color }}">
         <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="17" r="9" fill="currentColor"/><path d="M7 44v-5a17 17 0 0 1 34 0v5Z" fill="currentColor"/></svg>{% if profile.has_photo %}<img src="{{ url_for('auth.profile_photo') }}" alt="Your profile photo" width="112" height="112">{% endif %}
     </div>
-    <div class="profile-identity"><p class="profile-eyebrow">YOUR PLAYER PROFILE</p><h1>{{ profile.display_name }}</h1><p class="profile-overview-bio">{{ profile.bio or 'Every game leaves a mark. Your next chapter starts here.' }}</p><div class="profile-identity-meta"><span class="player-private">Your private workspace</span><span>Member since {{ (profile.created_at|string)[:4] }}</span></div></div>
+    <div class="profile-identity"><h1>{{ profile.display_name }}</h1>{% if profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}<div class="profile-identity-meta"><span class="player-private">Your private workspace</span><span>Member since {{ (profile.created_at|string)[:4] }}</span></div></div>
     <div class="profile-hero-actions"><a class="profile-action profile-action-primary" href="{{ url_for('auth.profile') }}">Edit profile <span aria-hidden="true">↗</span></a><a class="profile-action" href="{{ url_for('profiles.sharing') }}">Profile sharing</a><a class="profile-action" href="{{ url_for('main.index') }}">Open library</a></div>
 </header>
 {% endblock %}
 {% block panel_label %}Your profile and featured games{% endblock %}
 {% block panel %}
 {% if saved_messages %}<p id="profile-feedback" class="profile-feedback is-saved profile-overview-feedback" role="status" tabindex="-1" data-saved="true">✓ {{ saved_messages[0] }}</p>{% endif %}
+{% if pending_catalog_selection %}<p class="profile-catalog-continuation"><span>Your selected game is waiting.</span><a href="{{ url_for('explore.add', catalog_id=pending_catalog_selection.id) }}">Continue to your selected game ↗</a></p>{% endif %}
 <dl class="profile-metrics" aria-label="Your gaming progress">
     <div><dt>Games collected</dt><dd>{{ stats.total }}</dd></div><div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div><div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div><div><dt>Completion</dt><dd>{{ stats.completion_percent }}<small>%</small></dd></div>
 </dl>
 <section class="profile-section" aria-labelledby="showcase-title">
-    <header class="profile-section-heading"><div><p class="profile-eyebrow">THE GAMES THAT DEFINE YOU</p><h2 id="showcase-title">Your showcase</h2><p>Five places for the games that mean the most.</p></div><a class="profile-text-link" href="{{ url_for('auth.edit_showcase') }}">{{ 'Edit showcase' if showcase else 'Choose your games' }} <span aria-hidden="true">↗</span></a></header>
+    <header class="profile-section-heading"><div><h2 id="showcase-title">Showcase</h2></div>{% if showcase %}<a class="profile-text-link" href="{{ url_for('auth.edit_showcase') }}">Edit showcase <span aria-hidden="true">↗</span></a>{% endif %}</header>
     {% if showcase %}<ol class="profile-showcase-grid">
         {% for game in showcase %}<li><a class="profile-featured-game" href="{{ url_for('main.game_details', game_id=game.id) }}">{{ cover(game) }}<span class="profile-pick-position" aria-label="Position {{ loop.index }}">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small></a></li>{% endfor %}
         {% for slot in range(showcase|length, 5) %}<li class="profile-empty-pick"><a href="{{ url_for('auth.edit_showcase') }}"><span aria-hidden="true">+</span><small>Your next pick</small></a></li>{% endfor %}
-    </ol>{% else %}<div class="profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h3>Make room for your favorites.</h3><p>Pick up to five games from your library and arrange them in your own order.</p><a class="profile-action profile-action-primary" href="{{ url_for('auth.edit_showcase') if stats.total else url_for('main.create') }}">{{ 'Build your showcase' if stats.total else 'Add your first game' }} <span aria-hidden="true">↗</span></a></div>{% endif %}
+    </ol>{% else %}<div class="profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><p>Pick up to five games from your library and arrange them in your own order.</p><a class="profile-action profile-action-primary" href="{{ url_for('auth.edit_showcase') if stats.total else url_for('main.create') }}">{{ 'Build your showcase' if stats.total else 'Add your first game' }} <span aria-hidden="true">↗</span></a></div>{% endif %}
 </section>
 <div class="profile-activity-grid">
-    <section class="profile-section" aria-labelledby="playing-title"><header class="profile-section-heading"><div><p class="profile-eyebrow">IN PROGRESS</p><h2 id="playing-title">Playing now</h2></div><span class="profile-activity-dot" aria-hidden="true"></span></header>{{ activity(playing, 'Your next adventure is waiting. Set a game to Playing to see it here.') }}</section>
-    <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><div><p class="profile-eyebrow">CHAPTERS FINISHED</p><h2 id="completed-title">Recent completions</h2></div></header>{{ activity(completed, 'Finished a game? Mark it Completed and record its completion date to build your history.') }}</section>
+    <section class="profile-section" aria-labelledby="playing-title"><header class="profile-section-heading"><div><h2 id="playing-title">Playing now</h2></div><span class="profile-activity-dot" aria-hidden="true"></span></header>{{ activity(playing, 'Set a game to Playing to see it here.') }}</section>
+    <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><div><h2 id="completed-title">Recent completions</h2></div></header>{{ activity(completed, 'Finished a game? Mark it Completed and record its completion date to build your history.') }}</section>
 </div>
-<p class="profile-overview-note">{% if stats.average is not none %}Average rating <strong>{{ '%.1f'|format(stats.average) }}/10</strong> · {% endif %}Your library stays private. Profile sharing controls your public page. · Covers by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.</p>
+<p class="profile-overview-note">{% if stats.average is not none %}Average rating <strong>{{ '%.1f'|format(stats.average) }}/10</strong> · {% endif %}Your library stays private.</p>
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='profile-overview.js') }}" defer></script>{% endblock %}

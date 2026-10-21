@@ -8,7 +8,7 @@
     </form>
     {% else %}
     <a href="{{ url_for('auth.login') }}">Sign in</a>
-    <a href="{{ url_for('auth.register') }}">Create account</a>
+    <a class="account-create" href="{{ url_for('auth.register') }}">Create account</a>
     {% endif %}
 </div>
 {% endif %}

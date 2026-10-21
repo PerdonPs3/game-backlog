@@ -34,7 +34,7 @@ def test_search_uses_server_headers_and_post_body(monkeypatch):
     assert search_request.full_url == "https://api.igdb.com/v4/games"
     assert search_request.get_header("Authorization") == "Bearer fake-test-token"
     assert search_request.get_header("Client-id") == "fake-id"
-    assert 'search "Resident";' in search_request.data.decode()
+    assert 'name ~ *"Resident"*' in search_request.data.decode()
     assert "cover.image_id" in search_request.data.decode()
 
 
@@ -77,8 +77,10 @@ def test_query_quotes_are_escaped(monkeypatch):
     term = 'Game"; limit 500; search "'
     catalog.IGDBClient("fake-id", "fake-secret").search_games(term)
     body = request_json.call_args.args[0].data.decode()
-    assert body.startswith(f"search {json.dumps(term)};")
-    assert body.endswith("limit 30;")
+    assert 'name ~ *"Game"*' in body
+    assert 'search "' not in body
+    assert body.count(';') == 4
+    assert body.endswith("limit 500;")
 
 
 @pytest.mark.parametrize("payload", [{}, {"access_token": "bad"}, []])
@@ -181,7 +183,7 @@ def test_catalog_endpoint_returns_suggestions(client, app, stored_games):
     response = client.get("/catalog/search?q=Portal")
     assert response.status_code == 200
     assert response.json["games"][0]["id"] == 123
-    fake_client.search_games.assert_called_once_with("Portal")
+    fake_client.search_games.assert_called_once_with("Portal", include_community=False)
     assert stored_games() == []
 
 
@@ -203,3 +205,37 @@ def test_add_form_has_accessible_catalog_picker(client):
     assert 'role="combobox"' in page
     assert 'role="listbox"' in page
     assert '/static/catalog-search.js' in page
+
+def test_community_filter_excludes_provider_tags_and_keeps_independent_games(monkeypatch):
+    mod = {'id': 10, 'name': 'Zelda mod', 'game_type': {'type': 'Mod'}}
+    fan = {'id': 11, 'name': 'Zelda fan', 'game_type': {'type': 'Main Game'}, 'keywords': [{'name': 'zelda fangame'}]}
+    hack = {'id': 12, 'name': 'Zelda hack', 'keywords': [{'name': 'rom hack'}]}
+    official = {'id': 7346, 'name': 'The Legend of Zelda: Breath of the Wild', 'total_rating_count': 10000}
+    indie = {'id': 13, 'name': 'Independent adventure', 'game_type': {'type': 'Main Game'}}
+    request_json = Mock(side_effect=[TOKEN, [mod, fan, hack, official, indie], [mod, fan, hack, official, indie]])
+    monkeypatch.setattr(catalog, '_request_json', request_json)
+    client = catalog.IGDBClient('fake-id', 'fake-secret')
+    assert {g['id'] for g in client.search_games('zelda')} == {7346, 13}
+    assert {g['id'] for g in client.search_games('zelda', include_community=True)} == {10, 11, 12, 7346, 13}
+    assert request_json.call_count == 3
+    client.search_games('ZELDA')
+    assert request_json.call_count == 3
+
+
+def test_series_search_keeps_popular_games_ahead_of_recent_obscure_matches(monkeypatch):
+    popular = {'id': 7346, 'name': 'The Legend of Zelda: Breath of the Wild', 'total_rating_count': 10000, 'first_release_date': 1488499200}
+    newer = {'id': 20, 'name': 'The Legend of Zelda: Example', 'first_release_date': 1800000000}
+    monkeypatch.setattr(catalog, '_request_json', Mock(side_effect=[TOKEN, [newer, popular]]))
+    client = catalog.IGDBClient('fake-id', 'fake-secret')
+    assert client.search_games('zelda')[0]['id'] == 7346
+    assert catalog.search_sort_key(newer, newer['name']) < catalog.search_sort_key(popular, newer['name'])
+
+
+def test_multiword_search_does_not_require_contiguous_title_words(monkeypatch):
+    request_json = Mock(side_effect=[TOKEN, [GAME]])
+    monkeypatch.setattr(catalog, '_request_json', request_json)
+    catalog.IGDBClient('fake-id', 'fake-secret').search_games('breath of wild')
+    body = request_json.call_args.args[0].data.decode()
+    for word in ('breath', 'of', 'wild'):
+        assert f'name ~ *"{word}"*' in body
+        assert f'alternative_names.name ~ *"{word}"*' in body

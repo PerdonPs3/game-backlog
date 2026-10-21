@@ -19,7 +19,7 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert "t_cover_big/co4jni.jpg" in html
     assert 'action="/explore"' in html and 'data-catalog-url="/explore/suggestions"' in html
     assert 'href="#your-library"' in html and 'id="how-it-works"' in html
-    assert 'class="welcome-header"' in html
+    assert 'class="workspace-site-header"' in html
     assert 'Illustrative demo' in html
     assert 'Track your progress' in html and 'Build your showcase' in html
     assert 'home-library.png' not in html and 'home-profile.png' not in html

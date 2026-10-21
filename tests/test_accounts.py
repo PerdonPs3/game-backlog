@@ -51,7 +51,7 @@ def accounts(postgres_config, tmp_path):
 
 
 def submit(client, path, data, source=None):
-    page = client.get(source or path)
+    page = client.get(source or path, follow_redirects=True)
     assert page.status_code == 200, page.get_data(as_text=True)
     parser = CSRFTokenParser()
     parser.feed(page.get_data(as_text=True))
@@ -210,7 +210,7 @@ def test_expired_session_cannot_access_collection(accounts):
 def test_registration_confirmation_login_errors_and_csrf(accounts):
     client = accounts.test_client()
     assert client.post("/account/register", data={"email": "alice@example.test", "password": "test-password"}).status_code == 400
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert "Check your email" in response.get_data(as_text=True)
     assert client.get("/library").status_code == 302
     accounts.extensions["supabase_auth"].invalid = True
@@ -325,14 +325,17 @@ def test_first_login_requires_profile_before_library_and_saved_profile_unlocks_i
     assert response.status_code == 409 and response.json["profile_url"] == "/account/profile/edit"
     page = client.get("/account/profile/edit")
     assert "Create your profile" in page.get_data(as_text=True)
+    html = page.get_data(as_text=True)
+    assert html.index('id="display-name"') < html.index('id="setup-username"') < html.index('id="bio"')
     result = submit(client, "/account/profile/edit", {"display_name": "New player", "username": "New_Player", "bio": "", "avatar": "rocket"})
     assert result.status_code == 303 and result.location.endswith("#profile-feedback")
     saved = client.get(result.location)
     assert "Your profile is ready" in saved.get_data(as_text=True)
     assert 'data-saved="true"' in saved.get_data(as_text=True)
     assert "Open library" in saved.get_data(as_text=True)
-    assert client.get("/library").status_code == 200
-    assert "Your profile is ready" not in client.get("/account/profile/edit").get_data(as_text=True)
+    assert client.get("/library").location == "/account/new_player/library"
+    assert client.get("/account/new_player/library").status_code == 200
+    assert "Your profile is ready" not in client.get("/account/new_player/profile/edit").get_data(as_text=True)
     submit(client, "/account/logout", {}, source="/account/profile/edit")
     result = submit(client, "/account/login", {"email": "alice@example.test", "password": "test-password"})
     assert result.location.endswith("/library")
@@ -357,7 +360,7 @@ def test_confirmed_registration_with_provider_session_goes_to_creator(accounts):
         return original(path, payload, token, method)
     fake.call = confirmed_signup
     client = accounts.test_client()
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert response.location.endswith("/account/profile/edit")
     assert "Create your profile" in client.get(response.location).get_data(as_text=True)
 
@@ -373,7 +376,7 @@ def test_registration_still_requires_a_provider_confirmed_email(accounts):
         return original(path, payload, token, method)
     fake.call = unconfirmed_signup
     client = accounts.test_client()
-    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password"})
+    response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert "Registration could not be completed" in response.get_data(as_text=True)
     assert client.get("/account/profile/edit").location.endswith("/account/login")
     with accounts.app_context():
@@ -390,6 +393,7 @@ def test_profile_save_feedback_is_specific_to_current_account_and_not_query_para
 
 
 def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
+    import re
     from PIL import Image
     alice, bob = sign_in(accounts, "alice"), sign_in(accounts, "bob")
     image = BytesIO()
@@ -397,6 +401,7 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     image.seek(0)
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "avatar_color": "#aa44bb", "photo": (image, "photo.png")})
     assert result.status_code == 303
+    assert re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
     photo = alice.get("/account/profile/photo")
     assert photo.status_code == 200 and photo.mimetype == "image/jpeg"
     assert photo.headers["Cache-Control"] == "private, no-store"
@@ -414,6 +419,7 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "remove_photo": "yes", "avatar_color": "#228844"})
     assert result.status_code == 303
     assert alice.get("/account/profile/photo").status_code == 404
+    assert not re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
     assert 'name="avatar_color" value="#228844"' in alice.get("/account/profile/edit").get_data(as_text=True)
 
 
@@ -445,3 +451,28 @@ def test_profile_saves_chosen_crop_and_rejects_invalid_crop_without_replacing_ph
     result = submit(client, "/account/profile/edit", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":400}'})
     assert "Choose a crop inside" in result.get_data(as_text=True)
     assert client.get("/account/profile/photo").data == saved
+
+@pytest.mark.parametrize('confirmation', ['', 'different-password'])
+def test_registration_rejects_missing_or_mismatched_confirmation_before_provider(accounts, monkeypatch, confirmation):
+    from unittest.mock import Mock
+    call = Mock(side_effect=AssertionError('Invalid registration must not reach Supabase'))
+    monkeypatch.setattr(accounts.extensions['supabase_auth'], 'call', call)
+    response = submit(accounts.test_client(), '/account/register', {
+        'email': 'alice@example.test', 'password': 'test-password', 'confirmation': confirmation,
+    })
+    html = response.get_data(as_text=True)
+    assert 'Passwords do not match.' in html
+    assert 'value="test-password"' not in html
+    call.assert_not_called()
+
+
+def test_registration_accepts_more_than_eight_characters_and_has_matching_fields(accounts):
+    client = accounts.test_client()
+    page = client.get('/account/register').get_data(as_text=True)
+    assert 'id="confirmation"' in page and 'autocomplete="new-password"' in page
+    assert 'Min. 8' in page and 'Max. 128' in page
+    response = submit(client, '/account/register', {
+        'email': 'alice@example.test', 'password': 'a-longer-test-password',
+        'confirmation': 'a-longer-test-password',
+    })
+    assert 'Check your email' in response.get_data(as_text=True)

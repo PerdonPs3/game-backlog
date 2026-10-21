@@ -5,6 +5,16 @@ palette and the private profile overview design are approved in Preview. The
 five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
+## Interface copy review
+
+Functional pages use one direct task heading. Remove decorative kickers,
+repeated introductions, field-label paraphrases, duplicate tutorials, and
+repeated attribution already supplied by the common footer. Keep contextual
+privacy boundaries, destructive-action consequences, input limits, actionable
+empty states, and live save/error feedback. The homepage retains the brand
+tagline and feature demonstrations. This application-wide copy pass is
+implemented locally; user review and Preview publication are pending.
+
 ## 0. Validate the profile palette
 
 Use the supplied Vestigium Obsidian reference for a profile-only experiment:
@@ -17,6 +27,22 @@ the current light theme, typography, layout, and top-left utility controls.
 Acceptance: the profile, avatar menu, crop dialog, and save feedback are readable
 on desktop and mobile; other pages retain their current appearance. Broader
 palette adoption follows explicit design approval.
+
+The user has approved extending the palette throughout the application. Shared
+color roles now cover the homepage and its animated demos, library, public
+catalog and game details, account screens, lists, game forms, backups, picker,
+and dialogs. Dark mode uses the approved Obsidian surfaces and amber actions;
+light mode retains white surfaces and purple accents. Profile refinements
+inherit the same roles. Cover artwork, the homepage mosaic, custom avatar
+colors, layout, and navigation behavior are preserved. Implemented locally;
+user review and Preview publication pending.
+
+The shared header and footer now also frame the library and homepage. Utilities
+occupy normal layout space so expanding the GitHub label cannot cover the brand.
+The library hero uses a layered poster composition from available collection
+covers, with public decorative covers as an empty-library fallback. These images
+never add games to the collection. The existing emblem silhouette is preserved
+with a brighter metallic finish, including light-theme and favicon variants.
 
 ## 1. Make the player profile worth visiting
 
@@ -147,3 +173,42 @@ on the game detail page. Modified clicks and new-tab targets remain native, and
 back/forward navigation resets pending animations. The search focus ring wraps
 the complete input and search button. The light-theme wordmark uses the existing
 purple palette; dark mode retains the amber wordmark.
+
+## Account usability follow-up queue
+
+Resolve and review these increments in order:
+
+1. Registration: password visibility controls, required confirmation validated on
+   the server, and a live character count explaining the 8–128 character range.
+   Implemented locally; user review and Preview publication pending.
+2. Avatar editing: hide silhouette color controls while an uploaded photo is in
+   use; restore them when the photo is removed. Implemented locally for saved
+   photos and confirmed crops, retaining the selected silhouette color. User
+   review and Preview publication pending.
+3. Profile setup: display name first, then username, then bio. Suggest a username
+   from the display name without overwriting a manual choice; validate uniqueness
+   on save and preserve existing username-change rules. Implemented locally;
+   user review and Preview publication pending.
+4. New-account navigation: finish setup on the created profile, including when
+   registration began from a catalog game. Offer an explicit continuation to the
+   selected game instead of automatically opening Add game after setup.
+   Implemented locally and validated with a new demo profile; Preview pending.
+5. Account URLs: introduce username-based library and private profile routes with
+   compatibility redirects. A username in a URL must never grant access to another
+   account's private collection or editor; retain separate public profile routes.
+   Implemented locally, including editor, showcase, and sharing subpages, legacy
+   form/JSON compatibility, and owner-only redirects from previous usernames.
+   User review and Preview publication pending.
+6. Profile sharing design: review the light-theme screen against the user's
+   reference. Reduce the heavy lavender section fills, improve spacing and visual
+   hierarchy, and present the public profile URL as a readable link rather than
+   a code-like fragment. Review username cooldown messaging and alignment of the
+   identity, visibility, shared-details, and save controls. Implemented locally:
+   white cards, restrained selected-option tints, an address row instead of code,
+   a single cooldown date, and aligned section labels. Existing sharing behavior
+   is retained; user review and Preview publication pending.
+7. Workspace frame: keep the header visible while scrolling and place the footer
+   at the end, pushed to the viewport bottom on short pages. The footer must not
+   remain fixed over the form. The full-width header aligns the brand beside the
+   left utility controls and account actions at the right edge. Implemented locally following the user's choice;
+   Preview validation pending.

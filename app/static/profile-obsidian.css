@@ -1,52 +1,52 @@
-/* Obsidian palette pilot: dark profile pages only. */
+/* Profile refinements using the shared application palette. */
 html:not([data-theme="light"]) body.profile-palette-page {
-    --background: #111317;
-    --surface: #1e2023;
-    --text: #e2e2e6;
-    --text-muted: #d7c3ae;
-    --accent: #ffc880;
-    --border: #524534;
-    --obsidian-muted: #9f8e7a;
-    --obsidian-action: #f5a623;
-    --obsidian-on-action: #452b00;
-    background: radial-gradient(ellipse at 12% 0%, #f5a6230d, transparent 42%), radial-gradient(ellipse at 95% 55%, #40c2fd04, transparent 45%), #111317;
+    --background: var(--color-canvas);
+    --surface: var(--color-surface);
+    --text: var(--color-text);
+    --text-muted: var(--color-muted);
+    --accent: var(--color-accent);
+    --border: var(--color-border);
+    --obsidian-muted: var(--color-outline);
+    --obsidian-action: var(--color-action);
+    --obsidian-on-action: var(--color-on-action);
+    background: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--color-action) 5.10%, transparent), transparent 42%), radial-gradient(ellipse at 95% 55%, #40c2fd04, transparent 45%), var(--color-canvas);
     background-attachment: fixed;
 }
 html:not([data-theme="light"]) .profile-palette-page .profile-workspace {
-    --profile-panel: #1a1c1f;
-    --profile-field: #0c0e11;
-    --profile-cover: #282a2d;
-    --profile-line: #524534;
-    --profile-tint: #f5a6230f;
+    --profile-panel: var(--color-panel);
+    --profile-field: var(--color-field);
+    --profile-cover: var(--color-raised);
+    --profile-line: var(--color-border);
+    --profile-tint: color-mix(in srgb, var(--color-action) 5.88%, transparent);
     --profile-success: #10b981;
 }
 html:not([data-theme="light"]) .profile-palette-page .workspace-hero {
-    background: radial-gradient(ellipse at 100% 0%, #f5a62312, transparent 65%), linear-gradient(120deg, #1e2023, #111317);
-    border-color: #524534;
+    background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--color-action) 7.06%, transparent), transparent 65%), linear-gradient(120deg, var(--color-surface), var(--color-canvas));
+    border-color: var(--color-border);
     box-shadow: inset 0 1px 0 #ffffff08;
 }
-html:not([data-theme="light"]) .profile-palette-page .workspace-hero h1 { color: #e2e2e6; }
-html:not([data-theme="light"]) .profile-palette-page .workspace-hero h1 span { background-image: linear-gradient(120deg, #ffddb4, #ffc880 65%, #f5a623); }
-html:not([data-theme="light"]) .profile-palette-page :is(.workspace-brand span, .hero-kicker) { color: #ffc880; }
-html:not([data-theme="light"]) .profile-palette-page :is(.workspace-nav a, .workspace-form label) { color: #d7c3ae; }
+html:not([data-theme="light"]) .profile-palette-page .workspace-hero h1 { color: var(--color-text); }
+html:not([data-theme="light"]) .profile-palette-page .workspace-hero h1 span { background-image: linear-gradient(120deg, var(--color-accent-soft), var(--color-accent) 65%, var(--color-action)); }
+html:not([data-theme="light"]) .profile-palette-page :is(.workspace-brand span, .hero-kicker) { color: var(--color-accent); }
+html:not([data-theme="light"]) .profile-palette-page :is(.workspace-nav a, .workspace-form label) { color: var(--color-muted); }
 html:not([data-theme="light"]) .profile-palette-page :is(.player-card, .profile-editor-form) { box-shadow: inset 0 1px 0 #ffffff08, 0 16px 36px #0003; }
-html:not([data-theme="light"]) .profile-palette-page .player-card-cover { background: linear-gradient(135deg, transparent 45%, #f5a62309 45%, #f5a62309 65%, transparent 65%), linear-gradient(145deg, #282a2d, #1a1c1f); }
+html:not([data-theme="light"]) .profile-palette-page .player-card-cover { background: linear-gradient(135deg, transparent 45%, color-mix(in srgb, var(--color-action) 3.53%, transparent) 45%, color-mix(in srgb, var(--color-action) 3.53%, transparent) 65%, transparent 65%), linear-gradient(145deg, var(--color-raised), var(--color-panel)); }
 html:not([data-theme="light"]) .profile-palette-page .player-private { color: #9bdaff; border-color: #9bdaff38; background: #40c2fd09; }
-html:not([data-theme="light"]) .profile-palette-page :is(.player-card-label, .player-stats dt, .player-card-note, .profile-field-hint, .profile-bio-footer, .avatar-save-hint, .avatar-crop-keyboard) { color: #9f8e7a; }
-html:not([data-theme="light"]) .profile-palette-page .player-stats div:first-child dd { color: #ffc880; }
+html:not([data-theme="light"]) .profile-palette-page :is(.player-card-label, .player-stats dt, .player-card-note, .profile-field-hint, .profile-bio-footer, .avatar-save-hint, .avatar-crop-keyboard) { color: var(--color-outline); }
+html:not([data-theme="light"]) .profile-palette-page .player-stats div:first-child dd { color: var(--color-accent); }
 html:not([data-theme="light"]) .profile-palette-page .player-stats div:nth-child(2) dd { color: #a855f7; }
 html:not([data-theme="light"]) .profile-palette-page .player-stats div:nth-child(3) dd { color: #10b981; }
-html:not([data-theme="light"]) .profile-palette-page :is(.profile-field input, .profile-field textarea, .avatar-upload-button, .avatar-remove-button, .avatar-crop-actions button) { border-color: #9f8e7a; }
-html:not([data-theme="light"]) .profile-palette-page :is(.profile-field input, .profile-field textarea)::placeholder { color: #9f8e7a; }
+html:not([data-theme="light"]) .profile-palette-page :is(.profile-field input, .profile-field textarea, .avatar-upload-button, .avatar-remove-button, .avatar-crop-actions button) { border-color: var(--color-outline); }
+html:not([data-theme="light"]) .profile-palette-page :is(.profile-field input, .profile-field textarea)::placeholder { color: var(--color-outline); }
 html:not([data-theme="light"]) .profile-palette-page :is(.profile-save-actions button, .avatar-crop-actions [data-crop-apply]) {
-    color: #452b00;
-    background: #f5a623;
-    border: 1px solid #ffc880;
-    box-shadow: inset 0 1px 0 #ffddb466, 0 4px 18px #f5a62316;
+    color: var(--color-on-action);
+    background: var(--color-action);
+    border: 1px solid var(--color-accent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-accent-soft) 40.00%, transparent), 0 4px 18px color-mix(in srgb, var(--color-action) 8.63%, transparent);
 }
-html:not([data-theme="light"]) .profile-palette-page :is(.profile-save-actions button, .avatar-crop-actions [data-crop-apply]):hover { background: #ffc880; box-shadow: 0 0 20px #f5a62324; }
-html:not([data-theme="light"]) .profile-palette-page :is(.avatar-edit-panel, .avatar-crop-dialog) { background: #1e2023; border-color: #524534; box-shadow: inset 0 1px 0 #ffffff0c, 0 16px 36px #0006; }
+html:not([data-theme="light"]) .profile-palette-page :is(.profile-save-actions button, .avatar-crop-actions [data-crop-apply]):hover { background: var(--color-accent); box-shadow: 0 0 20px color-mix(in srgb, var(--color-action) 14.12%, transparent); }
+html:not([data-theme="light"]) .profile-palette-page :is(.avatar-edit-panel, .avatar-crop-dialog) { background: var(--color-surface); border-color: var(--color-border); box-shadow: inset 0 1px 0 #ffffff0c, 0 16px 36px #0006; }
 html:not([data-theme="light"]) .profile-palette-page .profile-error { color: #ffb4ab; border-color: #ffb4ab66; background: #93000a22; }
-html:not([data-theme="light"]) .profile-palette-page .workspace-footer { color: #9f8e7a; }
-html:not([data-theme="light"]) .profile-palette-page .appearance-bar :is(.theme-toggle, .github-profile) { background: #1a1c1ff2; color: #ffc880; border-color: #524534; }
-html:not([data-theme="light"]) .profile-palette-page .appearance-bar :is(.theme-toggle, .github-profile):hover { border-color: #ffc880; background: #282a2d; }
+html:not([data-theme="light"]) .profile-palette-page .workspace-footer { color: var(--color-outline); }
+html:not([data-theme="light"]) .profile-palette-page .appearance-bar :is(.theme-toggle, .github-profile) { background: color-mix(in srgb, var(--color-panel) 94.90%, transparent); color: var(--color-accent); border-color: var(--color-border); }
+html:not([data-theme="light"]) .profile-palette-page .appearance-bar :is(.theme-toggle, .github-profile):hover { border-color: var(--color-accent); background: var(--color-raised); }

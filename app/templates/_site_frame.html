@@ -1,0 +1,19 @@
+{% macro site_header() %}
+<header class="workspace-site-header">
+    <div class="workspace-topbar">
+        {% include '_appearance_bar.html' %}
+        <nav class="workspace-nav" aria-label="Site navigation">
+            <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
+            {{ caller() }}
+        </nav>
+        <div class="workspace-header-actions">{% include '_account_nav.html' %}</div>
+    </div>
+</header>
+{% endmacro %}
+
+{% macro site_footer() %}
+<footer class="site-footer workspace-footer">
+    <span>Vestigium · Every game leaves a mark.</span>
+    <div class="site-footer-links"><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span>{% include '_brand_easter_egg.html' %}</div>
+</footer>
+{% endmacro %}

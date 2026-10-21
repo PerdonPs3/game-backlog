@@ -3,12 +3,12 @@
     <label class="sticker-option">
         <input type="checkbox" name="is_favorite" value="yes"
                {% if (request.method == 'POST' and request.form.get('is_favorite') == 'yes') or (request.method != 'POST' and game is defined and game['is_favorite']) %}checked{% endif %}>
-        <span><strong><span aria-hidden="true">★</span> Favorite</strong><small>One of your personal favorites.</small></span>
+        <span><strong><span aria-hidden="true">★</span> Favorite</strong></span>
     </label>
     <label class="sticker-option">
         <input type="checkbox" name="is_goty" value="yes"
                {% if (request.method == 'POST' and request.form.get('is_goty') == 'yes') or (request.method != 'POST' and game is defined and game['is_goty']) %}checked{% endif %}>
-        <span><strong><span aria-hidden="true">✦</span> Your GOTY</strong><small>A game that deserves your own award.</small></span>
+        <span><strong><span aria-hidden="true">✦</span> Your GOTY</strong></span>
     </label>
-    <p>You can choose both. Your GOTY is a personal distinction, not an official award.</p>
+    <p>GOTY is your personal Game of the Year. You can select both.</p>
 </fieldset>

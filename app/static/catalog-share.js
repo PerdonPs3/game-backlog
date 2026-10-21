@@ -6,7 +6,7 @@
     button.addEventListener('click', async () => {
         try {
             await navigator.clipboard.writeText(location.origin + location.pathname);
-            feedback.textContent = 'Link copied. Share this game with someone.';
+            feedback.textContent = 'Link copied.';
         } catch {
             feedback.textContent = "Copy this page's address from your browser to share it.";
         }
