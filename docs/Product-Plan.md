@@ -161,10 +161,12 @@ Resolve and review these increments in order:
    review and Preview publication pending.
 3. Profile setup: display name first, then username, then bio. Suggest a username
    from the display name without overwriting a manual choice; validate uniqueness
-   on save and preserve existing username-change rules.
+   on save and preserve existing username-change rules. Implemented locally;
+   user review and Preview publication pending.
 4. New-account navigation: finish setup on the created profile, including when
    registration began from a catalog game. Offer an explicit continuation to the
    selected game instead of automatically opening Add game after setup.
+   Implemented locally and validated with a new demo profile; Preview pending.
 5. Account URLs: introduce username-based library and private profile routes with
    compatibility redirects. A username in a URL must never grant access to another
    account's private collection or editor; retain separate public profile routes.
@@ -174,3 +176,7 @@ Resolve and review these increments in order:
    a code-like fragment. Review username cooldown messaging and alignment of the
    identity, visibility, shared-details, and save controls. This is a recorded
    design issue, not yet implemented; retain the existing sharing behavior.
+7. Workspace frame: keep the header visible while scrolling and place the footer
+   at the end, pushed to the viewport bottom on short pages. The footer must not
+   remain fixed over the form. Implemented locally following the user's choice;
+   Preview validation pending.

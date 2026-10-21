@@ -13,8 +13,8 @@
 </head>
 <body class="{% block body_class %}library-page workspace-page{% endblock %}">
     {% include '_brand_easter_egg.html' %}
-    {% include '_appearance_bar.html' %}
-    <main class="workspace-layout {% block layout_class %}{% endblock %}">
+    <header class="workspace-site-header">
+        {% include '_appearance_bar.html' %}
         <div class="workspace-topbar">
             <nav class="workspace-nav" aria-label="Collection navigation">
                 <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
@@ -24,6 +24,8 @@
                 {% include '_account_nav.html' %}
             </div>
         </div>
+    </header>
+    <main class="workspace-layout {% block layout_class %}{% endblock %}">
         {% block workspace_hero %}
         <header class="workspace-hero">
             <div>

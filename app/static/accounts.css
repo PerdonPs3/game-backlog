@@ -100,8 +100,14 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
     .profile-workspace .workspace-hero { padding: 1.25rem; }
 }
 
-/* Keep workspace navigation and footer in the same content grid. */
-.workspace-page main.workspace-layout { margin-top: 4.5rem; }
+/* Keep the header visible while short pages push their footer to the bottom. */
+body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.workspace-site-header { position: sticky; top: 0; z-index: 95; flex-shrink: 0; background: var(--background); border-bottom: 1px solid var(--border); }
+.workspace-site-header .workspace-topbar { width: min(100% - 2.5rem, 1080px); margin: 0 auto; padding: 1rem 0 1rem max(0px, calc(115px - (100vw - min(100vw - 2.5rem, 1080px)) / 2)); border: 0; min-height: 70px; box-sizing: border-box; }
+.workspace-page main.workspace-layout { margin-top: 2rem; margin-bottom: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+.workspace-layout > .workspace-body { padding-bottom: 1.75rem; }
+.workspace-page :is(input, textarea, select, [tabindex="-1"]) { scroll-margin-block-start: 8rem; }
+.profile-workspace .player-card { top: 6rem; }
 .workspace-topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
 .workspace-topbar .workspace-nav { margin: 0; gap: 1.5rem; flex: 1; }
 .workspace-header-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
@@ -109,7 +115,7 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 .workspace-header-actions .account-navigation a { color: var(--text-muted); font-size: .8rem; text-decoration: none; }
 .workspace-header-actions .account-navigation button { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: .75rem; border-radius: 9px; }
 .workspace-header-actions .account-navigation button:hover { color: var(--accent); border-color: var(--accent); }
-.workspace-layout > .workspace-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; width: 100%; margin: 1.75rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--border); font-size: .75rem; text-align: left; }
+.workspace-layout > .workspace-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; width: 100%; margin: auto 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--border); font-size: .75rem; text-align: left; }
 .workspace-footer a { color: var(--text-muted); text-underline-offset: .25em; }
 .workspace-footer a:hover { color: var(--accent); }
 .profile-workspace .player-avatar { border-radius: 50%; background: var(--avatar-color, #64748b); color: #fff; overflow: hidden; }
