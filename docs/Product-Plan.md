@@ -193,8 +193,10 @@ Resolve and review these increments in order:
    reference. Reduce the heavy lavender section fills, improve spacing and visual
    hierarchy, and present the public profile URL as a readable link rather than
    a code-like fragment. Review username cooldown messaging and alignment of the
-   identity, visibility, shared-details, and save controls. This is a recorded
-   design issue, not yet implemented; retain the existing sharing behavior.
+   identity, visibility, shared-details, and save controls. Implemented locally:
+   white cards, restrained selected-option tints, an address row instead of code,
+   a single cooldown date, and aligned section labels. Existing sharing behavior
+   is retained; user review and Preview publication pending.
 7. Workspace frame: keep the header visible while scrolling and place the footer
    at the end, pushed to the viewport bottom on short pages. The footer must not
    remain fixed over the form. The full-width header aligns the brand beside the
