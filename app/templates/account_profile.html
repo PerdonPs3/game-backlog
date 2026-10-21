@@ -30,7 +30,7 @@
                     <label class="avatar-upload-button" for="profile-photo">Upload photo <span aria-hidden="true">↗</span></label>
                     <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 2 MB. Move and zoom to choose your crop.</p>
                     <p id="photo-feedback" class="profile-field-hint" role="status" aria-live="polite" data-photo-feedback></p>
-                    <div class="avatar-palette" role="group" aria-label="Default avatar color">
+                    <div class="avatar-palette" data-avatar-palette role="group" aria-label="Default avatar color" {% if profile.has_photo %}hidden{% endif %}>
                         <p>Background color</p>
                         <input type="hidden" name="avatar_color" value="{{ avatar_color }}" form="profile-form">
                         <div class="avatar-swatches">

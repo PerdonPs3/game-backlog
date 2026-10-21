@@ -18,6 +18,7 @@
     const photoFeedback = editor.querySelector('[data-photo-feedback]');
     const photoPreview = editor.querySelector('[data-avatar-photo]');
     const placeholder = editor.querySelector('[data-avatar-placeholder]');
+    const palette = editor.querySelector('[data-avatar-palette]');
     const savedPhoto = photoPreview.getAttribute('src');
     const avatarEditor = editor.querySelector('[data-avatar-editor]');
     const cropDialog = editor.querySelector('[data-avatar-crop]');
@@ -74,6 +75,7 @@
         photoPreview.hidden = !src;
         removeButton.hidden = !src;
         placeholder.hidden = Boolean(src);
+        palette.hidden = Boolean(src);
         if (src) photoPreview.src = src;
         else photoPreview.removeAttribute('src');
     }
@@ -141,5 +143,6 @@
         form.removeAttribute('aria-busy');
         updatePreview();
     });
+    updatePhoto();
     if (feedback.dataset.saved === 'true') feedback.focus({ preventScroll: true });
 })();

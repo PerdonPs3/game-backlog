@@ -156,7 +156,9 @@ Resolve and review these increments in order:
    the server, and a live character count explaining the 8–128 character range.
    Implemented locally; user review and Preview publication pending.
 2. Avatar editing: hide silhouette color controls while an uploaded photo is in
-   use; restore them when the photo is removed.
+   use; restore them when the photo is removed. Implemented locally for saved
+   photos and confirmed crops, retaining the selected silhouette color. User
+   review and Preview publication pending.
 3. Profile setup: display name first, then username, then bio. Suggest a username
    from the display name without overwriting a manual choice; validate uniqueness
    on save and preserve existing username-change rules.

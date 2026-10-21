@@ -390,6 +390,7 @@ def test_profile_save_feedback_is_specific_to_current_account_and_not_query_para
 
 
 def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
+    import re
     from PIL import Image
     alice, bob = sign_in(accounts, "alice"), sign_in(accounts, "bob")
     image = BytesIO()
@@ -397,6 +398,7 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     image.seek(0)
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "avatar_color": "#aa44bb", "photo": (image, "photo.png")})
     assert result.status_code == 303
+    assert re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
     photo = alice.get("/account/profile/photo")
     assert photo.status_code == 200 and photo.mimetype == "image/jpeg"
     assert photo.headers["Cache-Control"] == "private, no-store"
@@ -414,6 +416,7 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "remove_photo": "yes", "avatar_color": "#228844"})
     assert result.status_code == 303
     assert alice.get("/account/profile/photo").status_code == 404
+    assert not re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
     assert 'name="avatar_color" value="#228844"' in alice.get("/account/profile/edit").get_data(as_text=True)
 
 

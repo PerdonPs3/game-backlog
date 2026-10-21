@@ -151,6 +151,7 @@ html[data-theme="light"] .profile-workspace .workspace-panel { padding: 0; borde
 @media (prefers-reduced-motion: reduce) { .avatar-edit-overlay { transition: none; } }
 
 .avatar-palette { margin-top: 1rem; padding-top: .8rem; border-top: 1px solid var(--profile-line); }
+.avatar-palette[hidden] { display: none; }
 .avatar-palette > p { margin: 0 0 .65rem; font-size: .75rem; }
 .avatar-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; }
 .avatar-swatch { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 2px solid transparent; border-radius: 50%; background: var(--swatch-color); color: white; cursor: pointer; }
