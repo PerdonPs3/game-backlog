@@ -172,15 +172,6 @@ html[data-theme="light"] .welcome-backdrop::after {
 .welcome-explore { display: block; width: fit-content; margin: 1.25rem auto 0; color: var(--welcome-accent); font-size: .85rem; text-underline-offset: .3em; }
 
 /* Homepage layout: shared navigation keeps account actions clear of utilities. */
-.welcome-header { position: absolute; inset: 0 0 auto; z-index: 96; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 1rem; padding: max(.75rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) .75rem max(.75rem, env(safe-area-inset-left)); }
-.welcome-header .appearance-bar { position: static; justify-self: start; }
-.welcome-header .account-navigation { margin: 0; justify-self: end; justify-content: flex-end; gap: 1rem; font-size: .8rem; }
-.welcome-header a { color: var(--welcome-accent); }
-.welcome-header .account-navigation > a { padding: .5rem .65rem; border: 1px solid color-mix(in srgb, var(--color-accent) 21.96%, transparent); border-radius: 8px; text-decoration: none; line-height: 1.3; }
-.welcome-header .account-navigation > a:last-child { background: var(--welcome-button); color: var(--welcome-button-text); border-color: transparent; }
-.welcome-header .account-navigation button { margin: 0; font-size: .8rem; }
-.welcome-navigation { display: flex; gap: 1.5rem; align-items: center; justify-content: center; margin: 0; font-size: .8rem; }
-.welcome-navigation a { text-decoration: none; padding: .5rem 0; }
 .welcome-skip { position: fixed; left: 1rem; top: -5rem; z-index: 100; padding: .75rem; background: var(--surface); color: var(--text); }
 .welcome-skip:focus { top: 4rem; }
 .welcome-page :is(a, button, input):focus-visible { outline: 2px solid var(--welcome-accent); outline-offset: 4px; }
@@ -228,20 +219,14 @@ html[data-theme="light"] .welcome-backdrop::after {
 .welcome-join { max-width: 1180px; margin: 3rem auto 0; padding: 5rem 1.5rem 7rem; text-align: center; border-top: 1px solid color-mix(in srgb, var(--color-accent) 21.96%, transparent); }
 .welcome-join-action { display: inline-flex; margin: 1rem 0; border-radius: 10px; padding: .75rem 1.15rem; background: var(--welcome-button); color: var(--welcome-button-text) !important; text-decoration: none; font-size: .9rem; font-weight: 700; }
 .welcome-join > p:last-child { color: var(--welcome-muted); font-size: .8rem; }
-.welcome-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 2rem; color: var(--welcome-muted); background: var(--color-canvas); border-top: 1px solid color-mix(in srgb, var(--color-accent) 14.9%, transparent); font-size: .65rem; line-height: 1.8; }
-.welcome-footer a { color: inherit; }
 html[data-theme="light"] .welcome-copy .catalog-public-search > div { background: #faf8fdf2; border-color: #7042b738; }
 html[data-theme="light"] .welcome-copy .catalog-public-search input { background: transparent; }
 html[data-theme="light"] .welcome-copy .catalog-public-search { background: transparent; }
 html[data-theme="light"] .welcome-story { background: var(--welcome-story-surface); }
-html[data-theme="light"] .welcome-product, html[data-theme="light"] .welcome-footer { background: #f3eef9; }
+html[data-theme="light"] .welcome-product { background: #f3eef9; }
 html[data-theme="light"] .welcome-copy .catalog-option { background: var(--surface); }
 html[data-theme="light"] .welcome-copy .catalog-option:hover, html[data-theme="light"] .welcome-copy .catalog-option[aria-selected="true"] { background: #eee5f8; }
 @media (max-width: 640px) {
-    .welcome-header { grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; }
-    .welcome-header .account-navigation { gap: .75rem; font-size: .7rem; }
-    .welcome-header .account-navigation button { padding: .5rem .75rem; font-size: .7rem; }
-    .welcome-navigation { grid-column: 1 / -1; grid-row: 2; justify-self: center; margin: 0; font-size: .75rem; gap: 1.25rem; }
     .welcome-copy h1 { font-size: clamp(1.8rem, 8vw, 3rem); }
     .welcome-hero { padding: 9rem 1.25rem 6rem; }
     .welcome-section { padding: 4rem 1.25rem; }
@@ -249,7 +234,6 @@ html[data-theme="light"] .welcome-copy .catalog-option:hover, html[data-theme="l
     .welcome-steps-section { padding: 2rem 1.25rem; }
     .welcome-steps { grid-template-columns: 1fr; gap: 1.5rem; }
     .welcome-join { margin-top: 2rem; padding: 3rem 1.25rem 4rem; }
-    .welcome-footer { padding: 1.5rem 1.25rem; }
 }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 

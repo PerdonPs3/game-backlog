@@ -1,3 +1,4 @@
+{% from '_site_frame.html' import site_header, site_footer with context %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,17 +11,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
 <body class="library-page">
     {% include '_brand_easter_egg.html' %}
+    {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
     <main class="library-layout">
-        {% include '_appearance_bar.html' %}
-        {% include '_account_nav.html' %}
-        <nav class="library-navigation" aria-label="Project navigation">
-            <a href="{{ url_for('main.welcome') }}">← Home</a>
-            <a href="{{ url_for('explore.index') }}">Explore games ↗</a>
-        </nav>
         <header class="library-hero">
+            <div class="library-cover-scene" aria-hidden="true">
+                {% set personal_covers = games|selectattr('cover_url')|map(attribute='cover_url')|unique|list %}
+                {% set fallback_covers = ['co1rs4', 'co4jni', 'co1q1f'] %}
+                {% for slot in range(3) %}
+                <div class="library-scene-poster"><img src="{{ personal_covers[slot] if slot < personal_covers|length else 'https://images.igdb.com/igdb/image/upload/t_cover_big/' ~ fallback_covers[slot] ~ '.jpg' }}" alt="" width="264" height="374" decoding="async" referrerpolicy="no-referrer"></div>
+                {% endfor %}
+            </div>
             <div class="hero-copy">
                 <p class="hero-kicker">Your personal gaming library</p>
                 <h1 class="library-wordmark"><span>Vestigium</span></h1>
@@ -120,10 +124,9 @@
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}
         </section>
-        <p class="catalog-message">Game data and covers provided by
-            <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a>.
-        </p>
+
     </main>
+    {{ site_footer() }}
     <dialog id="delete-game-dialog" class="delete-dialog"
             aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
         <h2 id="delete-dialog-title">Delete game?</h2>

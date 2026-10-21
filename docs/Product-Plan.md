@@ -27,6 +27,13 @@ inherit the same roles. Cover artwork, the homepage mosaic, custom avatar
 colors, layout, and navigation behavior are preserved. Implemented locally;
 user review and Preview publication pending.
 
+The shared header and footer now also frame the library and homepage. Utilities
+occupy normal layout space so expanding the GitHub label cannot cover the brand.
+The library hero uses a layered poster composition from available collection
+covers, with public decorative covers as an empty-library fallback. These images
+never add games to the collection. The existing emblem silhouette is preserved
+with a brighter metallic finish, including light-theme and favicon variants.
+
 ## 1. Make the player profile worth visiting
 
 - Separate a profile overview from the profile editor.

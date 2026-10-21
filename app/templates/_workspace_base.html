@@ -1,3 +1,4 @@
+{% from '_site_frame.html' import site_header, site_footer with context %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,21 +11,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     {% block page_styles %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
 <body class="{% block body_class %}library-page workspace-page{% endblock %}">
     {% include '_brand_easter_egg.html' %}
-    <header class="workspace-site-header">
-        {% include '_appearance_bar.html' %}
-        <div class="workspace-topbar">
-            <nav class="workspace-nav" aria-label="Collection navigation">
-                <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
-                {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
-            </nav>
-            <div class="workspace-header-actions">
-                {% include '_account_nav.html' %}
-            </div>
-        </div>
-    </header>
+    {% call site_header() %}
+        {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
+    {% endcall %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
         {% block workspace_hero %}
         <header class="workspace-hero">
@@ -44,8 +37,9 @@
             </section>
             {% block aside %}{% endblock %}
         </div>
-        <footer class="workspace-footer"><span>Every game leaves a mark.</span><a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></footer>
+
     </main>
+    {{ site_footer() }}
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     {% block page_scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
