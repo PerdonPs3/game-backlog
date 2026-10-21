@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
 <body class="library-page welcome-page">
-    {% include '_brand_easter_egg.html' %}
     <a class="welcome-skip" href="#welcome-title">Skip to content</a>
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore</a><a href="#how-it-works">How it works</a>{% endcall %}
     <div class="welcome-backdrop" aria-hidden="true">

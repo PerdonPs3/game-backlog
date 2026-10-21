@@ -14,6 +14,9 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .library-page main.library-layout { flex: 1; margin-top: 2rem; margin-bottom: 2rem; }
 .site-footer.workspace-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; width: 100%; margin-top: auto; padding: 1.5rem max(1.5rem, env(safe-area-inset-right)); border-top: 1px solid var(--border); background: var(--color-canvas); color: var(--text-muted); font-size: .7rem; }
 .site-footer a { color: var(--accent); }
+.site-footer-links { display: flex; align-items: center; gap: 1.25rem; max-width: 100%; min-width: 0; }
+.site-footer-links > span { min-width: 0; }
+.site-footer .brand-easter-egg { position: static; flex: 0 0 30px; width: 30px; height: 34px; opacity: calc(.5 + var(--logo-light) * .5); }
 .welcome-page .welcome-hero { min-height: calc(100dvh - 76px); }
 .welcome-page .welcome-hero, .welcome-page .welcome-story { scroll-margin-top: 76px; }
 .welcome-page .welcome-section, .welcome-page .welcome-steps-section { scroll-margin-top: 7rem; }

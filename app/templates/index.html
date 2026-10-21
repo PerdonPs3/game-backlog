@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
 <body class="library-page">
-    {% include '_brand_easter_egg.html' %}
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
     <main class="library-layout">
         <header class="library-hero">
