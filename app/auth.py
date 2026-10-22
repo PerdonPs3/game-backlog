@@ -319,7 +319,7 @@ def logout():
         except AuthError:
             pass
     session.clear()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("main.welcome"))
 
 
 @auth.route("/profile/edit", methods=["GET", "POST"])

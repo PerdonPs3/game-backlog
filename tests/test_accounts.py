@@ -176,7 +176,15 @@ def test_opaque_session_logout_and_csrf(accounts):
         opaque = cookie["account_session"]
     assert client.post("/account/logout").status_code == 400
     assert client.get("/account/logout").status_code == 405
-    assert submit(client, "/account/logout", {}, source="/account/profile/edit").status_code == 302
+    response = submit(client, "/account/logout", {}, source="/account/profile/edit")
+    assert response.status_code == 302
+    assert response.headers["Location"] == "/"
+    homepage = client.get(response.headers["Location"])
+    assert homepage.status_code == 200
+    assert b"Sign in" in homepage.data and b"Create account" in homepage.data
+    assert b"Sign out" not in homepage.data
+    with client.session_transaction() as cookie:
+        assert "account_session" not in cookie
     assert client.get("/library").status_code == 302
     with accounts.app_context():
         assert get_db().execute("SELECT 1 FROM account_sessions WHERE id_hash = ?", (fingerprint(opaque),)).fetchone() is None
