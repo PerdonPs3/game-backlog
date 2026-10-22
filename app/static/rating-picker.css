@@ -1,0 +1,16 @@
+.rating-picker { min-width: 0; border: 0; padding: 0; margin: 0; }
+.rating-picker legend { width: 100%; margin-bottom: .5rem; color: var(--text); font-size: .85rem; }
+.rating-optional { float: right; color: var(--text-muted); font-size: .65rem; font-weight: 400; }
+.rating-stars { display: flex; width: min(100%, 240px); }
+.rating-choice { position: relative; display: block; flex: 1; min-width: 0; height: 44px; margin: 0; cursor: pointer; }
+.rating-choice input, .rating-clear input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; }
+.rating-choice svg { display: block; width: 100%; height: 44px; fill: var(--color-outline); opacity: .45; pointer-events: none; }
+.rating-stars:has(input:checked) .rating-choice svg { fill: var(--accent); opacity: 1; }
+.rating-choice:has(input:checked) ~ .rating-choice svg { fill: var(--color-outline); opacity: .45; }
+.rating-stars:has(.rating-choice:hover) .rating-choice svg { fill: var(--accent); opacity: 1; }
+.rating-stars .rating-choice:hover ~ .rating-choice svg { fill: var(--color-outline); opacity: .45; }
+.rating-choice:has(input:focus-visible), .rating-clear:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.rating-caption { display: flex; align-items: center; gap: 1rem; min-height: 28px; font-size: .75rem; }
+.rating-caption output { color: var(--accent); font-variant-numeric: tabular-nums; }
+.rating-clear { position: relative; display: inline-flex; align-items: center; min-height: 28px; color: var(--text-muted); cursor: pointer; margin: 0; }
+.rating-clear span { text-decoration: underline; text-underline-offset: 3px; }

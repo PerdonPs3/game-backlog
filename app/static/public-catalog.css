@@ -66,3 +66,38 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 .catalog-result-copy .catalog-community-tag { display: inline-block; margin-top: .5rem; padding: .2rem .5rem; border: 1px solid var(--border); border-radius: 20px; color: var(--accent); font-size: .6rem; }
 .catalog-public-search .catalog-option { padding: .75rem; font-size: .85rem; }
 .catalog-public-search .catalog-option strong { display: block; }
+
+.catalog-game-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; align-items: start; }
+.catalog-game-main { min-width: 0; }
+.catalog-game-layout .catalog-game-hero { grid-template-columns: 180px minmax(0, 1fr); padding: 1.5rem; gap: 1.5rem; margin-bottom: 1.5rem; }
+.catalog-game-layout .catalog-detail-grid { grid-template-columns: minmax(0, 1fr); }
+.catalog-library-actions { position: sticky; top: 100px; scroll-margin-top: 110px; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); min-width: 0; }
+.catalog-library-actions h2 { font-size: 1.1rem; margin: 0 0 1.25rem; }
+.catalog-quick-form { display: grid; gap: .6rem; }
+.catalog-quick-form > label { font-size: .8rem; margin-top: .35rem; }
+.catalog-quick-form select { font-size: .8rem; }
+.catalog-quick-form .rating-picker { margin-block: .65rem; }
+.catalog-quick-form > button { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: .85rem 1rem; font-size: .8rem; }
+.catalog-more-options { justify-self: center; padding: .35rem; font-size: .75rem; color: var(--accent); text-underline-offset: 3px; }
+.catalog-owned-entries { list-style: none; margin: 0 0 1rem; padding: 0; }
+.catalog-owned-entries li { display: flex; gap: 1rem; align-items: center; padding-block: .75rem; border-bottom: 1px solid var(--border); font-size: .75rem; }
+.catalog-owned-entries li div { min-width: 0; flex: 1; }
+.catalog-owned-entries strong, .catalog-owned-entries span { display: block; overflow-wrap: anywhere; }
+.catalog-owned-entries span { color: var(--text-muted); margin-top: .4rem; }
+.catalog-owned-entries a { flex-shrink: 0; color: var(--accent); }
+.catalog-save-feedback { color: #1ec996; font-size: .8rem; line-height: 1.6; }
+html[data-theme="light"] .catalog-library-actions { background: #fff; }
+html[data-theme="light"] .catalog-save-feedback { color: #15734f; }
+@media (max-width: 1000px) {
+    .catalog-game-layout { grid-template-columns: minmax(0, 1fr); }
+    .catalog-game-main { display: contents; }
+    .catalog-game-layout .catalog-game-hero { margin-bottom: 0; }
+    .catalog-library-actions { position: static; order: 1; }
+    .catalog-game-layout .catalog-detail-grid { order: 2; }
+}
+@media (max-width: 540px) {
+    .catalog-game-layout .catalog-game-hero { grid-template-columns: 100px minmax(0, 1fr); padding: 1rem; gap: 1rem; }
+    .catalog-game-layout .catalog-game-hero .catalog-detail-art { width: 100%; }
+    .catalog-game-layout .catalog-game-identity h1 { font-size: 1.65rem; }
+    .catalog-game-layout .catalog-tags { gap: .3rem; }
+}

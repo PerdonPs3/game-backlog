@@ -10,6 +10,11 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .workspace-site-header .workspace-nav > :not(.workspace-brand) { margin-left: 0; font-size: .8rem; }
 .workspace-site-header .workspace-nav > :nth-child(2) { margin-left: auto; }
 .workspace-site-header .workspace-header-actions { margin-left: auto; }
+.header-search { display: flex; align-items: center; flex: 0 1 280px; min-width: 160px; margin: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--color-field); }
+.header-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent); }
+.header-search input { min-width: 0; width: 100%; border: 0; background: transparent; padding: .65rem .75rem; font-size: .8rem; outline: none; }
+.header-search button { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; padding: 0; border-radius: 8px; background: transparent; color: var(--accent); }
+.header-search button:hover { background: var(--surface); }
 .workspace-site-header .account-navigation > a { padding: .45rem .65rem; border-radius: 8px; }
 .workspace-site-header .account-navigation > .account-create { background: var(--color-action); color: var(--color-on-action); font-weight: 700; }
 .workspace-site-header .account-create:hover { box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 16%, transparent); }
@@ -54,4 +59,18 @@ html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #7042b72a
     .welcome-page .welcome-hero { min-height: calc(100dvh - 120px); }
     .welcome-page .welcome-hero, .welcome-page .welcome-story { scroll-margin-top: 120px; }
     .welcome-page .welcome-section, .welcome-page .welcome-steps-section { scroll-margin-top: 9rem; }
+}
+
+@media (max-width: 760px) {
+    .workspace-site-header .workspace-topbar { gap: .6rem; padding: .65rem .8rem; }
+    .workspace-site-header .appearance-bar { gap: .35rem; }
+    .workspace-site-header .theme-toggle, .workspace-site-header .github-profile { width: 32px; height: 32px; min-width: 32px; padding: 6px; }
+    .workspace-site-header .github-profile-name { display: none; }
+    .workspace-site-header .workspace-nav { flex: 1; }
+    .workspace-site-header .workspace-nav > :not(.workspace-brand) { display: none; }
+    .workspace-site-header .workspace-brand { font-size: .95rem; }
+    .workspace-site-header .workspace-header-actions { width: auto; margin-left: 0; }
+    .workspace-site-header .account-navigation { gap: .25rem; }
+    .workspace-site-header .account-navigation > a, .workspace-site-header .account-navigation button { padding: .5rem; font-size: .7rem; white-space: nowrap; }
+    .header-search { order: 3; flex-basis: 100%; }
 }

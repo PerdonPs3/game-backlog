@@ -77,6 +77,28 @@ only after explicit authorization; production publication remains a separate ste
 Vercel Preview protection is a separate hosting gate; anonymous application access
 does not change that protection.
 
+## Header search and personal game actions
+
+Internal pages include a compact catalog search in the sticky site header. It
+submits to Explore with the same query bounds and default official-game filter;
+it does not replace the library's collection-only filter. The homepage retains
+its existing hero search. On small screens, header search occupies a second row.
+
+Game details provide a personal sidebar for completed, non-recovery sessions.
+Players can choose a platform, status, and optional rating and explicitly submit
+to the existing CSRF-protected Add game endpoint. The endpoint revalidates catalog
+identity, platform, rating, and owner-scoped duplicates, then redirects back to
+the game page. More options opens the full form for reviews, dates, and stickers.
+The sidebar lists only the current owner's saved entries and offers their edit
+links. Anonymous, incomplete-profile, and recovery sessions use the existing
+sign-in/setup continuation instead. Responses remain private and non-cacheable;
+shared URLs do not carry private entry IDs or ratings.
+
+Five stars with half-star steps map to the existing integer 1–10 rating scale.
+Native radio controls work with keyboard input and without JavaScript; Clear
+submits the existing empty-rating value. Saved ratings and database schema are
+unchanged. The same picker is used in the full Add/Edit forms.
+
 ## Search suggestions
 
 Search matches title words and alternative names without requiring a contiguous

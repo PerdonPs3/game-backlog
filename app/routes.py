@@ -466,6 +466,9 @@ def create():
                 )
                 db.commit()
 
+                if request.form.get('return_to_catalog') == 'yes':
+                    flash('Added to your library.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("create.html", error=error, selected_game=selected_game,
