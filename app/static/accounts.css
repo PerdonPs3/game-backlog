@@ -11,6 +11,8 @@
 .profile-country { display: inline-flex; flex: 0 0 auto; align-items: center; line-height: 1; }
 .profile-country[hidden] { display: none; }
 .profile-country img { display: block; width: 22px; height: 16.5px; object-fit: contain; border-radius: 2px; }
+.profile-admin-badge { display: inline-flex; align-items: center; flex: 0 0 auto; gap: .3rem; padding: .2rem .5rem; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--accent); font-size: .625rem; font-weight: 700; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase; }
+.profile-admin-badge svg { flex: 0 0 auto; }
 .auth-workspace { max-width: 800px; }
 .workspace-form.account-access-form { grid-template-columns: minmax(0, 1fr); }
 .account-access-form > button { justify-self: start; align-self: start; }

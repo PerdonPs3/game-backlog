@@ -74,14 +74,15 @@ def test_failed_schema_migration_rolls_back_ddl_and_version(postgres_app, tmp_pa
     (tmp_path / "006_username_history.sql").write_bytes((original / "006_username_history.sql").read_bytes())
     (tmp_path / "007_profile_country.sql").write_bytes((original / "007_profile_country.sql").read_bytes())
     (tmp_path / "008_country_profile_visibility.sql").write_bytes((original / "008_country_profile_visibility.sql").read_bytes())
-    (tmp_path / "009_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
+    (tmp_path / "009_profile_admin_badge.sql").write_bytes((original / "009_profile_admin_badge.sql").read_bytes())
+    (tmp_path / "010_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "rolled back" in result.output
     with postgres_app.app_context():
         db = get_db()
         assert db.execute("SELECT to_regclass('rollback_probe')").fetchone()[0] is None
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 8
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 9
 
 
 def test_changed_applied_migration_is_rejected(postgres_app, tmp_path, monkeypatch):
@@ -93,6 +94,7 @@ def test_changed_applied_migration_is_rejected(postgres_app, tmp_path, monkeypat
     (tmp_path / "006_username_history.sql").write_bytes((migrations.MIGRATIONS / "006_username_history.sql").read_bytes())
     (tmp_path / "007_profile_country.sql").write_bytes((migrations.MIGRATIONS / "007_profile_country.sql").read_bytes())
     (tmp_path / "008_country_profile_visibility.sql").write_bytes((migrations.MIGRATIONS / "008_country_profile_visibility.sql").read_bytes())
+    (tmp_path / "009_profile_admin_badge.sql").write_bytes((migrations.MIGRATIONS / "009_profile_admin_badge.sql").read_bytes())
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "has changed" in result.output
@@ -113,12 +115,13 @@ def test_username_history_upgrade_preserves_existing_names_and_publication(postg
         with application.app_context():
             get_db().execute("INSERT INTO profiles (id,display_name,username,is_public) VALUES (?, 'Existing player', 'existing_name', TRUE)", (owner,))
     result = application.test_cli_runner().invoke(args=['migrate-db'])
-    assert result.exit_code == 0 and 'Applied 3' in result.output
+    assert result.exit_code == 0 and 'Applied 4' in result.output
     with application.app_context():
         db = get_db()
-        row = db.execute('SELECT username, username_changed_at, is_public, country_code FROM profiles WHERE id = ?', (owner,)).fetchone()
+        row = db.execute('SELECT username, username_changed_at, is_public, country_code, admin_badge FROM profiles WHERE id = ?', (owner,)).fetchone()
         assert row['username'] == 'existing_name' and row['username_changed_at'] is None and row['is_public']
         assert row['country_code'] is None
+        assert not row['admin_badge']
         assert str(db.execute("SELECT owner_id FROM profile_usernames WHERE username = 'existing_name'").fetchone()[0]) == owner
         # Old installations have no historical claim time: allow one change immediately.
         save_sharing(db, owner, {'username':'updated_name', 'is_public':'yes'})
