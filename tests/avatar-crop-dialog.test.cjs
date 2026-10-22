@@ -7,7 +7,7 @@ function setup() {
     const revoked = [], applied = [], errors = [], draws = [], images = [], imagePlans = [];
     function element(extra = {}) { return { events: {}, addEventListener(name, fn) { this.events[name] = fn; }, focus() {}, ...extra }; }
     const context = { fillRect() {}, drawImage(...args) { draws.push(args); } };
-    const nodes = Object.fromEntries(['stage','zoom','error','apply','reset','cancel','replace','replacement'].map(name => [`[data-crop-${name}]`, element()]));
+    const nodes = Object.fromEntries(['stage','zoom','status','error','apply','reset','cancel','replace','replacement'].map(name => [`[data-crop-${name}]`, element()]));
     nodes['[data-crop-replacement]'].files = [];
     nodes['[data-crop-replacement]'].click = function () { this.clicked = true; };
     nodes['[data-crop-canvas]'] = { getContext: () => context };
@@ -27,6 +27,34 @@ function setup() {
     return { crop, dialog, nodes, revoked, applied, errors, draws, images, imagePlans };
 }
 const photo = name => ({ name, type: 'image/png', size: 1000 });
+
+test('the first selection opens immediately while decoding and can be cancelled', async () => {
+    const ui = setup();
+    let resolve;
+    ui.imagePlans.push({ decodePromise: new Promise(done => { resolve = done; }) });
+    const pending = ui.crop.open(photo('first.png'));
+    assert.equal(ui.dialog.open, true);
+    assert.equal(ui.nodes['[data-crop-apply]'].disabled, true);
+    assert.equal(ui.nodes['[data-crop-status]'].textContent, 'Opening photo…');
+    ui.nodes['[data-crop-cancel]'].events.click();
+    resolve(); await pending;
+    assert.equal(ui.dialog.open, false);
+    assert.equal(ui.applied.length, 0);
+});
+
+test('oversized initial files show an actionable error in the open editor', async () => {
+    const ui = setup();
+    await ui.crop.open({ ...photo('large.png'), size: 3 * 1024 * 1024 });
+    assert.equal(ui.dialog.open, true);
+    assert.equal(ui.nodes['[data-crop-apply]'].disabled, true);
+    assert.match(ui.nodes['[data-crop-error]'].textContent, /up to 2 MB/);
+    assert.equal(ui.nodes['[data-crop-status]'].textContent, '');
+    await ui.crop.open(photo('smaller.png'));
+    assert.equal(ui.nodes['[data-crop-apply]'].disabled, false);
+    assert.equal(ui.nodes['[data-crop-error]'].textContent, '');
+    ui.nodes['[data-crop-apply]'].events.click();
+    assert.equal(ui.applied[0][0].name, 'smaller.png');
+});
 
 test('the paperclip opens the picker and a valid replacement becomes the applied image', async () => {
     const ui = setup(); await ui.crop.open(photo('first.png'));

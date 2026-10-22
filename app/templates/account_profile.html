@@ -99,8 +99,9 @@
         <label class="avatar-crop-zoom">Zoom<input type="range" min="1" max="4" step="0.01" value="1" data-crop-zoom></label>
         <p class="avatar-crop-keyboard">You can also focus the photo and use the arrow keys.</p>
         <div class="avatar-crop-actions"><button type="button" data-crop-reset>Center photo</button><div><button type="button" data-crop-cancel>Cancel</button><button type="button" data-crop-apply>Use photo</button></div></div>
+        <p class="profile-field-hint" role="status" data-crop-status></p>
         <p class="avatar-crop-error" role="alert" data-crop-error></p>
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script>{% endblock %}

@@ -2,12 +2,12 @@
     <legend>Play history (optional)</legend>
     <div>
         <label for="started-on">Started on</label>
-        <input type="date" id="started-on" name="started_on"
+        <input type="date" id="started-on" name="started_on" data-play-date data-date-label="Started on"
                value="{{ request.form.get('started_on', (game['started_on'] or '') if game is defined else '') }}">
     </div>
     <div>
         <label for="completed-on">Completed on</label>
-        <input type="date" id="completed-on" name="completed_on"
+        <input type="date" id="completed-on" name="completed_on" data-play-date data-date-label="Completed on"
                value="{{ request.form.get('completed_on', (game['completed_on'] or '') if game is defined else '') }}">
     </div>
 

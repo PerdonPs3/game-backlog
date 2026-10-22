@@ -16,6 +16,8 @@
 
             <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
                  data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
+                <label for="catalog-content">Show</label>
+                <select id="catalog-content" data-catalog-content><option value="official">Official games</option><option value="all">Include mods &amp; fan games</option></select>
                 <label for="title">Title</label>
                 <div class="catalog-input-wrapper">
                     <input
@@ -43,8 +45,6 @@
 
                     {% endif %}
                 </p>
-                <label for="catalog-content">Show</label>
-                <select id="catalog-content" data-catalog-content><option value="official">Official games</option><option value="all">Include mods &amp; fan games</option></select>
             </div>
 
             <div>

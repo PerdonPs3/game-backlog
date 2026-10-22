@@ -22,6 +22,7 @@
         const stage = dialog.querySelector('[data-crop-stage]');
         const zoom = dialog.querySelector('[data-crop-zoom]');
         const error = dialog.querySelector('[data-crop-error]');
+        const status = dialog.querySelector('[data-crop-status]');
         const apply = dialog.querySelector('[data-crop-apply]');
         const replacement = dialog.querySelector('[data-crop-replacement]');
         let image, file, state, url, pointer, generation = 0;
@@ -45,17 +46,29 @@
         async function open(candidate) {
             const current = ++generation;
             const report = (message) => {
+                status.textContent = '';
+                apply.disabled = !state;
                 if (dialog.open) error.textContent = message;
                 else onError(message);
             };
+            error.textContent = '';
+            status.textContent = 'Opening photo…';
+            apply.disabled = true;
+            try {
+                if (!dialog.open) dialog.showModal();
+            } catch (_) {
+                report('The photo editor could not open. Reload the page and try again.');
+                return;
+            }
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(candidate.type) || candidate.size > 2 * 1024 * 1024) {
                 report('Choose a JPG, PNG, or WebP photo up to 2 MB.');
                 return;
             }
-            const candidateUrl = URL.createObjectURL(candidate);
-            const loaded = new Image();
-            loaded.src = candidateUrl;
+            let candidateUrl;
             try {
+                candidateUrl = URL.createObjectURL(candidate);
+                const loaded = new Image();
+                loaded.src = candidateUrl;
                 await loaded.decode();
                 if (current !== generation) { URL.revokeObjectURL(candidateUrl); return; }
                 if (!loaded.naturalWidth || !loaded.naturalHeight || loaded.naturalWidth * loaded.naturalHeight > 12000000) throw new Error();
@@ -67,8 +80,8 @@
                 state = { width: loaded.naturalWidth, height: loaded.naturalHeight, zoom: 1, cx: loaded.naturalWidth / 2, cy: loaded.naturalHeight / 2 };
                 zoom.value = '1';
                 error.textContent = '';
+                status.textContent = '';
                 apply.disabled = false;
-                if (!dialog.open) dialog.showModal();
                 draw();
                 stage.focus();
             } catch (_) {

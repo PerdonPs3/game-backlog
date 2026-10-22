@@ -13,7 +13,7 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     html = page.get_data(as_text=True)
     assert "VESTIGIUM" in html and "Every game" in html
     assert 'href="/explore"' in html
-    assert 'href="https://github.com/PerdonPs3"' in html
+    assert 'href="https://github.com/PerdonPs3/game-backlog"' in html
     assert 'class="welcome-primary"' not in html
     assert 'class="welcome-backdrop" aria-hidden="true"' in html
     assert "t_cover_big/co4jni.jpg" in html

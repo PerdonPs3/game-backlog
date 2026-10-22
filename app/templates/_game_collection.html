@@ -9,6 +9,7 @@
             {% endif %}
         </a>
         <div class="game-card-details">
+            <div class="game-card-heading">
             <h2><a class="game-title-link" href="{{ detail_url }}" {% if not game.igdb_id %}data-game-details{% endif %}>{{ game.title }}</a></h2>
             {% if game['is_favorite'] or game['is_goty'] %}
                 <div class="game-stickers" aria-label="Personal game distinctions">
@@ -16,6 +17,7 @@
                     {% if game['is_goty'] %}<span class="game-sticker sticker-goty"><span aria-hidden="true">✦</span> Your GOTY</span>{% endif %}
                 </div>
             {% endif %}
+            </div>
             <p>Platform: {{ game.platform }}</p>
             <div class="game-meta">
                 <p class="game-status">Status: {{ game.status }}</p>
@@ -33,7 +35,14 @@
             {% endif %}
 
             {% if game['review'] %}
+                {% if game.review|length > 240 or game.review.count('\n') > 3 %}
+                <details class="collection-review">
+                    <summary><span class="review-excerpt">{{ game.review|replace('\n', ' ')|truncate(220, false, '…') }}</span><span class="review-toggle"><span class="review-more">Read more</span><span class="review-less">Show less</span></span></summary>
+                    <p class="game-review">{{ game.review }}</p>
+                </details>
+                {% else %}
                 <p class="game-review">{{ game['review'] }}</p>
+                {% endif %}
             {% endif %}
 
             <div class="game-actions">
