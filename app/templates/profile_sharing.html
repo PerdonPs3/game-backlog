@@ -25,7 +25,7 @@
             </fieldset>
         </div>
         <fieldset class="profile-sharing-card profile-sharing-choices"><legend>Shared details</legend><h2>Shared details</h2><div class="profile-sharing-options">
-            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase'), ('share_country', 'Country flag')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if submitted else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong></span></label>{% endfor %}
+            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if submitted else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong></span></label>{% endfor %}
         </div></fieldset>
         <div class="profile-sharing-footer"><p class="profile-empty-note">Uploaded photos stay private. Visitors see your silhouette and avatar color.</p><div class="profile-save-actions"><button type="submit">Save changes</button><a href="{{ url_for('auth.profile_overview') }}">Cancel</a></div></div>
         <details class="profile-sharing-guidelines"><summary>About shared content and old links</summary><p>Previous usernames stay reserved for you and redirect to your current public profile.</p><p>Share only content you have the right to publish. Do not include private information, impersonation, hate, or explicit content.</p></details>

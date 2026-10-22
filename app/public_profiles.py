@@ -57,8 +57,8 @@ def save_sharing(db, owner, form):
                 raise ValueError('You can change your username again on ' + availability['available_at'] + '. You can still update your sharing settings.')
             claim_username(db, owner, username)
             db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
-        db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ?, share_country = ? WHERE id = ?',
-                   (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', form.get('share_country') == 'yes', owner))
+        db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
+                   (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
         db.commit()
     except psycopg.errors.UniqueViolation:
         db.rollback()
@@ -88,7 +88,7 @@ def sharing():
             return redirect(url_for('profiles.sharing', _anchor='sharing-feedback'), code=303)
         except ValueError as exc:
             error = str(exc)
-    item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase, share_country FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
+    item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
     return render_template('profile_sharing.html', sharing=item, error=error, username_state=username_availability(item, username_clock(db)))
 
 
@@ -105,7 +105,7 @@ def public_profile(username):
         # always resolve directly to the current name, never an alias chain.
         return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
-    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, CASE WHEN share_country THEN country_code ELSE NULL END AS country_code FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
+    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()

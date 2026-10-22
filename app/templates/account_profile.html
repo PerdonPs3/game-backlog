@@ -76,7 +76,6 @@
                 <option value="">Not specified</option>
                 {% for country in countries %}<option value="{{ country.code }}" data-flag="{{ url_for('static', filename='images/flags/' + country.code|lower + '.svg') }}" {% if country_code|upper == country.code %}selected{% endif %}>{{ country.name }}</option>{% endfor %}
             </select>
-            <label class="profile-country-sharing"><input type="checkbox" name="share_country" value="yes" {% if (request.form.get('share_country') == 'yes' if request.method == 'POST' else profile.share_country) %}checked{% endif %}><span>Show country on my public profile</span></label>
         </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
         {% if is_setup %}

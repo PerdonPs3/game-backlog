@@ -330,7 +330,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, country_code, share_country FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, country_code FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -359,9 +359,9 @@ def profile():
             try:
                 # Serialize setup with sharing edits; an existing identity is never replaced.
                 identity = db.execute('SELECT username FROM profiles WHERE id = ? FOR UPDATE', (g.user['id'],)).fetchone()
-                db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, country_code = ?, share_country = ?, "
+                db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, country_code = ?, "
                            "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
-                           (name, bio, avatar, color.lower(), country, request.form.get('share_country') == 'yes', photo is not None or remove_photo, photo, g.user["id"]))
+                           (name, bio, avatar, color.lower(), country, photo is not None or remove_photo, photo, g.user["id"]))
                 if is_setup and not identity['username']:
                     from app.public_profiles import claim_username, username_clock
                     claim_username(db, g.user['id'], username)

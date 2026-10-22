@@ -27,18 +27,19 @@ existing visibility and field-sharing rules. No database migration is needed.
 
 ### Optional country flag
 
-Migration `007_profile_country.sql` adds a nullable ISO 3166-1 country code and
-`share_country`, disabled by default for all accounts. Apply it explicitly to the
-isolated development database before publishing this increment; production
-migration requires separate authorization. No existing profile is changed or
-published by the migration.
+Migration `007_profile_country.sql` adds a nullable ISO 3166-1 country code.
+Migration `008_country_profile_visibility.sql` removes the initial separate
+country-sharing flag so country visibility follows profile visibility. Apply both
+explicitly to the isolated development database before publishing this increment;
+production migration requires separate authorization. Existing countries and
+profile visibility choices are preserved.
 
-Create/Edit profile includes an optional Country selector and a public-sharing
-checkbox. Not specified removes the saved country. The private profile and editor
-show a small flag beside the display name. The public profile projects the country
-only when both the profile and country sharing are enabled. Profile sharing can
-also revoke or enable the flag, independently of the bio and showcase. The country
-is selected manually, never inferred from location, IP address, or Steam.
+Create/Edit profile includes an optional Country selector. Not specified removes
+the saved country and flag. The private profile and editor show a small flag
+beside the display name. Public profiles show the selected country automatically;
+private profiles remain hidden from visitors. There is no separate country-sharing
+checkbox. The country is selected manually, never inferred from location, IP
+address, or Steam.
 
 The allowlist, English names, and local SVG icons are bundled from flag-icons
 7.6.0 (MIT), with attribution and license in `app/static/images/flags/`.
