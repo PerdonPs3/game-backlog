@@ -25,6 +25,28 @@ existing visibility and field-sharing rules. No database migration is needed.
 
 ## Optional public player identity
 
+### Optional country flag
+
+Migration `007_profile_country.sql` adds a nullable ISO 3166-1 country code.
+Migration `008_country_profile_visibility.sql` removes the initial separate
+country-sharing flag so country visibility follows profile visibility. Apply both
+explicitly to the isolated development database before publishing this increment;
+production migration requires separate authorization. Existing countries and
+profile visibility choices are preserved.
+
+Create/Edit profile includes an optional Country selector. Not specified removes
+the saved country and flag. The private profile and editor show a small flag
+beside the display name. Public profiles show the selected country automatically;
+private profiles remain hidden from visitors. There is no separate country-sharing
+checkbox. The country is selected manually, never inferred from location, IP
+address, or Steam.
+
+The allowlist, English names, and local SVG icons are bundled from flag-icons
+7.6.0 (MIT), with attribution and license in `app/static/images/flags/`.
+There are no browser requests to an external flag service. Unknown codes are
+rejected on the server and by a database constraint. SQLite offline mode does
+not expose account country settings.
+
 Migration `005_public_profiles.sql` adds a unique, nullable username and three
 sharing flags, all disabled at the database level before setup. It does not publish
 existing accounts. The application now selects Public when creating a new profile;
