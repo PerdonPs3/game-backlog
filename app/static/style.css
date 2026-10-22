@@ -460,7 +460,7 @@ input,
 select {
     width: 100%;
     padding: 0.75rem;
-    background: var(--color-field);
+    background-color: var(--color-field);
     color: var(--text);
     border: 1px solid var(--color-outline);
     border-radius: 8px;
@@ -1077,7 +1077,7 @@ a:focus-visible {
     min-height: 48px;
     border-color: var(--color-border);
     border-radius: 9px;
-    background: var(--color-canvas);
+    background-color: var(--color-canvas);
     font-size: 0.9rem;
 }
 
@@ -1442,7 +1442,7 @@ a:focus-visible {
     color: var(--text);
     border: 1px solid var(--color-outline);
     border-radius: 9px;
-    background: var(--color-field);
+    background-color: var(--color-field);
     font: inherit;
     font-size: 0.9rem;
 }

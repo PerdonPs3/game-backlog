@@ -313,7 +313,14 @@ profile. Apply it to the isolated development database with `flask migrate-db`
 before publishing this version to Preview. Production migration requires a
 separate authorized release.
 
-Users can upload a still JPG, PNG, or WebP up to 2 MB and 12 million pixels.
+The browser accepts JPG, PNG, or WebP sources up to 20 MB and 32 million pixels.
+Sources over 2 MB or 12 million pixels are optimized locally before cropping:
+resize proportionally to at most 2048 pixels on the longest edge, composite
+transparency onto white, and encode a JPEG below 2 MB. Failed preparation keeps
+the previous selection. Only the prepared file and crop coordinates are submitted;
+the large source is never uploaded. The server still independently enforces its
+2 MB, 12-million-pixel, still-image validation. Without JavaScript, those server
+limits apply directly to the selected source.
 Selecting a photo opens a circular crop preview with drag, arrow-key positioning,
 zoom, centering, cancel, and Use photo actions. Only a confirmed photo and its crop
 coordinates are submitted. Cancelling a replacement preserves the previous

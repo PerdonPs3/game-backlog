@@ -29,7 +29,7 @@
                     <p class="avatar-edit-heading">Profile picture</p>
                     <input class="avatar-file-input" type="file" id="profile-photo" name="photo" form="profile-form" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint photo-feedback">
                     <label class="avatar-upload-button" for="profile-photo">Upload photo <span aria-hidden="true">↗</span></label>
-                    <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 2 MB.</p>
+                    <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 20 MB. Large photos are optimized automatically.</p>
                     <p id="photo-feedback" class="profile-field-hint" role="status" aria-live="polite" data-photo-feedback></p>
                     <div class="avatar-palette" data-avatar-palette role="group" aria-label="Default avatar color" {% if profile.has_photo %}hidden{% endif %}>
                         <p>Background color</p>
@@ -104,4 +104,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script>{% endblock %}

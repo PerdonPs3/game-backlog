@@ -59,12 +59,12 @@ html[data-theme="light"] :is(.summary-average, .game-actions, .form-actions, .pe
 html[data-theme="light"] #collection-filters input,
 html[data-theme="light"] #collection-filters select,
 html[data-theme="light"] :is(input, select, textarea, .workspace-form input:not([type="checkbox"]), .workspace-form select, .workspace-form textarea) {
-    background: #fff;
+    background-color: #fff;
     border-color: var(--border);
     color: var(--text);
 }
 html[data-theme="light"] input::placeholder, html[data-theme="light"] textarea::placeholder { color: #776d88; opacity: 1; }
-html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background: #f4f0f8; color: var(--text-muted); }
+html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background-color: #f4f0f8; color: var(--text-muted); }
 html[data-theme="light"] :is(.workspace-form .play-dates, .sticker-picker, .file-upload-panel, .adventure-preferences, .list-game-picker, .profile-personal) { background: linear-gradient(140deg, #f8f3ff, #fff); border-color: var(--border); }
 html[data-theme="light"] :is(.workspace-form .sticker-option, .workspace-form .list-game-choice, .collection-view-switch, .list-editor-switch) { background: #fff; border-color: var(--border); }
 html[data-theme="light"] :is(.workspace-form .sticker-option:has(input:checked), .workspace-form .list-game-choice:has(input:checked)) { background: var(--light-tint); border-color: var(--light-accent-border); }
