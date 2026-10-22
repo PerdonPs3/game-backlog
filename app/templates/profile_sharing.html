@@ -13,6 +13,7 @@
     {% if error %}<p class="profile-error" role="alert">{{ error }}</p>{% endif %}
     <form method="post" class="workspace-form profile-sharing-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="publish_photo" value="yes">
         <div class="profile-sharing-top">
             <section class="profile-sharing-card" aria-labelledby="identity-title">
                 <h2 id="identity-title">Player identity</h2>
@@ -27,7 +28,7 @@
         <fieldset class="profile-sharing-card profile-sharing-choices"><legend>Shared details</legend><h2>Shared details</h2><div class="profile-sharing-options">
             {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if submitted else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong></span></label>{% endfor %}
         </div></fieldset>
-        <div class="profile-sharing-footer"><p class="profile-empty-note">Uploaded photos stay private. Visitors see your silhouette and avatar color.</p><div class="profile-save-actions"><button type="submit">Save changes</button><a href="{{ url_for('auth.profile_overview') }}">Cancel</a></div></div>
+        <div class="profile-sharing-footer"><p class="profile-empty-note">Saving also shares your photo when your profile is public.</p><div class="profile-save-actions"><button type="submit">Save changes</button><a href="{{ url_for('auth.profile_overview') }}">Cancel</a></div></div>
         <details class="profile-sharing-guidelines"><summary>About shared content and old links</summary><p>Previous usernames stay reserved for you and redirect to your current public profile.</p><p>Share only content you have the right to publish. Do not include private information, impersonation, hate, or explicit content.</p></details>
     </form>
 </section>

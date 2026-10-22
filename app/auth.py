@@ -362,6 +362,8 @@ def profile():
                 db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, country_code = ?, "
                            "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
                            (name, bio, avatar, color.lower(), country, photo is not None or remove_photo, photo, g.user["id"]))
+                if request.form.get('publish_photo') == 'yes' or remove_photo:
+                    db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (g.user['id'],))
                 if is_setup and not identity['username']:
                     from app.public_profiles import claim_username, username_clock
                     claim_username(db, g.user['id'], username)

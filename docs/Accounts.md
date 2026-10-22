@@ -120,17 +120,17 @@ even to the owner. Responses use `no-store` and `noindex, nofollow`; these do no
 make an enabled public URL secret or prevent others from copying its content.
 
 Public queries project only selected fields. They do not include account IDs,
-emails, sessions, uploaded photos, game entry IDs, reviews, ratings, progress,
+emails, sessions, photo bytes, game entry IDs, reviews, ratings, progress,
 lists, statistics, or unselected library entries. Public showcase cards do not
 link to private game routes. When available, they link to a public catalog page
 using the IGDB ID. See [Public catalog](Public-Catalog.md). Authenticated settings
 require a normal, completed-profile session
 and CSRF protection; recovery sessions cannot change publication settings.
 
-Uploaded photos remain private in this increment. The sharing form explains
-basic content rules. Public image publication, reporting, and moderation require
-a separately reviewed workflow before uploaded images or profile discovery are
-opened broadly. There is no profile directory or social feed in this increment.
+Public profile photos are available for the limited development trial described
+below. The sharing form explains basic content rules. Automated content moderation
+is a release gate before opening public uploads broadly. It is not implemented in
+this increment. There is no profile directory or social feed in this increment.
 
 ## First configure an isolated development project
 
@@ -270,9 +270,9 @@ appear in exported backups.
   completing recovery deletes all application sessions for that account. Recovery
   links require the originating browser, the expected email, and a valid one-use
   provider code; missing, expired, replayed, or mismatched requests fail closed.
-- Profiles have a display name, an optional bio, and a private uploaded avatar or
-  built-in silhouette. Public profiles expose only the projection described above;
-  libraries and uploaded photos remain private.
+- Profiles have a display name, an optional bio, and an uploaded avatar or built-in
+  silhouette. Public profiles expose only the projection described above and an
+  owner-confirmed photo when available. Libraries remain private.
 - The first confirmed sign-in opens the profile creator. A blank display name
   identifies unfinished setup; collection routes redirect to the creator until a
   valid name and unique username are saved. Public is selected initially, with a
@@ -306,7 +306,7 @@ References: [password authentication](https://supabase.com/docs/guides/auth/pass
 [Auth HTTP API](https://github.com/supabase/auth/blob/master/openapi.yaml).
 
 
-## Private profile photos
+## Profile photos and limited public sharing
 
 Migration `003_profile_photos.sql` adds a color and an optional photo to each
 profile. Apply it to the isolated development database with `flask migrate-db`
@@ -333,6 +333,22 @@ are never stored or served. The small normalized photo is stored in PostgreSQL
 The authenticated `/account/profile/photo` endpoint serves only the current
 account's photo, with private no-store caching and content sniffing disabled.
 Removing a photo restores a silhouette with the selected background color.
+
+Migration `010_public_profile_photos.sql` adds `share_photo`, initially false for
+all existing accounts, preserving the original private-photo promise. Saving the
+updated profile editor or sharing form confirms photo publication through a
+CSRF-protected `publish_photo=yes` marker and a visible notice. There is no extra
+checkbox. Older forms that lack the marker do not publish an existing private
+photo. Private profiles remain private even after confirmation. No other account's
+photo is published by another owner's save or by the migration.
+
+The public page includes only a photo-presence boolean and the current username's
+`/players/<username>/photo` URL. This endpoint checks current profile visibility,
+photo confirmation, and existence on every request. It returns the same 404 for
+hidden, missing, unknown, or old-username photos. Private profiles, removed photos,
+and renamed URLs immediately stop serving the image. Public photo responses and
+errors use `private, no-store`, `noindex, nofollow`, and `no-referrer`; JPEG responses
+also disable content sniffing. Previously downloaded copies cannot be recalled.
 On the player card, hovering over the avatar reveals an edit pencil. Clicking it
 opens photo upload and background color controls. A Remove photo button appears
 only when a photo is present and restores the colored silhouette. The same
@@ -340,10 +356,14 @@ native disclosure works with a tap or keyboard; Escape and outside clicks close
 it. These controls submit with the profile form, even when the disclosure is
 closed. Nothing is persisted until the profile is saved.
 
-These checks validate files, not visual content. Automatic detection of abusive,
-sexual, or copyrighted imagery is not implemented. Uploaded photos remain private;
-before introducing public avatars, define a content policy and add appropriate
-moderation and reporting tools.
+These checks validate files, not visual content. The owner has approved a limited
+development trial of public avatars. Before a broad public launch, integrate
+automated moderation before publication: accepted images may be published,
+prohibited or uncertain images require replacement, and service failures preserve
+the previous image without publishing the candidate. Review provider costs and
+image-processing privacy terms before connecting an external service. Allow normal
+game, anime, and logo avatars without treating every weapon as prohibited content.
+No images are sent to a moderation provider in this increment.
 
 
 ## Profile overview and game showcase
