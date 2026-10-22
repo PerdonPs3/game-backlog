@@ -178,3 +178,45 @@ html[data-theme="light"] .product-demo { --demo-surface: #faf8fd; --demo-raised:
     .demo-completion-track span { transition: width 1400ms cubic-bezier(.22,1,.36,1); }
     .product-demo[data-step="2"] .demo-review-stars { animation: tour-chip-enter 800ms both; }
 }
+
+/* Product actions: typing, adding a cover, selecting stars, then saving a review. */
+.demo-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.demo-typewriter { overflow-wrap: anywhere; }
+.demo-searchbar .demo-typewriter { min-height: 1.5em; }
+.demo-typewriter::after { content: ""; display: inline-block; width: 1px; height: 1em; vertical-align: -.1em; background: currentColor; margin-left: 2px; opacity: 0; }
+.demo-typewriter[data-writing="true"]::after { opacity: 1; }
+.demo-animated-stars { display: inline-flex; gap: .25rem; color: var(--welcome-accent); }
+.demo-animated-stars svg { width: 27px; height: 27px; overflow: visible; }
+.demo-star-outline { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+.demo-star-fill { fill: currentColor; opacity: 0; transform-origin: center; }
+.demo-animated-stars[data-rating="1"] svg:nth-child(-n+1) .demo-star-fill,
+.demo-animated-stars[data-rating="2"] svg:nth-child(-n+2) .demo-star-fill,
+.demo-animated-stars[data-rating="3"] svg:nth-child(-n+3) .demo-star-fill,
+.demo-animated-stars[data-rating="4"] svg:nth-child(-n+4) .demo-star-fill,
+.demo-animated-stars[data-rating="5"] .demo-star-fill { opacity: 1; }
+.demo-review-editor { margin-top: 1.5rem; padding: 1.25rem; background: var(--demo-raised); border: 1px solid var(--demo-line); border-radius: 12px; }
+.demo-review-editor > div:first-child { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .85rem; }
+.demo-review-editor strong { font-size: .85rem; }
+.demo-review-editor > div:first-child > span { color: var(--welcome-muted); font-size: .65rem; }
+.demo-review-writing { min-height: 5.5rem; padding: 1rem; margin-top: .75rem; background: var(--color-field); border: 1px solid var(--demo-line); border-radius: 8px; font-size: .85rem; line-height: 1.7; color: var(--welcome-strong); }
+.demo-review-saved { display: block; margin-top: .75rem; font-size: .7rem; color: var(--welcome-accent); opacity: 0; }
+.demo-review-saved[data-saved="true"] { opacity: 1; }
+.product-demo[data-step="0"] .demo-arriving { opacity: 0; transform: translateY(25px) scale(.9); }
+.product-demo[data-step="0"] .demo-discover-grid { opacity: .25; }
+.product-demo[data-step="2"] .demo-save { box-shadow: 0 0 0 3px color-mix(in srgb, var(--welcome-accent) 15%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+    .demo-discover-grid, .demo-arriving, .demo-review-saved, .demo-save { transition: opacity 500ms ease, transform 600ms ease, box-shadow 500ms ease; }
+    .demo-star-fill { transition: opacity 180ms ease, transform 180ms ease; transform: scale(.8); }
+    .demo-animated-stars[data-rating="5"] .demo-star-fill { transform: scale(1); }
+}
+.product-demo[data-paused="true"] *, .product-demo[data-paused="true"] *::after { animation-play-state: paused !important; }
+@media (max-width: 540px) {
+    .demo-review-editor { padding: .85rem; }
+    .demo-review-writing { font-size: .75rem; min-height: 7rem; }
+    .demo-animated-stars svg { width: 23px; height: 23px; }
+}
+.demo-card { position: relative; }
+.demo-favorite { position: absolute; top: 1rem; left: 1rem; padding: .35rem .5rem; border: 1px solid var(--welcome-accent); border-radius: 6px; background: var(--color-panel); color: var(--welcome-accent); font-size: .65rem; }
+.demo-favorite[hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) { .demo-favorite:not([hidden]) { animation: tour-chip-enter 600ms both; } }
+.demo-quick-add .demo-animated-stars { grid-column: 1 / -1; }
