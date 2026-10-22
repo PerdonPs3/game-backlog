@@ -56,3 +56,66 @@ html[data-theme="light"] .product-demo { --demo-surface: #faf8fd; --demo-raised:
     .demo-pick > span { width: 18px; height: 18px; left: .2rem; bottom: .2rem; font-size: .5rem; }
     .demo-progress i { width: 10px; }
 }
+
+/* A guided preview of existing product features. */
+.welcome-tour { padding-bottom: 3rem; }
+.welcome-tour .welcome-section-copy { max-width: 850px; text-align: center; margin: 0 auto 2.5rem; scroll-margin-top: 110px; }
+.tour-eyebrow { display: block; color: var(--welcome-accent); font-size: .64rem; letter-spacing: .15em; margin-bottom: 1rem; }
+.tour-navigation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-bottom: 2rem; }
+.tour-navigation[hidden], .tour-panel[hidden] { display: none; }
+.tour-navigation button { display: grid; grid-template-columns: auto 1fr; gap: .25rem .85rem; align-items: center; text-align: left; margin: 0; width: 100%; padding: 1.25rem; color: var(--welcome-muted); background: var(--color-panel); border: 1px solid color-mix(in srgb, var(--welcome-accent) 20%, transparent); border-radius: 14px; cursor: pointer; }
+.tour-navigation button > span { grid-row: span 2; font-size: 1.4rem; opacity: .5; font-weight: 800; }
+.tour-navigation button strong { font-size: .95rem; color: var(--welcome-strong); }
+.tour-navigation button small { font-size: .72rem; }
+.tour-navigation button[aria-selected="true"] { border-color: var(--welcome-accent); background: color-mix(in srgb, var(--welcome-accent) 9%, var(--color-panel)); box-shadow: inset 0 -3px var(--welcome-accent); }
+.tour-navigation button[aria-selected="true"] > span { opacity: 1; color: var(--welcome-accent); }
+.tour-navigation button:focus-visible { outline: 3px solid var(--welcome-accent); outline-offset: 4px; }
+.tour-context { display: flex; justify-content: space-between; align-items: center; gap: 2rem; margin: 0 0 1.25rem; }
+.tour-context h3 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--welcome-strong); }
+.tour-context p { margin: 0; max-width: 410px; font-size: .8rem; line-height: 1.6; color: var(--welcome-muted); }
+.welcome-tour .welcome-product { margin: 0; }
+.tour-bottom { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.5rem; font-size: .8rem; color: var(--welcome-muted); }
+.tour-bottom a { color: var(--welcome-accent); }
+.demo-discover-grid { display: grid; grid-template-columns: minmax(110px, .8fr) minmax(160px, 1.3fr) minmax(180px, 1fr); gap: 2rem; align-items: center; }
+.demo-searchbar { display: flex; align-items: center; gap: 1rem; padding: .85rem 1rem; margin-bottom: 2rem; border: 1px solid var(--demo-line); border-radius: 10px; background: var(--color-field); font-size: .9rem; }
+.demo-searchbar > span:first-child { font-size: 1.6rem; color: var(--welcome-accent); }
+.demo-search-key { margin-left: auto; color: var(--welcome-muted); }
+.product-demo .demo-discover-cover { width: 100%; height: auto; aspect-ratio: 264/374; object-fit: cover; border-radius: 10px; box-shadow: 0 16px 36px #0004; }
+.demo-game-description h4 { font-size: clamp(1.6rem, 3vw, 2.6rem); line-height: 1.05; letter-spacing: -.04em; margin: .5rem 0 1rem; color: var(--welcome-strong); }
+.demo-game-description p { font-size: .85rem; line-height: 1.6; color: var(--welcome-muted); }
+.demo-genres, .demo-sharing { display: flex; flex-wrap: wrap; gap: .5rem; }
+.demo-genres span, .demo-sharing span { padding: .4rem .6rem; font-size: .65rem; border: 1px solid var(--demo-line); border-radius: 20px; }
+.demo-search-result { color: var(--welcome-accent); font-size: .75rem; line-height: 1.6; margin-top: 2rem; }
+.demo-quick-add { padding: 1.3rem; border: 1px solid var(--demo-line); border-radius: 12px; background: var(--demo-raised); }
+.demo-quick-add > strong { display: block; margin-bottom: 1.25rem; font-size: 1rem; }
+.demo-field-label { display: block; color: var(--welcome-muted); font-size: .65rem; margin: 1rem 0 .45rem; }
+.demo-field { border: 1px solid var(--demo-line); border-radius: 7px; padding: .65rem; font-size: .7rem; background: var(--color-field); }
+.demo-empty-stars { display: block; white-space: nowrap; font-size: 1.6rem; color: var(--welcome-accent); }
+.demo-save { margin-top: 1.2rem; padding: .8rem .5rem; border-radius: 8px; background: var(--welcome-button); color: var(--welcome-button-text); font-size: .75rem; font-weight: 700; text-align: center; }
+.demo-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-top: 1.25rem; }
+.demo-stats > div { display: grid; gap: .35rem; padding: .8rem 1rem; border: 1px solid var(--demo-line); border-radius: 10px; background: var(--demo-raised); }
+.demo-stats strong { font-size: 1.5rem; color: var(--welcome-accent); }
+.demo-stats > div > span { font-size: .65rem; color: var(--welcome-muted); }
+.demo-library .demo-cards { max-width: 610px; }
+.demo-review-stars { color: var(--welcome-accent); display: block; font-size: 1.1rem; letter-spacing: .12em; }
+.demo-sharing { margin-top: 1.5rem; color: var(--welcome-accent); }
+@media (max-width: 760px) {
+    .tour-context { display: block; }
+    .tour-context p { margin-top: .6rem; max-width: none; }
+    .tour-navigation { gap: .4rem; }
+    .tour-navigation button { display: flex; flex-direction: column; align-items: flex-start; padding: .85rem .6rem; gap: .4rem; }
+    .tour-navigation button strong { font-size: .78rem; }
+    .tour-navigation button small { display: none; }
+    .tour-navigation button > span { font-size: 1rem; }
+    .demo-discover-grid { grid-template-columns: minmax(90px,.7fr) minmax(0,1fr); gap: 1rem; }
+    .demo-quick-add { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1rem; }
+    .demo-quick-add > strong, .demo-quick-add .demo-save { grid-column: 1 / -1; margin: 0; }
+    .demo-quick-add .demo-field-label { margin: .5rem 0 0; }
+    .demo-quick-add .demo-field { grid-row: 3; }
+    .demo-quick-add .demo-field-label:nth-of-type(3), .demo-empty-stars { grid-column: 1 / -1; }
+    .demo-game-description .tour-eyebrow { font-size: .5rem; }
+    .demo-game-description h4 { font-size: 1.6rem; }
+    .demo-search-result { margin-top: 1rem; }
+    .demo-stats > div { padding: .6rem; }
+    .demo-stats > div > span { font-size: .55rem; }
+}

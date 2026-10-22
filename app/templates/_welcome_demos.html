@@ -1,28 +1,37 @@
 {% macro product_demo(kind) %}
 {% set games = [('Hollow Knight', 'cocpbl'), ('Hades', 'cob9kr'), ('Celeste', 'cob9dh'), ('Portal 2', 'co1rs4'), ('Elden Ring', 'co4jni')] %}
-<figure class="welcome-product product-demo" data-product-demo="{{ kind }}" data-step="2" aria-label="{{ 'Library progress' if kind == 'library' else 'Player showcase' }} example">
+<figure class="welcome-product product-demo" data-product-demo="{{ kind }}" data-step="2" aria-label="{{ 'Catalog search' if kind == 'search' else 'Library progress' if kind == 'library' else 'Player showcase' }} example">
     <div class="demo-toolbar"><span><span class="demo-light" aria-hidden="true"></span> VESTIGIUM <span class="demo-example">/ Example</span></span><button type="button" class="demo-control" data-demo-control hidden aria-label="Replay {{ kind }} demo">Replay ↻</button></div>
-    {% if kind == 'library' %}
+    {% if kind == 'search' %}
+    <div class="demo-stage demo-discover">
+        <div class="demo-searchbar"><span aria-hidden="true">⌕</span> Hollow Knight <span class="demo-search-key" aria-hidden="true">↵</span></div>
+        <div class="demo-discover-grid">
+            <img class="demo-discover-cover" src="https://images.igdb.com/igdb/image/upload/t_cover_big/cocpbl.jpg" alt="Hollow Knight cover" width="264" height="374" loading="lazy">
+            <div class="demo-game-description"><span class="tour-eyebrow">EXPLORE / GAME DETAILS</span><h4>Hollow Knight</h4><div class="demo-genres"><span>Adventure</span><span>Indie</span></div><p>One more world to get lost in.</p><div class="demo-search-result"><span data-demo-frame="0" hidden>Game found in the catalog</span><span data-demo-frame="1" hidden>Choose how to start your journey</span><span data-demo-frame="2">✓ Saved to your library</span></div></div>
+            <div class="demo-quick-add"><strong>Your library</strong><span class="demo-field-label">Platform</span><div class="demo-field">PC (Microsoft Windows)</div><span class="demo-field-label">Status</span><div class="demo-field">Backlog</div><span class="demo-field-label">Your rating · optional</span><span class="demo-empty-stars" aria-label="Not rated">☆ ☆ ☆ ☆ ☆</span><div class="demo-save"><span data-demo-frame="0" hidden>+ Add to my library</span><span data-demo-frame="1" hidden>+ Add to my library</span><span data-demo-frame="2">✓ In your library</span></div></div>
+        </div>
+    </div>
+    {% elif kind == 'library' %}
     <div class="demo-stage demo-library">
-        <div class="demo-heading"><strong>Your library</strong></div>
+        <div class="demo-heading"><strong>Your library</strong></div><div class="demo-stats"><div><strong>3</strong><span>Games collected</span></div><div><strong><span data-demo-frame="0" hidden>0</span><span data-demo-frame="1" hidden>0</span><span data-demo-frame="2">1</span></strong><span>Completed</span></div><div><strong><span data-demo-frame="0" hidden>0%</span><span data-demo-frame="1" hidden>0%</span><span data-demo-frame="2">33%</span></strong><span>Completion</span></div></div>
         <div class="demo-tabs" aria-hidden="true"><span>All games <small>3</small></span><span>Playing <small><span data-demo-frame="0" hidden>1</span><span data-demo-frame="1" hidden>2</span><span data-demo-frame="2">1</span></small></span><span>Completed <small><span data-demo-frame="0" hidden>0</span><span data-demo-frame="1" hidden>0</span><span data-demo-frame="2">1</span></small></span></div>
         <div class="demo-cards">
             {% for title, cover in games[:3] %}
             <div class="demo-card{% if loop.first %} demo-featured{% endif %}"><img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ cover }}.jpg" alt="{{ title }} cover" width="264" height="374" loading="lazy"><strong>{{ title }}</strong>{% if loop.first %}<span class="demo-status"><span data-demo-frame="0" hidden>Backlog</span><span data-demo-frame="1" hidden>Playing</span><span data-demo-frame="2">Completed ✓</span></span>{% else %}<span class="demo-status">{{ 'Playing' if loop.index == 2 else 'Backlog' }}</span>{% endif %}</div>
             {% endfor %}
         </div>
-        <div class="demo-note"><span aria-hidden="true">✦</span><span data-demo-frame="0" hidden>Save a game for your next adventure.</span><span data-demo-frame="1" hidden>Start playing. Keep track of your journey.</span><span data-demo-frame="2">Finished it? Leave your own rating and notes.</span></div>
+        <div class="demo-note"><span aria-hidden="true">✦</span><span data-demo-frame="0" hidden>Save a game for your next adventure.</span><span data-demo-frame="1" hidden>Start playing. Keep track of your journey.</span><span data-demo-frame="2"><span class="demo-review-stars" aria-label="Rated 10 out of 10">★★★★★</span> Finished it? Leave your own rating and notes.</span></div>
     </div>
     {% else %}
     <div class="demo-stage demo-profile">
-        <div class="demo-player"><span class="demo-avatar" aria-hidden="true"><svg viewBox="0 0 40 40" fill="currentColor"><circle cx="20" cy="14" r="7"/><path d="M7 37v-5a13 13 0 0 1 26 0v5Z"/></svg></span><div><strong>Player One</strong></div></div>
+        <div class="demo-player"><span class="demo-avatar" aria-hidden="true"><svg viewBox="0 0 40 40" fill="currentColor"><circle cx="20" cy="14" r="7"/><path d="M7 37v-5a13 13 0 0 1 26 0v5Z"/></svg></span><div><strong>Player One</strong><span>@player_one</span><p>Exploring worlds, collecting memories.</p></div></div>
         <div class="demo-showcase-heading"><strong>My five favorites</strong><span>YOUR SHOWCASE</span></div>
         <div class="demo-showcase">
             {% for title, cover in games %}<div class="demo-pick" style="--pick: {{ loop.index0 }}"><img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ cover }}.jpg" alt="{{ title }} cover" width="264" height="374" loading="lazy"><span>{{ '%02d'|format(loop.index) }}</span></div>{% endfor %}
         </div>
-        <div class="demo-note"><span aria-hidden="true">✦</span><span data-demo-frame="0" hidden>Start with a name and a look of your own.</span><span data-demo-frame="1" hidden>Choose the games that mean the most to you.</span><span data-demo-frame="2">Your favorites. Your player identity.</span></div>
+        <div class="demo-sharing"><span>Public profile</span><span>✓ About you</span><span>✓ Five-game showcase</span></div><div class="demo-note"><span aria-hidden="true">✦</span><span data-demo-frame="0" hidden>Start with a name and a look of your own.</span><span data-demo-frame="1" hidden>Choose the games that mean the most to you.</span><span data-demo-frame="2">Your favorites. Your player identity.</span></div>
     </div>
     {% endif %}
-    <figcaption><span>Illustrative demo · {{ 'Track your progress' if kind == 'library' else 'Build your showcase' }}</span><span class="demo-progress" aria-hidden="true"><i></i><i></i><i></i></span></figcaption>
+    <figcaption><span>Illustrative demo · {{ 'Find your next game' if kind == 'search' else 'Track your progress' if kind == 'library' else 'Build your showcase' }}</span><span class="demo-progress" aria-hidden="true"><i></i><i></i><i></i></span></figcaption>
 </figure>
 {% endmacro %}

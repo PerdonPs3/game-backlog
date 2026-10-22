@@ -43,17 +43,20 @@
             <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
         </section>
         <div class="welcome-story">
-            <section class="welcome-section" id="your-library" aria-labelledby="library-intro-title">
-                <div class="welcome-section-copy"><h2 id="library-intro-title">Organize your games</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
-                {{ product_demo('library') }}
-            </section>
-            <section class="welcome-section welcome-section-profile" aria-labelledby="profile-intro-title">
-                <div class="welcome-section-copy"><h2 id="profile-intro-title">Show your favorites</h2><p>Build a five-game showcase and choose what to share. Your library stays private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
-                {{ product_demo('profile') }}
-            </section>
-            <section class="welcome-steps-section" id="how-it-works" aria-labelledby="steps-title">
-                <h2 id="steps-title">How it works</h2>
-                <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3></li><li><span>02</span><h3>Make it part of your library</h3></li><li><span>03</span><h3>Keep your story</h3></li></ol>
+            <section class="welcome-section welcome-tour" id="your-library" aria-labelledby="tour-title" data-product-tour>
+                <div class="welcome-section-copy" id="how-it-works"><span class="tour-eyebrow">FROM YOUR NEXT GAME TO YOUR ALL-TIME FAVORITE</span><h2 id="tour-title">See your collection take shape.</h2><p>Explore the preview. Make it yours when you're ready.</p></div>
+                <div class="tour-navigation" role="tablist" aria-label="Explore Vestigium features" hidden>
+                    <button type="button" role="tab" id="tour-tab-search" aria-controls="tour-search" aria-selected="true"><span>01</span><strong>Find &amp; save</strong><small>Your next adventure</small></button>
+                    <button type="button" role="tab" id="tour-tab-library" aria-controls="tour-library" aria-selected="false" tabindex="-1"><span>02</span><strong>Track &amp; rate</strong><small>Every game, your way</small></button>
+                    <button type="button" role="tab" id="tour-tab-profile" aria-controls="tour-profile" aria-selected="false" tabindex="-1"><span>03</span><strong>Make it yours</strong><small>A profile full of favorites</small></button>
+                </div>
+                {% for kind in ['search', 'library', 'profile'] %}
+                <div class="tour-panel" id="tour-{{ kind }}" data-tour-panel>
+                    <div class="tour-context"><h3>{{ {'search': 'Find it. Save it. Play it.', 'library': 'A home for every game.', 'profile': 'Put your favorites on display.'}[kind] }}</h3><p>{{ {'search': 'Search the catalog and add a game without leaving its page.', 'library': 'Backlog, playing, completed. Keep your ratings and notes alongside each game.', 'profile': 'Pick five games for your showcase. You decide what your profile shares.'}[kind] }}</p></div>
+                    {{ product_demo(kind) }}
+                </div>
+                {% endfor %}
+                <div class="tour-bottom"><span>Your library and notes stay private.</span><a href="{{ url_for('explore.index') }}">Try the real thing: explore games ↗</a></div>
             </section>
             <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
         </div>
@@ -65,6 +68,7 @@
     <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='welcome-scroll.js') }}" defer></script>
     <script src="{{ url_for('static', filename='community-count.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='product-tour.js') }}" defer></script>
     <script src="{{ url_for('static', filename='product-demos.js') }}" defer></script>
 </body>
 </html>
