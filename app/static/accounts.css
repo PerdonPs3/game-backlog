@@ -6,9 +6,9 @@
     margin-block: 1rem;
 }
 .account-navigation form { margin: 0; }
-.profile-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.profile-name-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: .65rem; }
 .profile-name-row > :is(h1, h2) { min-width: 0; margin: 0; overflow-wrap: anywhere; }
-.profile-country { display: inline-flex; flex: 0 0 auto; align-items: center; }
+.profile-country { display: inline-flex; flex: 0 0 auto; align-items: center; line-height: 1; }
 .profile-country[hidden] { display: none; }
 .profile-country img { display: block; width: 22px; height: 16.5px; object-fit: contain; border-radius: 2px; }
 .auth-workspace { max-width: 800px; }
@@ -58,6 +58,8 @@
 .player-avatar svg { width: 53px; height: 53px; }
 .player-card-kicker, .profile-eyebrow { color: var(--accent); font-size: .6rem; letter-spacing: .13em; font-weight: 700; text-transform: uppercase; }
 .player-card h2 { margin: .6rem 0; font-size: 1.6rem; letter-spacing: -.04em; overflow-wrap: anywhere; line-height: 1.2; }
+.player-card .profile-name-row { padding-block: .6rem; }
+.player-card .profile-name-row > h2 { margin: 0; }
 .player-bio { min-height: 3rem; margin: .75rem 0 1.5rem; color: var(--text-muted); font-size: .85rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
 .player-card-rule { height: 1px; background: var(--profile-line); }
 .player-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.25rem 0; }
