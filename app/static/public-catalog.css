@@ -42,12 +42,12 @@ html[data-theme="light"] .catalog-workspace .workspace-panel { padding: 0; borde
 .catalog-game-actions [hidden] { display: none; }
 .catalog-access-note, .catalog-copy-feedback { color: var(--text-muted); line-height: 1.7; font-size: .75rem; margin: 1rem 0 0; }
 .catalog-copy-feedback { color: var(--accent); }
-.catalog-detail-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem; }
+.catalog-detail-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; gap: 1.5rem; }
 .catalog-detail-panel { padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); min-width: 0; }
 .catalog-detail-panel h2 { font-size: 1.2rem; margin-top: .5rem; }
 .catalog-synopsis { color: var(--text-muted); font-size: .9rem; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
-.catalog-platforms { padding: 0; margin: 0; list-style: none; }
-.catalog-platforms li { padding: .65rem 0; font-size: .8rem; color: var(--text-muted); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.catalog-platforms { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin: 0; list-style: none; }
+.catalog-platforms li { padding: .4rem .65rem; font-size: .75rem; line-height: 1.5; color: var(--text-muted); border: 1px solid var(--border); border-radius: 8px; overflow-wrap: anywhere; }
 html[data-theme="light"] .catalog-public-search, html[data-theme="light"] .catalog-result, html[data-theme="light"] .catalog-empty, html[data-theme="light"] .catalog-game-hero, html[data-theme="light"] .catalog-detail-panel { background: #fff; }
 html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] .catalog-art.game-card-cover { background: #f3eef9; }
 @media (max-width: 900px) { .catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; } .catalog-game-hero { grid-template-columns: 180px minmax(0, 1fr); gap: 1.5rem; } }

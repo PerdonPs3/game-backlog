@@ -26,6 +26,25 @@ the trial to an unrestricted public launch.
 
 ## Interface copy review
 
+### Interface polish from development testing
+
+Implemented locally, pending user review and publication:
+
+- Add game's Official/community filter precedes the title search. Shared select
+  chevrons use consistent placement and theme colors.
+- Favorite/GOTY distinctions share the library card heading, with top-aligned
+  covers. Long reviews have an escaped excerpt and a native keyboard-accessible
+  Read more/Show less disclosure; full review text remains unchanged in storage.
+- Catalog synopsis/platform panels and profile activity panels size to their own
+  content. Platforms use wrapping tags; ratings remain on one line.
+- Share supports native sharing, clipboard fallback, cancellation, and a manual
+  public-link fallback without sharing query values or fragments.
+- Play dates have day/month/year fields plus Today and Clear, retaining the same
+  ISO submission and server-side history rules. Invalid or incomplete dates block
+  submission. Without JavaScript the existing native date inputs remain available.
+- Uploaded portraits use a neutral background beneath the photo, keeping the
+  silhouette's chosen color from showing around image edges.
+
 Functional pages use one direct task heading. Remove decorative kickers,
 repeated introductions, field-label paraphrases, duplicate tutorials, and
 repeated attribution already supplied by the common footer. Keep contextual

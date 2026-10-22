@@ -24,9 +24,12 @@ never included in the public projection.
   experiences use the same IGDB client, validated selection, and platform rules.
 - Discover can reuse these destinations when that milestone is implemented.
 
-**Copy link** copies only the current origin and path, excluding query strings and
-fragments. If the clipboard API is unavailable or denied, visitors can copy the
-browser address. Search and game pages work without JavaScript.
+**Share** opens native sharing when available, otherwise copies the public URL.
+Only the current origin and path are shared, excluding query strings and fragments.
+Cancelling native sharing does not copy anything or show an error. If native
+sharing fails, clipboard sharing remains available; without either API the page
+shows the public link for manual copying. Repeated clicks cannot open concurrent
+share requests. Search and game pages work without JavaScript.
 
 ## From discovery to collection
 
