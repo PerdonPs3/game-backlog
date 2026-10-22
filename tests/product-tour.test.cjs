@@ -4,42 +4,53 @@ const { readFileSync } = require('node:fs');
 const { runInNewContext } = require('node:vm');
 const { join } = require('node:path');
 
-function setup() {
-    let focused;
-    const tabs = [0, 1, 2].map(index => ({
-        id: `tab-${index}`, attributes: {}, events: {},
-        setAttribute(key, value) { this.attributes[key] = value; },
-        addEventListener(key, callback) { this.events[key] = callback; },
-        focus() { focused = index; },
-    }));
-    const panels = tabs.map(() => ({ hidden: false, attributes: {}, setAttribute(key, value) { this.attributes[key] = value; } }));
-    const navigation = { hidden: true, querySelectorAll: () => tabs };
-    const tour = { querySelector: () => navigation, querySelectorAll: () => panels };
-    runInNewContext(readFileSync(join(__dirname, '../app/static/product-tour.js'), 'utf8'), {
-        document: { querySelectorAll: () => [tour] },
+function setup({ reduced = false, observer = true } = {}) {
+    const observed = new Set(), events = {};
+    let reveal, disconnected = 0;
+    const chapters = [0, 1, 2, 3].map(() => {
+        const classes = new Set();
+        return { classList: { add: name => classes.add(name), contains: name => classes.has(name) } };
     });
-    return { tabs, panels, navigation, focus: () => focused };
+    const motion = { matches: reduced, addEventListener(_, callback) { this.change = callback; } };
+    const window = { matchMedia: () => motion, addEventListener: (name, callback) => { events[name] = callback; } };
+    if (observer) window.IntersectionObserver = class {
+        constructor(callback) { reveal = callback; }
+        observe(chapter) { observed.add(chapter); }
+        unobserve(chapter) { observed.delete(chapter); }
+        disconnect() { observed.clear(); disconnected++; }
+    };
+    runInNewContext(readFileSync(join(__dirname, '../app/static/product-tour.js'), 'utf8'), {
+        window, document: { querySelectorAll: () => chapters },
+    });
+    return { chapters, observed, motion, events, reveal: entries => reveal(entries), disconnected: () => disconnected };
 }
 
-test('selecting a scene exposes only its panel with matching accessible names', () => {
+test('chapters reveal independently on entry and stop observation after their first reveal', () => {
     const ui = setup();
-    assert.equal(ui.navigation.hidden, false);
-    assert.deepEqual(ui.panels.map(panel => panel.hidden), [false, true, true]);
-    ui.tabs[2].events.click();
-    assert.deepEqual(ui.panels.map(panel => panel.hidden), [true, true, false]);
-    assert.deepEqual(ui.tabs.map(tab => tab.tabIndex), [-1, -1, 0]);
-    assert.deepEqual(ui.tabs.map(tab => tab.attributes['aria-selected']), ['false', 'false', 'true']);
-    assert.equal(ui.panels[2].attributes['aria-labelledby'], 'tab-2');
-    assert.equal(ui.panels[2].attributes.role, 'tabpanel');
+    assert.equal(ui.observed.size, 4);
+    ui.reveal([{ target: ui.chapters[0], isIntersecting: false }]);
+    assert.equal(ui.chapters[0].classList.contains('is-revealed'), false);
+    ui.reveal([{ target: ui.chapters[0], isIntersecting: true }]);
+    assert.equal(ui.chapters[0].classList.contains('is-revealed'), true);
+    assert.equal(ui.observed.size, 3);
+    assert.equal(ui.chapters[1].classList.contains('is-revealed'), false);
+    ui.events.pagehide(); assert.equal(ui.observed.size, 0);
+    ui.events.pageshow(); assert.equal(ui.observed.size, 3);
 });
 
-test('keyboard navigation wraps, supports Home and End, and leaves other keys alone', () => {
-    const ui = setup();
-    let prevented = 0;
-    const press = (index, key) => ui.tabs[index].events.keydown({ key, preventDefault() { prevented++; } });
-    press(0, 'ArrowLeft'); assert.equal(ui.focus(), 2);
-    press(2, 'ArrowRight'); assert.equal(ui.focus(), 0);
-    press(0, 'End'); assert.equal(ui.focus(), 2);
-    press(2, 'Home'); assert.equal(ui.focus(), 0);
-    press(0, 'Tab'); assert.equal(prevented, 4);
+test('reduced motion reveals all chapters and handles a live preference change', () => {
+    const ui = setup({ reduced: true });
+    assert.equal(ui.observed.size, 0);
+    assert.ok(ui.chapters.every(chapter => chapter.classList.contains('is-revealed')));
+    const live = setup(); live.motion.matches = true; live.motion.change();
+    assert.equal(live.observed.size, 0);
+    assert.ok(live.chapters.every(chapter => chapter.classList.contains('is-revealed')));
+    live.motion.matches = false; live.motion.change();
+    assert.equal(live.observed.size, 0);
+});
+
+test('browsers without intersection observation keep the static document intact', () => {
+    const ui = setup({ observer: false });
+    assert.equal(ui.observed.size, 0);
+    assert.equal(ui.disconnected(), 0);
 });

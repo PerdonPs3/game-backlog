@@ -14,6 +14,7 @@
     {% elif kind == 'library' %}
     <div class="demo-stage demo-library">
         <div class="demo-heading"><strong>Your library</strong></div><div class="demo-stats"><div><strong>3</strong><span>Games collected</span></div><div><strong><span data-demo-frame="0" hidden>0</span><span data-demo-frame="1" hidden>0</span><span data-demo-frame="2">1</span></strong><span>Completed</span></div><div><strong><span data-demo-frame="0" hidden>0%</span><span data-demo-frame="1" hidden>0%</span><span data-demo-frame="2">33%</span></strong><span>Completion</span></div></div>
+        <div class="demo-completion-track" aria-hidden="true"><span></span></div>
         <div class="demo-tabs" aria-hidden="true"><span>All games <small>3</small></span><span>Playing <small><span data-demo-frame="0" hidden>1</span><span data-demo-frame="1" hidden>2</span><span data-demo-frame="2">1</span></small></span><span>Completed <small><span data-demo-frame="0" hidden>0</span><span data-demo-frame="1" hidden>0</span><span data-demo-frame="2">1</span></small></span></div>
         <div class="demo-cards">
             {% for title, cover in games[:3] %}
