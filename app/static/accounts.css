@@ -8,9 +8,9 @@
 .account-navigation form { margin: 0; }
 .profile-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
 .profile-name-row > :is(h1, h2) { min-width: 0; margin: 0; overflow-wrap: anywhere; }
-.profile-country { display: inline-flex; flex: 0 0 auto; align-items: center; padding: 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.profile-country { display: inline-flex; flex: 0 0 auto; align-items: center; }
 .profile-country[hidden] { display: none; }
-.profile-country img { display: block; width: 24px; height: 18px; object-fit: contain; border-radius: 2px; }
+.profile-country img { display: block; width: 22px; height: 16.5px; object-fit: contain; border-radius: 2px; }
 .auth-workspace { max-width: 800px; }
 .workspace-form.account-access-form { grid-template-columns: minmax(0, 1fr); }
 .account-access-form > button { justify-self: start; align-self: start; }
