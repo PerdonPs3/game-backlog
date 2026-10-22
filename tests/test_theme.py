@@ -9,7 +9,7 @@ def test_theme_available_on_all_page_shells(client, path):
     assert html.index("theme.js") < html.index("style.css") < html.index("light-theme.css")
     assert html.count("data-theme-toggle") == 1
     assert html.count('class="github-profile"') == 1
-    assert 'href="https://github.com/PerdonPs3"' in html
+    assert 'href="https://github.com/PerdonPs3/game-backlog"' in html
     assert 'class="github-profile-name"' in html
     assert html.index("data-theme-toggle") < html.index('class="github-profile"')
     assert 'aria-label="Switch to light mode"' in html
