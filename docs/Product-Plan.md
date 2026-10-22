@@ -5,6 +5,25 @@ palette and the private profile overview design are approved in Preview. The
 five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
+## Public avatar release gate
+
+Public photos are implemented locally for a limited development trial. Photos
+follow public/private profile visibility, with immediate direct-URL revocation on
+privatization, removal, or username changes. Existing private uploads stay private
+until their owner saves the updated editor or sharing form after reading the
+publication notice. This trial does not introduce a manual moderation queue.
+
+**Before broad public registration/upload access:** add automated image moderation
+before publication. Allow acceptable images, reject prohibited or uncertain
+candidates with an actionable replacement message, and retain the previous photo
+if the provider is unavailable. Confirm provider costs and data handling, configure
+server-only credentials, test illustrated/game/logo avatars, rate-limit uploads,
+and define how existing public photos are checked at activation. The filter must
+not claim perfect detection or guaranteed identification of impersonation or
+copyright infringement. Do not treat raster decoding/size checks as content
+moderation. This release gate is pending and must be completed before expanding
+the trial to an unrestricted public launch.
+
 ## Interface copy review
 
 Functional pages use one direct task heading. Remove decorative kickers,

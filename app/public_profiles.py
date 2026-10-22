@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timezone
 
 import psycopg
-from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from app.catalog import collection_cover_url
 from app.db import get_db
@@ -59,6 +59,8 @@ def save_sharing(db, owner, form):
             db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
         db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
                    (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
+        if form.get('publish_photo') == 'yes':
+            db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
         db.commit()
     except psycopg.errors.UniqueViolation:
         db.rollback()
@@ -105,7 +107,7 @@ def public_profile(username):
         # always resolve directly to the current name, never an alias chain.
         return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
-    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
+    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()
@@ -113,12 +115,25 @@ def public_profile(username):
     return render_template('public_profile.html', profile=item, showcase=showcase)
 
 
+@profiles.get('/players/<username>/photo')
+def public_photo(username):
+    if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username):
+        abort(404)
+    # Re-check visibility and publication on every request, including direct URLs.
+    image = get_db().execute('SELECT avatar_image FROM profiles WHERE username = ? AND is_public = TRUE AND share_photo = TRUE AND avatar_image IS NOT NULL', (username,)).fetchone()
+    if not image:
+        abort(404)
+    response = Response(bytes(image['avatar_image']), mimetype='image/jpeg')
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+
 def init_app(app):
     app.register_blueprint(profiles)
 
     @app.after_request
     def public_profile_headers(response):
-        if request.endpoint == 'profiles.public_profile':
+        if request.endpoint in ('profiles.public_profile', 'profiles.public_photo'):
             response.headers['Cache-Control'] = 'private, no-store'
             response.headers['X-Robots-Tag'] = 'noindex, nofollow'
             response.headers['Referrer-Policy'] = 'no-referrer'

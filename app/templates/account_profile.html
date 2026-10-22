@@ -59,6 +59,7 @@
     </aside>
     <form id="profile-form" action="{{ url_for('auth.profile') }}" method="post" enctype="multipart/form-data" class="workspace-form profile-editor-form" data-profile-form>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="publish_photo" value="yes">
 
         {% set upload_errors = get_flashed_messages(category_filter=['profile_error']) %}
         {% if upload_errors %}<p class="profile-error" role="alert">{{ upload_errors[0] }}</p>{% endif %}
@@ -83,6 +84,7 @@
         <fieldset class="profile-setup-visibility"><legend>Profile visibility</legend><label><input type="radio" name="is_public" value="yes" {% if request.form.get('is_public', 'yes') == 'yes' %}checked{% endif %}><span>Public <small>Default · Share your name, username, and avatar color.</small></span></label><label><input type="radio" name="is_public" value="no" {% if request.form.get('is_public') == 'no' %}checked{% endif %}><span>Private <small>Hide your profile link from everyone.</small></span></label><p class="profile-field-hint">Your library always stays private. You can share your bio and showcase later in Profile sharing.</p></fieldset>
         {% endif %}
         <footer class="profile-save-bar">
+            <p class="profile-field-hint">Saving also makes your photo visible when your profile is public.</p>
             <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ url_for('auth.profile_overview') }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{% endif %}</p>
         </footer>
