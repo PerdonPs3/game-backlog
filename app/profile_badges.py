@@ -13,7 +13,7 @@ from app.db import get_db
 @click.option('--apply', is_flag=True, help='Save the assignment. Default: inspect the target only.')
 @with_appcontext
 def set_admin_badge(username, remove, apply):
-    """Assign a cosmetic Admin badge to the account behind a current username."""
+    """Assign a cosmetic Creator badge to the account behind a current username."""
     if not current_app.config.get('DATABASE_URL'):
         raise click.ClickException('This command requires PostgreSQL.')
     db = get_db()
@@ -28,7 +28,7 @@ def set_admin_badge(username, remove, apply):
         else:
             db.rollback()
         action = 'Remove' if remove else 'Assign'
-        click.echo(f"{action} Admin badge for @{profile['username']}: {'saved' if apply else 'preview only; add --apply to save'}.")
+        click.echo(f"{action} Creator badge for @{profile['username']}: {'saved' if apply else 'preview only; add --apply to save'}.")
     except Exception:
         db.rollback()
         raise

@@ -1,4 +1,4 @@
-"""Cosmetic Admin badges are server-assigned, account-bound, and respect privacy."""
+"""Cosmetic Creator badges are server-assigned, account-bound, and respect privacy."""
 
 from app import create_app
 from app.db import get_db
@@ -18,6 +18,7 @@ def test_badge_assignment_is_explicit_and_account_bound(accounts):
         assert 'class="profile-admin-badge"' in alice.get(path, follow_redirects=True).get_data(as_text=True)
     public = accounts.test_client().get('/players/m4ckay')
     assert 'class="profile-admin-badge"' in public.get_data(as_text=True)
+    assert '<span>Creator</span>' in public.get_data(as_text=True)
     assert 'class="profile-admin-badge"' not in accounts.test_client().get('/players/other_player').get_data(as_text=True)
     # A rename preserves the badge because it belongs to the immutable account ID.
     with accounts.app_context():

@@ -25,10 +25,11 @@ existing visibility and field-sharing rules. No database migration is needed.
 
 ## Optional public player identity
 
-### Server-assigned Admin badge
+### Server-assigned Creator badge
 
 Migration `009_profile_admin_badge.sql` adds an `admin_badge` flag, disabled for
-every existing and new account. This is a cosmetic identity badge, never an
+every existing and new account. The displayed label is **Creator**; the initial
+internal field and command names remain compatible. This is a cosmetic identity badge, never an
 authorization role. It does not change access to accounts, collections, or pages.
 There is no browser form or HTTP endpoint that assigns it. Apply the migration to
 the intended environment before serving the updated application.
