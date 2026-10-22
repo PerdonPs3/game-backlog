@@ -1,14 +1,36 @@
 .rating-picker { min-width: 0; border: 0; padding: 0; margin: 0; }
 .rating-picker legend { width: 100%; margin-bottom: .5rem; color: var(--text); font-size: .85rem; }
 .rating-optional { float: right; color: var(--text-muted); font-size: .65rem; font-weight: 400; }
-.rating-stars { display: flex; width: min(100%, 240px); }
+.rating-stars { --rating: 0; position: relative; display: flex; width: min(100%, 240px); }
+.rating-artwork { position: absolute; inset: 0; display: flex; pointer-events: none; }
+.rating-artwork > span { position: relative; flex: 1; min-width: 0; height: 44px; }
+.rating-artwork svg { position: absolute; width: 32px; height: 32px; left: 50%; top: 6px; transform: translateX(-50%); stroke-width: 1.4; stroke-linejoin: round; }
+.rating-outline { fill: var(--color-field); stroke: var(--color-outline); opacity: .65; }
+.rating-fill { fill: var(--accent); stroke: var(--accent); clip-path: inset(0 clamp(0%, calc((var(--star) * 2 - var(--rating)) * 50%), 100%) 0 0); }
 .rating-choice { position: relative; display: block; flex: 1; min-width: 0; height: 44px; margin: 0; cursor: pointer; }
 .rating-choice input, .rating-clear input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; }
-.rating-choice svg { display: block; width: 100%; height: 44px; fill: var(--color-outline); opacity: .45; pointer-events: none; }
-.rating-stars:has(input:checked) .rating-choice svg { fill: var(--accent); opacity: 1; }
-.rating-choice:has(input:checked) ~ .rating-choice svg { fill: var(--color-outline); opacity: .45; }
-.rating-stars:has(.rating-choice:hover) .rating-choice svg { fill: var(--accent); opacity: 1; }
-.rating-stars .rating-choice:hover ~ .rating-choice svg { fill: var(--color-outline); opacity: .45; }
+.rating-stars:has(input[value="1"]:checked) { --rating: 1; }
+.rating-stars:has(input[value="2"]:checked) { --rating: 2; }
+.rating-stars:has(input[value="3"]:checked) { --rating: 3; }
+.rating-stars:has(input[value="4"]:checked) { --rating: 4; }
+.rating-stars:has(input[value="5"]:checked) { --rating: 5; }
+.rating-stars:has(input[value="6"]:checked) { --rating: 6; }
+.rating-stars:has(input[value="7"]:checked) { --rating: 7; }
+.rating-stars:has(input[value="8"]:checked) { --rating: 8; }
+.rating-stars:has(input[value="9"]:checked) { --rating: 9; }
+.rating-stars:has(input[value="10"]:checked) { --rating: 10; }
+@media (hover: hover) {
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="1"]) { --rating: 1; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="2"]) { --rating: 2; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="3"]) { --rating: 3; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="4"]) { --rating: 4; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="5"]) { --rating: 5; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="6"]) { --rating: 6; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="7"]) { --rating: 7; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="8"]) { --rating: 8; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="9"]) { --rating: 9; }
+    .rating-stars:not(:focus-within):has(.rating-choice:hover input[value="10"]) { --rating: 10; }
+}
 .rating-choice:has(input:focus-visible), .rating-clear:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .rating-caption { display: flex; align-items: center; gap: 1rem; min-height: 28px; font-size: .75rem; }
 .rating-caption output { color: var(--accent); font-variant-numeric: tabular-nums; }
