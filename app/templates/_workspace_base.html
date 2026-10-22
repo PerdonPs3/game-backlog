@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='rating-picker.css') }}">
     {% block page_styles %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
@@ -42,5 +43,6 @@
     {% block page_scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
     <script src="{{ url_for('static', filename='play-dates.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='rating-picker.js') }}" defer></script>
 </body>
 </html>

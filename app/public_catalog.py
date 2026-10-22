@@ -8,6 +8,8 @@ from flask import Blueprint, abort, current_app, g, redirect, render_template, u
 
 from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game
 from app.catalog_journey import remember_selection, take_selection
+from app.db import get_db
+from app.ownership import owned
 
 
 explore = Blueprint('explore', __name__, url_prefix='/explore')
@@ -112,7 +114,19 @@ def game(catalog_id):
                 item, profile = catalog_card(raw), game_profile(raw)
         except CatalogError:
             error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
-    return render_template('catalog_game.html', game=item, profile=profile, error=error), status
+    can_manage = not current_app.config.get('AUTH_ENABLED') or bool(
+        g.user and not g.account_session['recovery'] and g.profile and g.profile['display_name'].strip()
+    )
+    entries = []
+    if item and can_manage:
+        entries = get_db().execute(
+            f'SELECT id, platform, status, rating FROM games WHERE igdb_id = ? AND {owned()} ORDER BY platform, id',
+            (catalog_id,),
+        ).fetchall()
+    saved_platforms = {entry['platform'].strip().casefold() for entry in entries}
+    available_platforms = [platform for platform in item['platforms'] if platform.strip().casefold() not in saved_platforms] if item else []
+    return render_template('catalog_game.html', game=item, profile=profile, error=error,
+                           can_manage=can_manage, entries=entries, available_platforms=available_platforms), status
 
 
 @explore.get('/games/<int:catalog_id>/add')

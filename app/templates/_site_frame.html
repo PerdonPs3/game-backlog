@@ -6,6 +6,12 @@
             <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
             {{ caller() }}
         </nav>
+        {% if request.endpoint != 'main.welcome' %}
+        <form class="header-search" action="{{ url_for('explore.index') }}" method="get" role="search" aria-label="Search the game catalog">
+            <input type="search" name="q" placeholder="Search games…" aria-label="Search games" minlength="2" maxlength="200" required>
+            <button type="submit" aria-label="Search catalog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+        </form>
+        {% endif %}
         <div class="workspace-header-actions">{% include '_account_nav.html' %}</div>
     </div>
 </header>
