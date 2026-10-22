@@ -1,5 +1,30 @@
 (function (root) {
     const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const uploadLimit = 2 * 1024 * 1024;
+
+    async function preparePhoto(image, file) {
+        const width = image.naturalWidth, height = image.naturalHeight;
+        if (!width || !height || width * height > 32000000) throw new Error();
+        if (file.size <= uploadLimit && width * height <= 12000000) return { image, file, width, height };
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 2048 / Math.max(width, height));
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        for (const quality of [0.9, 0.75, 0.6]) {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+            if (!blob) throw new Error();
+            if (blob.size <= uploadLimit) return {
+                image: canvas,
+                file: new File([blob], 'profile-photo.jpg', { type: 'image/jpeg' }),
+                width: canvas.width, height: canvas.height,
+            };
+        }
+        throw new Error();
+    }
 
     function constrain(state) {
         const size = Math.min(state.width, state.height) / state.zoom;
@@ -60,8 +85,8 @@
                 report('The photo editor could not open. Reload the page and try again.');
                 return;
             }
-            if (!['image/jpeg', 'image/png', 'image/webp'].includes(candidate.type) || candidate.size > 2 * 1024 * 1024) {
-                report('Choose a JPG, PNG, or WebP photo up to 2 MB.');
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(candidate.type) || candidate.size > 20 * 1024 * 1024) {
+                report('Choose a JPG, PNG, or WebP photo up to 20 MB.');
                 return;
             }
             let candidateUrl;
@@ -71,13 +96,15 @@
                 loaded.src = candidateUrl;
                 await loaded.decode();
                 if (current !== generation) { URL.revokeObjectURL(candidateUrl); return; }
-                if (!loaded.naturalWidth || !loaded.naturalHeight || loaded.naturalWidth * loaded.naturalHeight > 12000000) throw new Error();
+                status.textContent = 'Preparing photo…';
+                const prepared = await preparePhoto(loaded, candidate);
+                if (current !== generation) { URL.revokeObjectURL(candidateUrl); return; }
                 if (url) URL.revokeObjectURL(url);
                 url = candidateUrl;
-                image = loaded;
-                file = candidate;
+                image = prepared.image;
+                file = prepared.file;
                 pointer = null;
-                state = { width: loaded.naturalWidth, height: loaded.naturalHeight, zoom: 1, cx: loaded.naturalWidth / 2, cy: loaded.naturalHeight / 2 };
+                state = { width: prepared.width, height: prepared.height, zoom: 1, cx: prepared.width / 2, cy: prepared.height / 2 };
                 zoom.value = '1';
                 error.textContent = '';
                 status.textContent = '';
@@ -87,7 +114,7 @@
             } catch (_) {
                 URL.revokeObjectURL(candidateUrl);
                 if (current !== generation) return;
-                report('This photo could not be opened. Use a still JPG, PNG, or WebP up to 12 million pixels.');
+                report('This photo could not be prepared. Try a smaller still JPG, PNG, or WebP, up to 32 million pixels.');
             }
         }
 
@@ -160,7 +187,7 @@
         return { open, dispose: cleanup };
     }
 
-    const api = { constrain, move, create };
+    const api = { constrain, move, create, preparePhoto };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.AvatarCrop = api;
 })(typeof window !== 'undefined' ? window : globalThis);

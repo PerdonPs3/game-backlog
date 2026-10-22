@@ -4,7 +4,7 @@ const { readFileSync } = require('node:fs');
 const { runInNewContext } = require('node:vm');
 
 function setup() {
-    const revoked = [], applied = [], errors = [], draws = [], images = [], imagePlans = [];
+    const revoked = [], applied = [], errors = [], draws = [], images = [], imagePlans = [], canvases = [], blobPlans = [];
     function element(extra = {}) { return { events: {}, addEventListener(name, fn) { this.events[name] = fn; }, focus() {}, ...extra }; }
     const context = { fillRect() {}, drawImage(...args) { draws.push(args); } };
     const nodes = Object.fromEntries(['stage','zoom','status','error','apply','reset','cancel','replace','replacement'].map(name => [`[data-crop-${name}]`, element()]));
@@ -17,16 +17,78 @@ function setup() {
     let next = 0;
     runInNewContext(readFileSync('app/static/avatar-crop.js', 'utf8'), {
         module,
+        File: class { constructor(parts, name, options) { this.name = name; this.type = options.type; this.size = parts[0].size; } },
         Image: class { constructor() { this.naturalWidth = 400; this.naturalHeight = 200; Object.assign(this, imagePlans.shift()); images.push(this); }
             decode() { return this.decodePromise || (this.fail ? Promise.reject(new Error()) : Promise.resolve()); } },
         URL: { createObjectURL: () => `blob:${++next}`, revokeObjectURL: url => revoked.push(url) },
-        document: { createElement: () => ({ getContext: () => context, toDataURL: () => 'data:preview' }) },
+        document: { createElement: () => {
+            const canvas = { getContext: () => context, toDataURL: () => 'data:preview',
+                toBlob(callback, type, quality) {
+                    this.quality = quality;
+                    const result = blobPlans.length ? blobPlans.shift() : { size: 100000 };
+                    if (typeof result === 'function') result(callback);
+                    else callback(result);
+                } };
+            canvases.push(canvas); return canvas;
+        } },
     });
     const editor = { querySelector: selector => selector === '[data-avatar-crop]' ? dialog : element() };
     const crop = module.exports.create(editor, (...values) => applied.push(values), message => errors.push(message));
-    return { crop, dialog, nodes, revoked, applied, errors, draws, images, imagePlans };
+    return { crop, dialog, nodes, revoked, applied, errors, draws, images, imagePlans, canvases, blobPlans };
 }
 const photo = name => ({ name, type: 'image/png', size: 1000 });
+
+test('large photos are resized proportionally and only the optimized JPEG and its crop are applied', async () => {
+    const ui = setup();
+    ui.imagePlans.push({ naturalWidth: 4000, naturalHeight: 2000 });
+    await ui.crop.open({ ...photo('large.png'), size: 3 * 1024 * 1024 });
+    assert.equal(ui.dialog.open, true);
+    assert.equal(ui.canvases[0].width, 2048);
+    assert.equal(ui.canvases[0].height, 1024);
+    assert.equal(ui.canvases[0].quality, 0.9);
+    ui.nodes['[data-crop-apply]'].events.click();
+    const [file, crop] = ui.applied[0];
+    assert.equal(file.type, 'image/jpeg');
+    assert.equal(file.name, 'profile-photo.jpg');
+    assert.ok(file.size <= 2 * 1024 * 1024);
+    assert.equal(crop.x, 512);
+    assert.equal(crop.y, 0);
+    assert.equal(crop.size, 1024);
+});
+
+test('compression retries lower quality and preserves the previous crop when encoding fails', async () => {
+    const ui = setup(), first = photo('first.png');
+    await ui.crop.open(first);
+    ui.blobPlans.push({ size: 3 * 1024 * 1024 }, null);
+    await ui.crop.open({ ...photo('large.png'), size: 3 * 1024 * 1024 });
+    assert.equal(ui.canvases[0].quality, 0.75);
+    assert.match(ui.nodes['[data-crop-error]'].textContent, /could not be prepared/);
+    ui.nodes['[data-crop-apply]'].events.click();
+    assert.equal(ui.applied[0][0], first);
+});
+
+test('cancelling during compression discards the eventual result', async () => {
+    const ui = setup(); let finish, started;
+    const preparing = new Promise(resolve => { started = resolve; });
+    ui.blobPlans.push(callback => { finish = callback; started(); });
+    const pending = ui.crop.open({ ...photo('large.png'), size: 3 * 1024 * 1024 });
+    await preparing;
+    assert.equal(typeof finish, 'function');
+    ui.nodes['[data-crop-cancel]'].events.click();
+    finish({ size: 1000 }); await pending;
+    assert.equal(ui.dialog.open, false);
+    assert.equal(ui.applied.length, 0);
+    assert.ok(ui.revoked.includes('blob:1'));
+});
+
+test('images over the pixel bound are rejected before allocating an optimization canvas', async () => {
+    const ui = setup();
+    ui.imagePlans.push({ naturalWidth: 8000, naturalHeight: 8000 });
+    await ui.crop.open(photo('huge.png'));
+    assert.equal(ui.canvases.length, 0);
+    assert.equal(ui.nodes['[data-crop-apply]'].disabled, true);
+    assert.match(ui.nodes['[data-crop-error]'].textContent, /32 million pixels/);
+});
 
 test('the first selection opens immediately while decoding and can be cancelled', async () => {
     const ui = setup();
@@ -44,10 +106,10 @@ test('the first selection opens immediately while decoding and can be cancelled'
 
 test('oversized initial files show an actionable error in the open editor', async () => {
     const ui = setup();
-    await ui.crop.open({ ...photo('large.png'), size: 3 * 1024 * 1024 });
+    await ui.crop.open({ ...photo('large.png'), size: 21 * 1024 * 1024 });
     assert.equal(ui.dialog.open, true);
     assert.equal(ui.nodes['[data-crop-apply]'].disabled, true);
-    assert.match(ui.nodes['[data-crop-error]'].textContent, /up to 2 MB/);
+    assert.match(ui.nodes['[data-crop-error]'].textContent, /up to 20 MB/);
     assert.equal(ui.nodes['[data-crop-status]'].textContent, '');
     await ui.crop.open(photo('smaller.png'));
     assert.equal(ui.nodes['[data-crop-apply]'].disabled, false);
@@ -92,7 +154,7 @@ test('a decode failure preserves the previous image and reports the error inside
     const ui = setup(), first = photo('first.png'); await ui.crop.open(first);
     ui.imagePlans.push({ fail: true }); await ui.crop.open(photo('broken.png'));
     assert.equal(ui.dialog.open, true); assert.equal(ui.errors.length, 0);
-    assert.match(ui.nodes['[data-crop-error]'].textContent, /could not be opened/);
+    assert.match(ui.nodes['[data-crop-error]'].textContent, /could not be prepared/);
     ui.nodes['[data-crop-apply]'].events.click(); assert.equal(ui.applied[0][0], first);
 });
 
