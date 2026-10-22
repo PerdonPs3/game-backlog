@@ -1,5 +1,6 @@
 {% extends '_workspace_base.html' %}
 {% from '_profile_country.html' import country_flag %}
+{% from '_profile_badges.html' import admin_badge %}
 {% set country_code = request.form.get('country_code', profile.country_code or '') %}
 {% set display_name = request.form.get('display_name', profile.display_name) %}
 {% set bio = request.form.get('bio', profile.bio) %}
@@ -45,7 +46,7 @@
                 </div>
             </details>
 
-            <div class="profile-name-row"><h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>{{ country_flag(country_code) }}</div>
+            <div class="profile-name-row"><h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>{{ country_flag(country_code) }}{{ admin_badge(profile.admin_badge) }}</div>
             <p class="player-bio" data-profile-bio>{{ bio.strip() }}</p>
             <div class="player-card-rule"></div>
             <dl class="player-stats">

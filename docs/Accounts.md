@@ -25,6 +25,28 @@ existing visibility and field-sharing rules. No database migration is needed.
 
 ## Optional public player identity
 
+### Server-assigned Admin badge
+
+Migration `009_profile_admin_badge.sql` adds an `admin_badge` flag, disabled for
+every existing and new account. This is a cosmetic identity badge, never an
+authorization role. It does not change access to accounts, collections, or pages.
+There is no browser form or HTTP endpoint that assigns it. Apply the migration to
+the intended environment before serving the updated application.
+
+After verifying the target account and environment, use the server-only command:
+
+```powershell
+python -m flask --app wsgi set-admin-badge --username m4ckay
+python -m flask --app wsgi set-admin-badge --username m4ckay --apply
+```
+
+The first command inspects the current username without changes. The second
+assigns the badge to that account's immutable ID. Renaming the account preserves
+the badge; another account never inherits it by username matching. Use the current
+username with `--remove --apply` to revoke it. Editor, private profile, and public
+profile share the same badge rendering. A private public-profile URL still returns
+404. Grants in development do not propagate to production.
+
 ### Optional country flag
 
 Migration `007_profile_country.sql` adds a nullable ISO 3166-1 country code.

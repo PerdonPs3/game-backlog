@@ -66,6 +66,8 @@ def create_app(test_config=None):
     app.cli.add_command(migrate_db_command)
     app.cli.add_command(check_db_command)
     app.cli.add_command(migrate_sqlite_command)
+    from app.profile_badges import set_admin_badge
+    app.cli.add_command(set_admin_badge)
 
     from app.catalog import check_igdb_command
     app.cli.add_command(check_igdb_command)
