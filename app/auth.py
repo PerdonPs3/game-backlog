@@ -330,7 +330,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, country_code, share_country FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -345,6 +345,8 @@ def profile():
             error = "Choose a valid profile color."
         else:
             try:
+                from app.countries import clean_country
+                country = clean_country(request.form.get('country_code', item['country_code'] or ''))
                 if is_setup:
                     from app.public_profiles import clean_username
                     username = clean_username(request.form.get('username', ''))
@@ -357,9 +359,9 @@ def profile():
             try:
                 # Serialize setup with sharing edits; an existing identity is never replaced.
                 identity = db.execute('SELECT username FROM profiles WHERE id = ? FOR UPDATE', (g.user['id'],)).fetchone()
-                db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, "
+                db.execute("UPDATE profiles SET display_name = ?, bio = ?, avatar = ?, avatar_color = ?, country_code = ?, share_country = ?, "
                            "avatar_image = CASE WHEN ? THEN ? ELSE avatar_image END WHERE id = ?",
-                           (name, bio, avatar, color.lower(), photo is not None or remove_photo, photo, g.user["id"]))
+                           (name, bio, avatar, color.lower(), country, request.form.get('share_country') == 'yes', photo is not None or remove_photo, photo, g.user["id"]))
                 if is_setup and not identity['username']:
                     from app.public_profiles import claim_username, username_clock
                     claim_username(db, g.user['id'], username)
@@ -381,7 +383,8 @@ def profile():
                 return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
     from app.public_profiles import RESERVED_NAMES
-    return render_template("account_profile.html", profile=item, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES),
+    from app.countries import COUNTRIES
+    return render_template("account_profile.html", profile=item, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 
@@ -400,7 +403,7 @@ def profile_overview():
     from app.routes import collection_statistics
     db = get_db()
     user_id = g.user["id"]
-    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at FROM profiles WHERE id = ?", (user_id,)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, country_code FROM profiles WHERE id = ?", (user_id,)).fetchone()
     playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed))

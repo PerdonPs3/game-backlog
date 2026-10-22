@@ -1,4 +1,6 @@
 {% extends '_workspace_base.html' %}
+{% from '_profile_country.html' import country_flag %}
+{% set country_code = request.form.get('country_code', profile.country_code or '') %}
 {% set display_name = request.form.get('display_name', profile.display_name) %}
 {% set bio = request.form.get('bio', profile.bio) %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
@@ -43,7 +45,7 @@
                 </div>
             </details>
 
-            <h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>
+            <div class="profile-name-row"><h2 data-profile-name>{{ display_name.strip() or 'Your player name' }}</h2>{{ country_flag(country_code) }}</div>
             <p class="player-bio" data-profile-bio>{{ bio.strip() }}</p>
             <div class="player-card-rule"></div>
             <dl class="player-stats">
@@ -68,6 +70,14 @@
         {% if is_setup %}
         <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" data-reserved-usernames='{{ username_reserved|tojson }}' name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username or request.form.get('username', '') }}" {% if profile.username %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores; start with a letter. Editable suggestion · Changes allowed every 30 days.</p></div>
         {% endif %}
+        <div class="profile-field profile-country-field">
+            <label for="country-code">Country <span>Optional</span></label>
+            <select id="country-code" name="country_code" autocomplete="country">
+                <option value="">Not specified</option>
+                {% for country in countries %}<option value="{{ country.code }}" data-flag="{{ url_for('static', filename='images/flags/' + country.code|lower + '.svg') }}" {% if country_code|upper == country.code %}selected{% endif %}>{{ country.name }}</option>{% endfor %}
+            </select>
+            <label class="profile-country-sharing"><input type="checkbox" name="share_country" value="yes" {% if (request.form.get('share_country') == 'yes' if request.method == 'POST' else profile.share_country) %}checked{% endif %}><span>Show country on my public profile</span></label>
+        </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
         {% if is_setup %}
         <fieldset class="profile-setup-visibility"><legend>Profile visibility</legend><label><input type="radio" name="is_public" value="yes" {% if request.form.get('is_public', 'yes') == 'yes' %}checked{% endif %}><span>Public <small>Default · Share your name, username, and avatar color.</small></span></label><label><input type="radio" name="is_public" value="no" {% if request.form.get('is_public') == 'no' %}checked{% endif %}><span>Private <small>Hide your profile link from everyone.</small></span></label><p class="profile-field-hint">Your library always stays private. You can share your bio and showcase later in Profile sharing.</p></fieldset>
@@ -91,4 +101,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script>{% endblock %}

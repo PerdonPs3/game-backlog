@@ -86,6 +86,8 @@ def create_app(test_config=None):
     init_account_urls(app)
 
     from app.game_fields import STATUSES
+    from app.countries import country_info
+    app.jinja_env.filters['country_info'] = country_info
 
     @app.context_processor
     def game_choices():
