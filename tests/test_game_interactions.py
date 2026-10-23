@@ -11,7 +11,9 @@ def test_quick_add_stays_on_the_game_and_only_lists_the_current_owners_entries(a
     path = '/explore/games/123'
     data = {'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC',
             'status': 'Playing', 'rating': '9', 'return_to_catalog': 'yes'}
-    assert alice.post('/games/new', data=data).status_code == 400
+    assert alice.post('/games/new', data=data).status_code == 303
+    with accounts.app_context():
+        assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
     response = submit(alice, '/games/new', data, source=path)
     assert response.status_code == 303
     assert response.location == path + '#library-actions'

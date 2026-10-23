@@ -37,6 +37,10 @@ def init_app(app):
 
     @app.url_defaults
     def account_link_values(endpoint, values):
+        if endpoint == 'profiles.public_profile' and 'username' not in values:
+            username = current_username()
+            if username:
+                values['username'] = username
         if endpoint in ACCOUNT_PAGES and "username" not in values:
             username = current_username()
             if username:
@@ -72,6 +76,10 @@ def init_app(app):
                     abort(404)
         # Legacy POSTs still execute once with CSRF protection. Keep the legacy
         # JSON collection endpoint compatible with existing clients as well.
+        if username and request.method in ('GET', 'HEAD') and request.endpoint == 'auth.profile_overview':
+            return redirect(url_for('profiles.public_profile', username=username), code=302)
+        if username and request.method in ('GET', 'HEAD') and request.endpoint == 'profiles.sharing':
+            return redirect(url_for('auth.profile', username=username, _anchor='profile-privacy'), code=302)
         if username and request.method in ("GET", "HEAD") and requested != username:
             if requested is None and request.accept_mimetypes.best == "application/json":
                 return

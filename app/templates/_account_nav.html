@@ -1,7 +1,7 @@
 {% if accounts_enabled %}
 <div class="account-navigation">
     {% if account_user %}
-    <a href="{{ url_for('auth.profile_overview') }}">My profile</a>
+    <a href="{{ profile_url() }}">My profile</a>
     <form action="{{ url_for('auth.logout') }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit">Sign out</button>

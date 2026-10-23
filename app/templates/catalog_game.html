@@ -26,4 +26,4 @@
 <section class="catalog-empty" role="alert"><h2>Keep exploring.</h2><p>{{ error }}</p><a class="button-link" href="{{ url_for('explore.index') }}">Browse the catalog ↗</a></section>
 {% endif %}
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-quick-add.js') }}" defer></script>{% endblock %}

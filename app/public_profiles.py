@@ -46,21 +46,9 @@ def username_availability(profile, now):
 
 
 def save_sharing(db, owner, form):
-    username = clean_username(form.get('username', ''))
     db.execute('BEGIN')
     try:
-        profile = db.execute('SELECT username, username_changed_at FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
-        if profile['username'] != username:
-            now = username_clock(db)
-            availability = username_availability(profile, now)
-            if availability['locked']:
-                raise ValueError('You can change your username again on ' + availability['available_at'] + '. You can still update your sharing settings.')
-            claim_username(db, owner, username)
-            db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
-        db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
-                   (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
-        if form.get('publish_photo') == 'yes':
-            db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
+        update_sharing(db, owner, form)
         db.commit()
     except psycopg.errors.UniqueViolation:
         db.rollback()
@@ -68,6 +56,23 @@ def save_sharing(db, owner, form):
     except Exception:
         db.rollback()
         raise
+
+
+def update_sharing(db, owner, form):
+    """Update identity and privacy inside the caller's atomic profile transaction."""
+    username = clean_username(form.get('username', ''))
+    profile = db.execute('SELECT username, username_changed_at FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
+    if profile['username'] != username:
+        now = username_clock(db)
+        availability = username_availability(profile, now)
+        if availability['locked']:
+            raise ValueError('You can change your username again on ' + availability['available_at'] + '. You can still update your sharing settings.')
+        claim_username(db, owner, username)
+        db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
+    db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
+               (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
+    if form.get('publish_photo') == 'yes':
+        db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
 
 
 @profiles.route('/account/profile/sharing', methods=['GET', 'POST'])
@@ -82,6 +87,8 @@ def sharing():
         return redirect(url_for('auth.profile'))
     db = get_db()
     error = None
+    if request.method == 'GET':
+        return redirect(url_for('auth.profile', _anchor='profile-privacy'), code=302)
     if request.method == 'POST':
         try:
             save_sharing(db, g.user['id'], request.form)
@@ -95,7 +102,23 @@ def sharing():
 
 
 @profiles.get('/players/<username>')
+@profiles.get('/profile/<username>')
 def public_profile(username):
+    if request.path.startswith('/profile/'):
+        if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{2,23}', username):
+            abort(404)
+        username = username.lower()
+        identity = get_db().execute('SELECT p.id, p.username FROM profile_usernames u JOIN profiles p ON p.id = u.owner_id WHERE u.username = ?', (username,)).fetchone()
+        if not identity:
+            abort(404)
+        is_owner = bool(g.user and str(identity['id']) == g.user['id'] and not g.account_session['recovery'])
+        if not is_owner and not get_db().execute('SELECT 1 FROM profiles WHERE id = ? AND is_public = TRUE', (identity['id'],)).fetchone():
+            abort(404)
+        if request.view_args['username'] != identity['username']:
+            return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
+        if is_owner:
+            from app.auth import profile_overview
+            return profile_overview()
     if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username):
         abort(404)
     db = get_db()
@@ -136,5 +159,5 @@ def init_app(app):
         if request.endpoint in ('profiles.public_profile', 'profiles.public_photo'):
             response.headers['Cache-Control'] = 'private, no-store'
             response.headers['X-Robots-Tag'] = 'noindex, nofollow'
-            response.headers['Referrer-Policy'] = 'no-referrer'
+            response.headers['Referrer-Policy'] = 'same-origin' if request.endpoint == 'profiles.public_profile' else 'no-referrer'
         return response

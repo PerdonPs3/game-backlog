@@ -1,6 +1,6 @@
 {% extends '_profile_base.html' %}
 {% block page_title %}Edit showcase · Vestigium{% endblock %}
-{% block workspace_return %}<a href="{{ url_for('auth.profile_overview') }}">← Back to profile</a>{% endblock %}
+{% block workspace_return %}<a href="{{ profile_url() }}">← Back to profile</a>{% endblock %}
 {% block page_heading %}Edit <span>showcase</span>{% endblock %}
 {% block panel_label %}Choose and arrange your featured games{% endblock %}
 {% block panel %}
@@ -19,7 +19,7 @@
         </li>{% endfor %}
         </ol>
         <p class="profile-empty-note" role="status" aria-live="polite" data-showcase-status></p>
-        <div class="profile-showcase-actions"><button type="submit" class="profile-action profile-action-primary">Save showcase <span aria-hidden="true">↗</span></button><a class="profile-text-link" href="{{ url_for('auth.profile_overview') }}">Cancel</a></div>
+        <div class="profile-showcase-actions"><button type="submit" class="profile-action profile-action-primary">Save showcase <span aria-hidden="true">↗</span></button><a class="profile-text-link" href="{{ profile_url() }}">Cancel</a></div>
     </form>
 {% else %}<div class="profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>Your showcase starts with a game.</h2><p>Add a game to your library, then come back to choose your favorites.</p><a class="profile-action profile-action-primary" href="{{ url_for('main.create') }}">Add your first game ↗</a></div>{% endif %}
 </section>

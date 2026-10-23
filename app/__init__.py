@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 from flask import Flask
 from secrets import token_hex
@@ -12,6 +13,7 @@ def create_app(test_config=None):
     instance_path = Path(app.instance_path)
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
     app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
     if test_config is None and not hosted:
         app.config.from_pyfile(

@@ -24,6 +24,7 @@
     {% if mode == 'verify-recovery' %}
     <div><label for="code">Recovery code</label><input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required></div>
     {% endif %}
+    {% if mode == 'login' %}<p class="profile-field-hint">Stay signed in on this browser for up to 30 days. Sign out on shared devices.</p>{% endif %}
     <button type="submit">{{ 'Send recovery email' if mode == 'recover' else titles[mode] }}</button>
 </form>
 <nav class="account-links" aria-label="Account options">

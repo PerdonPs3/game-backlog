@@ -151,7 +151,9 @@ def init_app(app):
     def catalog_headers(response):
         if request.blueprint == 'explore':
             response.headers['Cache-Control'] = 'private, no-store'
-            response.headers['Referrer-Policy'] = 'no-referrer'
+            # HTTPS CSRF validation needs the Referer for our own form posts.
+            # Cross-origin destinations still receive no browsing context.
+            response.headers['Referrer-Policy'] = 'same-origin'
             if response.status_code == 429:
                 response.headers['Retry-After'] = '60'
         return response

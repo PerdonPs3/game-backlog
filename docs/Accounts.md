@@ -3,25 +3,46 @@
 Hosted PostgreSQL installations require Supabase Auth. SQLite remains an offline,
 single-user mode. Account pages are under `/account`; `/` remains public.
 
-## Private account addresses
+## Profile and account addresses
 
-Completed profiles with a username use `/account/<username>/library` and
-`/account/<username>/profile`. The editor, showcase, and sharing settings append
-`/edit`, `/showcase`, and `/sharing` to the private profile address. Navigation and
-successful saves generate the current account's address. Profiles without a
-username retain their existing setup and sharing routes until one is claimed.
+`/profile/<username>` is the canonical profile address. A verified owner sees
+private progress and editing controls at that address; visitors and other signed-in
+accounts see only the owner's public projection. Private profiles return 404 to
+visitors while remaining accessible to their owner. Historical usernames redirect
+to the current name only when that viewer may access the destination. Every
+private query uses the session owner ID, never a URL-supplied identity.
 
-Old HTML GET/HEAD links redirect temporarily to the current address, preserving
-query parameters. Old POST forms still run once with CSRF protection; legacy
-`/library` JSON clients remain compatible. Previous usernames redirect only for
-their authenticated owner. Unknown and other users' private addresses return
-404; anonymous requests require sign-in. Every collection query continues to use
-the session's owner ID, never the URL name. Recovery sessions retain their reset
-restriction. Private pages and redirects are not cached. Offline mode keeps
-`/library` and does not expose named account routes.
+The library remains `/account/<username>/library`. Editing and showcase routes
+remain under `/account/<username>/profile/edit` and `/showcase`. **Edit profile**
+now includes username, identity, photo, and all sharing controls in one atomic
+save. Legacy sharing GET routes redirect to its privacy section; existing POST
+forms retain CSRF checks and ownership validation. Legacy account profile routes
+redirect to the canonical profile, and old `/players/<username>` links remain
+compatible. Responses vary by Cookie and are private and non-cacheable.
 
-Public profiles remain separate at `/players/<username>` and retain their
-existing visibility and field-sharing rules. No database migration is needed.
+Normal logins use an opaque, persistent HttpOnly browser cookie and a rolling
+30-day server session. Provider access and refresh tokens remain server-side.
+Expired provider tokens still rotate under a row lock; logout revokes the server
+session, including copies of that browser cookie. Recovery sessions are
+non-persistent, last at most 30 minutes, and cannot access private collections.
+
+### Profile defaults and deployment
+
+Apply `011_profile_sharing_defaults.sql` before deploying this increment. It
+changes defaults for **new** bio and showcase sharing flags without updating
+existing rows. Setup selects Public and the available profile details, including
+photo sharing, with visible private/unsharing options before saving. Unfinished
+accounts remain unpublished until a valid username and display name exist.
+Existing privacy choices are preserved, including when an older profile form is
+submitted without the new privacy controls. Email, library entries, ratings, and
+reviews are never made public by these defaults.
+
+Catalog pages use `Referrer-Policy: same-origin`: HTTPS form POSTs retain the
+same-origin Referer required by Flask-WTF, while external sites receive none.
+Quick add refreshes its browser-bound CSRF token before submitting; session or
+network failures display an actionable message. A stale native quick-add form
+returns to the game without writing anything. Cross-origin form submissions
+remain rejected, even with a syntactically valid token.
 
 ## Optional public player identity
 
@@ -71,7 +92,7 @@ rejected on the server and by a database constraint. SQLite offline mode does
 not expose account country settings.
 
 Migration `005_public_profiles.sql` adds a unique, nullable username and three
-sharing flags, all disabled at the database level before setup. It does not publish
+sharing flags, initially disabled in that historical migration. Migration 011 changes only new bio/showcase defaults. It does not publish
 existing accounts. The application now selects Public when creating a new profile;
 the user can choose Private before saving. Setup reserves a required username and
 saves the profile and its visibility atomically. Username history also requires
@@ -80,7 +101,7 @@ Apply it explicitly to the isolated development database before deploying this
 version, following the environment checks below. Production needs separate
 authorization.
 
-After completing profile setup, open **My profile → Profile sharing**. Usernames
+After completing profile setup, open **My profile → Edit profile → Privacy & sharing**. Usernames
 accept 3–24 ASCII letters, numbers, or underscores, start with a letter, and exclude
 reserved service names. Both the browser and server accept capitals; the saved
 identity and link are normalized to lowercase. Migration `006_username_history.sql`
@@ -92,7 +113,7 @@ immediately once because the previous assignment time was not recorded.
 New assignments and renames start a 30-day cooldown, measured in exact seconds by
 the database clock after locking the account row. Saving the same normalized
 username, editing other profile fields, or changing visibility never restarts it.
-The form displays the next available date and time in UTC; changing visibility
+The editor displays the next available date and time in UTC; changing visibility
 and display names remains possible during the cooldown. Rename attempts during
 the cooldown or claims of unavailable names roll back every setting in that save.
 
@@ -110,13 +131,12 @@ are not included in public profile markup. Registry RLS is enabled without
 granting public Data API access.
 
 Public is the default for new profiles. Existing saved privacy choices are preserved.
-Older named profiles without usernames stay unpublished until their first sharing
-save, where Public is initially selected. `/players/<username>` works without
+Older named profiles without usernames stay unpublished until they save a valid identity; saved privacy choices are retained. `/players/<username>` works without
 signing in only when the profile is Public. The owner chooses separately whether
 to share the bio and ordered showcase. Display name, username, and silhouette
 color form the minimum public identity. Subsequent changes to shared fields also
 update the public page. Unpublishing returns the same 404 as an unknown username,
-even to the owner. Responses use `no-store` and `noindex, nofollow`; these do not
+for legacy public-only URLs; the canonical profile remains accessible to its verified owner. Responses use `no-store` and `noindex, nofollow`; these do not
 make an enabled public URL secret or prevent others from copying its content.
 
 Public queries project only selected fields. They do not include account IDs,
