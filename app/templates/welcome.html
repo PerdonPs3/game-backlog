@@ -43,17 +43,21 @@
             <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
         </section>
         <div class="welcome-story">
-            <section class="welcome-section" id="your-library" aria-labelledby="library-intro-title">
-                <div class="welcome-section-copy"><h2 id="library-intro-title">Organize your games</h2><p>Keep your backlog, current games, and finished favorites together. Add your own ratings and notes.</p><a href="{{ url_for('explore.index') }}">Find your next game ↗</a></div>
-                {{ product_demo('library') }}
+            <section class="welcome-section welcome-tour" id="your-library" aria-labelledby="tour-title" data-product-tour>
+                <div class="welcome-section-copy" id="how-it-works"><span class="tour-eyebrow">FROM YOUR NEXT GAME TO YOUR ALL-TIME FAVORITE</span><h2 id="tour-title">See your collection take shape.</h2><p>Scroll through your next gaming chapter.</p></div>
+                {% for kind in ['search', 'library', 'profile'] %}
+                <section class="tour-panel tour-chapter" id="tour-{{ kind }}" data-tour-panel aria-labelledby="chapter-{{ kind }}">
+                    <span class="tour-chapter-number" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+                    <div class="tour-context"><span class="tour-eyebrow">{{ {'search': '01 / DISCOVER', 'library': '02 / YOUR COLLECTION', 'profile': '03 / YOUR IDENTITY'}[kind] }}</span><h3 id="chapter-{{ kind }}">{{ {'search': 'Find it. Save it. Play it.', 'library': 'A home for every game.', 'profile': 'Put your favorites on display.'}[kind] }}</h3><p>{{ {'search': 'Search the catalog and add a game without leaving its page.', 'library': 'Backlog, playing, completed. Keep your ratings and notes alongside each game.', 'profile': 'Pick five games for your showcase. You decide what your profile shares.'}[kind] }}</p></div>
+                    <div class="tour-scene">{{ product_demo(kind) }}</div>
+                    {% if kind == 'search' %}<div class="tour-feature-trail" aria-label="Save a game in three steps"><span>Search the catalog</span><i aria-hidden="true">→</i><span>Choose your platform</span><i aria-hidden="true">→</i><span>Add to your library</span></div>{% elif kind == 'library' %}<div class="tour-feature-trail"><span>Backlog</span><i aria-hidden="true">→</i><span>Playing</span><i aria-hidden="true">→</i><span>Completed ✓</span></div>{% else %}<div class="tour-feature-trail"><span>Your name</span><i aria-hidden="true">+</i><span>Your five favorites</span><i aria-hidden="true">+</i><span>Your sharing choices</span></div>{% endif %}
+                </section>
+                {% endfor %}
+                <div class="tour-bottom"><span>Your library and notes stay private.</span><a href="{{ url_for('explore.index') }}">Try the real thing: explore games ↗</a></div>
             </section>
-            <section class="welcome-section welcome-section-profile" aria-labelledby="profile-intro-title">
-                <div class="welcome-section-copy"><h2 id="profile-intro-title">Show your favorites</h2><p>Build a five-game showcase and choose what to share. Your library stays private.</p><a href="{{ url_for('auth.profile_overview') if accounts_enabled and account_user else url_for('auth.register') if accounts_enabled else url_for('main.index') }}">{{ 'Open your profile' if accounts_enabled and account_user else 'Start your collection' }} ↗</a></div>
-                {{ product_demo('profile') }}
-            </section>
-            <section class="welcome-steps-section" id="how-it-works" aria-labelledby="steps-title">
-                <h2 id="steps-title">How it works</h2>
-                <ol class="welcome-steps"><li><span>01</span><h3>Find a game</h3></li><li><span>02</span><h3>Make it part of your library</h3></li><li><span>03</span><h3>Keep your story</h3></li></ol>
+            <section class="tour-cover-finale" aria-labelledby="finale-title" data-tour-panel>
+                <div class="tour-cover-fan" aria-hidden="true">{% for cover in ['co1rs4', 'cob9dh', 'co4jni', 'cocpbl', 'cob9kr'] %}<img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ cover }}.jpg" alt="" loading="lazy" width="132" height="187" style="--fan-index: {{ loop.index0 }}">{% endfor %}</div>
+                <div><span class="tour-eyebrow">NEXT UP</span><h2 id="finale-title">What will you play next?</h2><p>Find something new. Or return to an old favorite.</p><a href="{{ url_for('explore.index') }}">Explore games ↗</a></div>
             </section>
             <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
         </div>
@@ -65,6 +69,7 @@
     <script src="{{ url_for('static', filename='welcome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='welcome-scroll.js') }}" defer></script>
     <script src="{{ url_for('static', filename='community-count.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='product-tour.js') }}" defer></script>
     <script src="{{ url_for('static', filename='product-demos.js') }}" defer></script>
 </body>
 </html>
