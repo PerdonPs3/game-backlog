@@ -94,7 +94,9 @@ links. Anonymous, incomplete-profile, and recovery sessions use the existing
 sign-in/setup continuation instead. Responses remain private and non-cacheable;
 shared URLs do not carry private entry IDs or ratings.
 
-Five stars with half-star steps map to the existing integer 1–10 rating scale.
+All rating labels, tooltips, personal scores, and averages use a five-star scale,
+including half-star steps. Internally, ratings remain integer half-star units
+(1–10), preserving existing entries and backup compatibility without migration.
 Native radio controls work with keyboard input and without JavaScript; Clear
 submits the existing empty-rating value. Saved ratings and database schema are
 unchanged. The same picker is used in the full Add/Edit forms.

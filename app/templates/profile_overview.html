@@ -31,6 +31,6 @@
     <section class="profile-section" aria-labelledby="playing-title"><header class="profile-section-heading"><div><h2 id="playing-title">Playing now</h2></div><span class="profile-activity-dot" aria-hidden="true"></span></header>{{ activity(playing, 'Set a game to Playing to see it here.') }}</section>
     <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><div><h2 id="completed-title">Recent completions</h2></div></header>{{ activity(completed, 'Finished a game? Mark it Completed and record its completion date to build your history.') }}</section>
 </div>
-<p class="profile-overview-note">{% if stats.average is not none %}Average rating <strong>{{ '%.1f'|format(stats.average) }}/10</strong> · {% endif %}Your library stays private.</p>
+<p class="profile-overview-note">{% if stats.average is not none %}Average rating <strong>{{ '%.1f'|format(stats.average / 2) }}/5</strong> · {% endif %}Your library stays private.</p>
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='profile-overview.js') }}" defer></script>{% endblock %}

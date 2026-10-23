@@ -42,7 +42,7 @@ input validation, and automated testing.
 - Choose a platform from the selected game's available platforms, including linked ports.
 - Validate catalog IDs and game/platform combinations on the server.
 - Prevent adding the same catalog game twice on the same platform, including when editing.
-- Add an optional whole-number rating from 1 to 10 and a review of up to 2,000 characters.
+- Add an optional rating of up to five stars, with half-star steps and a review of up to 2,000 characters.
 - Clear an existing rating or review by leaving its field empty when editing.
 - Preserve entered form values when validation fails.
 - Confirm deletion before permanently removing a game.

@@ -32,7 +32,7 @@
             <div class="personal-score">
                 <span class="verdict-label">Your rating</span>
                 {% if game.rating is not none %}
-                    <p class="score-value" aria-label="Your rating: {{ game.rating }}/10"><strong>{{ game.rating }}</strong><span aria-hidden="true">/ 10</span></p>
+                    <p class="score-value" aria-label="Your rating: {{ game.rating|star_rating }}/5"><strong>{{ game.rating|star_rating }}</strong><span aria-hidden="true">/ 5</span></p>
                     <div class="score-segments" aria-hidden="true">
                         {% for segment in range(1, 11) %}<span{% if segment <= game.rating %} class="is-filled"{% endif %}></span>{% endfor %}
                     </div>

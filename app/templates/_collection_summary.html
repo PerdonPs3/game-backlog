@@ -40,7 +40,7 @@
     </div>
     <p class="summary-average">
         {% if stats.average is not none %}
-            Your average rating: <strong>{{ '%.1f'|format(stats.average) }}/10</strong>
+            Your average rating: <strong>{{ '%.1f'|format(stats.average / 2) }}/5</strong>
             <span>· {{ stats.rated }} {{ 'game' if stats.rated == 1 else 'games' }} rated</span>
         {% else %}
             No ratings yet. Rate a game to see your average.

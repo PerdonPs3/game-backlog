@@ -5,7 +5,7 @@
     {% if can_manage %}
         {% if entries %}
         <ul class="catalog-owned-entries" aria-label="Your saved entries">
-            {% for entry in entries %}<li><div><strong>{{ entry.platform }}</strong><span>{{ entry.status }}{% if entry.rating %} · {{ entry.rating }}/10{% endif %}</span></div><a href="{{ url_for('main.edit', game_id=entry.id) }}" aria-label="Edit your {{ entry.platform }} entry">Edit ↗</a></li>{% endfor %}
+            {% for entry in entries %}<li><div><strong>{{ entry.platform }}</strong><span>{{ entry.status }}{% if entry.rating %} · {{ entry.rating|star_rating }}/5{% endif %}</span></div><a href="{{ url_for('main.edit', game_id=entry.id) }}" aria-label="Edit your {{ entry.platform }} entry">Edit ↗</a></li>{% endfor %}
         </ul>
         {% endif %}
         {% if available_platforms %}

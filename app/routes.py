@@ -423,10 +423,10 @@ def create():
             try:
                 rating = int(rating_text)
             except ValueError:
-                error = "Rating must be a whole number between 1 and 10."
+                error = "Choose a rating from the five-star scale."
             else:
                 if not 1 <= rating <= 10:
-                    error = "Rating must be a whole number between 1 and 10."
+                    error = "Choose a rating from the five-star scale."
 
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."
@@ -525,10 +525,10 @@ def edit(game_id):
             try:
                 rating = int(rating_text)
             except ValueError:
-                error = "Rating must be a whole number between 1 and 10."
+                error = "Choose a rating from the five-star scale."
             else:
                 if not 1 <= rating <= 10:
-                    error = "Rating must be a whole number between 1 and 10."
+                    error = "Choose a rating from the five-star scale."
 
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."

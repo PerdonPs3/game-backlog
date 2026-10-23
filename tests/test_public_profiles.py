@@ -35,7 +35,7 @@ def test_private_by_default_and_selective_publication(accounts):
     response = anon.get('/players/alice_player')
     page = response.get_data(as_text=True)
     assert 'Chosen game' in page and 'Alice public bio' in page
-    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/games/', '/account/profile/photo', 'private-photo', '7/10', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
+    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/games/', '/account/profile/photo', 'private-photo', '3.5/5', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
         assert private not in page
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'

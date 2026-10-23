@@ -22,7 +22,7 @@
             <div class="game-meta">
                 <p class="game-status">Status: {{ game.status }}</p>
                 {% if game['rating'] is not none %}
-                    <p class="game-rating">Rating: {{ game['rating'] }}/10</p>
+                    <p class="game-rating">Rating: {{ game['rating']|star_rating }}/5</p>
                 {% endif %}
             </div>
 

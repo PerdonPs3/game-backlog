@@ -39,7 +39,7 @@ def test_catalog_details_fragment_escaped(client, seed_game, app, stored_games):
     page = client.get(f"/games/{game_id}", headers={"Accept": "application/json"})
     html = page.json["html"]
     assert "Puzzle" in html and "2011-04-19" in html
-    assert "Favorite" in html and "9/10" in html
+    assert "Favorite" in html and "4.5/5" in html
     assert "&lt;script&gt;" in html and "<script>" not in html
     assert "<!DOCTYPE" not in html
     assert "Accept" in page.headers["Vary"]
@@ -100,6 +100,6 @@ def test_personal_verdict_design(client, seed_game, rating, filled):
     assert f'href="/games/{game_id}/edit"' in html
     assert "A memory\n" in html
     if rating is not None:
-        assert f'aria-label="Your rating: {rating}/10"' in html
+        assert f'aria-label="Your rating: {rating / 2:g}/5"' in html
     else:
         assert "Not rated yet" in html
