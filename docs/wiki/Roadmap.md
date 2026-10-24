@@ -23,7 +23,7 @@ profile palette pilot, player profile, public catalog, guided homepage, and Disc
 - [x] Search an external game catalog instead of typing every detail manually.
       For example, searching **Resident** would return matching titles to choose from.
 - [x] Display covers and release years in suggestions, with available platforms after selection.
-- [x] Search title words and aliases with popularity-aware ordering, paginated Explore results, and an official/community content filter based on IGDB types and tags (local validation complete; Preview publication pending).
+- [x] Search title words and aliases with popularity-aware ordering, paginated Explore results, and an official/community content filter based on IGDB types and tags (published to develop).
 - [x] Store catalog identifiers and validate the selected game and platform.
 - [x] Display game covers in the collection.
 - [x] Block duplicate catalog game/platform combinations and link to the existing entry.
@@ -35,6 +35,8 @@ profile palette pilot, player profile, public catalog, guided homepage, and Disc
 - [x] Connect Explore from the welcome page and library; preserve catalog selection
       through sign-in and profile setup, with explicit confirmation before adding.
 - [x] Link public profile showcase games to shared catalog detail pages.
+- [x] Add game-specific artwork backgrounds, selectable trailers/screenshots, and a public game-details sidebar.
+- [x] Publish reviews explicitly from both Add game and Edit game, with a five-star rating scale, spoiler labels, reporting, and separate private notes.
 - [ ] Reuse the same catalog flow from Discover.
 - [ ] Validate anonymous search, sharing, and the authenticated add flow in Preview.
 
@@ -63,9 +65,9 @@ Games from other platforms remain supported through the catalog.
 - [x] Show collection statistics: totals, status counts, completion progress, and average rating.
 - [x] Implement accounts and separate collections with automated two-account isolation tests.
 - [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
-- [ ] Let users choose which profile information and activity to make public.
+- [x] Let users choose which supported profile fields and showcase information to make public.
 - [x] Implement unique usernames and optional public profile links
-      with separate bio and showcase sharing controls; keep uploaded photos private.
+      with separate bio, showcase, and photo sharing controls. Existing private uploads require explicit publication.
 - [x] Default new profile setup to Public with a Private option, accept uppercase
       username input while keeping lowercase links, and organize sharing controls
       into identity, visibility, and shared-content sections.
@@ -108,8 +110,9 @@ completions and externally verified achievements will need clear distinctions.
 
 ### 8. Prepare for a safe public release
 
-Account implementation and local tests are complete in the feature branch. Real
-Preview acceptance and production rollout remain pending; see [account setup](../Accounts.md).
+Account features are published to `develop`. The project owner reports successful
+manual development testing. Production cutover, configuration, and release gates
+remain separate from that acceptance; see [account setup](../Accounts.md).
 
 Public access requires accounts, data ownership, and reliable storage. These
 requirements take priority over optional integrations and progression.
@@ -118,7 +121,7 @@ requirements take priority over optional integrations and progression.
 - [x] Associate games, lists, backups, and statistics with their owning account.
 - [x] Enforce ownership on the server: users must never edit or delete another
       user's data, even by changing a URL or submitting a crafted request.
-- [ ] Add public/private profiles and allow viewing only information the owner
+- [x] Add public/private profiles and allow viewing only information the owner
       explicitly shares. Viewing a profile must never grant editing access.
 - [ ] Migrate the existing local collection safely into its owner's account.
 - [ ] Set up persistent production storage and test backup restoration across
@@ -135,8 +138,8 @@ requirements take priority over optional integrations and progression.
       the project name, tagline, and links to the library and GitHub. Personal
       collection entries are never used in the welcome screen.
 - [x] Add a discreet GitHub link inside the application.
-- [x] Build a scrolling product introduction with animated library/profile examples, playback controls, a reduced-motion alternative, and clear account actions (implemented locally; Preview validation pending).
-- [x] Add an aggregate activated-account count with a green person icon, minute refreshes, and configurable test-account exclusions (implemented locally; Preview validation pending).
+- [x] Build a scrolling product introduction with looping animated library/profile examples, a reduced-motion alternative, and clear account actions (published to develop).
+- [x] Add an aggregate activated-account count with a green person icon, minute refreshes, and configurable test-account exclusions (published to develop).
 - [ ] Review naming availability before a public launch and add real product
       screenshots to the showcase when the interface is ready.
 - [ ] Optionally publish a static project showcase on GitHub Pages, with a

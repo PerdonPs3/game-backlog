@@ -168,11 +168,14 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs tests/list-editor.test.cjs tests/theme.test.cjs
+$interactionTests = Get-ChildItem tests -Filter *.test.cjs | ForEach-Object FullName
+node --test $interactionTests
 ```
 
-Each test uses a separate temporary SQLite database rather than the real
-collection. CSRF protection remains enabled during the tests. These tests check
+Database tests use separate temporary SQLite databases or disposable PostgreSQL
+schemas when `--postgres-url` points to a dedicated local test database. Account
+and public-review tests require PostgreSQL; see [account verification](docs/Accounts.md#verification-checklist).
+Never point tests at a hosted development or production database. CSRF protection remains enabled during the tests. These tests check
 server behavior and rendered HTML; they do not check browser layout visually.
 
 ## Project structure

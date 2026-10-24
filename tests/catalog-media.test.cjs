@@ -4,6 +4,7 @@ const { readFileSync } = require('node:fs');
 const { runInNewContext } = require('node:vm');
 
 function setup() {
+    const previews = [];
     const node = () => ({ dataset: {}, events: {}, attrs: {}, hidden: false,
         addEventListener(name, handler) { this.events[name] = handler; },
         setAttribute(name, value) { this.attrs[name] = value; },
@@ -19,9 +20,10 @@ function setup() {
     nodes['[data-media-stage]'] = stage;
     const gallery = { querySelectorAll: () => [video, image], querySelector: key => nodes[key] };
     runInNewContext(readFileSync('app/static/catalog-media.js', 'utf8'), {
+        Image: class { constructor() { previews.push(this); } },
         document: { querySelectorAll: () => [gallery], createElement: () => ({ focus() {}, remove() { frame = undefined; } }) },
     });
-    return { video, image, nodes, get frame() { return frame; } };
+    return { video, image, nodes, previews, get frame() { return frame; } };
 }
 
 test('a gallery loads no player before play and switching stops the current video', () => {
@@ -46,4 +48,32 @@ test('modified clicks keep the external link and malformed video IDs never creat
     ui.video.dataset.mediaId = '../injected';
     ui.nodes['[data-media-play]'].events.click();
     assert.equal(ui.frame, undefined);
+});
+
+test('large video previews use maximum resolution and cache a successful image', () => {
+    const ui = setup();
+    const preview = ui.previews[0];
+    assert.match(preview.src, /\/maxresdefault\.jpg$/);
+    preview.naturalWidth = 1280;
+    preview.onload();
+    assert.equal(ui.nodes['[data-media-poster]'].src, preview.src);
+    ui.video.events.click({ preventDefault() {} });
+    assert.equal(ui.previews.length, 1);
+});
+
+test('missing or placeholder high-resolution images fall back without breaking the poster', () => {
+    const ui = setup();
+    ui.previews[0].naturalWidth = 120;
+    ui.previews[0].onload();
+    assert.match(ui.previews[1].src, /\/sddefault\.jpg$/);
+    ui.previews[1].onerror();
+    assert.equal(ui.nodes['[data-media-poster]'].src, ui.video.dataset.preview);
+});
+
+test('a slow video preview cannot replace a newly selected screenshot', () => {
+    const ui = setup();
+    ui.image.events.click({ preventDefault() {} });
+    ui.previews[0].naturalWidth = 1280;
+    ui.previews[0].onload();
+    assert.equal(ui.nodes['[data-media-poster]'].src, ui.image.href);
 });

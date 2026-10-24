@@ -191,7 +191,7 @@ def test_review_pagination_average_and_storage_security(accounts):
     guest = accounts.test_client()
     first = guest.get(PATH).get_data(as_text=True)
     assert first.count('class="community-review"') == 10
-    assert '3.5<small>/5' in first and 'Older reviews' in first
+    assert 'aria-label="Average rating: 3.5/5. Read player reviews"' in first and 'Older reviews' in first
     second = guest.get(PATH + '?reviews_page=2').get_data(as_text=True)
     assert second.count('class="community-review"') == 1 and 'Newer reviews' in second
     for page in ('0', '-1', 'no', '10001'):
