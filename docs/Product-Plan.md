@@ -13,17 +13,24 @@ Earlier references below to local implementation or pending Preview publication
 are historical implementation notes, not the current deployment status. Public
 review publication is supported in both Add game and Edit game through shared
 controls and validation. Production migration and deployment remain a separate
-release operation; the public-avatar moderation gate below is still open.
+release operation. The owner-approved public-avatar launch scope is recorded below.
 
-## Public avatar release gate
+## Public avatar launch scope — 2026-10-24
 
-Public photos are implemented locally for a limited development trial. Photos
+Public photos are implemented and published to develop. Photos
 follow public/private profile visibility, with immediate direct-URL revocation on
 privatization, removal, or username changes. Existing private uploads stay private
 until their owner saves the updated editor or sharing form after reading the
-publication notice. This trial does not introduce a manual moderation queue.
+publication notice. This implementation does not introduce a manual moderation queue.
 
-**Before broad public registration/upload access:** add automated image moderation
+The owner explicitly approved public registration and photo uploads without
+automated image moderation for the initial launch. This supersedes the earlier
+moderation release gate. Keep file validation, visibility controls, and explicit
+photo-publication consent enabled. File validation does not moderate visual
+content; inappropriate images can still be published. No moderation provider,
+paid service, or automatic content screening is configured.
+
+**Deferred follow-up:** add automated image moderation
 before publication. Allow acceptable images, reject prohibited or uncertain
 candidates with an actionable replacement message, and retain the previous photo
 if the provider is unavailable. Confirm provider costs and data handling, configure
@@ -31,8 +38,8 @@ server-only credentials, test illustrated/game/logo avatars, rate-limit uploads,
 and define how existing public photos are checked at activation. The filter must
 not claim perfect detection or guaranteed identification of impersonation or
 copyright infringement. Do not treat raster decoding/size checks as content
-moderation. This release gate is pending and must be completed before expanding
-the trial to an unrestricted public launch.
+moderation. This remains future work, rather than a condition of the initial
+public launch, under the owner's updated decision.
 
 ## Interface copy review
 
