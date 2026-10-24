@@ -9,12 +9,13 @@
         </ul>
         {% endif %}
         {% if available_platforms %}
+        {% if entries %}<details class="catalog-add-platform"><summary>Add another platform</summary>{% endif %}
         <form action="{{ url_for('main.create') }}" method="post" class="catalog-quick-form" data-quick-add data-token-url="{{ url_for('auth.form_token') if accounts_enabled else '' }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="igdb_id" value="{{ game.id }}">
             <input type="hidden" name="title" value="{{ game.name }}">
             <input type="hidden" name="return_to_catalog" value="yes">
-            <label for="quick-platform">{{ 'Add another platform' if entries else 'Platform' }}</label>
+            <label for="quick-platform">Platform</label>
             <select name="platform" id="quick-platform" required>
                 <option value="">Choose a platform</option>
                 {% for platform in available_platforms %}<option value="{{ platform }}">{{ platform }}</option>{% endfor %}
@@ -26,6 +27,7 @@
             <p class="catalog-message" role="status" data-quick-feedback hidden></p>
             <a class="catalog-more-options" href="{{ url_for('explore.add', catalog_id=game.id) }}">More options ↗</a>
         </form>
+        {% if entries %}</details>{% endif %}
         {% elif entries %}<p class="catalog-access-note">Already in your library.</p>
         {% else %}<p class="catalog-access-note">Platform information is not available yet.</p>{% endif %}
         <p class="catalog-access-note">Your library and notes stay private.</p>

@@ -74,6 +74,9 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 .catalog-library-actions { position: sticky; top: 100px; scroll-margin-top: 110px; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); min-width: 0; }
 .catalog-library-actions h2 { font-size: 1.1rem; margin: 0 0 1.25rem; }
 .catalog-quick-form { display: grid; gap: .6rem; }
+.catalog-add-platform > summary { cursor: pointer; color: var(--accent); font-size: .8rem; padding-block: .5rem; }
+.catalog-add-platform > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.catalog-add-platform[open] > summary { margin-bottom: .75rem; }
 .catalog-quick-form > label { font-size: .8rem; margin-top: .35rem; }
 .catalog-quick-form select { font-size: .8rem; }
 .catalog-quick-form .rating-picker { margin-block: .65rem; }
