@@ -1,11 +1,12 @@
 import json
 from random import choice, sample
 
-from flask import Blueprint, abort, flash, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, g, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
 from app.game_fields import STATUSES, validate_dates
+from app.game_reviews import begin_review_write, save_public_review, validate_public_review
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
 
 from app.ownership import owned, member_owned, insert_owned, insert_members
@@ -391,6 +392,9 @@ def create():
     error = None
     selected_game = None
     duplicate_game_id = None
+    review_publication_available = False
+    if current_app.config.get('AUTH_ENABLED') and g.profile and g.profile['username']:
+        review_publication_available = get_db().execute('SELECT is_public FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()[0]
 
     if request.method == 'GET' and 'igdb_id' in request.args:
         raw_id = request.args['igdb_id']
@@ -430,6 +434,12 @@ def create():
 
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."
+        publish_requested = request.form.get('publish_review') == 'yes'
+        if error is None and publish_requested:
+            if not review_publication_available:
+                error = 'A public profile is required to publish a review.'
+            else:
+                error = validate_public_review(rating, review)
 
         # Resolve the ID even on validation errors so the dropdown can be restored.
         raw_id = request.form.get("igdb_id", "")
@@ -450,29 +460,42 @@ def create():
         if error is None:
             db = get_db()
             # Serialize check + write so simultaneous submissions cannot both pass.
-            begin_write(db)
-            duplicate = find_duplicate_game(
-                db, selected_game["id"], selected_game["name"], platform,
-            )
-            if duplicate is not None:
-                duplicate_game_id = duplicate["id"]
-                db.rollback()
-                error = DUPLICATE_GAME_ERROR
-            else:
-                insert_owned(
-                    db, "games", ("title", "platform", "status", "rating", "review", "igdb_id", "cover_image_id", "started_on", "completed_on", "is_favorite", "is_goty"),
-                    (selected_game["name"], platform, status, rating, review, selected_game["id"],
-                     cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
+            try:
+                begin_write(db)
+                duplicate = find_duplicate_game(
+                    db, selected_game["id"], selected_game["name"], platform,
                 )
-                db.commit()
-
+                if duplicate is not None:
+                    duplicate_game_id = duplicate["id"]
+                    db.rollback()
+                    error = DUPLICATE_GAME_ERROR
+                elif publish_requested:
+                    error = begin_review_write(db, publishing=True, in_transaction=True)
+                if error is None:
+                    insert_owned(
+                        db, "games", ("title", "platform", "status", "rating", "review", "igdb_id", "cover_image_id", "started_on", "completed_on", "is_favorite", "is_goty"),
+                        (selected_game["name"], platform, status, rating, review, selected_game["id"],
+                         cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
+                    )
+                    if publish_requested:
+                        save_public_review(db, selected_game['id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    db.commit()
+            except DATABASE_ERRORS as exc:
+                db.rollback()
+                current_app.logger.error('Unable to save game and optional public review (%s)', type(exc).__name__)
+                error = 'The game could not be saved. Nothing changed. Please try again.'
+            if error is None:
+                if publish_requested:
+                    flash('Added to your library and published your review.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='community-reviews'), code=303)
                 if request.form.get('return_to_catalog') == 'yes':
                     flash('Added to your library.', 'catalog_saved')
                     return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("create.html", error=error, selected_game=selected_game,
-                           duplicate_game_id=duplicate_game_id)
+                           duplicate_game_id=duplicate_game_id,
+                           review_publication_available=review_publication_available)
 
 
 @main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])

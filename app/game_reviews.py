@@ -55,9 +55,10 @@ def review_context(catalog_id):
             'own_review': own, 'review_can_publish': bool(public and public[0]), 'review_normal_session': normal}
 
 
-def begin_review_write(db, *, publishing=False):
+def begin_review_write(db, *, publishing=False, in_transaction=False):
     """Serialize writes per account and enforce a shared, persistent hourly budget."""
-    db.execute('BEGIN')
+    if not in_transaction:
+        db.execute('BEGIN')
     profile = db.execute('SELECT is_public FROM profiles WHERE id = ? FOR UPDATE', (g.user['id'],)).fetchone()
     if publishing and not profile['is_public']:
         db.rollback()
@@ -71,26 +72,37 @@ def begin_review_write(db, *, publishing=False):
     return None
 
 
+def validate_public_review(rating, body):
+    if rating is None or not 1 <= rating <= 10:
+        return 'Choose a rating from the five-star scale.'
+    if not 1 <= len(body) <= 2000 or '\x00' in body:
+        return 'Write a review with 1 to 2,000 characters.'
+
+
+def save_public_review(db, catalog_id, rating, body, has_spoilers):
+    """Save within the caller's transaction, preserving moderation decisions."""
+    db.execute('INSERT INTO public_game_reviews (catalog_id, owner_id, rating, body, has_spoilers) '
+               'VALUES (?, ?, ?, ?, ?) ON CONFLICT (catalog_id, owner_id) DO UPDATE '
+               "SET rating = EXCLUDED.rating, body = EXCLUDED.body, has_spoilers = EXCLUDED.has_spoilers, updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')",
+               (catalog_id, g.user['id'], rating, body, has_spoilers))
+
+
 def publish_review(catalog_id):
     """Called only after the catalog has verified the requested game exists."""
     body = request.form.get('body', '').strip()
     try:
         rating = int(request.form.get('rating', ''))
     except ValueError:
-        rating = 0
-    if not 1 <= rating <= 10:
-        return 'Choose a rating from the five-star scale.'
-    if not 1 <= len(body) <= 2000 or '\x00' in body:
-        return 'Write a review with 1 to 2,000 characters.'
+        rating = None
+    error = validate_public_review(rating, body)
+    if error:
+        return error
     db = get_db()
     try:
         error = begin_review_write(db, publishing=True)
         if error:
             return error
-        db.execute('INSERT INTO public_game_reviews (catalog_id, owner_id, rating, body, has_spoilers) '
-                   'VALUES (?, ?, ?, ?, ?) ON CONFLICT (catalog_id, owner_id) DO UPDATE '
-                   "SET rating = EXCLUDED.rating, body = EXCLUDED.body, has_spoilers = EXCLUDED.has_spoilers, updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')",
-                   (catalog_id, g.user['id'], rating, body, request.form.get('has_spoilers') == 'yes'))
+        save_public_review(db, catalog_id, rating, body, request.form.get('has_spoilers') == 'yes')
         db.commit()
     except Exception:
         db.rollback()
