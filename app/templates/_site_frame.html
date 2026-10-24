@@ -8,7 +8,7 @@
         </nav>
         {% if request.endpoint != 'main.welcome' %}
         <form class="header-search" action="{{ url_for('explore.index') }}" method="get" role="search" aria-label="Search the game catalog">
-            <input type="search" name="q" placeholder="Search games…" aria-label="Search games" minlength="2" maxlength="200" required>
+            <input type="search" name="q" placeholder="Search games…" aria-label="Search games" minlength="2" maxlength="200" spellcheck="false" autocapitalize="none" autocorrect="off" required>
             <button type="submit" aria-label="Search catalog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
         </form>
         {% endif %}

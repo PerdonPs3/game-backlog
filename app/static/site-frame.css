@@ -13,6 +13,19 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .header-search { display: flex; align-items: center; flex: 0 1 280px; min-width: 160px; margin: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--color-field); }
 .header-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent); }
 .header-search input { min-width: 0; width: 100%; border: 0; background: transparent; padding: .65rem .75rem; font-size: .8rem; outline: none; }
+.header-search input:focus { outline: none; box-shadow: none; }
+.header-search input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-inline: .5rem .1rem;
+    background-color: var(--accent);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m7 7 10 10M17 7 7 17'/%3E%3C/svg%3E") center / contain no-repeat;
+    opacity: .7;
+    cursor: pointer;
+}
+.header-search input::-webkit-search-cancel-button:hover { opacity: 1; }
+.header-search input:placeholder-shown::-webkit-search-cancel-button { opacity: 0; pointer-events: none; }
 .header-search button { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; padding: 0; border-radius: 8px; background: transparent; color: var(--accent); }
 .header-search button:hover { background: var(--surface); }
 .workspace-site-header .account-navigation > a { padding: .45rem .65rem; border-radius: 8px; }
