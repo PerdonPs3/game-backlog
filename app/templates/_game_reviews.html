@@ -2,7 +2,6 @@
 <section class="community-reviews" id="community-reviews" aria-labelledby="community-reviews-title">
     <header class="community-reviews-heading">
         <div><h2 id="community-reviews-title">Player reviews</h2><p>{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</p></div>
-        {% if review_average is not none %}<div class="community-review-average" aria-label="Average rating: {{ '%.1f'|format(review_average / 2) }}/5"><strong>{{ '%.1f'|format(review_average / 2) }}<small>/5</small></strong>{{ review_stars(review_average) }}</div>{% endif %}
     </header>
     {% for message in get_flashed_messages(category_filter=['review_saved']) %}<p class="catalog-save-feedback" role="status">{{ message }}</p>{% endfor %}
     {% for message in get_flashed_messages(category_filter=['review_error']) %}<p class="catalog-message" role="alert">{{ message }}</p>{% endfor %}

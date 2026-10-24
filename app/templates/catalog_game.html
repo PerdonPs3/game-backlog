@@ -1,4 +1,5 @@
 {% extends '_catalog_base.html' %}
+{% from '_review_stars.html' import review_stars %}
 {% block page_title %}{{ game.name if game else 'Game unavailable' }} · Vestigium{% endblock %}
 {% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}">{% endblock %}
 {% block workspace_hero %}{% if not game %}<header class="workspace-hero"><div><h1>Game <span>unavailable.</span></h1><p>{{ error }}</p></div></header>{% endif %}{% endblock %}
@@ -12,7 +13,16 @@
                 <h1>{{ game.name }}</h1>
                 <p class="catalog-release">First release: {% if profile.release %}<time datetime="{{ profile.release }}">{{ profile.release }}</time>{% else %}Not available{% endif %}</p>
                 <ul class="catalog-tags" aria-label="Genres">{% for genre in profile.genres[:30] %}<li>{{ genre }}</li>{% endfor %}</ul>
-                <div class="catalog-game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button></div>
+                <div class="catalog-game-actions">
+                    <button type="button" class="secondary-button" data-copy-game-link hidden>Share</button>
+                    {% if reviews_enabled and review_average is not none %}
+                    <a class="community-review-average catalog-community-rating" href="#community-reviews" aria-label="Average rating: {{ '%.1f'|format(review_average / 2) }}/5. Read player reviews">
+                        <span class="catalog-rating-label">Player rating</span>
+                        <strong>{{ '%.1f'|format(review_average / 2) }}<small>/5</small></strong>
+                        {{ review_stars(review_average) }}
+                    </a>
+                    {% endif %}
+                </div>
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>
