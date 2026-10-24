@@ -2,9 +2,13 @@
 .community-reviews-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .community-reviews-heading h2 { margin: 0; font-size: 1.4rem; letter-spacing: -.025em; }
 .community-reviews-heading p { color: var(--text-muted); font-size: .8rem; margin: .5rem 0 0; }
-.community-review-average { display: grid; justify-items: end; gap: .3rem; padding: .65rem .9rem; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--accent) 5%, var(--color-field)); color: var(--accent); font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.community-review-average > strong { font-size: 1.8rem; line-height: 1; }
-.community-review-average small { font-size: .85rem; color: var(--text-muted); margin-left: .2rem; }
+.catalog-community-rating { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem .7rem; width: fit-content; max-width: 100%; margin: 0 0 1.25rem; color: var(--accent); text-decoration: none; font-variant-numeric: tabular-nums; border-radius: 4px; }
+.catalog-rating-value { display: inline-flex; align-items: baseline; gap: .15rem; white-space: nowrap; }
+.catalog-rating-value strong { font-size: 1.5rem; line-height: 1; }
+.catalog-rating-value small { font-size: .75rem; color: var(--text-muted); }
+.catalog-rating-label { font-size: .7rem; color: var(--text-muted); white-space: nowrap; }
+.catalog-community-rating:hover .catalog-rating-label { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.catalog-community-rating:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 .review-score-stars { display: inline-flex; gap: 2px; flex-shrink: 0; }
 .review-score-stars > span { position: relative; width: 15px; height: 15px; }
 .review-score-stars svg { position: absolute; inset: 0; width: 100%; height: 100%; stroke-width: 1.4; stroke-linejoin: round; }
@@ -12,7 +16,6 @@
 .review-star-fill { fill: currentColor; stroke: currentColor; clip-path: inset(0 clamp(0%, calc((var(--star) * 2 - var(--rating)) * 50%), 100%) 0 0); }
 .community-review-list { display: grid; gap: 1rem; }
 .community-review { position: relative; padding: clamp(1rem, 2.5vw, 1.5rem); border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 16px; background: linear-gradient(125deg, color-mix(in srgb, var(--accent) 3%, var(--color-surface)), var(--color-field) 70%); box-shadow: 0 8px 24px #0000000b; min-width: 0; transition: border-color 180ms ease, box-shadow 180ms ease; }
-.community-review::before { content: ''; position: absolute; top: -1px; left: 24px; width: 90px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), transparent); opacity: .65; }
 .community-review:hover, .community-review:focus-within { border-color: color-mix(in srgb, var(--accent) 38%, transparent); box-shadow: 0 10px 28px #00000014; }
 .community-review > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .community-review .community-review-author { display: flex; align-items: center; gap: .75rem; min-width: 0; color: var(--text); text-decoration: none; }
@@ -20,6 +23,9 @@
 .community-review-avatar { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent); border-radius: 50%; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, var(--color-panel)), var(--color-panel)); color: var(--accent); font-size: 1.1rem; font-weight: 700; overflow: hidden; }
 .community-review-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .community-review-identity { min-width: 0; overflow-wrap: anywhere; }
+.community-review-byline { display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .7rem; }
+.community-review-byline time { color: var(--text-muted); font-size: .65rem; font-weight: 400; white-space: nowrap; }
+.community-review-tools { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
 .community-review-identity strong { font-size: .9rem; line-height: 1.5; transition: color 150ms ease; }
 .community-review-identity small { display: block; color: var(--text-muted); font-size: .7rem; margin-top: .15rem; }
 .community-review-score { display: flex; align-items: center; gap: .65rem; color: var(--accent); flex-shrink: 0; padding: .6rem .75rem; border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 5%, transparent); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -27,13 +33,14 @@
 .community-review-score small { font-size: .65rem; opacity: .7; margin-left: .1rem; }
 .community-review > p { position: relative; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .9rem; line-height: 1.85; margin: 1.3rem 0; max-width: 78ch; color: var(--text); }
 .community-review-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; padding-top: .85rem; border-top: 1px solid color-mix(in srgb, var(--accent) 10%, transparent); }
-.community-review-footer > time { display: flex; align-items: center; gap: .4rem; font-size: .7rem; color: var(--text-muted); }
-.community-review-footer-actions { display: flex; align-items: center; justify-content: end; flex-wrap: wrap; gap: .75rem; min-width: 0; }
 .community-spoiler-label { display: inline-block; padding: .2rem .5rem; border: 1px solid var(--border); border-radius: 5px; color: var(--text-muted); font-size: .65rem; }
-.community-report { color: var(--text-muted); font-size: .7rem; }
-.community-report > summary { cursor: pointer; width: fit-content; padding: .2rem .1rem; }
-.community-report > summary:hover { color: var(--accent); }
-.community-report form { display: grid; gap: .65rem; border: 0; padding: 1rem 0 0; margin: 0; box-shadow: none; background: none; width: 280px; max-width: 100%; }
+.community-report { position: relative; color: var(--text-muted); font-size: .7rem; }
+.community-report > summary { display: grid; place-items: center; list-style: none; cursor: pointer; width: 40px; height: 40px; border-radius: 10px; }
+.community-report > summary::-webkit-details-marker { display: none; }
+.community-report > summary:hover, .community-report[open] > summary { color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.community-report > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.community-review:has(.community-report[open]) { z-index: 2; }
+.community-report form { position: absolute; z-index: 1; right: 0; top: calc(100% + .5rem); display: grid; gap: .65rem; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: 0; box-shadow: 0 12px 32px #00000030; background: var(--color-panel); width: min(280px, calc(100vw - 6rem)); }
 .community-report select { font-size: .8rem; }
 .community-report button { justify-self: start; }
 .community-reviews-empty { color: var(--text-muted); padding: 2rem 1rem; font-size: .85rem; text-align: center; border: 1px dashed var(--border); border-radius: 14px; margin: 0; }
@@ -41,9 +48,9 @@
 @media (max-width: 540px) {
     .community-review > header { flex-wrap: wrap; gap: .75rem; }
     .community-review .community-review-author { flex-basis: 100%; }
-    .community-review-score { margin-left: 56px; padding: .4rem .55rem; }
+    .community-review-tools { margin-left: 56px; flex-direction: row-reverse; }
+    .community-review-score { padding: .4rem .55rem; }
     .community-review > p { font-size: .85rem; }
-    .community-review-footer-actions { max-width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
     .community-review, .community-review-identity strong { transition: none; }

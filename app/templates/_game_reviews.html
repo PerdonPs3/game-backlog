@@ -2,7 +2,6 @@
 <section class="community-reviews" id="community-reviews" aria-labelledby="community-reviews-title">
     <header class="community-reviews-heading">
         <div><h2 id="community-reviews-title">Player reviews</h2><p>{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</p></div>
-        {% if review_average is not none %}<div class="community-review-average" aria-label="Average rating: {{ '%.1f'|format(review_average / 2) }}/5"><strong>{{ '%.1f'|format(review_average / 2) }}<small>/5</small></strong>{{ review_stars(review_average) }}</div>{% endif %}
     </header>
     {% for message in get_flashed_messages(category_filter=['review_saved']) %}<p class="catalog-save-feedback" role="status">{{ message }}</p>{% endfor %}
     {% for message in get_flashed_messages(category_filter=['review_error']) %}<p class="catalog-message" role="alert">{{ message }}</p>{% endfor %}
@@ -12,17 +11,11 @@
             <header>
                 <a class="community-review-author" href="{{ url_for('profiles.public_profile', username=review.username) }}">
                     <span class="community-review-avatar" aria-hidden="true">{% if review.has_public_photo %}<img src="{{ url_for('profiles.public_photo', username=review.username) }}" alt="" width="44" height="44" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% else %}{{ review.display_name[:1]|upper }}{% endif %}</span>
-                    <span class="community-review-identity"><strong>{{ review.display_name }}</strong><small>@{{ review.username }}</small></span>
+                    <span class="community-review-identity"><span class="community-review-byline"><strong>{{ review.display_name }}</strong><time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time></span><small>@{{ review.username }}</small></span>
                 </a>
-                <span class="community-review-score" role="img" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<span aria-hidden="true"><strong>{{ review.rating|star_rating }}</strong><small>/5</small></span></span>
-            </header>
-            <p>{{ review.body }}</p>
-            <footer class="community-review-footer">
-            <time datetime="{{ review.updated_at[:10] }}"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16"/></svg>{{ review.updated_at[:10] }}</time>
-            <div class="community-review-footer-actions">
-            {% if review.has_spoilers %}<span class="community-spoiler-label">Spoilers</span>{% endif %}
-            {% if not review.is_own and review_normal_session %}
-            <details class="community-report"><summary>Report</summary>
+                <div class="community-review-tools">
+                {% if not review.is_own and review_normal_session %}
+                <details class="community-report"><summary aria-label="Report review" title="Report review"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.7 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></svg></summary>
                 <form method="post" action="{{ url_for('reviews.report', catalog_id=game.id, review_id=review.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <label for="report-reason-{{ review.id }}">Reason</label>
@@ -30,10 +23,13 @@
                     <small>Reporting hides this review for you.</small>
                     <button type="submit" class="secondary-button">Report and hide</button>
                 </form>
-            </details>
-            {% endif %}
-            </div>
-            </footer>
+                </details>
+                {% endif %}
+                <span class="community-review-score" role="img" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<span aria-hidden="true"><strong>{{ review.rating|star_rating }}</strong><small>/5</small></span></span>
+                </div>
+            </header>
+            <p>{{ review.body }}</p>
+            {% if review.has_spoilers %}<footer class="community-review-footer"><span class="community-spoiler-label">Spoilers</span></footer>{% endif %}
         </article>
         {% else %}<p class="community-reviews-empty">No reviews to show yet.</p>{% endfor %}
     </div>
