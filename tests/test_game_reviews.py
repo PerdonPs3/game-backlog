@@ -68,19 +68,21 @@ def test_unknown_catalog_game_does_not_accept_reviews(accounts):
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
 
-def test_spoilers_and_long_reviews_are_collapsed_and_html_is_escaped(accounts):
+def test_reviews_are_visible_directly_with_spoiler_labels_and_escaped_html(accounts):
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
     body = '<script>alert(1)</script>' + ' A very long memory.' * 50
     assert publish(alice, {**DATA, 'body': body, 'has_spoilers': 'yes'}).status_code == 303
     html = accounts.test_client().get(PATH).get_data(as_text=True)
-    assert '<details class="community-review-content">' in html
-    assert 'Spoilers</span> Show review' in html
+    assert '<details class="community-review-content">' not in html
+    assert 'Spoilers</span>' in html and 'Show review' not in html
     assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html
     assert '<script>alert(1)</script>' not in html
     assert publish(alice, {**DATA, 'body': body}).status_code == 303
     html = accounts.test_client().get(PATH).get_data(as_text=True)
-    assert 'Read full review' in html
+    assert 'Read full review' not in html
+    assert 'class="community-spoiler-label"' not in html
+    assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html
 
 
 def test_author_binding_private_profile_visibility_and_owner_only_deletion(accounts):

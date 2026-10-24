@@ -43,12 +43,8 @@
         <article class="community-review" id="review-{{ review.id }}">
             <header><a href="{{ url_for('profiles.public_profile', username=review.username) }}"><strong>{{ review.display_name }}</strong><small>@{{ review.username }}</small></a><span class="community-review-score" aria-label="Rating: {{ review.rating|star_rating }}/5"><span aria-hidden="true">★</span> {{ review.rating|star_rating }}/5</span></header>
             <time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time>
-            {% if review.has_spoilers or review.body|length > 360 or review.body.count('\n') > 4 %}
-            <details class="community-review-content">
-                <summary>{% if review.has_spoilers %}<span class="community-spoiler-label">Spoilers</span> Show review{% else %}<span class="community-review-excerpt">{{ review.body|replace('\n', ' ')|truncate(240, false, '…') }}</span><span>Read full review</span>{% endif %}</summary>
-                <p>{{ review.body }}</p>
-            </details>
-            {% else %}<p>{{ review.body }}</p>{% endif %}
+            {% if review.has_spoilers %}<span class="community-spoiler-label">Spoilers</span>{% endif %}
+            <p>{{ review.body }}</p>
             {% if not review.is_own and review_normal_session %}
             <details class="community-report"><summary>Report</summary>
                 <form method="post" action="{{ url_for('reviews.report', catalog_id=game.id, review_id=review.id) }}">

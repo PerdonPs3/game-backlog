@@ -18,8 +18,9 @@ format and do not include public reviews.
   identifiers are ignored; every mutation binds ownership on the server.
 - Setting a profile to private hides its reviews and removes them from community
   averages. Making that profile public restores otherwise visible reviews.
-- Spoilers remain behind a closed native disclosure. Long reviews also collapse.
-  Text is escaped and never interpreted as HTML. Native controls work without JS.
+- Review text is shown directly, including long reviews. Spoiler-marked reviews
+  keep a visible label without hiding the text behind another control. Text is
+  escaped and never interpreted as HTML. Native controls work without JS.
 - Catalog reads never create reviews. Publication checks that the catalog game
   exists before writing. Every form requires CSRF validation; responses are
   private and non-cacheable.

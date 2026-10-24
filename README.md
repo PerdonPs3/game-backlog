@@ -44,7 +44,7 @@ input validation, and automated testing.
 - Prevent adding the same catalog game twice on the same platform, including when editing.
 - Add an optional rating of up to five stars, with half-star steps and a review of up to 2,000 characters.
 - Clear an existing rating or review by leaving its field empty when editing.
-- Publish a separate, optional [public game review](docs/Public-Reviews.md) with a five-star score, spoiler protection, author profile, and report controls. Private library notes are never published automatically.
+- Publish a separate, optional [public game review](docs/Public-Reviews.md) with a five-star score, spoiler labels, author profile, and report controls. Private library notes are never published automatically.
 - Preserve entered form values when validation fails.
 - Confirm deletion before permanently removing a game.
 - Confirm deletion in a small accessible dialog without leaving the collection (with a separate-page fallback without JavaScript).
