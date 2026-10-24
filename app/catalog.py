@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from threading import RLock
 from time import monotonic, sleep
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 import click
@@ -139,7 +139,8 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS},summary,genres.name; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id,videos.name,videos.video_id,"
+                f"involved_companies.company.name,involved_companies.developer,involved_companies.publisher,websites.url,websites.type.type; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -324,6 +325,82 @@ def game_suggestion(game):
     }
 
 
+def game_media(game):
+    """Expose bounded, validated media on fixed provider hosts only."""
+    items, seen = [], set()
+    videos = game.get('videos')
+    if isinstance(videos, list):
+        for video in videos:
+            if not isinstance(video, dict):
+                continue
+            video_id = video.get('video_id')
+            if not isinstance(video_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id) or video_id in seen:
+                continue
+            seen.add(video_id)
+            title = video.get('name')
+            items.append({'kind': 'video', 'id': video_id,
+                          'title': title[:160] if isinstance(title, str) and title.strip() else 'Trailer',
+                          'preview': f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg',
+                          'url': f'https://www.youtube.com/watch?v={video_id}'})
+            if len(items) == 4:
+                break
+    screenshots = game.get('screenshots')
+    if isinstance(screenshots, list):
+        for image in screenshots:
+            image_id = cover_image_id({'cover': image})
+            if not image_id or image_id in seen:
+                continue
+            seen.add(image_id)
+            items.append({'kind': 'image', 'id': image_id, 'title': f'Screenshot {sum(item["kind"] == "image" for item in items) + 1}',
+                          'preview': f'https://images.igdb.com/igdb/image/upload/t_screenshot_med/{image_id}.jpg',
+                          'url': f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'})
+            if sum(item['kind'] == 'image' for item in items) == 8:
+                break
+    return items
+
+
+def game_facts(game):
+    """Normalize public company credits and safe official/store links."""
+    developers, publishers = set(), set()
+    companies = game.get('involved_companies')
+    if isinstance(companies, list):
+        for credit in companies:
+            if not isinstance(credit, dict) or not isinstance(credit.get('company'), dict):
+                continue
+            name = credit['company'].get('name')
+            if not isinstance(name, str) or not name.strip():
+                continue
+            if credit.get('developer') is True:
+                developers.add(name.strip()[:160])
+            if credit.get('publisher') is True:
+                publishers.add(name.strip()[:160])
+    links = {}
+    websites = game.get('websites')
+    if isinstance(websites, list):
+        for website in websites:
+            if not isinstance(website, dict) or not isinstance(website.get('type'), dict):
+                continue
+            kind, url = website['type'].get('type'), website.get('url')
+            if kind not in ('Official Website', 'Steam', 'GOG') or kind in links:
+                continue
+            if not isinstance(url, str) or len(url) > 2048 or any(character.isspace() or ord(character) < 32 for character in url):
+                continue
+            try:
+                parsed = urlsplit(url)
+                if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
+                    continue
+                if kind == 'Steam' and parsed.hostname != 'store.steampowered.com':
+                    continue
+                if kind == 'GOG' and parsed.hostname not in ('gog.com', 'www.gog.com'):
+                    continue
+            except ValueError:
+                continue
+            links[kind] = url
+    return {'developers': sorted(developers, key=str.casefold)[:12],
+            'publishers': sorted(publishers, key=str.casefold)[:12],
+            'links': [{'label': label, 'url': links[label]} for label in ('Official Website', 'Steam', 'GOG') if label in links]}
+
+
 def game_profile(game):
     """Public catalog details, with safe defaults for optional upstream fields."""
     release = None
@@ -340,7 +417,20 @@ def game_profile(game):
                     if isinstance(genre, dict) and isinstance(genre.get("name"), str)
                     and genre["name"].strip()}, key=str.casefold)
     summary = game.get("summary")
-    return {"release": release, "genres": names,
+    backdrop = None
+    for field in ('artworks', 'screenshots'):
+        images = game.get(field)
+        if isinstance(images, list):
+            for image in images:
+                image_id = cover_image_id({'cover': image})
+                if image_id:
+                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'
+                    break
+        if backdrop:
+            break
+    if not backdrop:
+        backdrop = collection_cover_url(cover_image_id(game))
+    return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game), **game_facts(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
 

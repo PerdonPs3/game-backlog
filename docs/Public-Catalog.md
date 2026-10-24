@@ -1,5 +1,18 @@
 # Public catalog and shareable game pages
 
+The desktop sidebar places public game facts above library actions: release date,
+developer/publisher credits, platforms, and available official, Steam, and GOG
+links. Missing credits and links are omitted. On narrow screens, facts and library
+actions follow the game heading in the same order. External links use
+HTTPS, reject embedded credentials, and validate store hostnames.
+
+Game pages include a media gallery between the identity panel and synopsis when
+IGDB provides videos or screenshots. Validated YouTube IDs and IGDB image IDs
+produce fixed-host links, limited to four videos and eight screenshots. Selecting
+a video shows its preview; an embedded player loads only after Play is pressed.
+Switching media removes the player and stops playback. External video/image links
+remain available without JavaScript and when a provider blocks embedding.
+
 Visitors can browse `/explore` without an account. Search uses a normal GET form
 with a 2–200 character query and 30 results per page. `/explore/games/<catalog_id>`
 is a standalone page that opens directly, survives refresh, and can be shared.

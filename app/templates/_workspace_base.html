@@ -18,6 +18,7 @@
     {% call site_header() %}
         {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
     {% endcall %}
+    {% block workspace_backdrop %}{% endblock %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
         {% block workspace_hero %}
         <header class="workspace-hero">
