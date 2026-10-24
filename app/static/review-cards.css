@@ -2,13 +2,13 @@
 .community-reviews-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .community-reviews-heading h2 { margin: 0; font-size: 1.4rem; letter-spacing: -.025em; }
 .community-reviews-heading p { color: var(--text-muted); font-size: .8rem; margin: .5rem 0 0; }
-.community-review-average { display: grid; justify-items: end; gap: .3rem; padding: .65rem .9rem; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--accent) 5%, var(--color-field)); color: var(--accent); font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.community-review-average > strong { font-size: 1.8rem; line-height: 1; }
-.community-review-average small { font-size: .85rem; color: var(--text-muted); margin-left: .2rem; }
-.catalog-community-rating { text-decoration: none; grid-template-columns: auto auto; align-items: center; justify-items: start; gap: .35rem .65rem; }
-.catalog-rating-label { grid-column: 1 / -1; font-size: .65rem; color: var(--text-muted); }
-.catalog-community-rating:hover { border-color: var(--accent); }
-.catalog-community-rating:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.catalog-community-rating { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem .7rem; width: fit-content; max-width: 100%; margin: 0 0 1.25rem; color: var(--accent); text-decoration: none; font-variant-numeric: tabular-nums; border-radius: 4px; }
+.catalog-rating-value { display: inline-flex; align-items: baseline; gap: .15rem; white-space: nowrap; }
+.catalog-rating-value strong { font-size: 1.5rem; line-height: 1; }
+.catalog-rating-value small { font-size: .75rem; color: var(--text-muted); }
+.catalog-rating-label { font-size: .7rem; color: var(--text-muted); white-space: nowrap; }
+.catalog-community-rating:hover .catalog-rating-label { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.catalog-community-rating:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 .review-score-stars { display: inline-flex; gap: 2px; flex-shrink: 0; }
 .review-score-stars > span { position: relative; width: 15px; height: 15px; }
 .review-score-stars svg { position: absolute; inset: 0; width: 100%; height: 100%; stroke-width: 1.4; stroke-linejoin: round; }

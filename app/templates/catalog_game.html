@@ -13,16 +13,14 @@
                 <h1>{{ game.name }}</h1>
                 <p class="catalog-release">First release: {% if profile.release %}<time datetime="{{ profile.release }}">{{ profile.release }}</time>{% else %}Not available{% endif %}</p>
                 <ul class="catalog-tags" aria-label="Genres">{% for genre in profile.genres[:30] %}<li>{{ genre }}</li>{% endfor %}</ul>
-                <div class="catalog-game-actions">
-                    <button type="button" class="secondary-button" data-copy-game-link hidden>Share</button>
-                    {% if reviews_enabled and review_average is not none %}
-                    <a class="community-review-average catalog-community-rating" href="#community-reviews" aria-label="Average rating: {{ '%.1f'|format(review_average / 2) }}/5. Read player reviews">
-                        <span class="catalog-rating-label">Player rating</span>
-                        <strong>{{ '%.1f'|format(review_average / 2) }}<small>/5</small></strong>
-                        {{ review_stars(review_average) }}
-                    </a>
-                    {% endif %}
-                </div>
+                {% if reviews_enabled and review_average is not none %}
+                <a class="catalog-community-rating" href="#community-reviews" aria-label="Average rating: {{ '%.1f'|format(review_average / 2) }}/5. Read player reviews">
+                    <span class="catalog-rating-value"><strong>{{ '%.1f'|format(review_average / 2) }}</strong><small>/5</small></span>
+                    {{ review_stars(review_average) }}
+                    <span class="catalog-rating-label">{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</span>
+                </a>
+                {% endif %}
+                <div class="catalog-game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button></div>
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>
