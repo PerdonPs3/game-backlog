@@ -76,6 +76,7 @@
                     rows="4"
                     maxlength="2000"
                 >{{ request.form.get('review', game['review']) }}</textarea>
+                {% include '_review_publication.html' %}
             </div>
 
             <div class="form-actions">

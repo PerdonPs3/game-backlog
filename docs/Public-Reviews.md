@@ -2,8 +2,8 @@
 
 Catalog game pages show opt-in player reviews with a five-star rating, author,
 profile link, date, and paginated text. Public reviews are separate records from
-private collection entries. Add game offers an unchecked **Also publish this
-review** option to save the entered rating and review on the public game page.
+private collection entries. Add game and Edit game offer an unchecked **Also
+publish this review** option to save the entered rating and review on the public game page.
 This explicit option saves both records atomically, requires a public profile,
 and allows marking spoilers. It replaces the author's existing public review
 for that game, if any. Without that option, creating, editing, importing, or

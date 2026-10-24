@@ -6,7 +6,7 @@ from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_back
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
 from app.game_fields import STATUSES, validate_dates
-from app.game_reviews import begin_review_write, save_public_review, validate_public_review
+from app.game_reviews import begin_review_write, can_publish_public_review, save_public_review, validate_public_review
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
 
 from app.ownership import owned, member_owned, insert_owned, insert_members
@@ -392,9 +392,7 @@ def create():
     error = None
     selected_game = None
     duplicate_game_id = None
-    review_publication_available = False
-    if current_app.config.get('AUTH_ENABLED') and g.profile and g.profile['username']:
-        review_publication_available = get_db().execute('SELECT is_public FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()[0]
+    review_publication_available = can_publish_public_review()
 
     if request.method == 'GET' and 'igdb_id' in request.args:
         raw_id = request.args['igdb_id']
@@ -510,6 +508,12 @@ def edit(game_id):
     if game is None:
         abort(404)
 
+    review_publication_available = game['igdb_id'] is not None and can_publish_public_review()
+    public_review_spoilers_default = False
+    if current_app.config.get('AUTH_ENABLED') and game['igdb_id'] is not None:
+        shared = db.execute('SELECT has_spoilers FROM public_game_reviews WHERE catalog_id = ? AND owner_id = ?',
+                            (game['igdb_id'], g.user['id'])).fetchone()
+        public_review_spoilers_default = bool(shared and shared[0])
     error = None
     duplicate_game_id = None
     catalog_game = None
@@ -556,40 +560,61 @@ def edit(game_id):
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."
 
-        if error is None:
-            begin_write(db)
-            current_identity = db.execute(
-                f"SELECT title, platform FROM games WHERE id = ? AND {owned()}", (game_id,),
-            ).fetchone()
-            if current_identity is None:
-                db.rollback()
-                abort(404)
-            identity_changed = (
-                platform.casefold() != current_identity["platform"].strip().casefold()
-                or (game["igdb_id"] is None and title.casefold() != current_identity["title"].strip().casefold())
-            )
-            # Pre-existing duplicates remain editable; never delete or merge user data.
-            duplicate = find_duplicate_game(db, game["igdb_id"], title, platform, game_id) if identity_changed else None
-            if duplicate is not None:
-                duplicate_game_id = duplicate["id"]
-                db.rollback()
-                error = DUPLICATE_GAME_ERROR
+        publish_requested = request.form.get('publish_review') == 'yes'
+        if error is None and publish_requested:
+            if not review_publication_available:
+                error = 'A catalog game and public profile are required to publish a review.'
             else:
-                db.execute(
-                    "UPDATE games SET title = ?, platform = ?, status = ?, "
-                    "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
-                    f"WHERE id = ? AND {owned()}",
-                    (title, platform, status, rating, review,
-                     cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
-                     started_on, completed_on, is_favorite, is_goty, game_id),
-                )
-                db.commit()
+                error = validate_public_review(rating, review)
 
+        if error is None:
+            try:
+                begin_write(db)
+                current_identity = db.execute(
+                    f"SELECT title, platform FROM games WHERE id = ? AND {owned()}", (game_id,),
+                ).fetchone()
+                if current_identity is None:
+                    db.rollback()
+                    abort(404)
+                identity_changed = (
+                    platform.casefold() != current_identity["platform"].strip().casefold()
+                    or (game["igdb_id"] is None and title.casefold() != current_identity["title"].strip().casefold())
+                )
+                # Pre-existing duplicates remain editable; never delete or merge user data.
+                duplicate = find_duplicate_game(db, game["igdb_id"], title, platform, game_id) if identity_changed else None
+                if duplicate is not None:
+                    duplicate_game_id = duplicate["id"]
+                    db.rollback()
+                    error = DUPLICATE_GAME_ERROR
+                elif publish_requested:
+                    error = begin_review_write(db, publishing=True, in_transaction=True)
+                if error is None:
+                    db.execute(
+                        "UPDATE games SET title = ?, platform = ?, status = ?, "
+                        "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
+                        f"WHERE id = ? AND {owned()}",
+                        (title, platform, status, rating, review,
+                         cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
+                         started_on, completed_on, is_favorite, is_goty, game_id),
+                    )
+                    if publish_requested:
+                        save_public_review(db, game['igdb_id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    db.commit()
+            except DATABASE_ERRORS as exc:
+                db.rollback()
+                current_app.logger.error('Unable to update game and optional public review (%s)', type(exc).__name__)
+                error = 'The changes could not be saved. Nothing changed. Please try again.'
+            if error is None:
+                if publish_requested:
+                    flash('Saved your changes and published your review.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=game['igdb_id'], _anchor='community-reviews'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("edit.html", game=game, error=error,
                            available_platforms=available_platforms,
-                           duplicate_game_id=duplicate_game_id)
+                           duplicate_game_id=duplicate_game_id,
+                           review_publication_available=review_publication_available,
+                           public_review_spoilers_default=public_review_spoilers_default)
 
 
 @main.get("/catalog/games/<int:catalog_id>")

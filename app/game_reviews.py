@@ -13,6 +13,12 @@ REPORT_REASONS = ('spam', 'abuse', 'spoilers', 'other')
 VISIBLE = 'p.is_public AND p.username IS NOT NULL AND NOT r.moderation_hidden'
 
 
+def can_publish_public_review():
+    if not current_app.config.get('AUTH_ENABLED') or not g.user or g.account_session['recovery'] or not g.profile or not g.profile['username']:
+        return False
+    return get_db().execute('SELECT is_public FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()[0]
+
+
 def require_reviewer():
     if not current_app.config.get('AUTH_ENABLED'):
         abort(404)
