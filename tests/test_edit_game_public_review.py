@@ -86,3 +86,19 @@ def test_other_account_cannot_publish_from_another_players_edit_page(accounts):
     assert submit(bob, path, {**DATA, 'publish_review': 'yes'}, source='/games/new').status_code == 404
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
+
+
+def test_edit_can_delete_public_review_without_saving_pending_private_changes(accounts):
+    fake_catalog(accounts)
+    client = public_author(accounts, 'alice')
+    add(client, publish_review='yes')
+    path = entry_path(accounts)
+    editor = client.get(path).get_data(as_text=True)
+    action = '/explore/games/123/reviews/delete'
+    assert f'formaction="{action}" formnovalidate>Delete public review' in editor
+    response = submit(client, action, {**DATA, 'review': 'Unsaved changes'}, source=path)
+    assert response.status_code == 303
+    with accounts.app_context():
+        assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
+        assert get_db().execute('SELECT review FROM games').fetchone()[0] == DATA['review']
+    assert 'Delete public review' not in client.get(path).get_data(as_text=True)

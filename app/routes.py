@@ -510,10 +510,14 @@ def edit(game_id):
 
     review_publication_available = game['igdb_id'] is not None and can_publish_public_review()
     public_review_spoilers_default = False
+    has_public_review = False
+    public_review_hidden = False
     if current_app.config.get('AUTH_ENABLED') and game['igdb_id'] is not None:
-        shared = db.execute('SELECT has_spoilers FROM public_game_reviews WHERE catalog_id = ? AND owner_id = ?',
+        shared = db.execute('SELECT has_spoilers, moderation_hidden FROM public_game_reviews WHERE catalog_id = ? AND owner_id = ?',
                             (game['igdb_id'], g.user['id'])).fetchone()
         public_review_spoilers_default = bool(shared and shared[0])
+        has_public_review = shared is not None
+        public_review_hidden = bool(shared and shared[1])
     error = None
     duplicate_game_id = None
     catalog_game = None
@@ -614,7 +618,8 @@ def edit(game_id):
                            available_platforms=available_platforms,
                            duplicate_game_id=duplicate_game_id,
                            review_publication_available=review_publication_available,
-                           public_review_spoilers_default=public_review_spoilers_default)
+                           public_review_spoilers_default=public_review_spoilers_default,
+                           has_public_review=has_public_review, public_review_hidden=public_review_hidden)
 
 
 @main.get("/catalog/games/<int:catalog_id>")

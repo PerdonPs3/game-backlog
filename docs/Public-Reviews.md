@@ -8,7 +8,10 @@ This explicit option saves both records atomically, requires a public profile,
 and allows marking spoilers. It replaces the author's existing public review
 for that game, if any. Without that option, creating, editing, importing, or
 deleting a library entry never publishes or changes a public review. Publishing
-from a catalog page never changes the library. Private backup files retain their existing
+controls are available only in Add game and Edit game. Catalog pages display the
+reviews and report controls without a separate review composer. Edit game also
+lets an author delete their public review without deleting the library entry.
+Private backup files retain their existing
 format and do not include public reviews.
 
 ## Publication and privacy

@@ -1,6 +1,7 @@
 """Public review consent, isolation, moderation, and rendering boundaries."""
 
 from uuid import uuid4
+import re
 
 import pytest
 
@@ -20,7 +21,14 @@ def public_author(app, name):
 
 
 def publish(client, data=None):
-    return submit(client, PATH, DATA if data is None else data, source=PATH)
+    review = DATA if data is None else data
+    page = client.get(PATH).get_data(as_text=True)
+    match = re.search(r'href="(/games/\d+/edit)"', page)
+    path = match.group(1) if match else '/games/new'
+    payload = {**review, 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC',
+               'status': 'Playing', 'review': review.get('body', ''), 'publish_review': 'yes',
+               'public_review_spoilers': review.get('has_spoilers', '')}
+    return submit(client, path, payload, source=path if match else '/games/new?igdb_id=123')
 
 
 def review_id(app):
@@ -32,7 +40,7 @@ def test_publication_is_explicit_and_never_changes_or_copies_private_notes(accou
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
     with accounts.app_context():
-        get_db().execute("INSERT INTO games (title, platform, review, rating, owner_id, igdb_id) VALUES ('Portal', 'PC', 'SECRET PERSONAL NOTE', 3, ?, 123)", (ALICE,))
+        get_db().execute("INSERT INTO games (title, platform, review, rating, owner_id, igdb_id) VALUES ('Portal', 'PC', 'SECRET PERSONAL NOTE', 3, ?, 999)", (ALICE,))
     assert 'SECRET PERSONAL NOTE' not in accounts.test_client().get(PATH).get_data(as_text=True)
     assert publish(alice).status_code == 303
     html = accounts.test_client().get(PATH).get_data(as_text=True)
@@ -44,7 +52,7 @@ def test_publication_is_explicit_and_never_changes_or_copies_private_notes(accou
     with accounts.app_context():
         db = get_db()
         assert db.execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 1
-        assert tuple(db.execute('SELECT review, rating FROM games').fetchone()) == ('SECRET PERSONAL NOTE', 3)
+        assert tuple(db.execute('SELECT review, rating FROM games WHERE igdb_id = 999').fetchone()) == ('SECRET PERSONAL NOTE', 3)
     assert DATA['body'] not in accounts.test_client().get(PATH).get_data(as_text=True)
 
 
@@ -53,8 +61,8 @@ def test_invalid_review_keeps_input_and_never_publishes(accounts, changes):
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
     response = publish(alice, {**DATA, **changes})
-    assert response.status_code == 400
-    assert b'role="alert"' in response.data and b'id="write-review" open' in response.data
+    assert response.status_code == 200
+    assert b'role="alert"' in response.data and b'name="publish_review" value="yes" checked' in response.data
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
@@ -62,8 +70,8 @@ def test_invalid_review_keeps_input_and_never_publishes(accounts, changes):
 def test_unknown_catalog_game_does_not_accept_reviews(accounts):
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
-    response = submit(alice, '/explore/games/999', DATA, source=PATH)
-    assert response.status_code == 404
+    response = submit(alice, '/games/new', {'title': 'Unknown', 'igdb_id': '999', 'platform': 'PC', 'status': 'Playing', 'rating': '9', 'review': 'Not published', 'publish_review': 'yes'}, source='/games/new?igdb_id=123')
+    assert response.status_code == 200 and b'role="alert"' in response.data
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
@@ -94,7 +102,7 @@ def test_author_binding_private_profile_visibility_and_owner_only_deletion(accou
     with accounts.app_context():
         get_db().execute('UPDATE profiles SET is_public = FALSE WHERE id = ?', (ALICE,))
     assert DATA['body'] not in accounts.test_client().get(PATH).get_data(as_text=True)
-    assert publish(alice).status_code == 400
+    assert publish(alice).status_code == 200
     with accounts.app_context():
         get_db().execute('UPDATE profiles SET is_public = TRUE WHERE id = ?', (ALICE,))
     assert DATA['body'] in accounts.test_client().get(PATH).get_data(as_text=True)
@@ -105,10 +113,10 @@ def test_author_binding_private_profile_visibility_and_owner_only_deletion(accou
 def test_guest_recovery_incomplete_and_csrf_cannot_publish(accounts):
     fake_catalog(accounts)
     guest = accounts.test_client()
-    response = submit(guest, PATH, DATA, source='/account/login')
+    response = publish(guest)
     assert response.location.endswith('/account/login')
     alice = public_author(accounts, 'alice')
-    assert alice.post(PATH, data=DATA).status_code == 400
+    assert alice.post('/games/new', data=DATA).status_code == 400
     incomplete = sign_in(accounts, 'bob', complete_profile=False)
     assert '/profile/edit' in publish(incomplete).location
     with accounts.app_context():
@@ -147,7 +155,7 @@ def test_write_budget_is_persistent_but_never_prevents_deleting_your_review(acco
         for _ in range(29):
             get_db().execute('INSERT INTO public_review_events (owner_id) VALUES (?)', (ALICE,))
     response = publish(alice, {**DATA, 'body': 'Blocked update'})
-    assert response.status_code == 400 and b'too many review changes' in response.data
+    assert response.status_code == 200 and b'too many review changes' in response.data
     assert submit(alice, PATH + '/reviews/delete', {}, source=PATH).status_code == 303
 
 
@@ -188,3 +196,32 @@ def test_review_pagination_average_and_storage_security(accounts):
     assert second.count('class="community-review"') == 1 and 'Newer reviews' in second
     for page in ('0', '-1', 'no', '10001'):
         assert guest.get(PATH + '?reviews_page=' + page).status_code == 400
+
+
+def test_catalog_has_no_review_composer_and_rejects_direct_publication(accounts):
+    fake_catalog(accounts)
+    alice = public_author(accounts, 'alice')
+    for client in (alice, accounts.test_client()):
+        html = client.get(PATH).get_data(as_text=True)
+        assert 'Write a review' not in html
+        assert 'id="write-review"' not in html
+        assert 'community-review-form' not in html
+    assert submit(alice, PATH, DATA, source='/games/new?igdb_id=123').status_code == 405
+
+
+def test_review_avatar_respects_public_photo_consent(accounts):
+    fake_catalog(accounts)
+    alice = public_author(accounts, 'alice')
+    publish(alice)
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET avatar_image = ?, share_photo = FALSE WHERE id = ?',
+                         (b'private-image-bytes', ALICE))
+    guest = accounts.test_client()
+    hidden = guest.get(PATH).get_data(as_text=True)
+    assert '<img src="/players/alice_player/photo"' not in hidden
+    assert 'private-image-bytes' not in hidden
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET share_photo = TRUE WHERE id = ?', (ALICE,))
+    shared = guest.get(PATH).get_data(as_text=True)
+    assert '<img src="/players/alice_player/photo"' in shared
+    assert 'private-image-bytes' not in shared

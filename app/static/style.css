@@ -456,6 +456,7 @@ p {
 .review-publication small { display: block; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
 .review-publication-options { display: none; margin-left: 1.7rem; }
 .review-publication:has(input[name="publish_review"]:checked) .review-publication-options { display: block; }
+.review-publication-management { margin-top: 1rem; }
 
 form {
     display: grid;

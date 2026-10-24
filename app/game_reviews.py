@@ -36,9 +36,6 @@ def review_context(catalog_id):
     db = get_db()
     owner = g.user['id'] if g.user else None
     normal = bool(owner and not g.account_session['recovery'] and g.profile and g.profile['username'])
-    public = db.execute('SELECT is_public FROM profiles WHERE id = ?', (owner,)).fetchone() if normal else None
-    own = db.execute('SELECT rating, body, has_spoilers, moderation_hidden FROM public_game_reviews '
-                     'WHERE catalog_id = ? AND owner_id = ?', (catalog_id, owner)).fetchone() if normal else None
     try:
         page = int(request.args.get('reviews_page', '1'))
     except ValueError:
@@ -52,13 +49,13 @@ def review_context(catalog_id):
     summary = db.execute('SELECT COUNT(*), AVG(r.rating) FROM public_game_reviews r '
                          'JOIN profiles p ON p.id = r.owner_id WHERE r.catalog_id = ? AND ' + visible, params).fetchone()
     rows = db.execute('SELECT r.id, r.rating, r.body, r.has_spoilers, r.updated_at, '
-                      'p.display_name, p.username, r.owner_id = ? AS is_own '
+                      'p.display_name, p.username, (p.share_photo AND p.avatar_image IS NOT NULL) AS has_public_photo, r.owner_id = ? AS is_own '
                       'FROM public_game_reviews r JOIN profiles p ON p.id = r.owner_id '
                       'WHERE r.catalog_id = ? AND ' + visible + ' ORDER BY r.updated_at DESC, r.id DESC LIMIT ? OFFSET ?',
                       (owner, *params, PAGE_SIZE, (page - 1) * PAGE_SIZE)).fetchall()
     return {'reviews_enabled': True, 'community_reviews': rows, 'review_count': summary[0],
             'review_average': summary[1], 'reviews_page': page, 'reviews_has_next': page * PAGE_SIZE < summary[0],
-            'own_review': own, 'review_can_publish': bool(public and public[0]), 'review_normal_session': normal}
+            'review_normal_session': normal}
 
 
 def begin_review_write(db, *, publishing=False, in_transaction=False):
@@ -91,28 +88,6 @@ def save_public_review(db, catalog_id, rating, body, has_spoilers):
                'VALUES (?, ?, ?, ?, ?) ON CONFLICT (catalog_id, owner_id) DO UPDATE '
                "SET rating = EXCLUDED.rating, body = EXCLUDED.body, has_spoilers = EXCLUDED.has_spoilers, updated_at = (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')",
                (catalog_id, g.user['id'], rating, body, has_spoilers))
-
-
-def publish_review(catalog_id):
-    """Called only after the catalog has verified the requested game exists."""
-    body = request.form.get('body', '').strip()
-    try:
-        rating = int(request.form.get('rating', ''))
-    except ValueError:
-        rating = None
-    error = validate_public_review(rating, body)
-    if error:
-        return error
-    db = get_db()
-    try:
-        error = begin_review_write(db, publishing=True)
-        if error:
-            return error
-        save_public_review(db, catalog_id, rating, body, request.form.get('has_spoilers') == 'yes')
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
 
 
 def review_redirect(catalog_id):

@@ -1,5 +1,6 @@
 {% extends '_catalog_base.html' %}
 {% block page_title %}{{ game.name if game else 'Game unavailable' }} · Vestigium{% endblock %}
+{% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}">{% endblock %}
 {% block workspace_hero %}{% if not game %}<header class="workspace-hero"><div><h1>Game <span>unavailable.</span></h1><p>{{ error }}</p></div></header>{% endif %}{% endblock %}
 {% block panel %}
 {% if game %}
