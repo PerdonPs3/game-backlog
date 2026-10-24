@@ -5,6 +5,16 @@ palette and the private profile overview design are approved in Preview. The
 five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
+## Development status — 2026-10-24
+
+The interface, profiles, sharing editor, public reviews, catalog gallery,
+game-specific backgrounds, and game-details sidebar are published to `develop`.
+Earlier references below to local implementation or pending Preview publication
+are historical implementation notes, not the current deployment status. Public
+review publication is supported in both Add game and Edit game through shared
+controls and validation. Production migration and deployment remain a separate
+release operation; the public-avatar moderation gate below is still open.
+
 ## Public avatar release gate
 
 Public photos are implemented locally for a limited development trial. Photos
