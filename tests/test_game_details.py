@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, game_profile, game_media
+from app.catalog import CatalogError, game_profile, game_media, game_facts
 from app.db import get_db
 
 
@@ -27,6 +27,25 @@ def test_catalog_media_validates_deduplicates_and_limits_provider_ids():
     assert len({item['id'] for item in media}) == len(media)
     assert media[0]['url'] == 'https://www.youtube.com/watch?v=KOiuc9UWz1E'
     assert game_media({'videos': {}, 'screenshots': None}) == []
+
+
+def test_catalog_facts_keep_roles_separate_and_only_safe_official_links():
+    facts = game_facts({'involved_companies': [None,
+        {'company': {'name': 'Studio'}, 'developer': True},
+        {'company': {'name': 'Studio'}, 'developer': True},
+        {'company': {'name': 'Publisher'}, 'publisher': True}],
+        'websites': [
+            {'type': {'type': 'Official Website'}, 'url': 'javascript:alert(1)'},
+            {'type': {'type': 'Official Website'}, 'url': 'https://example.com/game'},
+            {'type': {'type': 'Steam'}, 'url': 'https://fake-steam.test/app/1'},
+            {'type': {'type': 'Steam'}, 'url': 'https://store.steampowered.com/app/1'},
+            {'type': {'type': 'GOG'}, 'url': 'https://user:password@www.gog.com/game/test'},
+            {'type': {'type': 'GOG'}, 'url': 'https://www.gog.com/game/test'},
+            {'type': {'type': 'Twitter'}, 'url': 'https://x.com/game'}]})
+    assert facts['developers'] == ['Studio']
+    assert facts['publishers'] == ['Publisher']
+    assert [link['label'] for link in facts['links']] == ['Official Website', 'Steam', 'GOG']
+    assert game_facts({'involved_companies': {}, 'websites': None}) == {'developers': [], 'publishers': [], 'links': []}
 
 
 def link_catalog(app, game_id):
@@ -95,6 +114,7 @@ def test_missing_details(client, app):
 def test_profile_invalid_optional_data():
     assert game_profile({"summary": {}, "genres": {}, "first_release_date": True}) == {
         "summary": None, "genres": [], "release": None, "backdrop_url": None, "media": [],
+        "developers": [], "publishers": [], "links": [],
     }
     assert game_profile({"first_release_date": 10**100})["release"] is None
     assert game_profile({"genres": [{"name": "Puzzle"}, {"name": "Puzzle"}, None]})["genres"] == ["Puzzle"]

@@ -77,6 +77,23 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 
 .catalog-game-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; align-items: start; }
 .catalog-game-main { min-width: 0; }
+.catalog-game-sidebar { display: grid; align-content: start; gap: 1.5rem; min-width: 0; }
+.catalog-game-sidebar .catalog-library-actions { position: static; }
+.catalog-game-facts { padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); min-width: 0; }
+.catalog-game-facts h2 { margin: 0 0 1.25rem; font-size: 1.1rem; }
+.catalog-game-facts dl { margin: 0; }
+.catalog-game-facts dl > div { padding: .85rem 0; border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent); }
+.catalog-game-facts dl > div:first-child { border: 0; padding-top: 0; }
+.catalog-game-facts dt { margin-bottom: .45rem; color: var(--text-muted); font-size: .65rem; }
+.catalog-game-facts dd { margin: 0; color: var(--text); font-size: .8rem; line-height: 1.7; overflow-wrap: anywhere; }
+.catalog-game-facts dd > span { display: block; }
+.catalog-game-facts .catalog-platforms { gap: .4rem; }
+.catalog-game-facts .catalog-platforms li { font-size: .65rem; padding: .3rem .5rem; }
+.catalog-game-links { display: grid; gap: .5rem; margin-top: .8rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.catalog-game-links a { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 8px; color: var(--accent); text-decoration: none; font-size: .7rem; }
+.catalog-game-links a:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); border-color: var(--accent); }
+.catalog-game-links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+html[data-theme="light"] .catalog-game-facts { background: #fff; }
 .catalog-media { min-width: 0; margin-bottom: 1.5rem; padding: 1.15rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); }
 .catalog-media > header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .catalog-media h2 { margin: 0; font-size: 1rem; letter-spacing: -.02em; }
@@ -138,6 +155,8 @@ html[data-theme="light"] .catalog-save-feedback { color: #15734f; }
     .catalog-game-main { display: contents; }
     .catalog-game-layout .catalog-game-hero { margin-bottom: 0; }
     .catalog-library-actions { position: static; order: 1; }
+    .catalog-game-sidebar { display: contents; }
+    .catalog-game-facts { order: 3; }
     .catalog-game-layout .catalog-detail-grid { order: 2; }
     .catalog-game-layout .catalog-media { order: 2; margin-bottom: 0; }
 }

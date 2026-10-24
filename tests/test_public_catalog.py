@@ -37,6 +37,20 @@ def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accou
     assert 'data-media-gallery' not in accounts.test_client().get('/explore/games/123').get_data(as_text=True)
 
 
+def test_game_facts_appear_once_in_sidebar_with_escaped_company_names(accounts):
+    catalog = fake_catalog(accounts)
+    catalog.get_game.side_effect = None
+    catalog.get_game.return_value = {**GAME, 'involved_companies': [
+        {'company': {'name': '<Studio>'}, 'developer': True}],
+        'websites': [{'type': {'type': 'Official Website'}, 'url': 'https://example.com/game'}]}
+    page = accounts.test_client().get('/explore/games/123').get_data(as_text=True)
+    assert 'catalog-game-sidebar' in page and 'Game details' in page
+    assert page.count('datetime="2011-04-19"') == 1
+    assert page.count('<dt>Platforms</dt>') == 1
+    assert '&lt;Studio&gt;' in page and '<Studio>' not in page
+    assert 'href="https://example.com/game" target="_blank" rel="noopener noreferrer"' in page
+
+
 def test_search_and_shareable_detail_work_without_login_and_without_writes(accounts):
     catalog=fake_catalog(accounts)
     alice=sign_in(accounts,'alice')

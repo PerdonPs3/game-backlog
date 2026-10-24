@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from threading import RLock
 from time import monotonic, sleep
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 import click
@@ -139,7 +139,8 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id,videos.name,videos.video_id; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id,videos.name,videos.video_id,"
+                f"involved_companies.company.name,involved_companies.developer,involved_companies.publisher,websites.url,websites.type.type; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -358,6 +359,48 @@ def game_media(game):
     return items
 
 
+def game_facts(game):
+    """Normalize public company credits and safe official/store links."""
+    developers, publishers = set(), set()
+    companies = game.get('involved_companies')
+    if isinstance(companies, list):
+        for credit in companies:
+            if not isinstance(credit, dict) or not isinstance(credit.get('company'), dict):
+                continue
+            name = credit['company'].get('name')
+            if not isinstance(name, str) or not name.strip():
+                continue
+            if credit.get('developer') is True:
+                developers.add(name.strip()[:160])
+            if credit.get('publisher') is True:
+                publishers.add(name.strip()[:160])
+    links = {}
+    websites = game.get('websites')
+    if isinstance(websites, list):
+        for website in websites:
+            if not isinstance(website, dict) or not isinstance(website.get('type'), dict):
+                continue
+            kind, url = website['type'].get('type'), website.get('url')
+            if kind not in ('Official Website', 'Steam', 'GOG') or kind in links:
+                continue
+            if not isinstance(url, str) or len(url) > 2048 or any(character.isspace() or ord(character) < 32 for character in url):
+                continue
+            try:
+                parsed = urlsplit(url)
+                if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
+                    continue
+                if kind == 'Steam' and parsed.hostname != 'store.steampowered.com':
+                    continue
+                if kind == 'GOG' and parsed.hostname not in ('gog.com', 'www.gog.com'):
+                    continue
+            except ValueError:
+                continue
+            links[kind] = url
+    return {'developers': sorted(developers, key=str.casefold)[:12],
+            'publishers': sorted(publishers, key=str.casefold)[:12],
+            'links': [{'label': label, 'url': links[label]} for label in ('Official Website', 'Steam', 'GOG') if label in links]}
+
+
 def game_profile(game):
     """Public catalog details, with safe defaults for optional upstream fields."""
     release = None
@@ -387,7 +430,7 @@ def game_profile(game):
             break
     if not backdrop:
         backdrop = collection_cover_url(cover_image_id(game))
-    return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game),
+    return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game), **game_facts(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
 
