@@ -22,7 +22,17 @@
             <div class="game-meta">
                 <p class="game-status">Status: {{ game.status }}</p>
                 {% if game['rating'] is not none %}
-                    <p class="game-rating">Rating: {{ game['rating']|star_rating }}/5</p>
+                    <p class="game-rating" role="img" aria-label="Rating: {{ game.rating|star_rating }}/5">
+                        <span class="collection-rating-stars" aria-hidden="true">
+                            {% for star in range(1, 6) %}
+                            <span class="collection-rating-star" style="--star-fill: {{ 100 if game.rating >= star * 2 else 50 if game.rating == star * 2 - 1 else 0 }}%">
+                                <svg class="collection-star-outline" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+                                <svg class="collection-star-fill" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+                            </span>
+                            {% endfor %}
+                        </span>
+                        <span aria-hidden="true">{{ game.rating|star_rating }}/5</span>
+                    </p>
                 {% endif %}
             </div>
 
