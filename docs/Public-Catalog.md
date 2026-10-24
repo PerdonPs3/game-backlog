@@ -1,9 +1,9 @@
 # Public catalog and shareable game pages
 
-The desktop sidebar places public game facts below library actions: release date,
+The desktop sidebar places public game facts above library actions: release date,
 developer/publisher credits, platforms, and available official, Steam, and GOG
-links. Missing credits and links are omitted. On narrow screens, facts follow the
-gallery and synopsis so they do not interrupt media browsing. External links use
+links. Missing credits and links are omitted. On narrow screens, facts and library
+actions follow the game heading in the same order. External links use
 HTTPS, reject embedded credentials, and validate store hostnames.
 
 Game pages include a media gallery between the identity panel and synopsis when

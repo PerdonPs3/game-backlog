@@ -156,7 +156,7 @@ html[data-theme="light"] .catalog-save-feedback { color: #15734f; }
     .catalog-game-layout .catalog-game-hero { margin-bottom: 0; }
     .catalog-library-actions { position: static; order: 1; }
     .catalog-game-sidebar { display: contents; }
-    .catalog-game-facts { order: 3; }
+    .catalog-game-facts { order: 1; }
     .catalog-game-layout .catalog-detail-grid { order: 2; }
     .catalog-game-layout .catalog-media { order: 2; margin-bottom: 0; }
 }

@@ -45,6 +45,7 @@ def test_game_facts_appear_once_in_sidebar_with_escaped_company_names(accounts):
         'websites': [{'type': {'type': 'Official Website'}, 'url': 'https://example.com/game'}]}
     page = accounts.test_client().get('/explore/games/123').get_data(as_text=True)
     assert 'catalog-game-sidebar' in page and 'Game details' in page
+    assert page.index('id="catalog-facts-title"') < page.index('id="library-actions"')
     assert page.count('datetime="2011-04-19"') == 1
     assert page.count('<dt>Platforms</dt>') == 1
     assert '&lt;Studio&gt;' in page and '<Studio>' not in page
