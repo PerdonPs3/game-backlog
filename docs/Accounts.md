@@ -149,8 +149,8 @@ and CSRF protection; recovery sessions cannot change publication settings.
 
 Public profile photos are available for the limited development trial described
 below. The sharing form explains basic content rules. Automated content moderation
-is a release gate before opening public uploads broadly. It is not implemented in
-this increment. There is no profile directory or social feed in this increment.
+is deferred under the owner's public-launch decision of 2026-10-24. It is not
+implemented. There is no profile directory or social feed in this increment.
 
 ## First configure an isolated development project
 
@@ -383,8 +383,10 @@ native disclosure works with a tap or keyboard; Escape and outside clicks close
 it. These controls submit with the profile form, even when the disclosure is
 closed. Nothing is persisted until the profile is saved.
 
-These checks validate files, not visual content. The owner has approved a limited
-development trial of public avatars. Before a broad public launch, integrate
+These checks validate files, not visual content. On 2026-10-24, the owner approved
+public photo uploads for the initial launch and deferred automatic content
+moderation, superseding the previous development-only trial restriction. As a
+future improvement, integrate
 automated moderation before publication: accepted images may be published,
 prohibited or uncertain images require replacement, and service failures preserve
 the previous image without publishing the candidate. Review provider costs and
