@@ -7,7 +7,7 @@
     {% for message in get_flashed_messages(category_filter=['review_saved']) %}<p class="catalog-save-feedback" role="status">{{ message }}</p>{% endfor %}
     {% for message in get_flashed_messages(category_filter=['review_error']) %}<p class="catalog-message" role="alert">{{ message }}</p>{% endfor %}
     <details class="community-review-editor" id="write-review"{% if review_error or own_review and request.args.get('edit_review') == 'yes' %} open{% endif %}>
-        <summary>{{ 'Edit your public review' if own_review else 'Write a review' }}</summary>
+        <summary>{{ 'Edit your review' if own_review else 'Write a review' }}</summary>
         {% if review_normal_session %}
             {% if own_review and own_review.moderation_hidden %}<p class="catalog-message">Your review has been hidden by moderation. Editing it will not republish it.</p>{% endif %}
             {% if review_can_publish %}
@@ -49,8 +49,7 @@
                 <p>{{ review.body }}</p>
             </details>
             {% else %}<p>{{ review.body }}</p>{% endif %}
-            {% if review.is_own %}<a class="community-review-edit" href="{{ url_for('explore.game', catalog_id=game.id, edit_review='yes', _anchor='write-review') }}">Edit your review ↑</a>
-            {% elif review_normal_session %}
+            {% if not review.is_own and review_normal_session %}
             <details class="community-report"><summary>Report</summary>
                 <form method="post" action="{{ url_for('reviews.report', catalog_id=game.id, review_id=review.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

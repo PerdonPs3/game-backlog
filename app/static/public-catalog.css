@@ -37,7 +37,6 @@
 .community-report form { display: grid; gap: .65rem; border: 0; padding: 1rem 0 0; margin: 0; box-shadow: none; background: none; max-width: 350px; }
 .community-report select { font-size: .8rem; }
 .community-report button { justify-self: start; }
-.community-review-edit { display: inline-block; font-size: .75rem; margin-top: .75rem; }
 .community-reviews-empty { color: var(--text-muted); padding-block: 1rem; font-size: .85rem; }
 .community-reviews-pages { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-size: .8rem; margin-top: 1rem; }
 .catalog-workspace .workspace-panel,
