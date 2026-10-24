@@ -27,11 +27,12 @@ def test_legacy_links_redirect_to_the_owners_account(named_libraries, suffix, le
     for client, name in ((alice, "alice_player"), (bob, "bob_player")):
         result = client.get(legacy)
         assert result.status_code == 302
-        assert result.location == f"/account/{name}/{suffix}"
+        expected = f"/profile/{name}" if suffix == "profile" else f"/account/{name}/profile/edit#profile-privacy" if suffix == "profile/sharing" else f"/account/{name}/{suffix}"
+        assert result.location == expected
         assert result.headers["Cache-Control"] == "private, no-store"
         page = client.get(result.location)
         assert page.status_code == 200
-        assert f'/account/{name}/profile' in page.text
+        assert f'/profile/{name}' in page.text
         assert 'href="/library"' not in page.text
         assert 'href="/account/profile"' not in page.text
 
@@ -70,7 +71,7 @@ def test_old_names_redirect_only_for_the_owner_and_posts_remain_safe(accounts, n
         get_db().execute("UPDATE profiles SET username = 'alice_renamed' WHERE id = ?", (ALICE,))
     for slug in ("alice_player", "ALICE_RENAMED"):
         response = alice.get(f"/account/{slug}/profile")
-        assert response.location == "/account/alice_renamed/profile"
+        assert response.location == "/profile/alice_renamed"
         assert bob.get(f"/account/{slug}/profile").status_code == 404
     result = submit(alice, "/account/alice_player/profile/edit", {"display_name": "Renamed Alice"})
     assert result.status_code == 303
@@ -86,9 +87,9 @@ def test_old_names_redirect_only_for_the_owner_and_posts_remain_safe(accounts, n
 def test_setup_login_and_sharing_changes_use_the_current_identity(accounts):
     alice = sign_in(accounts, "alice", complete_profile=False)
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "username": "alice_player"})
-    assert result.location == "/account/alice_player/profile#profile-feedback"
+    assert result.location == "/profile/alice_player#profile-feedback"
     assert alice.get(result.location).status_code == 200
-    assert alice.get('/account/alice_player/profile/sharing').status_code == 200
+    assert alice.get('/account/alice_player/profile/sharing').location == '/account/alice_player/profile/edit#profile-privacy'
     with accounts.app_context():
         get_db().execute("UPDATE profiles SET username_changed_at = NULL WHERE id = ?", (ALICE,))
     result = submit(alice, '/account/alice_player/profile/sharing', {"username": "alice_renamed", "is_public": "yes"})

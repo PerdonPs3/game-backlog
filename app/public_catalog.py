@@ -1,15 +1,16 @@
-"""Anonymous, read-only catalog pages using the existing cached IGDB client."""
+"""Public catalog browsing and explicit review publication using cached IGDB data."""
 
 from collections import deque
 from threading import Lock
 from time import monotonic
 
-from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
+from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, url_for, request, jsonify
 
 from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game
 from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
+from app.game_reviews import require_reviewer, publish_review, review_context, review_redirect
 
 
 explore = Blueprint('explore', __name__, url_prefix='/explore')
@@ -98,10 +99,15 @@ def suggestions():
     return jsonify(games=games)
 
 
-@explore.get('/games/<int:catalog_id>')
+@explore.route('/games/<int:catalog_id>', methods=['GET', 'POST'])
 def game(catalog_id):
     if not 0 < catalog_id < 2**63:
         abort(404)
+    if request.method == 'POST':
+        guard = require_reviewer()
+        if guard:
+            return guard
+    review_error = None
     item, profile, error, status = None, None, None, 200
     if not public_request_allowed():
         error, status = 'The catalog is busy. Please wait a minute and try again.', 429
@@ -114,6 +120,12 @@ def game(catalog_id):
                 item, profile = catalog_card(raw), game_profile(raw)
         except CatalogError:
             error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
+    if item and request.method == 'POST':
+        review_error = publish_review(catalog_id)
+        if not review_error:
+            flash('Your public review was saved.', 'review_saved')
+            return review_redirect(catalog_id)
+        status = 400
     can_manage = not current_app.config.get('AUTH_ENABLED') or bool(
         g.user and not g.account_session['recovery'] and g.profile and g.profile['display_name'].strip()
     )
@@ -126,7 +138,8 @@ def game(catalog_id):
     saved_platforms = {entry['platform'].strip().casefold() for entry in entries}
     available_platforms = [platform for platform in item['platforms'] if platform.strip().casefold() not in saved_platforms] if item else []
     return render_template('catalog_game.html', game=item, profile=profile, error=error,
-                           can_manage=can_manage, entries=entries, available_platforms=available_platforms), status
+                           can_manage=can_manage, entries=entries, available_platforms=available_platforms,
+                           review_error=review_error, **(review_context(catalog_id) if item else {})), status
 
 
 @explore.get('/games/<int:catalog_id>/add')
@@ -151,7 +164,9 @@ def init_app(app):
     def catalog_headers(response):
         if request.blueprint == 'explore':
             response.headers['Cache-Control'] = 'private, no-store'
-            response.headers['Referrer-Policy'] = 'no-referrer'
+            # HTTPS CSRF validation needs the Referer for our own form posts.
+            # Cross-origin destinations still receive no browsing context.
+            response.headers['Referrer-Policy'] = 'same-origin'
             if response.status_code == 429:
                 response.headers['Retry-After'] = '60'
         return response

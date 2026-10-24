@@ -24,7 +24,7 @@ def test_private_by_default_and_selective_publication(accounts):
     assert anon.get('/players/alice_player').status_code == 404
     result = submit(alice, PATH, {'username': 'Alice_Player'})
     assert result.status_code == 303
-    assert 'profile is private' in alice.get(result.location).get_data(as_text=True)
+    assert 'profile is private' in alice.get(result.location, follow_redirects=True).get_data(as_text=True)
     assert anon.get('/players/alice_player').status_code == 404
     submit(alice, PATH, {'username': 'alice_player', 'is_public': 'yes'})
     response = anon.get('/players/alice_player')
@@ -35,11 +35,11 @@ def test_private_by_default_and_selective_publication(accounts):
     response = anon.get('/players/alice_player')
     page = response.get_data(as_text=True)
     assert 'Chosen game' in page and 'Alice public bio' in page
-    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/games/', '/account/profile/photo', 'private-photo', '7/10', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
+    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/games/', '/account/profile/photo', 'private-photo', '3.5/5', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
         assert private not in page
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'
-    assert response.headers['Referrer-Policy'] == 'no-referrer'
+    assert response.headers['Referrer-Policy'] == 'same-origin'
     assert bob.get('/players/alice_player').status_code == 200
     assert 'BOB SECRET' not in bob.get('/players/alice_player').get_data(as_text=True)
     # Unsharing content and revoking the page take effect on the next request.
@@ -95,19 +95,19 @@ def test_public_routes_are_unavailable_in_offline_mode(client):
     assert client.get(PATH).status_code == 404
 
 
-def test_setup_publishes_by_default_and_accepts_capitals_without_publishing_extra_fields(accounts):
+def test_setup_publishes_selected_profile_details_by_default_and_accepts_capitals(accounts):
     alice = sign_in(accounts, 'alice', complete_profile=False)
     response = submit(alice, '/account/profile/edit', {'display_name':'Alice', 'username':'PerdonPs3', 'bio':'Private until selected'})
     assert response.status_code == 303
     anon = accounts.test_client()
     page = anon.get('/players/perdonps3')
     assert page.status_code == 200 and '@perdonps3' in page.get_data(as_text=True)
-    assert 'Private until selected' not in page.get_data(as_text=True)
+    assert 'Private until selected' in page.get_data(as_text=True)
     # Editing an established profile does not reset a deliberately private choice.
     submit(alice, PATH, {'username':'PERDONPS3', 'is_public':'no'})
     submit(alice, '/account/profile/edit', {'display_name':'Renamed Alice', 'is_public':'yes'})
     assert anon.get('/players/perdonps3').status_code == 404
-    assert 'value="no" checked' in alice.get('/account/perdonps3/profile/sharing').get_data(as_text=True)
+    assert 'value="no" checked' in alice.get('/account/perdonps3/profile/sharing', follow_redirects=True).get_data(as_text=True)
 
 
 def test_setup_can_be_private_and_taken_username_rolls_back_all_profile_changes(accounts):

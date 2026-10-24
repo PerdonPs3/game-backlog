@@ -11,18 +11,20 @@ def test_quick_add_stays_on_the_game_and_only_lists_the_current_owners_entries(a
     path = '/explore/games/123'
     data = {'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC',
             'status': 'Playing', 'rating': '9', 'return_to_catalog': 'yes'}
-    assert alice.post('/games/new', data=data).status_code == 400
+    assert alice.post('/games/new', data=data).status_code == 303
+    with accounts.app_context():
+        assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
     response = submit(alice, '/games/new', data, source=path)
     assert response.status_code == 303
     assert response.location == path + '#library-actions'
     own = alice.get(response.location).get_data(as_text=True)
-    assert 'Added to your library.' in own and 'Playing · 9/10' in own
+    assert 'Added to your library.' in own and 'Playing · 4.5/5' in own
     assert '<option value="PC">' not in own
     assert '<option value="PS3">' in own
     other = bob.get(path).get_data(as_text=True)
-    assert 'Playing · 9/10' not in other and '<option value="PC">' in other
+    assert 'Playing · 4.5/5' not in other and '<option value="PC">' in other
     anonymous = accounts.test_client().get(path).get_data(as_text=True)
-    assert 'Playing · 9/10' not in anonymous and 'catalog-quick-form' not in anonymous
+    assert 'Playing · 4.5/5' not in anonymous and 'catalog-quick-form' not in anonymous
     assert 'Sign in to add game' in anonymous
     duplicate = submit(alice, '/games/new', data, source=path)
     assert b'already in your collection' in duplicate.data
@@ -44,7 +46,7 @@ def test_quick_add_revalidates_platform_rating_and_catalog_title(accounts):
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
 
 
-def test_star_ratings_keep_the_existing_ten_point_scale_and_can_be_cleared(accounts):
+def test_star_ratings_display_five_stars_preserve_saved_precision_and_can_be_cleared(accounts):
     fake_catalog(accounts)
     client = sign_in(accounts, 'alice')
     data = {'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Completed', 'rating': '7'}
@@ -53,7 +55,7 @@ def test_star_ratings_keep_the_existing_ten_point_scale_and_can_be_cleared(accou
         game_id = get_db().execute('SELECT id FROM games').fetchone()[0]
     path = f'/games/{game_id}/edit'
     page = client.get(path).get_data(as_text=True)
-    assert '3.5 stars, 7 out of 10" checked' in page
+    assert '3.5 out of 5 stars" checked' in page
     assert submit(client, path, {**data, 'rating': ''}).status_code == 302
     with accounts.app_context():
         assert get_db().execute('SELECT rating FROM games WHERE id = ?', (game_id,)).fetchone()[0] is None

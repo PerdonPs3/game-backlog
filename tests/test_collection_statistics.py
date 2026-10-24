@@ -23,7 +23,7 @@ def test_empty_collection_has_safe_statistics_and_help(client, app):
     assert "Add your first game" in summary
     assert "No ratings yet" in summary
     assert 'value="0" max="1"' in summary
-    assert "0.0/10" not in summary
+    assert "0.0/5" not in summary
 
 
 def test_statistics_count_statuses_and_ignore_unrated_games(app, client, seed_game):
@@ -40,7 +40,7 @@ def test_statistics_count_statuses_and_ignore_unrated_games(app, client, seed_ga
     assert 'id="summary-completed">2<' in summary
     assert 'id="summary-playing">1<' in summary
     assert 'id="summary-backlog">1<' in summary
-    assert "8.0/10" in summary
+    assert "4.0/5" in summary
     assert "3 games rated" in summary
     assert 'value="2" max="4"' in summary
 

@@ -1,0 +1,4 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Refresh this form · Vestigium{% endblock %}
+{% block page_heading %}Refresh this form{% endblock %}
+{% block panel %}<p role="alert">This form expired or your session changed. Nothing was saved.</p><p>Open the page again before submitting. You may need to sign in again.</p><a href="{{ url_for('explore.index') }}">Return to Explore games →</a>{% endblock %}

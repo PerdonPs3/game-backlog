@@ -13,6 +13,7 @@ from uuid import UUID
 import click
 from flask import Response, Blueprint, abort, current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
 from flask.cli import with_appcontext
+from flask_wtf.csrf import CSRFError, generate_csrf
 
 from app.profile_images import normalize_avatar
 from app.db import get_db, INTEGRITY_ERRORS
@@ -20,7 +21,8 @@ from app.catalog_journey import clear_auth_keep_selection, take_selection, pendi
 
 
 auth = Blueprint("auth", __name__, url_prefix="/account")
-SESSION_SECONDS = 12 * 60 * 60
+SESSION_SECONDS = 30 * 24 * 60 * 60
+RECOVERY_SECONDS = 30 * 60
 
 
 class AuthError(Exception):
@@ -100,9 +102,10 @@ def start_session(payload, recovery=False):
     opaque = token_urlsafe(32)
     db.execute("DELETE FROM account_sessions WHERE valid_until <= ?", (int(time()),))
     db.execute("INSERT INTO account_sessions (id_hash, user_id, access_token, refresh_token, expires_at, valid_until, recovery) VALUES (?, ?, ?, ?, ?, ?, ?)",
-               (fingerprint(opaque), user["id"], access, refresh, expiry, int(time()) + SESSION_SECONDS, int(recovery)))
+               (fingerprint(opaque), user["id"], access, refresh, expiry, int(time()) + (RECOVERY_SECONDS if recovery else SESSION_SECONDS), int(recovery)))
     clear_auth_keep_selection()
     session["account_session"] = opaque
+    session.permanent = not recovery
     return user
 
 
@@ -138,6 +141,10 @@ def load_user():
         g.user = user
         g.profile = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username FROM profiles WHERE id = ?", (user["id"],)).fetchone()
         g.account_session = {"id_hash": key, "access_token": access, "recovery": bool(stored["recovery"])}
+        if not stored['recovery']:
+            session.permanent = True
+            if stored['valid_until'] < int(time()) + SESSION_SECONDS - 86400:
+                db.execute('UPDATE account_sessions SET valid_until = ? WHERE id_hash = ?', (int(time()) + SESSION_SECONDS, key))
         db.commit()
     except AuthError as error:
         db.rollback()
@@ -322,6 +329,15 @@ def logout():
     return redirect(url_for("main.welcome"))
 
 
+@auth.get('/form-token')
+def form_token():
+    if not g.user:
+        return jsonify(error='Please sign in again before adding this game.'), 401
+    if g.account_session['recovery'] or not g.profile or not g.profile['display_name'].strip():
+        return jsonify(error='Finish setting up your account before adding this game.'), 409
+    return jsonify(csrf_token=generate_csrf())
+
+
 @auth.route("/profile/edit", methods=["GET", "POST"])
 def profile():
     if not g.user:
@@ -330,7 +346,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -369,6 +385,11 @@ def profile():
                     claim_username(db, g.user['id'], username)
                     db.execute('UPDATE profiles SET username = ?, is_public = ?, username_changed_at = ? WHERE id = ?',
                                (username, request.form.get('is_public', 'yes') == 'yes', username_clock(db), g.user['id']))
+                if request.form.get('profile_sharing') == 'yes':
+                    from app.public_profiles import update_sharing
+                    update_sharing(db, g.user['id'], request.form)
+                    db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
+                               (request.form.get('share_photo') == 'yes', g.user['id']))
                 db.commit()
             except ValueError as exc:
                 db.rollback()
@@ -382,11 +403,11 @@ def profile():
             if not error:
                 g.profile = db.execute("SELECT display_name, username FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
                 flash("Your profile is ready. Welcome to Vestigium." if is_setup else "Changes saved. Your profile is up to date.", "profile_saved")
-                return redirect(url_for("auth.profile_overview" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
+                return redirect(url_for("profiles.public_profile" if is_setup else "auth.profile", _anchor="profile-feedback"), code=303)
     from app.routes import collection_statistics
-    from app.public_profiles import RESERVED_NAMES
+    from app.public_profiles import RESERVED_NAMES, username_availability, username_clock
     from app.countries import COUNTRIES
-    return render_template("account_profile.html", profile=item, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES),
+    return render_template("account_profile.html", profile=item, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES), username_state=username_availability(item, username_clock(db)),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 
@@ -401,6 +422,8 @@ def profile_overview():
         return profile()
     if not g.profile or not g.profile["display_name"].strip():
         return redirect(url_for("auth.profile"))
+    if request.endpoint == 'auth.profile_overview' and g.profile['username']:
+        return redirect(url_for('profiles.public_profile', username=g.profile['username']), code=302)
     from app.profile_showcase import game_cards, showcase_games
     from app.routes import collection_statistics
     db = get_db()
@@ -487,6 +510,15 @@ def init_app(app):
     app.before_request(protect_collection)
     app.cli.add_command(assign_legacy)
 
+    @app.errorhandler(CSRFError)
+    def expired_form(error):
+        if request.endpoint == 'main.create' and request.form.get('return_to_catalog') == 'yes':
+            value = request.form.get('igdb_id', '')
+            if value.isascii() and value.isdigit() and len(value) <= 19 and 0 < int(value) < 2**63:
+                flash('This form expired or your session changed. Please try adding the game again.', 'catalog_error')
+                return redirect(url_for('explore.game', catalog_id=int(value), _anchor='library-actions'), code=303)
+        return render_template('form_expired.html'), 400
+
     @app.errorhandler(413)
     def upload_too_large(error):
         if request.endpoint == "auth.profile":
@@ -497,6 +529,7 @@ def init_app(app):
     @app.context_processor
     def account_context():
         return {"accounts_enabled": app.config.get("AUTH_ENABLED", False), "account_user": getattr(g, "user", None),
+                "profile_url": lambda: url_for('profiles.public_profile', username=g.profile['username']) if getattr(g, 'profile', None) and g.profile['username'] else url_for('auth.profile_overview'),
                 "pending_catalog_selection": pending_selection()}
 
     @app.after_request

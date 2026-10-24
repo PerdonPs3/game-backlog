@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 from flask import Flask
 from secrets import token_hex
@@ -12,6 +13,7 @@ def create_app(test_config=None):
     instance_path = Path(app.instance_path)
     app.config["DATABASE"] = str(instance_path / "backlog.sqlite")
     app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
     if test_config is None and not hosted:
         app.config.from_pyfile(
@@ -80,6 +82,8 @@ def create_app(test_config=None):
     init_public_profiles(app)
     from app.public_catalog import init_app as init_public_catalog
     init_public_catalog(app)
+    from app.game_reviews import init_app as init_game_reviews
+    init_game_reviews(app)
 
     from app.community import init_app as init_community
     init_community(app)
@@ -87,7 +91,8 @@ def create_app(test_config=None):
     from app.account_urls import init_app as init_account_urls
     init_account_urls(app)
 
-    from app.game_fields import STATUSES
+    from app.game_fields import STATUSES, star_rating
+    app.jinja_env.filters['star_rating'] = star_rating
     from app.countries import country_info
     app.jinja_env.filters['country_info'] = country_info
 

@@ -39,7 +39,7 @@ def test_search_and_shareable_detail_work_without_login_and_without_writes(accou
     for secret in ('PRIVATE TITLE','PRIVATE REVIEW',ALICE,'alice@example.test','alice-access','alice-refresh'):
         assert secret not in page
     assert response.headers['Cache-Control']=='private, no-store'
-    assert response.headers['Referrer-Policy']=='no-referrer'
+    assert response.headers['Referrer-Policy']=='same-origin'
     assert anon.get('/games/1').location.endswith('/account/login')
     assert anon.get('/catalog/games/123').status_code==401
     with accounts.app_context():
@@ -80,7 +80,7 @@ def test_selection_survives_registration_confirmation_and_profile_setup(accounts
     logged_in=submit(client,'/account/login',{'email':'alice@example.test','password':'test-password'})
     assert logged_in.location.endswith('/account/profile/edit')
     setup=submit(client,'/account/profile/edit',{'display_name':'Alice','username':'alice_player'})
-    assert setup.status_code==303 and setup.location.endswith('/account/alice_player/profile#profile-feedback')
+    assert setup.status_code==303 and setup.location.endswith('/profile/alice_player#profile-feedback')
     overview = client.get(setup.location).get_data(as_text=True)
     assert 'Your profile is ready.' in overview and 'Continue to your selected game' in overview
     continuation = client.get('/explore/games/123/add')
