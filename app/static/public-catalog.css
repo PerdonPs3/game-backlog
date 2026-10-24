@@ -74,7 +74,11 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 .catalog-library-actions { position: sticky; top: 100px; scroll-margin-top: 110px; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); min-width: 0; }
 .catalog-library-actions h2 { font-size: 1.1rem; margin: 0 0 1.25rem; }
 .catalog-quick-form { display: grid; gap: .6rem; }
-.catalog-add-platform > summary { cursor: pointer; color: var(--accent); font-size: .8rem; padding-block: .5rem; }
+.catalog-add-platform > summary { display: flex; align-items: center; gap: .6rem; list-style: none; cursor: pointer; color: var(--text-muted); font-size: .75rem; padding: .8rem; border: 1px dashed var(--border); border-radius: 10px; }
+.catalog-add-platform > summary::-webkit-details-marker { display: none; }
+.catalog-add-platform > summary > span { font-size: 1.1rem; line-height: 1; color: var(--accent); }
+.catalog-add-platform > summary:hover { color: var(--accent); border-color: var(--accent); }
+.catalog-add-platform[open] > summary > span { transform: rotate(45deg); }
 .catalog-add-platform > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 .catalog-add-platform[open] > summary { margin-bottom: .75rem; }
 .catalog-quick-form > label { font-size: .8rem; margin-top: .35rem; }
@@ -83,11 +87,21 @@ html[data-theme="light"] .catalog-public-search input, html[data-theme="light"] 
 .catalog-quick-form > button { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: .85rem 1rem; font-size: .8rem; }
 .catalog-more-options { justify-self: center; padding: .35rem; font-size: .75rem; color: var(--accent); text-underline-offset: 3px; }
 .catalog-owned-entries { list-style: none; margin: 0 0 1rem; padding: 0; }
-.catalog-owned-entries li { display: flex; gap: 1rem; align-items: center; padding-block: .75rem; border-bottom: 1px solid var(--border); font-size: .75rem; }
-.catalog-owned-entries li div { min-width: 0; flex: 1; }
-.catalog-owned-entries strong, .catalog-owned-entries span { display: block; overflow-wrap: anywhere; }
-.catalog-owned-entries span { color: var(--text-muted); margin-top: .4rem; }
-.catalog-owned-entries a { flex-shrink: 0; color: var(--accent); }
+.catalog-owned-entries li { display: grid; gap: 1rem; padding: 1rem; margin-bottom: .75rem; border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 12px; background: linear-gradient(140deg, color-mix(in srgb, var(--accent) 5%, var(--color-field)), var(--color-field)); font-size: .75rem; }
+.catalog-entry-platform { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.catalog-entry-platform strong { overflow-wrap: anywhere; line-height: 1.6; }
+.catalog-platform-icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 9px; color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.catalog-entry-progress { display: grid; justify-items: start; gap: .75rem; }
+.catalog-entry-status { display: inline-flex; align-items: center; gap: .4rem; color: var(--text-muted); font-size: .65rem; }
+.catalog-entry-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.catalog-entry-status[data-status="Playing"] { color: #20b991; }
+.catalog-entry-status[data-status="Completed"] { color: var(--accent); }
+.catalog-entry-rating { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; color: var(--accent); }
+.catalog-entry-rating small { color: var(--text-muted); font-size: .65rem; }
+.catalog-owned-entries .catalog-entry-edit { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .7rem; border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent); border-radius: 8px; color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); text-decoration: none; font-weight: 600; }
+.catalog-entry-edit > span { margin-left: auto; }
+.catalog-entry-edit:hover { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+html[data-theme="light"] .catalog-entry-status[data-status="Playing"] { color: #147d64; }
 .catalog-save-feedback { color: #1ec996; font-size: .8rem; line-height: 1.6; }
 html[data-theme="light"] .catalog-library-actions { background: #fff; }
 html[data-theme="light"] .catalog-save-feedback { color: #15734f; }

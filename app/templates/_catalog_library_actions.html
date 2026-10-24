@@ -5,11 +5,18 @@
     {% if can_manage %}
         {% if entries %}
         <ul class="catalog-owned-entries" aria-label="Your saved entries">
-            {% for entry in entries %}<li><div><strong>{{ entry.platform }}</strong><span>{{ entry.status }}{% if entry.rating %} · {{ entry.rating|star_rating }}/5{% endif %}</span></div><a href="{{ url_for('main.edit', game_id=entry.id) }}" aria-label="Edit your {{ entry.platform }} entry">Edit ↗</a></li>{% endfor %}
+            {% from '_review_stars.html' import review_stars %}
+            {% for entry in entries %}
+            <li>
+                <div class="catalog-entry-platform"><span class="catalog-platform-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span><strong>{{ entry.platform }}</strong></div>
+                <div class="catalog-entry-progress"><span class="catalog-entry-status" data-status="{{ entry.status }}">{{ entry.status }}</span>{% if entry.rating %}<span class="catalog-entry-rating" role="img" aria-label="Your rating: {{ entry.rating|star_rating }}/5">{{ review_stars(entry.rating) }}<small aria-hidden="true">{{ entry.rating|star_rating }}/5</small></span>{% endif %}</div>
+                <a class="catalog-entry-edit" href="{{ url_for('main.edit', game_id=entry.id) }}" aria-label="Edit your {{ entry.platform }} entry"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 5 5-12 12H4v-5Z M13 6l5 5"/></svg>Edit entry<span aria-hidden="true">↗</span></a>
+            </li>
+            {% endfor %}
         </ul>
         {% endif %}
         {% if available_platforms %}
-        {% if entries %}<details class="catalog-add-platform"><summary>Add another platform</summary>{% endif %}
+        {% if entries %}<details class="catalog-add-platform"><summary><span aria-hidden="true">+</span>Add another platform</summary>{% endif %}
         <form action="{{ url_for('main.create') }}" method="post" class="catalog-quick-form" data-quick-add data-token-url="{{ url_for('auth.form_token') if accounts_enabled else '' }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="igdb_id" value="{{ game.id }}">

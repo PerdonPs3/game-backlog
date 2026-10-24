@@ -18,13 +18,14 @@ def test_quick_add_stays_on_the_game_and_only_lists_the_current_owners_entries(a
     assert response.status_code == 303
     assert response.location == path + '#library-actions'
     own = alice.get(response.location).get_data(as_text=True)
-    assert 'Added to your library.' in own and 'Playing · 4.5/5' in own
+    assert 'Added to your library.' in own and 'data-status="Playing">Playing' in own
+    assert 'aria-label="Your rating: 4.5/5"' in own
     assert '<option value="PC">' not in own
     assert '<option value="PS3">' in own
     other = bob.get(path).get_data(as_text=True)
-    assert 'Playing · 4.5/5' not in other and '<option value="PC">' in other
+    assert 'aria-label="Your rating: 4.5/5"' not in other and '<option value="PC">' in other
     anonymous = accounts.test_client().get(path).get_data(as_text=True)
-    assert 'Playing · 4.5/5' not in anonymous and 'catalog-quick-form' not in anonymous
+    assert 'aria-label="Your rating: 4.5/5"' not in anonymous and 'catalog-quick-form' not in anonymous
     assert 'Sign in to add game' in anonymous
     duplicate = submit(alice, '/games/new', data, source=path)
     assert b'already in your collection' in duplicate.data
