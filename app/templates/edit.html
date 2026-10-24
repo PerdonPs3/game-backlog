@@ -77,6 +77,12 @@
                     maxlength="2000"
                 >{{ request.form.get('review', game['review']) }}</textarea>
                 {% include '_review_publication.html' %}
+                {% if has_public_review %}
+                <div class="review-publication-management">
+                    {% if public_review_hidden %}<p class="catalog-message">Your review is hidden by moderation. Editing it will not republish it.</p>{% endif %}
+                    <button type="submit" class="secondary-button danger-link" formaction="{{ url_for('reviews.delete', catalog_id=game.igdb_id) }}" formnovalidate>Delete public review</button>
+                </div>
+                {% endif %}
             </div>
 
             <div class="form-actions">

@@ -1,0 +1,10 @@
+{% macro review_stars(rating) %}
+<span class="review-score-stars" style="--rating: {{ rating }}" aria-hidden="true">
+    {% for star in range(1, 6) %}
+    <span style="--star: {{ star }}">
+        <svg class="review-star-outline" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+        <svg class="review-star-fill" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+    </span>
+    {% endfor %}
+</span>
+{% endmacro %}
