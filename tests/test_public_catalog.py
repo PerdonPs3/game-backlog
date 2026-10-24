@@ -22,6 +22,21 @@ def fake_catalog(app):
     return catalog
 
 
+def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accounts):
+    catalog = fake_catalog(accounts)
+    catalog.get_game.side_effect = None
+    catalog.get_game.return_value = {**GAME, 'videos': [{'name': '<Trailer>', 'video_id': 'KOiuc9UWz1E'}],
+                                   'screenshots': [{'image_id': 'shot_123'}]}
+    page = accounts.test_client().get('/explore/games/123').get_data(as_text=True)
+    assert 'data-media-gallery' in page and '&lt;Trailer&gt;' in page
+    assert 'https://www.youtube.com/watch?v=KOiuc9UWz1E' in page
+    assert 't_screenshot_huge/shot_123.jpg' in page
+    assert '<iframe' not in page
+    assert page.index('data-media-gallery') < page.index('About the game')
+    catalog.get_game.return_value = GAME
+    assert 'data-media-gallery' not in accounts.test_client().get('/explore/games/123').get_data(as_text=True)
+
+
 def test_search_and_shareable_detail_work_without_login_and_without_writes(accounts):
     catalog=fake_catalog(accounts)
     alice=sign_in(accounts,'alice')

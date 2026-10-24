@@ -139,7 +139,7 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id,videos.name,videos.video_id; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -324,6 +324,40 @@ def game_suggestion(game):
     }
 
 
+def game_media(game):
+    """Expose bounded, validated media on fixed provider hosts only."""
+    items, seen = [], set()
+    videos = game.get('videos')
+    if isinstance(videos, list):
+        for video in videos:
+            if not isinstance(video, dict):
+                continue
+            video_id = video.get('video_id')
+            if not isinstance(video_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id) or video_id in seen:
+                continue
+            seen.add(video_id)
+            title = video.get('name')
+            items.append({'kind': 'video', 'id': video_id,
+                          'title': title[:160] if isinstance(title, str) and title.strip() else 'Trailer',
+                          'preview': f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg',
+                          'url': f'https://www.youtube.com/watch?v={video_id}'})
+            if len(items) == 4:
+                break
+    screenshots = game.get('screenshots')
+    if isinstance(screenshots, list):
+        for image in screenshots:
+            image_id = cover_image_id({'cover': image})
+            if not image_id or image_id in seen:
+                continue
+            seen.add(image_id)
+            items.append({'kind': 'image', 'id': image_id, 'title': f'Screenshot {sum(item["kind"] == "image" for item in items) + 1}',
+                          'preview': f'https://images.igdb.com/igdb/image/upload/t_screenshot_med/{image_id}.jpg',
+                          'url': f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'})
+            if sum(item['kind'] == 'image' for item in items) == 8:
+                break
+    return items
+
+
 def game_profile(game):
     """Public catalog details, with safe defaults for optional upstream fields."""
     release = None
@@ -353,7 +387,7 @@ def game_profile(game):
             break
     if not backdrop:
         backdrop = collection_cover_url(cover_image_id(game))
-    return {"release": release, "genres": names, "backdrop_url": backdrop,
+    return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
 

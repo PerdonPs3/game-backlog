@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, game_profile
+from app.catalog import CatalogError, game_profile, game_media
 from app.db import get_db
 
 
@@ -13,6 +13,21 @@ from app.db import get_db
 ])
 def test_catalog_backdrop_uses_validated_game_images_only(media, expected):
     assert game_profile(media)['backdrop_url'] == 'https://images.igdb.com/igdb/image/upload/' + expected
+
+
+def test_catalog_media_validates_deduplicates_and_limits_provider_ids():
+    videos = [{'video_id': 'KOiuc9UWz1E', 'name': '<Trailer>'}] * 2
+    videos += [{'video_id': '../bad'}, None, {'video_id': 'https://example.com'}]
+    videos += [{'video_id': f'video{i:06d}', 'name': 'Trailer'} for i in range(10)]
+    images = [{'image_id': 'shot_0'}] * 2 + [None, {'image_id': '../bad'}]
+    images += [{'image_id': f'shot_{i}'} for i in range(10)]
+    media = game_media({'videos': videos, 'screenshots': images})
+    assert len(media) == 12
+    assert sum(item['kind'] == 'video' for item in media) == 4
+    assert len({item['id'] for item in media}) == len(media)
+    assert media[0]['url'] == 'https://www.youtube.com/watch?v=KOiuc9UWz1E'
+    assert game_media({'videos': {}, 'screenshots': None}) == []
+
 
 def link_catalog(app, game_id):
     with app.app_context():
@@ -79,7 +94,7 @@ def test_missing_details(client, app):
 
 def test_profile_invalid_optional_data():
     assert game_profile({"summary": {}, "genres": {}, "first_release_date": True}) == {
-        "summary": None, "genres": [], "release": None, "backdrop_url": None,
+        "summary": None, "genres": [], "release": None, "backdrop_url": None, "media": [],
     }
     assert game_profile({"first_release_date": 10**100})["release"] is None
     assert game_profile({"genres": [{"name": "Puzzle"}, {"name": "Puzzle"}, None]})["genres"] == ["Puzzle"]

@@ -26,6 +26,7 @@
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>
+        {% include '_catalog_media.html' %}
         <div class="catalog-detail-grid">
             <section class="catalog-detail-panel"><h2>About the game</h2><p class="catalog-synopsis">{{ profile.summary or 'A synopsis is not available for this game yet.' }}</p></section>
             <aside class="catalog-detail-panel"><h2>Platforms</h2>{% if game.platforms %}<ul class="catalog-platforms">{% for platform in game.platforms %}<li>{{ platform }}</li>{% endfor %}</ul>{% else %}<p>Platform information is not available.</p>{% endif %}</aside>
@@ -38,4 +39,4 @@
 <section class="catalog-empty" role="alert"><h2>Keep exploring.</h2><p>{{ error }}</p><a class="button-link" href="{{ url_for('explore.index') }}">Browse the catalog ↗</a></section>
 {% endif %}
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-quick-add.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-quick-add.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-media.js') }}" defer></script>{% endblock %}

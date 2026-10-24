@@ -1,5 +1,12 @@
 # Public catalog and shareable game pages
 
+Game pages include a media gallery between the identity panel and synopsis when
+IGDB provides videos or screenshots. Validated YouTube IDs and IGDB image IDs
+produce fixed-host links, limited to four videos and eight screenshots. Selecting
+a video shows its preview; an embedded player loads only after Play is pressed.
+Switching media removes the player and stops playback. External video/image links
+remain available without JavaScript and when a provider blocks embedding.
+
 Visitors can browse `/explore` without an account. Search uses a normal GET form
 with a 2–200 character query and 30 results per page. `/explore/games/<catalog_id>`
 is a standalone page that opens directly, survives refresh, and can be shared.
