@@ -6,6 +6,14 @@ from app.catalog import CatalogError, game_profile
 from app.db import get_db
 
 
+@pytest.mark.parametrize('media,expected', [
+    ({'artworks': [{'image_id': 'art_123'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/art_123.jpg'),
+    ({'artworks': [{'image_id': '../invalid'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/shot_123.jpg'),
+    ({'artworks': {}, 'screenshots': [None, {'image_id': 'https://example.com/image'}], 'cover': {'image_id': 'co123'}}, 't_cover_big/co123.jpg'),
+])
+def test_catalog_backdrop_uses_validated_game_images_only(media, expected):
+    assert game_profile(media)['backdrop_url'] == 'https://images.igdb.com/igdb/image/upload/' + expected
+
 def link_catalog(app, game_id):
     with app.app_context():
         db = get_db()
@@ -71,7 +79,7 @@ def test_missing_details(client, app):
 
 def test_profile_invalid_optional_data():
     assert game_profile({"summary": {}, "genres": {}, "first_release_date": True}) == {
-        "summary": None, "genres": [], "release": None,
+        "summary": None, "genres": [], "release": None, "backdrop_url": None,
     }
     assert game_profile({"first_release_date": 10**100})["release"] is None
     assert game_profile({"genres": [{"name": "Puzzle"}, {"name": "Puzzle"}, None]})["genres"] == ["Puzzle"]

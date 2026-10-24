@@ -139,7 +139,7 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS},summary,genres.name; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -340,7 +340,20 @@ def game_profile(game):
                     if isinstance(genre, dict) and isinstance(genre.get("name"), str)
                     and genre["name"].strip()}, key=str.casefold)
     summary = game.get("summary")
-    return {"release": release, "genres": names,
+    backdrop = None
+    for field in ('artworks', 'screenshots'):
+        images = game.get(field)
+        if isinstance(images, list):
+            for image in images:
+                image_id = cover_image_id({'cover': image})
+                if image_id:
+                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'
+                    break
+        if backdrop:
+            break
+    if not backdrop:
+        backdrop = collection_cover_url(cover_image_id(game))
+    return {"release": release, "genres": names, "backdrop_url": backdrop,
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
 

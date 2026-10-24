@@ -2,6 +2,8 @@
 {% from '_review_stars.html' import review_stars %}
 {% block page_title %}{{ game.name if game else 'Game unavailable' }} · Vestigium{% endblock %}
 {% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}">{% endblock %}
+{% block body_class %}{{ super() }}{% if game and profile.backdrop_url %} catalog-illustrated-page{% endif %}{% endblock %}
+{% block workspace_backdrop %}{% if game and profile.backdrop_url %}<div class="catalog-game-backdrop" aria-hidden="true"><img src="{{ profile.backdrop_url }}" alt="" fetchpriority="low" decoding="async" referrerpolicy="no-referrer"></div>{% endif %}{% endblock %}
 {% block workspace_hero %}{% if not game %}<header class="workspace-hero"><div><h1>Game <span>unavailable.</span></h1><p>{{ error }}</p></div></header>{% endif %}{% endblock %}
 {% block panel %}
 {% if game %}

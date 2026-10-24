@@ -1,4 +1,12 @@
 .catalog-workspace { max-width: 1240px; }
+.catalog-game-backdrop { position: absolute; top: 76px; left: 0; right: 0; height: min(1000px, 110vh); pointer-events: none; overflow: hidden; }
+.catalog-game-backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; opacity: .55; filter: saturate(.75); }
+.catalog-game-backdrop::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #10121555, #10121566 25%, #101215e0 75%, #101215 100%), linear-gradient(90deg, #10121577, transparent 40%, #10121555); }
+.catalog-illustrated-page .catalog-workspace { position: relative; z-index: 1; }
+.catalog-illustrated-page .catalog-game-hero { background: color-mix(in srgb, var(--color-panel) 82%, transparent); backdrop-filter: blur(8px); }
+html[data-theme="light"] .catalog-game-backdrop img { opacity: .35; }
+html[data-theme="light"] .catalog-game-backdrop::after { background: linear-gradient(180deg, #faf8f466, #faf8f488 30%, #faf8f4ef 78%, #faf8f4); }
+html[data-theme="light"] .catalog-illustrated-page .catalog-game-hero { background: #ffffffd9; }
 .catalog-workspace .workspace-panel,
 html[data-theme="light"] .catalog-workspace .workspace-panel { padding: 0; border: 0; background: transparent; box-shadow: none; min-width: 0; }
 .catalog-workspace .workspace-body { display: block; }
