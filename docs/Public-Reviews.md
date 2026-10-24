@@ -2,9 +2,13 @@
 
 Catalog game pages show opt-in player reviews with a five-star rating, author,
 profile link, date, and paginated text. Public reviews are separate records from
-private collection entries. Creating, editing, importing, or deleting a private
-library entry never publishes or changes a public review, and publishing a
-review never changes the library. Private backup files retain their existing
+private collection entries. Add game offers an unchecked **Also publish this
+review** option to save the entered rating and review on the public game page.
+This explicit option saves both records atomically, requires a public profile,
+and allows marking spoilers. It replaces the author's existing public review
+for that game, if any. Without that option, creating, editing, importing, or
+deleting a library entry never publishes or changes a public review. Publishing
+from a catalog page never changes the library. Private backup files retain their existing
 format and do not include public reviews.
 
 ## Publication and privacy

@@ -91,6 +91,17 @@
                     rows="4"
                     maxlength="2000"
                 >{{ request.form.get('review', '') }}</textarea>
+                {% if accounts_enabled %}
+                <div class="review-publication">
+                    <label><input type="checkbox" name="publish_review" value="yes"{% if request.form.get('publish_review') == 'yes' %} checked{% endif %}{% if not review_publication_available %} disabled{% endif %}>Also publish this review</label>
+                    {% if review_publication_available %}
+                    <div class="review-publication-options">
+                        <small>Rating and review text are required. Replaces your existing public review for this game, if any.</small>
+                        <label><input type="checkbox" name="public_review_spoilers" value="yes"{% if request.form.get('public_review_spoilers') == 'yes' %} checked{% endif %}>Contains spoilers</label>
+                    </div>
+                    {% else %}<small><a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">Make your profile public</a> to publish reviews.</small>{% endif %}
+                </div>
+                {% endif %}
             </div>
             <div class="form-actions">
                 <button id="add-game-button" type="submit" {% if not selected_game %}disabled{% endif %}>Add game</button>
