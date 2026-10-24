@@ -1,0 +1,73 @@
+{% from '_rating_picker.html' import rating_picker %}
+<section class="community-reviews" id="community-reviews" aria-labelledby="community-reviews-title">
+    <header class="community-reviews-heading">
+        <div><h2 id="community-reviews-title">Player reviews</h2><p>{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</p></div>
+        {% if review_average is not none %}<strong class="community-review-average">{{ '%.1f'|format(review_average / 2) }}<small>/5</small></strong>{% endif %}
+    </header>
+    {% for message in get_flashed_messages(category_filter=['review_saved']) %}<p class="catalog-save-feedback" role="status">{{ message }}</p>{% endfor %}
+    {% for message in get_flashed_messages(category_filter=['review_error']) %}<p class="catalog-message" role="alert">{{ message }}</p>{% endfor %}
+    <details class="community-review-editor" id="write-review"{% if review_error or own_review and request.args.get('edit_review') == 'yes' %} open{% endif %}>
+        <summary>{{ 'Edit your public review' if own_review else 'Write a review' }}</summary>
+        {% if review_normal_session %}
+            {% if own_review and own_review.moderation_hidden %}<p class="catalog-message">Your review has been hidden by moderation. Editing it will not republish it.</p>{% endif %}
+            {% if review_can_publish %}
+            <form method="post" action="{{ url_for('explore.game', catalog_id=game.id, _anchor='write-review') }}" class="community-review-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <p class="community-review-privacy">Public with your name. Your private notes stay in your library.</p>
+                {% if review_error %}<p class="catalog-message" role="alert">{{ review_error }}</p>{% endif %}
+                {{ rating_picker(request.form.get('rating', '') if review_error else (own_review.rating if own_review else ''), optional=false) }}
+                <label for="public-review-body">Your review</label>
+                <textarea id="public-review-body" name="body" rows="5" maxlength="2000" required placeholder="What made this game memorable?">{{ request.form.get('body', '') if review_error else (own_review.body if own_review else '') }}</textarea>
+                <small>Up to 2,000 characters.</small>
+                <label class="community-review-spoiler"><input type="checkbox" name="has_spoilers" value="yes"{% if (request.form.get('has_spoilers') == 'yes' if review_error else own_review and own_review.has_spoilers) %} checked{% endif %}>Contains spoilers</label>
+                <button type="submit">{{ 'Save public review' if own_review else 'Publish review' }} ↗</button>
+            </form>
+            {% else %}
+            <p>Make your profile public to publish a review. Existing reviews stay hidden while your profile is private.</p>
+            <a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">Edit profile privacy ↗</a>
+            {% endif %}
+            {% if own_review %}
+            <form method="post" action="{{ url_for('reviews.delete', catalog_id=game.id) }}" class="community-review-delete">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="secondary-button danger-link" type="submit">Delete public review</button>
+            </form>
+            {% endif %}
+        {% elif account_user %}
+            <a href="{{ url_for('auth.password') if g.account_session.recovery else url_for('auth.profile') }}">{{ 'Finish account recovery' if g.account_session.recovery else 'Complete your profile' }} ↗</a>
+        {% else %}
+            <a class="button-link" href="{{ url_for('auth.login') }}">Sign in to write a review ↗</a>
+        {% endif %}
+    </details>
+    <div class="community-review-list">
+        {% for review in community_reviews %}
+        <article class="community-review" id="review-{{ review.id }}">
+            <header><a href="{{ url_for('profiles.public_profile', username=review.username) }}"><strong>{{ review.display_name }}</strong><small>@{{ review.username }}</small></a><span class="community-review-score" aria-label="Rating: {{ review.rating|star_rating }}/5"><span aria-hidden="true">★</span> {{ review.rating|star_rating }}/5</span></header>
+            <time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time>
+            {% if review.has_spoilers or review.body|length > 360 or review.body.count('\n') > 4 %}
+            <details class="community-review-content">
+                <summary>{% if review.has_spoilers %}<span class="community-spoiler-label">Spoilers</span> Show review{% else %}<span class="community-review-excerpt">{{ review.body|replace('\n', ' ')|truncate(240, false, '…') }}</span><span>Read full review</span>{% endif %}</summary>
+                <p>{{ review.body }}</p>
+            </details>
+            {% else %}<p>{{ review.body }}</p>{% endif %}
+            {% if review.is_own %}<a class="community-review-edit" href="{{ url_for('explore.game', catalog_id=game.id, edit_review='yes', _anchor='write-review') }}">Edit your review ↑</a>
+            {% elif review_normal_session %}
+            <details class="community-report"><summary>Report</summary>
+                <form method="post" action="{{ url_for('reviews.report', catalog_id=game.id, review_id=review.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label for="report-reason-{{ review.id }}">Reason</label>
+                    <select id="report-reason-{{ review.id }}" name="reason" required><option value="">Choose a reason</option><option value="spam">Spam</option><option value="abuse">Abuse or harmful content</option><option value="spoilers">Unmarked spoilers</option><option value="other">Other</option></select>
+                    <small>Reporting hides this review for you.</small>
+                    <button type="submit" class="secondary-button">Report and hide</button>
+                </form>
+            </details>
+            {% endif %}
+        </article>
+        {% else %}<p class="community-reviews-empty">No reviews to show yet.</p>{% endfor %}
+    </div>
+    {% if reviews_page > 1 or reviews_has_next %}
+    <nav class="community-reviews-pages" aria-label="Review pages">
+        {% if reviews_page > 1 %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page - 1, _anchor='community-reviews') }}">← Newer reviews</a>{% endif %}
+        {% if reviews_has_next %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page + 1, _anchor='community-reviews') }}">Older reviews →</a>{% endif %}
+    </nav>
+    {% endif %}
+</section>

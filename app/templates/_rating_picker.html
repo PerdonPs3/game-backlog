@@ -1,7 +1,7 @@
-{% macro rating_picker(value='') %}
+{% macro rating_picker(value='', optional=true) %}
 {% set score = value|int if value else 0 %}
 <fieldset class="rating-picker" data-rating-picker>
-    <legend>Your rating <span class="rating-optional">Optional</span></legend>
+    <legend>Your rating <span class="rating-optional">{{ 'Optional' if optional else 'Required' }}</span></legend>
     <div class="rating-stars" aria-label="Rate from half a star to five stars">
         <div class="rating-artwork" aria-hidden="true">
         {% for star in range(1, 6) %}

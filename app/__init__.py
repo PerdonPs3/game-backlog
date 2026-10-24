@@ -82,6 +82,8 @@ def create_app(test_config=None):
     init_public_profiles(app)
     from app.public_catalog import init_app as init_public_catalog
     init_public_catalog(app)
+    from app.game_reviews import init_app as init_game_reviews
+    init_game_reviews(app)
 
     from app.community import init_app as init_community
     init_community(app)

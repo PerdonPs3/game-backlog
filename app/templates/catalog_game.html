@@ -22,6 +22,7 @@
     </div>
     {% include '_catalog_library_actions.html' %}
 </div>
+{% if reviews_enabled %}{% include '_game_reviews.html' %}{% endif %}
 {% else %}
 <section class="catalog-empty" role="alert"><h2>Keep exploring.</h2><p>{{ error }}</p><a class="button-link" href="{{ url_for('explore.index') }}">Browse the catalog ↗</a></section>
 {% endif %}
