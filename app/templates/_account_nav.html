@@ -1,0 +1,14 @@
+{% if accounts_enabled %}
+<div class="account-navigation">
+    {% if account_user %}
+    <a href="{{ profile_url() }}">My profile</a>
+    <form action="{{ url_for('auth.logout') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Sign out</button>
+    </form>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}">Sign in</a>
+    <a class="account-create" href="{{ url_for('auth.register') }}">Create account</a>
+    {% endif %}
+</div>
+{% endif %}

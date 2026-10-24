@@ -18,7 +18,7 @@ def test_create_game_persists(app, post_form, game_data, stored_games):
     # A fresh client/request must see the saved game too.
     page = app.test_client().get("/library")
     assert b"Portal 2" in page.data
-    assert b"Rating: 9/10" in page.data
+    assert b"Rating: 4.5/5" in page.data
 
 
 def test_create_without_rating_or_review(post_form, game_data, stored_games):
@@ -35,10 +35,10 @@ INVALID_FIELDS = [
     ("platform", "   ", "Platform must contain"),
     ("platform", "x" * 81, "Platform must contain"),
     ("status", "Unknown", "Please select a valid status"),
-    ("rating", "0", "Rating must be a whole number"),
-    ("rating", "11", "Rating must be a whole number"),
-    ("rating", "8.5", "Rating must be a whole number"),
-    ("rating", "abc", "Rating must be a whole number"),
+    ("rating", "0", "Choose a rating from the five-star scale"),
+    ("rating", "11", "Choose a rating from the five-star scale"),
+    ("rating", "8.5", "Choose a rating from the five-star scale"),
+    ("rating", "abc", "Choose a rating from the five-star scale"),
     ("review", "x" * 2001, "Review must contain no more than"),
 ]
 

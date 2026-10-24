@@ -1,0 +1,22 @@
+{% macro rating_picker(value='', optional=true) %}
+{% set score = value|int if value else 0 %}
+<fieldset class="rating-picker" data-rating-picker>
+    <legend>Your rating <span class="rating-optional">{{ 'Optional' if optional else 'Required' }}</span></legend>
+    <div class="rating-stars" aria-label="Rate from half a star to five stars">
+        <div class="rating-artwork" aria-hidden="true">
+        {% for star in range(1, 6) %}
+            <span style="--star: {{ star }}">
+                <svg class="rating-outline" viewBox="0 0 24 24"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+                <svg class="rating-fill" viewBox="0 0 24 24"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+            </span>
+        {% endfor %}
+        </div>
+    {% for point in range(1, 11) %}
+        <label class="rating-choice" title="{{ point|star_rating }}/5 stars">
+            <input type="radio" name="rating" value="{{ point }}" aria-label="{{ point|star_rating }} out of 5 stars"{% if score == point %} checked{% endif %}>
+        </label>
+    {% endfor %}
+    </div>
+    <div class="rating-caption"><output data-rating-score>{{ (score|star_rating ~ '/5') if score else 'Not rated' }}</output><label class="rating-clear"><input type="radio" name="rating" value="" aria-label="Clear rating"{% if not score %} checked{% endif %}><span>Clear</span></label></div>
+</fieldset>
+{% endmacro %}

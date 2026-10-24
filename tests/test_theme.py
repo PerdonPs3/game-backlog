@@ -9,12 +9,16 @@ def test_theme_available_on_all_page_shells(client, path):
     assert html.index("theme.js") < html.index("style.css") < html.index("light-theme.css")
     assert html.count("data-theme-toggle") == 1
     assert html.count('class="github-profile"') == 1
-    assert 'href="https://github.com/PerdonPs3"' in html
+    assert 'href="https://github.com/PerdonPs3/game-backlog"' in html
     assert 'class="github-profile-name"' in html
     assert html.index("data-theme-toggle") < html.index('class="github-profile"')
     assert 'aria-label="Switch to light mode"' in html
     assert "data-theme-label" not in html
     assert 'class="theme-sun"' in html and 'class="theme-moon"' in html
+    assert html.count('<header class="workspace-site-header">') == 1
+    assert html.count('<footer class="site-footer workspace-footer">') == 1
+    assert html.index('</main>') < html.index('<footer class="site-footer')
+    assert 'site-frame.css' in html
 
 
 def test_theme_available_in_edit_delete_and_details(client, seed_game):

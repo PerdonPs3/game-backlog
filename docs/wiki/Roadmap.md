@@ -3,6 +3,8 @@
 The long-term idea is a personal gaming library where finishing adventures also
 helps your player profile grow. The stages below describe a proposed direction,
 not a release schedule. Checked items are implemented; unchecked items are planned.
+For the current proposed execution order, see the [product plan](../Product-Plan.md):
+profile palette pilot, player profile, public catalog, guided homepage, and Discover.
 
 ### 1. Make the collection easier to manage
 
@@ -21,9 +23,22 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 - [x] Search an external game catalog instead of typing every detail manually.
       For example, searching **Resident** would return matching titles to choose from.
 - [x] Display covers and release years in suggestions, with available platforms after selection.
+- [x] Search title words and aliases with popularity-aware ordering, paginated Explore results, and an official/community content filter based on IGDB types and tags (published to develop).
 - [x] Store catalog identifiers and validate the selected game and platform.
 - [x] Display game covers in the collection.
 - [x] Block duplicate catalog game/platform combinations and link to the existing entry.
+- [x] Allow anonymous catalog search and public game detail pages, independent of private library entries.
+- [x] Give each catalog game a stable, shareable page URL that opens directly on
+      refresh or in a new tab without signing in. Link to it from library covers;
+      keep the current modal only as an optional quick view. Never include the
+      owner's private notes, rating, or progress in the shared catalog page.
+- [x] Connect Explore from the welcome page and library; preserve catalog selection
+      through sign-in and profile setup, with explicit confirmation before adding.
+- [x] Link public profile showcase games to shared catalog detail pages.
+- [x] Add game-specific artwork backgrounds, selectable trailers/screenshots, and a public game-details sidebar.
+- [x] Publish reviews explicitly from both Add game and Edit game, with a five-star rating scale, spoiler labels, reporting, and separate private notes.
+- [ ] Reuse the same catalog flow from Discover.
+- [ ] Validate anonymous search, sharing, and the authenticated add flow in Preview.
 
 Game metadata and covers are provided by [IGDB](https://www.igdb.com/).
 
@@ -42,10 +57,25 @@ Games from other platforms remain supported through the catalog.
 
 ### 4. Build a personal player profile
 
-- [ ] Add an avatar, a short bio, and a shelf of favorite games.
+- [x] Add a private profile with a display name, a short bio, and a built-in avatar.
+- [x] Upload profile photos with an adjustable circular crop and preset avatar colors.
+- [x] Validate the Obsidian palette pilot on the dark profile before wider adoption.
+- [x] Separate a private profile overview from the editor and add an ordered five-game showcase.
+- [ ] Validate the overview, showcase ordering, and empty states in Preview before release.
 - [x] Show collection statistics: totals, status counts, completion progress, and average rating.
-- [ ] Introduce accounts and separate collections before supporting multiple users.
-- [ ] Let users choose which profile information and activity to make public.
+- [x] Implement accounts and separate collections with automated two-account isolation tests.
+- [ ] Validate real signup, confirmation emails, recovery, and isolation on the separate Preview database before release.
+- [x] Let users choose which supported profile fields and showcase information to make public.
+- [x] Implement unique usernames and optional public profile links
+      with separate bio, showcase, and photo sharing controls. Existing private uploads require explicit publication.
+- [x] Default new profile setup to Public with a Private option, accept uppercase
+      username input while keeping lowercase links, and organize sharing controls
+      into identity, visibility, and shared-content sections.
+- [x] Allow username changes every 30 days, show the next available time, and
+      redirect reserved previous names directly to the current public profile.
+- [ ] Validate public profile publication, anonymous viewing, and revocation in
+      Preview before release. Add reporting and moderation before public photos
+      or profile discovery.
 
 ### 5. Add progression and customization
 
@@ -70,24 +100,28 @@ completions and externally verified achievements will need clear distinctions.
 
 ### 7. Deploy with Vercel and Supabase
 
-- [ ] Deploy the web application on Vercel.
-- [ ] Use Supabase PostgreSQL as the hosted database, migrating the current
+- [x] Deploy the web application on Vercel.
+- [x] Use Supabase PostgreSQL as the hosted database, migrating the current
       SQLite schema and data while preserving existing collections.
-- [ ] Adapt and validate the Flask application for Vercel's runtime and
+- [x] Adapt and validate the Flask application for Vercel's runtime and
       Supabase database connections, including persistent data across requests.
-- [ ] Configure deployment credentials securely and verify the hosted workflow
+- [x] Configure deployment credentials securely and verify the hosted workflow
       before publishing to production, with explicit user approval.
 
 ### 8. Prepare for a safe public release
 
+Account features are published to `develop`. The project owner reports successful
+manual development testing. Production cutover, configuration, and release gates
+remain separate from that acceptance; see [account setup](../Accounts.md).
+
 Public access requires accounts, data ownership, and reliable storage. These
 requirements take priority over optional integrations and progression.
 
-- [ ] Add registration, sign-in, sign-out, secure password storage, and account recovery.
-- [ ] Associate games, lists, backups, and statistics with their owning account.
-- [ ] Enforce ownership on the server: users must never edit or delete another
+- [x] Implement registration, sign-in, sign-out, and recovery through Supabase Auth; passwords are managed by the provider.
+- [x] Associate games, lists, backups, and statistics with their owning account.
+- [x] Enforce ownership on the server: users must never edit or delete another
       user's data, even by changing a URL or submitting a crafted request.
-- [ ] Add public/private profiles and allow viewing only information the owner
+- [x] Add public/private profiles and allow viewing only information the owner
       explicitly shares. Viewing a profile must never grant editing access.
 - [ ] Migrate the existing local collection safely into its owner's account.
 - [ ] Set up persistent production storage and test backup restoration across
@@ -104,6 +138,8 @@ requirements take priority over optional integrations and progression.
       the project name, tagline, and links to the library and GitHub. Personal
       collection entries are never used in the welcome screen.
 - [x] Add a discreet GitHub link inside the application.
+- [x] Build a scrolling product introduction with looping animated library/profile examples, a reduced-motion alternative, and clear account actions (published to develop).
+- [x] Add an aggregate activated-account count with a green person icon, minute refreshes, and configurable test-account exclusions (published to develop).
 - [ ] Review naming availability before a public launch and add real product
       screenshots to the showcase when the interface is ready.
 - [ ] Optionally publish a static project showcase on GitHub Pages, with a
@@ -113,5 +149,11 @@ GitHub Pages can host a static showcase, not the Python server or writable
 database. A public working application requires suitable hosting and the
 public-release safeguards above. Keep secrets and real collection data out of
 public demonstration bundles.
+
+### 10. Discover releases and updates
+
+- [ ] Add upcoming and recent releases with dates and platform filters.
+- [ ] Reuse Discover content in a small homepage preview and link to shared catalog details.
+- [ ] Add dated, attributed news only after selecting a suitable source and freshness rules.
 
 [Back to the wiki](README.md)

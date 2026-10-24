@@ -1,0 +1,27 @@
+{% extends '_profile_base.html' %}
+{% block page_title %}Edit showcase · Vestigium{% endblock %}
+{% block workspace_return %}<a href="{{ profile_url() }}">← Back to profile</a>{% endblock %}
+{% block page_heading %}Edit <span>showcase</span>{% endblock %}
+{% block panel_label %}Choose and arrange your featured games{% endblock %}
+{% block panel %}
+<section class="profile-section profile-showcase-editor">
+{% if games %}
+    <form method="post" data-showcase-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if error %}<p class="profile-error" role="alert">{{ error }}</p>{% endif %}
+        <p class="profile-empty-note">Choose up to five games and arrange their order. Empty slots are skipped.</p>
+        <ol class="profile-showcase-slots">
+        {% for slot in range(5) %}<li data-showcase-slot>
+            <span class="showcase-slot-number" aria-hidden="true">{{ '%02d'|format(slot + 1) }}</span>
+            <span class="showcase-slot-cover"><span aria-hidden="true">✦</span><img data-slot-cover alt="" width="56" height="76" hidden></span>
+            <div class="showcase-slot-field"><label for="showcase-game-{{ slot }}">Position {{ slot + 1 }}</label><select id="showcase-game-{{ slot }}" name="games" data-showcase-select><option value="">Empty slot</option>{% for game in games %}<option value="{{ game.id }}" data-cover="{{ game.cover_url or '' }}" {% if selected[slot] == game.id|string %}selected{% endif %}>{{ game.title }} · {{ game.platform }}</option>{% endfor %}</select></div>
+            <div class="showcase-order-actions"><button type="button" data-move="-1" aria-label="Move position {{ slot + 1 }} up" {% if slot == 0 %}disabled{% endif %}>↑</button><button type="button" data-move="1" aria-label="Move position {{ slot + 1 }} down" {% if slot == 4 %}disabled{% endif %}>↓</button></div>
+        </li>{% endfor %}
+        </ol>
+        <p class="profile-empty-note" role="status" aria-live="polite" data-showcase-status></p>
+        <div class="profile-showcase-actions"><button type="submit" class="profile-action profile-action-primary">Save showcase <span aria-hidden="true">↗</span></button><a class="profile-text-link" href="{{ profile_url() }}">Cancel</a></div>
+    </form>
+{% else %}<div class="profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>Your showcase starts with a game.</h2><p>Add a game to your library, then come back to choose your favorites.</p><a class="profile-action profile-action-primary" href="{{ url_for('main.create') }}">Add your first game ↗</a></div>{% endif %}
+</section>
+{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-showcase.js') }}" defer></script>{% endblock %}

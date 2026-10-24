@@ -1,0 +1,37 @@
+{% extends '_workspace_base.html' %}
+{% from '_password_field.html' import password_field %}
+{% set titles = {'login': 'Sign in', 'register': 'Create your account', 'recover': 'Recover your account', 'verify-recovery': 'Enter your recovery code', 'password': 'Choose a new password'} %}
+{% block page_title %}{{ titles[mode] }} · Vestigium{% endblock %}
+{% block page_heading %}{{ titles[mode] }}{% endblock %}
+{% block panel_label %}Account access{% endblock %}
+{% block layout_class %}auth-workspace{% endblock %}
+{% block panel %}
+{% if pending_catalog_selection and mode in ('login', 'register') %}<p class="catalog-message" role="status">Your selected game will be waiting after sign-in.</p>{% endif %}
+{% for message in get_flashed_messages(category_filter=['account']) %}<p role="alert">{{ message }}</p>{% endfor %}
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+{% if message %}<p role="status">{{ message }}</p>{% endif %}
+<form method="post" class="workspace-form account-access-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if mode != 'password' %}
+    <div><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254" required value="{{ request.form.get('email', '') }}"></div>
+    {% endif %}
+    {% if mode in ('login', 'register', 'password') %}
+    {{ password_field('password', 'Password', 'current-password' if mode == 'login' else 'new-password', counter=mode != 'login') }}
+    {% endif %}
+    {% if mode in ('register', 'password') %}
+    {{ password_field('confirmation', 'Confirm password', 'new-password') }}
+    {% endif %}
+    {% if mode == 'verify-recovery' %}
+    <div><label for="code">Recovery code</label><input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required></div>
+    {% endif %}
+    {% if mode == 'login' %}<p class="profile-field-hint">Stay signed in on this browser for up to 30 days. Sign out on shared devices.</p>{% endif %}
+    <button type="submit">{{ 'Send recovery email' if mode == 'recover' else titles[mode] }}</button>
+</form>
+<nav class="account-links" aria-label="Account options">
+    {% if mode != 'login' %}<a href="{{ url_for('auth.login') }}">Sign in</a>{% endif %}
+    {% if mode == 'login' %}<a href="{{ url_for('auth.register') }}">Create account</a><a href="{{ url_for('auth.recover') }}">Forgot password?</a>{% endif %}
+    {% if mode == 'recover' %}<a href="{{ url_for('auth.verify_recovery') }}">I have a recovery code</a>{% endif %}
+    {% if mode == 'verify-recovery' %}<a href="{{ url_for('auth.recover') }}">Request a new code</a>{% endif %}
+</nav>
+{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='account-password.js') }}" defer></script>{% endblock %}

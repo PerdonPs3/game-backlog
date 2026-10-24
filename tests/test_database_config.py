@@ -20,6 +20,8 @@ def test_invalid_database_url_never_falls_back_to_sqlite():
 def test_environment_config_and_test_isolation(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://invalid.example/backlog")
     monkeypatch.setenv("SECRET_KEY", "environment-test-key")
+    monkeypatch.setenv("SUPABASE_URL", "https://auth.example.invalid")
+    monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "public-test-key")
     application = create_app()
     assert application.config["DATABASE_URL"] == "postgresql://invalid.example/backlog"
     assert application.config["SECRET_KEY"] == "environment-test-key"
@@ -45,7 +47,7 @@ def test_hosted_config_never_creates_local_secret_file(monkeypatch):
         raise AssertionError("Hosted configuration must not write local files")
     monkeypatch.setattr("pathlib.Path.mkdir", unexpected_write)
     monkeypatch.setattr("pathlib.Path.write_text", unexpected_write)
-    create_app({"DATABASE_URL": "postgresql://invalid.example/test", "SECRET_KEY": "test"})
+    create_app({"DATABASE_URL": "postgresql://invalid.example/test", "SECRET_KEY": "test", "SUPABASE_URL": "https://auth.example.invalid", "SUPABASE_PUBLISHABLE_KEY": "public-test-key"})
 
 
 def test_vercel_without_database_url_fails_instead_of_using_sqlite(monkeypatch):

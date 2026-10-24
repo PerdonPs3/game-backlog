@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 440">
-  <rect width="440" height="440" rx="100" fill="#10151e"/>
+  <rect width="440" height="440" rx="100" fill="#111317"/>
   <defs>
     <linearGradient id="accent" x2="1" y2="1">
-      <stop stop-color="#fff5ce"/>
-      <stop offset="1" stop-color="#d99b27"/>
+      <stop stop-color="#fff2d5"/><stop offset=".28" stop-color="#ffddb4"/><stop offset=".48" stop-color="#ffc880"/><stop offset=".72" stop-color="#b97216"/>
+      <stop offset="1" stop-color="#f5a623"/>
     </linearGradient>
   </defs>
   <g fill="url(#accent)">
     <path d="M65 85 150 110 166 140 153 135 220 253 287 135 274 140 290 110 375 85 337 151 295 171 273 216 295 207 315 190 220 360 125 190 145 207 167 216 145 171 103 151Z"/>
     <path d="M65 85 150 110 220 278 290 110 375 85 287 135 220 253 153 135 166 140 150 110Z" fill="#fff" fill-opacity=".2"/>
   </g>
-  <style>@media(prefers-color-scheme:light){rect{fill:#faf8fd}stop:first-child{stop-color:#ae7be2}stop:last-child{stop-color:#613297}}</style>
+  <style>@media(prefers-color-scheme:light){rect{fill:#faf8fd}stop:first-child{stop-color:#ae7be2}stop:nth-child(2){stop-color:#ae7be2}stop:nth-child(3){stop-color:#8250bf}stop:nth-child(4){stop-color:#4d277f}stop:last-child{stop-color:#7042b7}}</style>
 </svg>

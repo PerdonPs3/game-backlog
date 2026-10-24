@@ -27,7 +27,7 @@ def test_secondary_pages_share_design_accessible_heading_and_navigation(client, 
     assert sum(tag == "main" for tag, _ in parser.tags) == 1
     assert 'class="library-page workspace-page"' in html
     assert 'class="workspace-hero"' in html
-    assert 'aria-label="Collection navigation"' in html
+    assert 'aria-label="Site navigation"' in html
     assert 'class="hero-emblem" data-hero-logo aria-hidden="true"' in html
     assert "cursor-glow.js" in html
     assert "Back to collection" in html

@@ -1,12 +1,15 @@
 import json
 from random import choice, sample
 
-from flask import Blueprint, abort, flash, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, g, jsonify, make_response, redirect, render_template, request, url_for
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
 from app.game_fields import STATUSES, validate_dates
+from app.game_reviews import begin_review_write, can_publish_public_review, save_public_review, validate_public_review
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
+
+from app.ownership import owned, member_owned, insert_owned, insert_members
 
 main = Blueprint("main", __name__)
 
@@ -23,7 +26,7 @@ COLLECTION_SORTS = {
 def find_duplicate_game(db, igdb_id, title, platform, exclude_id=None):
     """Prefer catalog identity; compare names only between legacy manual entries."""
     parameters = [platform.strip()]
-    conditions = ["lower(trim(platform)) = lower(?)"]
+    conditions = [owned(), "lower(trim(platform)) = lower(?)"]
     if igdb_id is not None:
         conditions.append("igdb_id = ?")
         parameters.append(igdb_id)
@@ -62,7 +65,7 @@ def collection_statistics(db):
         "COALESCE(SUM(CASE WHEN status = 'On hold' THEN 1 ELSE 0 END), 0) AS on_hold, "
         "COALESCE(SUM(CASE WHEN status = 'Dropped' THEN 1 ELSE 0 END), 0) AS dropped, "
         "COUNT(rating) AS rated, AVG(rating) AS average "
-        "FROM games"
+        f"FROM games WHERE {owned()}"
     ).fetchone()
     stats = dict(row)
     stats["completion_percent"] = int(stats["completed"] * 100 / stats["total"] + 0.5) if stats["total"] else 0
@@ -77,7 +80,8 @@ def welcome():
         return redirect(url_for("main.index", **{key: request.args[key] for key in keys if key in request.args}))
     # Public decorative covers, independent of the user's collection and API access.
     image_ids = ("co4jni", "cocpbl", "co1rs4", "cob9kr", "cob9dh", "coaih8", "coaarl", "co1q1f")
-    return render_template("welcome.html", welcome_covers=[collection_cover_url(value) for value in image_ids])
+    from app.community import member_count
+    return render_template("welcome.html", member_count=member_count(), welcome_covers=[collection_cover_url(value) for value in image_ids])
 
 
 @main.get("/library")
@@ -86,7 +90,7 @@ def index():
     if selected_list:
         if not selected_list.isascii() or not selected_list.isdigit() or len(selected_list) > 18:
             abort(400)
-        if get_db().execute("SELECT 1 FROM game_lists WHERE id = ?", (int(selected_list),)).fetchone() is None:
+        if get_db().execute(f"SELECT 1 FROM game_lists WHERE id = ? AND {owned()}", (int(selected_list),)).fetchone() is None:
             abort(404)
     status = request.args.get("status", "")
     search_query = request.args.get("q", "").strip()
@@ -101,7 +105,7 @@ def index():
     if len(search_query) > 200:
         abort(400)
 
-    conditions = []
+    conditions = [owned()]
     parameters = []
     if selected_list:
         conditions.append("id IN (SELECT game_id FROM game_list_members WHERE list_id = ?)")
@@ -116,7 +120,7 @@ def index():
         conditions.append(title_contains_sql())
         parameters.append(search_query)
 
-    query = "SELECT id, title, platform, status, rating, review, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
+    query = "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty FROM games"
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     # Only fixed, allowlisted SQL can become an ORDER BY clause.
@@ -153,12 +157,12 @@ def lists():
             error = str(problem)
         else:
             begin_write(db)
-            if db.execute("SELECT COUNT(*) FROM game_lists").fetchone()[0] >= MAX_LISTS:
+            if db.execute(f"SELECT COUNT(*) FROM game_lists WHERE {owned()}").fetchone()[0] >= MAX_LISTS:
                 db.rollback()
                 error = "You can create up to 100 lists."
             else:
                 try:
-                    list_id = db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) RETURNING id", (name, name.casefold())).fetchone()["id"]
+                    list_id = insert_owned(db, "game_lists", ("name", "name_key"), (name, name.casefold())).fetchone()["id"]
                     db.commit()
                     return redirect(url_for("main.edit_list", list_id=list_id))
                 except INTEGRITY_ERRORS:
@@ -170,14 +174,14 @@ def lists():
 @main.route("/lists/<int:list_id>/edit", methods=["GET", "POST"])
 def edit_list(list_id):
     db = get_db()
-    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
     if item is None:
         abort(404)
     error = None
     view = request.values.get("view", "all")
     if view not in ("all", "selected"):
         view = "all"
-    selected = {row[0] for row in db.execute("SELECT game_id FROM game_list_members WHERE list_id = ?", (list_id,))}
+    selected = {row[0] for row in db.execute(f"SELECT game_id FROM game_list_members WHERE list_id = ? AND {member_owned()}", (list_id,))}
     if request.method == "POST":
         try:
             raw_ids = request.form.getlist("games")
@@ -186,15 +190,15 @@ def edit_list(list_id):
             selected = {int(value) for value in raw_ids}
             name = clean_list_name(request.form.get("name", ""))
             begin_write(db)
-            existing = {row[0] for row in db.execute("SELECT id FROM games")}
+            existing = {row[0] for row in db.execute(f"SELECT id FROM games WHERE {owned()}")}
             if not selected <= existing:
                 raise ValueError("Some selected games are no longer in your collection. Please review your choices.")
-            if db.execute("SELECT 1 FROM game_lists WHERE id = ?", (list_id,)).fetchone() is None:
+            if db.execute(f"SELECT 1 FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone() is None:
                 db.rollback()
                 abort(404)
-            db.execute("UPDATE game_lists SET name = ?, name_key = ? WHERE id = ?", (name, name.casefold(), list_id))
-            db.execute("DELETE FROM game_list_members WHERE list_id = ?", (list_id,))
-            db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?)", [(list_id, value) for value in selected])
+            db.execute(f"UPDATE game_lists SET name = ?, name_key = ? WHERE id = ? AND {owned()}", (name, name.casefold(), list_id))
+            db.execute(f"DELETE FROM game_list_members WHERE list_id = ? AND {member_owned()}", (list_id,))
+            insert_members(db, [(list_id, value) for value in selected])
             db.commit()
             flash("List saved. Your games are right where you left them.", "list_saved")
             return redirect(url_for("main.edit_list", list_id=list_id, view=view, _anchor="list-feedback"))
@@ -205,19 +209,19 @@ def edit_list(list_id):
             db.rollback()
             error = "A list with this name already exists. Your changes were not saved."
     games = [{**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
-             for row in db.execute("SELECT * FROM games ORDER BY lower(title), platform, id")]
+             for row in db.execute(f"SELECT * FROM games WHERE {owned()} ORDER BY lower(title), platform, id")]
     return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
 
 
 @main.route("/lists/<int:list_id>/delete", methods=["GET", "POST"])
 def delete_list(list_id):
     db = get_db()
-    item = db.execute("SELECT * FROM game_lists WHERE id = ?", (list_id,)).fetchone()
+    item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
     if item is None:
         abort(404)
     if request.method == "POST":
         begin_write(db)
-        db.execute("DELETE FROM game_lists WHERE id = ?", (list_id,))
+        db.execute(f"DELETE FROM game_lists WHERE id = ? AND {owned()}", (list_id,))
         db.commit()
         return redirect(url_for("main.lists"))
     return render_template("delete_list.html", item=item)
@@ -225,7 +229,7 @@ def delete_list(list_id):
 
 @main.get("/games/<int:game_id>")
 def game_details(game_id):
-    row = get_db().execute("SELECT * FROM games WHERE id = ?", (game_id,)).fetchone()
+    row = get_db().execute(f"SELECT * FROM games WHERE id = ? AND {owned()}", (game_id,)).fetchone()
     if row is None:
         abort(404)
     game = {**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
@@ -253,12 +257,15 @@ def game_details(game_id):
 @main.get("/catalog/search")
 def catalog_search():
     term = request.args.get("q", "").strip()
+    content = request.args.get("content", "official")
+    if content not in ("official", "all"):
+        return jsonify(error="Choose a valid catalog filter."), 400
     if len(term) > 200:
         return jsonify(error="Search must contain no more than 200 characters."), 400
     if len(term) < 2:
         return jsonify(games=[])
     try:
-        games = get_catalog().search_games(term)
+        games = get_catalog().search_games(term, include_community=content == "all")[:10]
     except CatalogError:
         return jsonify(error="The catalog is unavailable. Please try again shortly."), 503
     return jsonify(games=[game_suggestion(game) for game in games])
@@ -271,7 +278,7 @@ def pick_game():
     selected_genre = request.args.get("genre", "")
     if len(selected_platform) > 80 or len(selected_genre) > 100:
         abort(400)
-    backlog = get_db().execute("SELECT * FROM games WHERE status = 'Backlog'").fetchall()
+    backlog = get_db().execute(f"SELECT * FROM games WHERE status = 'Backlog' AND {owned()}").fetchall()
     platforms = sorted({row["platform"] for row in backlog}, key=str.casefold)
     if selected_platform and selected_platform not in platforms:
         abort(400)
@@ -319,10 +326,10 @@ def export_backup():
     db = get_db()
     # Keep games and membership indices in the same read snapshot.
     begin_snapshot(db)
-    rows = db.execute("SELECT * FROM games ORDER BY id").fetchall()
+    rows = db.execute(f"SELECT * FROM games WHERE {owned()} ORDER BY id").fetchall()
     positions = {row["id"]: index for index, row in enumerate(rows)}
     memberships = {}
-    for member in db.execute("SELECT list_id, game_id FROM game_list_members ORDER BY game_id"):
+    for member in db.execute(f"SELECT list_id, game_id FROM game_list_members WHERE {member_owned()} ORDER BY game_id"):
         memberships.setdefault(member["list_id"], []).append(positions[member["game_id"]])
     lists = [{"name": item["name"], "games": memberships.get(item["id"], [])} for item in all_lists(db)]
     db.commit()
@@ -353,7 +360,7 @@ def import_backup():
                 begin_write(db)
                 imported = skipped = 0
                 try:
-                    existing_keys = {row[0] for row in db.execute("SELECT name_key FROM game_lists")}
+                    existing_keys = {row[0] for row in db.execute(f"SELECT name_key FROM game_lists WHERE {owned()}")}
                     if len(existing_keys | {item["name"].casefold() for item in backup_lists}) > MAX_LISTS:
                         raise ValueError("List limit")
                     saved_ids = []
@@ -363,17 +370,14 @@ def import_backup():
                             skipped += 1
                             saved_ids.append(duplicate["id"])
                             continue
-                        cursor = db.execute(
-                            "INSERT INTO games (" + ", ".join(BACKUP_FIELDS) + ") "
-                            "VALUES (" + ", ".join("?" for _ in BACKUP_FIELDS) + ") RETURNING id",
-                            [game[field] for field in BACKUP_FIELDS],
-                        )
+                        cursor = insert_owned(db, "games", BACKUP_FIELDS, [game[field] for field in BACKUP_FIELDS])
                         saved_ids.append(cursor.fetchone()["id"])
                         imported += 1
                     for item in backup_lists:
-                        db.execute("INSERT INTO game_lists (name, name_key) VALUES (?, ?) ON CONFLICT (name_key) DO NOTHING", (item["name"], item["name"].casefold()))
-                        list_id = db.execute("SELECT id FROM game_lists WHERE name_key = ?", (item["name"].casefold(),)).fetchone()[0]
-                        db.executemany("INSERT INTO game_list_members (list_id, game_id) VALUES (?, ?) ON CONFLICT (list_id, game_id) DO NOTHING",
+                        if db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone() is None:
+                            insert_owned(db, "game_lists", ("name", "name_key"), (item["name"], item["name"].casefold()))
+                        list_id = db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone()[0]
+                        insert_members(db,
                                        [(list_id, saved_ids[index]) for index in item["games"]])
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
@@ -388,6 +392,19 @@ def create():
     error = None
     selected_game = None
     duplicate_game_id = None
+    review_publication_available = can_publish_public_review()
+
+    if request.method == 'GET' and 'igdb_id' in request.args:
+        raw_id = request.args['igdb_id']
+        if not raw_id.isascii() or not raw_id.isdigit() or len(raw_id) > 19 or not 0 < int(raw_id) < 2**63:
+            abort(400)
+        try:
+            catalog_game = get_catalog().get_game(int(raw_id))
+            if catalog_game is None:
+                abort(404)
+            selected_game = game_suggestion(catalog_game)
+        except CatalogError:
+            error = 'The catalog is unavailable. Please try again shortly.'
 
     if request.method == "POST":
         title = request.form.get("title", "").strip()
@@ -408,13 +425,19 @@ def create():
             try:
                 rating = int(rating_text)
             except ValueError:
-                error = "Rating must be a whole number between 1 and 10."
+                error = "Choose a rating from the five-star scale."
             else:
                 if not 1 <= rating <= 10:
-                    error = "Rating must be a whole number between 1 and 10."
+                    error = "Choose a rating from the five-star scale."
 
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."
+        publish_requested = request.form.get('publish_review') == 'yes'
+        if error is None and publish_requested:
+            if not review_publication_available:
+                error = 'A public profile is required to publish a review.'
+            else:
+                error = validate_public_review(rating, review)
 
         # Resolve the ID even on validation errors so the dropdown can be restored.
         raw_id = request.form.get("igdb_id", "")
@@ -435,27 +458,42 @@ def create():
         if error is None:
             db = get_db()
             # Serialize check + write so simultaneous submissions cannot both pass.
-            begin_write(db)
-            duplicate = find_duplicate_game(
-                db, selected_game["id"], selected_game["name"], platform,
-            )
-            if duplicate is not None:
-                duplicate_game_id = duplicate["id"]
-                db.rollback()
-                error = DUPLICATE_GAME_ERROR
-            else:
-                db.execute(
-                    "INSERT INTO games (title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (selected_game["name"], platform, status, rating, review, selected_game["id"],
-                     cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
+            try:
+                begin_write(db)
+                duplicate = find_duplicate_game(
+                    db, selected_game["id"], selected_game["name"], platform,
                 )
-                db.commit()
-
+                if duplicate is not None:
+                    duplicate_game_id = duplicate["id"]
+                    db.rollback()
+                    error = DUPLICATE_GAME_ERROR
+                elif publish_requested:
+                    error = begin_review_write(db, publishing=True, in_transaction=True)
+                if error is None:
+                    insert_owned(
+                        db, "games", ("title", "platform", "status", "rating", "review", "igdb_id", "cover_image_id", "started_on", "completed_on", "is_favorite", "is_goty"),
+                        (selected_game["name"], platform, status, rating, review, selected_game["id"],
+                         cover_image_id(catalog_game), started_on, completed_on, is_favorite, is_goty),
+                    )
+                    if publish_requested:
+                        save_public_review(db, selected_game['id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    db.commit()
+            except DATABASE_ERRORS as exc:
+                db.rollback()
+                current_app.logger.error('Unable to save game and optional public review (%s)', type(exc).__name__)
+                error = 'The game could not be saved. Nothing changed. Please try again.'
+            if error is None:
+                if publish_requested:
+                    flash('Added to your library and published your review.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='community-reviews'), code=303)
+                if request.form.get('return_to_catalog') == 'yes':
+                    flash('Added to your library.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("create.html", error=error, selected_game=selected_game,
-                           duplicate_game_id=duplicate_game_id)
+                           duplicate_game_id=duplicate_game_id,
+                           review_publication_available=review_publication_available)
 
 
 @main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])
@@ -463,13 +501,23 @@ def edit(game_id):
     db = get_db()
     game = db.execute(
         "SELECT id, title, platform, status, rating, review, igdb_id, cover_image_id, started_on, completed_on, is_favorite, is_goty "
-        "FROM games WHERE id = ?",
+        f"FROM games WHERE id = ? AND {owned()}",
         (game_id,),
     ).fetchone()
 
     if game is None:
         abort(404)
 
+    review_publication_available = game['igdb_id'] is not None and can_publish_public_review()
+    public_review_spoilers_default = False
+    has_public_review = False
+    public_review_hidden = False
+    if current_app.config.get('AUTH_ENABLED') and game['igdb_id'] is not None:
+        shared = db.execute('SELECT has_spoilers, moderation_hidden FROM public_game_reviews WHERE catalog_id = ? AND owner_id = ?',
+                            (game['igdb_id'], g.user['id'])).fetchone()
+        public_review_spoilers_default = bool(shared and shared[0])
+        has_public_review = shared is not None
+        public_review_hidden = bool(shared and shared[1])
     error = None
     duplicate_game_id = None
     catalog_game = None
@@ -508,48 +556,70 @@ def edit(game_id):
             try:
                 rating = int(rating_text)
             except ValueError:
-                error = "Rating must be a whole number between 1 and 10."
+                error = "Choose a rating from the five-star scale."
             else:
                 if not 1 <= rating <= 10:
-                    error = "Rating must be a whole number between 1 and 10."
+                    error = "Choose a rating from the five-star scale."
 
         if error is None and len(review) > 2000:
             error = "Review must contain no more than 2000 characters."
 
-        if error is None:
-            begin_write(db)
-            current_identity = db.execute(
-                "SELECT title, platform FROM games WHERE id = ?", (game_id,),
-            ).fetchone()
-            if current_identity is None:
-                db.rollback()
-                abort(404)
-            identity_changed = (
-                platform.casefold() != current_identity["platform"].strip().casefold()
-                or (game["igdb_id"] is None and title.casefold() != current_identity["title"].strip().casefold())
-            )
-            # Pre-existing duplicates remain editable; never delete or merge user data.
-            duplicate = find_duplicate_game(db, game["igdb_id"], title, platform, game_id) if identity_changed else None
-            if duplicate is not None:
-                duplicate_game_id = duplicate["id"]
-                db.rollback()
-                error = DUPLICATE_GAME_ERROR
+        publish_requested = request.form.get('publish_review') == 'yes'
+        if error is None and publish_requested:
+            if not review_publication_available:
+                error = 'A catalog game and public profile are required to publish a review.'
             else:
-                db.execute(
-                    "UPDATE games SET title = ?, platform = ?, status = ?, "
-                    "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
-                    "WHERE id = ?",
-                    (title, platform, status, rating, review,
-                     cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
-                     started_on, completed_on, is_favorite, is_goty, game_id),
-                )
-                db.commit()
+                error = validate_public_review(rating, review)
 
+        if error is None:
+            try:
+                begin_write(db)
+                current_identity = db.execute(
+                    f"SELECT title, platform FROM games WHERE id = ? AND {owned()}", (game_id,),
+                ).fetchone()
+                if current_identity is None:
+                    db.rollback()
+                    abort(404)
+                identity_changed = (
+                    platform.casefold() != current_identity["platform"].strip().casefold()
+                    or (game["igdb_id"] is None and title.casefold() != current_identity["title"].strip().casefold())
+                )
+                # Pre-existing duplicates remain editable; never delete or merge user data.
+                duplicate = find_duplicate_game(db, game["igdb_id"], title, platform, game_id) if identity_changed else None
+                if duplicate is not None:
+                    duplicate_game_id = duplicate["id"]
+                    db.rollback()
+                    error = DUPLICATE_GAME_ERROR
+                elif publish_requested:
+                    error = begin_review_write(db, publishing=True, in_transaction=True)
+                if error is None:
+                    db.execute(
+                        "UPDATE games SET title = ?, platform = ?, status = ?, "
+                        "rating = ?, review = ?, cover_image_id = ?, started_on = ?, completed_on = ?, is_favorite = ?, is_goty = ? "
+                        f"WHERE id = ? AND {owned()}",
+                        (title, platform, status, rating, review,
+                         cover_image_id(catalog_game) if catalog_game is not None else game["cover_image_id"],
+                         started_on, completed_on, is_favorite, is_goty, game_id),
+                    )
+                    if publish_requested:
+                        save_public_review(db, game['igdb_id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    db.commit()
+            except DATABASE_ERRORS as exc:
+                db.rollback()
+                current_app.logger.error('Unable to update game and optional public review (%s)', type(exc).__name__)
+                error = 'The changes could not be saved. Nothing changed. Please try again.'
+            if error is None:
+                if publish_requested:
+                    flash('Saved your changes and published your review.', 'catalog_saved')
+                    return redirect(url_for('explore.game', catalog_id=game['igdb_id'], _anchor='community-reviews'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("edit.html", game=game, error=error,
                            available_platforms=available_platforms,
-                           duplicate_game_id=duplicate_game_id)
+                           duplicate_game_id=duplicate_game_id,
+                           review_publication_available=review_publication_available,
+                           public_review_spoilers_default=public_review_spoilers_default,
+                           has_public_review=has_public_review, public_review_hidden=public_review_hidden)
 
 
 @main.get("/catalog/games/<int:catalog_id>")
@@ -567,7 +637,7 @@ def catalog_game_details(catalog_id):
 def delete(game_id):
     db = get_db()
     game = db.execute(
-        "SELECT id, title FROM games WHERE id = ?",
+        f"SELECT id, title FROM games WHERE id = ? AND {owned()}",
         (game_id,),
     ).fetchone()
 
@@ -577,7 +647,7 @@ def delete(game_id):
     if request.method == "POST":
         begin_write(db)
         db.execute(
-            "DELETE FROM games WHERE id = ?",
+            f"DELETE FROM games WHERE id = ? AND {owned()}",
             (game_id,),
         )
         db.commit()

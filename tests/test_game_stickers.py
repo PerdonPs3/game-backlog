@@ -35,7 +35,8 @@ def test_edit_can_add_and_remove_stickers(client, post_form, game_data, seed_gam
     marked = {**game_data, "is_favorite": "yes", "is_goty": "yes"}
     assert post_form(url, marked).status_code == 302
     page = client.get(url).get_data(as_text=True)
-    assert page.count("checked") == 2
+    import re
+    assert len(re.findall(r'<input[^>]+type="checkbox"[^>]+checked', page)) == 2
     assert stored_games()[0]["is_goty"] == 1
     assert post_form(url, game_data).status_code == 302
     assert stored_games()[0]["is_favorite"] == 0

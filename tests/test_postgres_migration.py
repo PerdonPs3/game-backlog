@@ -59,29 +59,66 @@ def test_migrations_are_repeatable_and_health_check_is_read_only(postgres_app):
     assert runner.invoke(args=["init-db"]).exit_code != 0
     with postgres_app.app_context():
         db = get_db()
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 1
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == len(list(migrations.MIGRATIONS.glob('[0-9]*.sql')))
         assert db.execute("SELECT COUNT(*) FROM games").fetchone()[0] == 0
         assert all(row[0] for row in db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('games', 'game_lists', 'game_list_members')"))
 
 
 def test_failed_schema_migration_rolls_back_ddl_and_version(postgres_app, tmp_path, monkeypatch):
     original = migrations.MIGRATIONS
-    (tmp_path / "001_initial.sql").write_text((original / "001_initial.sql").read_text(encoding="utf-8"), encoding="utf-8")
-    (tmp_path / "002_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
+    for path in original.glob('[0-9]*.sql'):
+        (tmp_path / path.name).write_bytes(path.read_bytes())
+    (tmp_path / "999_broken.sql").write_text("CREATE TABLE rollback_probe (id INTEGER); SELECT missing_column FROM games;", encoding="utf-8")
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "rolled back" in result.output
     with postgres_app.app_context():
         db = get_db()
         assert db.execute("SELECT to_regclass('rollback_probe')").fetchone()[0] is None
-        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == 1
+        assert len(db.execute("SELECT * FROM schema_migrations").fetchall()) == len(list(original.glob('[0-9]*.sql')))
 
 
 def test_changed_applied_migration_is_rejected(postgres_app, tmp_path, monkeypatch):
+    for path in migrations.MIGRATIONS.glob('[0-9]*.sql'):
+        (tmp_path / path.name).write_bytes(path.read_bytes())
     (tmp_path / "001_initial.sql").write_text("SELECT 1;", encoding="utf-8")
     monkeypatch.setattr(migrations, "MIGRATIONS", tmp_path)
     result = postgres_app.test_cli_runner().invoke(args=["migrate-db"])
     assert result.exit_code != 0 and "has changed" in result.output
+
+
+def test_username_history_upgrade_preserves_existing_names_and_publication(postgres_config, tmp_path, monkeypatch):
+    if not postgres_config:
+        pytest.skip('Requires disposable PostgreSQL schemas')
+    from app.public_profiles import save_sharing
+    owner = '11111111-1111-4111-8111-111111111111'
+    original = migrations.MIGRATIONS
+    for path in sorted(original.glob('[0-9]*.sql'))[:5]:
+        (tmp_path / path.name).write_bytes(path.read_bytes())
+    application = create_app({'TESTING':True, 'SECRET_KEY':'migration-tests', **postgres_config})
+    with monkeypatch.context() as patch:
+        patch.setattr(migrations, 'MIGRATIONS', tmp_path)
+        assert application.test_cli_runner().invoke(args=['migrate-db']).exit_code == 0
+        with application.app_context():
+            get_db().execute("INSERT INTO profiles (id,display_name,username,is_public) VALUES (?, 'Existing player', 'existing_name', TRUE)", (owner,))
+    result = application.test_cli_runner().invoke(args=['migrate-db'])
+    assert result.exit_code == 0 and f"Applied {len(list(original.glob('[0-9]*.sql'))) - 5}" in result.output
+    with application.app_context():
+        db = get_db()
+        row = db.execute('SELECT username, username_changed_at, is_public, country_code, admin_badge, share_photo, share_bio, share_showcase FROM profiles WHERE id = ?', (owner,)).fetchone()
+        assert row['username'] == 'existing_name' and row['username_changed_at'] is None and row['is_public']
+        assert row['country_code'] is None
+        assert not row['admin_badge']
+        assert not row['share_photo']
+        assert not row['share_bio'] and not row['share_showcase']
+        db.execute("INSERT INTO profiles (id) VALUES ('22222222-2222-4222-8222-222222222222')")
+        defaults = db.execute("SELECT share_bio, share_showcase, is_public FROM profiles WHERE id = '22222222-2222-4222-8222-222222222222'").fetchone()
+        assert defaults['share_bio'] and defaults['share_showcase'] and not defaults['is_public']
+        assert str(db.execute("SELECT owner_id FROM profile_usernames WHERE username = 'existing_name'").fetchone()[0]) == owner
+        # Old installations have no historical claim time: allow one change immediately.
+        save_sharing(db, owner, {'username':'updated_name', 'is_public':'yes'})
+        assert db.execute('SELECT username FROM profiles WHERE id = ?', (owner,)).fetchone()[0] == 'updated_name'
+        assert db.execute('SELECT COUNT(*) FROM profile_usernames WHERE owner_id = ?', (owner,)).fetchone()[0] == 2
 
 
 def test_transfer_preserves_fields_relationships_and_next_ids(postgres_app, sqlite_source):
@@ -93,9 +130,10 @@ def test_transfer_preserves_fields_relationships_and_next_ids(postgres_app, sqli
     with postgres_app.app_context():
         db = get_db()
         source_games, source_lists, source_members = read_sqlite_collection(sqlite_source)
-        assert [dict(row) for row in db.execute("SELECT * FROM games")] == source_games
-        assert [dict(row) for row in db.execute("SELECT * FROM game_lists")] == source_lists
-        assert [tuple(row) for row in db.execute("SELECT * FROM game_list_members")] == source_members
+        assert [{key: row[key] for key in source_games[0]} for row in db.execute("SELECT * FROM games")] == source_games
+        assert [{key: row[key] for key in source_lists[0]} for row in db.execute("SELECT * FROM game_lists")] == source_lists
+        assert [tuple(row) for row in db.execute("SELECT list_id, game_id FROM game_list_members")] == source_members
+        assert db.execute("SELECT owner_id FROM games").fetchone()[0] is None
         assert db.execute("INSERT INTO games (title, platform) VALUES ('Next', 'PC') RETURNING id").fetchone()[0] == 43
         assert db.execute("INSERT INTO game_lists (name, name_key) VALUES ('Next', 'next') RETURNING id").fetchone()[0] == 18
     assert runner.invoke(args=args).exit_code != 0

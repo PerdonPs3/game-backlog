@@ -1,6 +1,7 @@
 {% for game in games %}
+    {% set detail_url = url_for('explore.game', catalog_id=game.igdb_id) if game.igdb_id else url_for('main.game_details', game_id=game.id) %}
     <article class="game-card">
-        <a class="game-card-cover" href="{{ url_for('main.game_details', game_id=game['id']) }}" data-game-details aria-label="View details for {{ game.title }}">
+        <a class="game-card-cover" href="{{ detail_url }}" {% if not game.igdb_id %}data-game-details{% endif %} aria-label="View details for {{ game.title }}">
             <span>No cover available</span>
             {% if game['cover_url'] %}
                 <img src="{{ game['cover_url'] }}" alt="" width="264" height="374"
@@ -8,18 +9,30 @@
             {% endif %}
         </a>
         <div class="game-card-details">
-            <h2><a class="game-title-link" href="{{ url_for('main.game_details', game_id=game['id']) }}" data-game-details>{{ game.title }}</a></h2>
+            <div class="game-card-heading">
+            <h2><a class="game-title-link" href="{{ detail_url }}" {% if not game.igdb_id %}data-game-details{% endif %}>{{ game.title }}</a></h2>
             {% if game['is_favorite'] or game['is_goty'] %}
                 <div class="game-stickers" aria-label="Personal game distinctions">
                     {% if game['is_favorite'] %}<span class="game-sticker sticker-favorite"><span aria-hidden="true">★</span> Favorite</span>{% endif %}
                     {% if game['is_goty'] %}<span class="game-sticker sticker-goty"><span aria-hidden="true">✦</span> Your GOTY</span>{% endif %}
                 </div>
             {% endif %}
+            </div>
             <p>Platform: {{ game.platform }}</p>
             <div class="game-meta">
                 <p class="game-status">Status: {{ game.status }}</p>
                 {% if game['rating'] is not none %}
-                    <p class="game-rating">Rating: {{ game['rating'] }}/10</p>
+                    <p class="game-rating" role="img" aria-label="Rating: {{ game.rating|star_rating }}/5">
+                        <span class="collection-rating-stars" aria-hidden="true">
+                            {% for star in range(1, 6) %}
+                            <span class="collection-rating-star" style="--star-fill: {{ 100 if game.rating >= star * 2 else 50 if game.rating == star * 2 - 1 else 0 }}%">
+                                <svg class="collection-star-outline" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+                                <svg class="collection-star-fill" viewBox="0 0 24 24" focusable="false"><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.19L12 17.2l-5.56 2.92 1.06-6.19L3 9.54l6.22-.91Z"/></svg>
+                            </span>
+                            {% endfor %}
+                        </span>
+                        <span aria-hidden="true">{{ game.rating|star_rating }}/5</span>
+                    </p>
                 {% endif %}
             </div>
 
@@ -32,10 +45,18 @@
             {% endif %}
 
             {% if game['review'] %}
+                {% if game.review|length > 240 or game.review.count('\n') > 3 %}
+                <details class="collection-review">
+                    <summary><span class="review-excerpt">{{ game.review|replace('\n', ' ')|truncate(220, false, '…') }}</span><span class="review-toggle"><span class="review-more">Read more</span><span class="review-less">Show less</span></span></summary>
+                    <p class="game-review">{{ game.review }}</p>
+                </details>
+                {% else %}
                 <p class="game-review">{{ game['review'] }}</p>
+                {% endif %}
             {% endif %}
 
             <div class="game-actions">
+                {% if game.igdb_id %}<a href="{{ url_for('main.game_details', game_id=game.id) }}" data-game-details>My entry</a>{% endif %}
                 <a href="{{ url_for('main.edit', game_id=game['id']) }}">Edit game</a>
                 <a class="danger-link" href="{{ url_for('main.delete', game_id=game['id']) }}"
                    data-delete-game data-game-title="{{ game.title }}">Delete game</a>

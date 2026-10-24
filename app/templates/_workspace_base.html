@@ -1,3 +1,4 @@
+{% from '_site_frame.html' import site_header, site_footer with context %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,34 +9,41 @@
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='rating-picker.css') }}">
+    {% block page_styles %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
 </head>
-<body class="library-page workspace-page">
-    {% include '_brand_easter_egg.html' %}
+<body class="{% block body_class %}library-page workspace-page{% endblock %}">
+    {% call site_header() %}
+        {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
+    {% endcall %}
+    {% block workspace_backdrop %}{% endblock %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
-        {% include '_appearance_bar.html' %}
-        <nav class="workspace-nav" aria-label="Collection navigation">
-            <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
-            <a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>
-        </nav>
+        {% block workspace_hero %}
         <header class="workspace-hero">
             <div>
-                <p class="hero-kicker">{% block page_kicker %}Your personal gaming library{% endblock %}</p>
                 <h1>{% block page_heading %}{% endblock %}</h1>
-                <p class="workspace-description">{% block page_description %}{% endblock %}</p>
+                {% set description %}{% block page_description %}{% endblock %}{% endset %}{% if description|trim %}<p class="workspace-description">{{ description }}</p>{% endif %}
             </div>
             <div class="hero-emblem" data-hero-logo aria-hidden="true">
                 <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false"><use href="#brand-symbol" /></svg>
             </div>
         </header>
+        {% endblock %}
         <div class="workspace-body">
             <section class="workspace-panel" aria-label="{% block panel_label %}Game details{% endblock %}">
                 {% block panel %}{% endblock %}
             </section>
             {% block aside %}{% endblock %}
         </div>
-        <footer class="workspace-footer">Every game leaves a mark. · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></footer>
+
     </main>
+    {{ site_footer() }}
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     {% block page_scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='play-dates.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='rating-picker.js') }}" defer></script>
 </body>
 </html>

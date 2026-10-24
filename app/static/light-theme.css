@@ -1,6 +1,19 @@
-/* Light theme is scoped: the original dark/gold design remains untouched. */
+/* White and purple counterparts to the shared Obsidian color roles. */
 html[data-theme="light"] {
     color-scheme: light;
+    --color-canvas: #faf8f5;
+    --color-panel: #ffffff;
+    --color-surface: #ffffff;
+    --color-raised: #f2ecfa;
+    --color-field: #fcfaff;
+    --color-border: #ddd4e9;
+    --color-text: #29213d;
+    --color-muted: #665d75;
+    --color-outline: #74677e;
+    --color-accent: #7042b7;
+    --color-accent-soft: #8250bf;
+    --color-action: #7042b7;
+    --color-on-action: #ffffff;
     --background: #faf8f5;
     --surface: #ffffff;
     --text: #29213d;
@@ -46,12 +59,12 @@ html[data-theme="light"] :is(.summary-average, .game-actions, .form-actions, .pe
 html[data-theme="light"] #collection-filters input,
 html[data-theme="light"] #collection-filters select,
 html[data-theme="light"] :is(input, select, textarea, .workspace-form input:not([type="checkbox"]), .workspace-form select, .workspace-form textarea) {
-    background: #fff;
+    background-color: #fff;
     border-color: var(--border);
     color: var(--text);
 }
 html[data-theme="light"] input::placeholder, html[data-theme="light"] textarea::placeholder { color: #776d88; opacity: 1; }
-html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background: #f4f0f8; color: var(--text-muted); }
+html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background-color: #f4f0f8; color: var(--text-muted); }
 html[data-theme="light"] :is(.workspace-form .play-dates, .sticker-picker, .file-upload-panel, .adventure-preferences, .list-game-picker, .profile-personal) { background: linear-gradient(140deg, #f8f3ff, #fff); border-color: var(--border); }
 html[data-theme="light"] :is(.workspace-form .sticker-option, .workspace-form .list-game-choice, .collection-view-switch, .list-editor-switch) { background: #fff; border-color: var(--border); }
 html[data-theme="light"] :is(.workspace-form .sticker-option:has(input:checked), .workspace-form .list-game-choice:has(input:checked)) { background: var(--light-tint); border-color: var(--light-accent-border); }

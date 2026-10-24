@@ -1,0 +1,4 @@
+{% macro country_flag(code) %}
+{% set country = code|country_info %}
+<span class="profile-country" data-profile-country {% if not country %}hidden{% else %}title="{{ country.name }}"{% endif %}><img width="24" height="18" data-country-flag {% if country %}src="{{ url_for('static', filename=country.flag) }}" alt="{{ country.name }}"{% else %}alt=""{% endif %}></span>
+{% endmacro %}

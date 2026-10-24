@@ -1,0 +1,8 @@
+{% macro cover(game) -%}
+<span class="profile-cover game-card-cover"><span aria-hidden="true">{{ game.title[:1] }}</span>{% if game.cover_url %}<img src="{{ game.cover_url }}" alt="" width="264" height="374" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}</span>
+{%- endmacro %}
+{% macro activity(games, empty_text) -%}
+{% if games %}<ul class="profile-activity-list">
+    {% for game in games %}<li><a href="{{ url_for('main.game_details', game_id=game.id) }}">{{ cover(game) }}<span class="profile-activity-copy"><strong>{{ game.title }}</strong><small>{{ game.platform }}{% if game.completed_on is defined and game.completed_on %} · {{ game.completed_on }}{% endif %}</small></span>{% if game.rating is not none %}<span class="profile-game-rating">{{ game.rating|star_rating }}<small>/5</small></span>{% endif %}</a></li>{% endfor %}
+</ul>{% else %}<p class="profile-empty-note">{{ empty_text }}</p>{% endif %}
+{%- endmacro %}

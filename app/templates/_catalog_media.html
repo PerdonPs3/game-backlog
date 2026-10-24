@@ -1,0 +1,19 @@
+{% if profile.media %}
+{% set first = profile.media[0] %}
+<section class="catalog-media" aria-labelledby="catalog-media-title" data-media-gallery>
+    <header><h2 id="catalog-media-title">Trailers & screenshots</h2><span data-media-position>1 / {{ profile.media|length }}</span></header>
+    <div class="catalog-media-stage" data-media-stage data-kind="{{ first.kind }}">
+        <img data-media-poster src="{{ first.preview if first.kind == 'video' else first.url }}" alt="{{ first.title }}" width="1280" height="720" loading="lazy" referrerpolicy="no-referrer">
+        <button type="button" class="catalog-media-play" data-media-play aria-label="Play {{ first.title }}" hidden><svg aria-hidden="true" width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="m9 5 11 7-11 7Z"/></svg></button>
+    </div>
+    <div class="catalog-media-caption"><strong data-media-caption>{{ first.title }}</strong><a data-media-external href="{{ first.url }}" target="_blank" rel="noopener noreferrer">{{ 'Watch on YouTube' if first.kind == 'video' else 'Open image' }} ↗</a></div>
+    <nav class="catalog-media-strip" aria-label="Choose a trailer or screenshot">
+        {% for item in profile.media %}
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" data-media-item data-kind="{{ item.kind }}" data-media-id="{{ item.id }}" data-preview="{{ item.preview }}" data-title="{{ item.title }}" aria-label="{{ item.title }}"{% if loop.first %} aria-current="true"{% endif %}>
+            <img src="{{ item.preview }}" alt="" width="160" height="90" loading="lazy" referrerpolicy="no-referrer">
+            {% if item.kind == 'video' %}<span aria-hidden="true">▶</span>{% endif %}
+        </a>
+        {% endfor %}
+    </nav>
+</section>
+{% endif %}

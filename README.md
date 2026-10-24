@@ -15,6 +15,8 @@ input validation, and automated testing.
 
 ## Features
 
+- Hosted accounts with Supabase email/password authentication, recovery links and codes, and private libraries. See [account and environment setup](docs/Accounts.md) before deploying this version.
+- Private profiles with a display name, bio, built-in avatar, and personal collection counts.
 - Add, view, edit, and delete games.
 - Create and rename personal lists, include a game in several lists, and filter the library by list alongside search and status. Removing a list never removes its games.
 - Preview each list with a stack of its covers; switch the editor between All games and In this list. Saving stays in the editor with confirmation and preserves the selected view.
@@ -40,8 +42,9 @@ input validation, and automated testing.
 - Choose a platform from the selected game's available platforms, including linked ports.
 - Validate catalog IDs and game/platform combinations on the server.
 - Prevent adding the same catalog game twice on the same platform, including when editing.
-- Add an optional whole-number rating from 1 to 10 and a review of up to 2,000 characters.
+- Add an optional rating of up to five stars, with half-star steps and a review of up to 2,000 characters.
 - Clear an existing rating or review by leaving its field empty when editing.
+- Publish a separate, optional [public game review](docs/Public-Reviews.md) with a five-star score, spoiler labels, author profile, and report controls. Private library notes are never published automatically.
 - Preserve entered form values when validation fails.
 - Confirm deletion before permanently removing a game.
 - Confirm deletion in a small accessible dialog without leaving the collection (with a separate-page fallback without JavaScript).
@@ -165,11 +168,14 @@ requests are mocked; tests never contact IGDB.
 If Node.js is installed, also run the dependency-free interaction tests:
 
 ```powershell
-node --test tests/catalog-search.test.cjs tests/collection-filters.test.cjs tests/cursor-glow.test.cjs tests/delete-confirmation.test.cjs tests/game-details.test.cjs tests/collection-view.test.cjs tests/shelf-covers.test.cjs tests/adventure-roulette.test.cjs tests/roulette-sound.test.cjs tests/list-editor.test.cjs tests/theme.test.cjs
+$interactionTests = Get-ChildItem tests -Filter *.test.cjs | ForEach-Object FullName
+node --test $interactionTests
 ```
 
-Each test uses a separate temporary SQLite database rather than the real
-collection. CSRF protection remains enabled during the tests. These tests check
+Database tests use separate temporary SQLite databases or disposable PostgreSQL
+schemas when `--postgres-url` points to a dedicated local test database. Account
+and public-review tests require PostgreSQL; see [account verification](docs/Accounts.md#verification-checklist).
+Never point tests at a hosted development or production database. CSRF protection remains enabled during the tests. These tests check
 server behavior and rendered HTML; they do not check browser layout visually.
 
 ## Project structure

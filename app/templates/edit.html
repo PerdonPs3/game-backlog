@@ -1,8 +1,6 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Edit game · Vestigium{% endblock %}
-{% block page_kicker %}Your library, your story{% endblock %}
 {% block page_heading %}Edit <span>game</span>{% endblock %}
-{% block page_description %}Update your progress and capture what made this adventure yours.{% endblock %}
 {% block panel %}
 
         {% if error %}
@@ -67,18 +65,8 @@
 
             {% include '_play_dates.html' %}
             {% include '_game_stickers.html' %}
-            <div>
-                <label for="rating">Rating (1–10, optional)</label>
-                <input
-                    type="number"
-                    id="rating"
-                    name="rating"
-                    min="1"
-                    max="10"
-                    step="1"
-                    value="{{ request.form.get('rating', game['rating'] if game['rating'] is not none else '') }}"
-                >
-            </div>
+            {% from '_rating_picker.html' import rating_picker %}
+            {{ rating_picker(request.form.get('rating', game['rating'] if game['rating'] is not none else '')) }}
 
             <div class="form-wide">
                 <label for="review">Review (optional)</label>
@@ -88,6 +76,13 @@
                     rows="4"
                     maxlength="2000"
                 >{{ request.form.get('review', game['review']) }}</textarea>
+                {% include '_review_publication.html' %}
+                {% if has_public_review %}
+                <div class="review-publication-management">
+                    {% if public_review_hidden %}<p class="catalog-message">Your review is hidden by moderation. Editing it will not republish it.</p>{% endif %}
+                    <button type="submit" class="secondary-button danger-link" formaction="{{ url_for('reviews.delete', catalog_id=game.igdb_id) }}" formnovalidate>Delete public review</button>
+                </div>
+                {% endif %}
             </div>
 
             <div class="form-actions">
@@ -99,13 +94,13 @@
 {% endblock %}
 {% block aside %}
     <aside class="workspace-aside" aria-label="Saved game summary">
-        <p class="aside-kicker">In your collection</p>
+
         <h2>{{ game['title'] }}</h2>
         <p>{{ game['platform'] }}</p>
         <span class="aside-status">{{ game['status'] }}</span>
         <div class="aside-divider"></div>
-        <h3>Keep your story up to date</h3>
-        <p class="aside-note">Your rating and review are personal. Clear either field to remove it.</p>
-        <p class="aside-note">Dates are optional. Changing the status will not invent or erase your history.</p>
+
+        <p class="aside-note">Clear a rating or review to remove it.</p>
+        <p class="aside-note">Changing status keeps your recorded dates.</p>
     </aside>
 {% endblock %}

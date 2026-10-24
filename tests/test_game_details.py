@@ -2,8 +2,50 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, game_profile
+from app.catalog import CatalogError, game_profile, game_media, game_facts
 from app.db import get_db
+
+
+@pytest.mark.parametrize('media,expected', [
+    ({'artworks': [{'image_id': 'art_123'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/art_123.jpg'),
+    ({'artworks': [{'image_id': '../invalid'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/shot_123.jpg'),
+    ({'artworks': {}, 'screenshots': [None, {'image_id': 'https://example.com/image'}], 'cover': {'image_id': 'co123'}}, 't_cover_big/co123.jpg'),
+])
+def test_catalog_backdrop_uses_validated_game_images_only(media, expected):
+    assert game_profile(media)['backdrop_url'] == 'https://images.igdb.com/igdb/image/upload/' + expected
+
+
+def test_catalog_media_validates_deduplicates_and_limits_provider_ids():
+    videos = [{'video_id': 'KOiuc9UWz1E', 'name': '<Trailer>'}] * 2
+    videos += [{'video_id': '../bad'}, None, {'video_id': 'https://example.com'}]
+    videos += [{'video_id': f'video{i:06d}', 'name': 'Trailer'} for i in range(10)]
+    images = [{'image_id': 'shot_0'}] * 2 + [None, {'image_id': '../bad'}]
+    images += [{'image_id': f'shot_{i}'} for i in range(10)]
+    media = game_media({'videos': videos, 'screenshots': images})
+    assert len(media) == 12
+    assert sum(item['kind'] == 'video' for item in media) == 4
+    assert len({item['id'] for item in media}) == len(media)
+    assert media[0]['url'] == 'https://www.youtube.com/watch?v=KOiuc9UWz1E'
+    assert game_media({'videos': {}, 'screenshots': None}) == []
+
+
+def test_catalog_facts_keep_roles_separate_and_only_safe_official_links():
+    facts = game_facts({'involved_companies': [None,
+        {'company': {'name': 'Studio'}, 'developer': True},
+        {'company': {'name': 'Studio'}, 'developer': True},
+        {'company': {'name': 'Publisher'}, 'publisher': True}],
+        'websites': [
+            {'type': {'type': 'Official Website'}, 'url': 'javascript:alert(1)'},
+            {'type': {'type': 'Official Website'}, 'url': 'https://example.com/game'},
+            {'type': {'type': 'Steam'}, 'url': 'https://fake-steam.test/app/1'},
+            {'type': {'type': 'Steam'}, 'url': 'https://store.steampowered.com/app/1'},
+            {'type': {'type': 'GOG'}, 'url': 'https://user:password@www.gog.com/game/test'},
+            {'type': {'type': 'GOG'}, 'url': 'https://www.gog.com/game/test'},
+            {'type': {'type': 'Twitter'}, 'url': 'https://x.com/game'}]})
+    assert facts['developers'] == ['Studio']
+    assert facts['publishers'] == ['Publisher']
+    assert [link['label'] for link in facts['links']] == ['Official Website', 'Steam', 'GOG']
+    assert game_facts({'involved_companies': {}, 'websites': None}) == {'developers': [], 'publishers': [], 'links': []}
 
 
 def link_catalog(app, game_id):
@@ -39,7 +81,7 @@ def test_catalog_details_fragment_escaped(client, seed_game, app, stored_games):
     page = client.get(f"/games/{game_id}", headers={"Accept": "application/json"})
     html = page.json["html"]
     assert "Puzzle" in html and "2011-04-19" in html
-    assert "Favorite" in html and "9/10" in html
+    assert "Favorite" in html and "4.5/5" in html
     assert "&lt;script&gt;" in html and "<script>" not in html
     assert "<!DOCTYPE" not in html
     assert "Accept" in page.headers["Vary"]
@@ -71,7 +113,8 @@ def test_missing_details(client, app):
 
 def test_profile_invalid_optional_data():
     assert game_profile({"summary": {}, "genres": {}, "first_release_date": True}) == {
-        "summary": None, "genres": [], "release": None,
+        "summary": None, "genres": [], "release": None, "backdrop_url": None, "media": [],
+        "developers": [], "publishers": [], "links": [],
     }
     assert game_profile({"first_release_date": 10**100})["release"] is None
     assert game_profile({"genres": [{"name": "Puzzle"}, {"name": "Puzzle"}, None]})["genres"] == ["Puzzle"]
@@ -94,12 +137,12 @@ def test_details_links_survive_live_filter(client, seed_game):
 def test_personal_verdict_design(client, seed_game, rating, filled):
     game_id = seed_game(rating=rating, review="A memory\n" + "x" * 1000)
     html = client.get(f"/games/{game_id}").get_data(as_text=True)
-    assert "The personal verdict" in html
+    assert "Your review" in html
     assert 'class="verdict-quote"' in html
     assert html.count('class="is-filled"') == filled
     assert f'href="/games/{game_id}/edit"' in html
     assert "A memory\n" in html
     if rating is not None:
-        assert f'aria-label="Your rating: {rating}/10"' in html
+        assert f'aria-label="Your rating: {rating / 2:g}/5"' in html
     else:
         assert "Not rated yet" in html

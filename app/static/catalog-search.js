@@ -4,9 +4,11 @@
     const picker = document.querySelector("[data-catalog-url]");
     if (!picker) return;
 
-    const input = picker.querySelector("#title");
+    const browsing = Boolean(picker.dataset.browseUrl);
+    const input = picker.querySelector(browsing ? "#catalog-query" : "#title");
     const results = picker.querySelector("#catalog-results");
     const message = picker.querySelector("#catalog-message");
+    const content = picker.querySelector("[data-catalog-content]");
     const platform = document.querySelector("#platform");
     const gameId = document.querySelector("#igdb-id");
     const submit = document.querySelector("#add-game-button");
@@ -24,14 +26,16 @@
         platform.disabled = true;
         submit.disabled = true;
         input.setCustomValidity("Choose a game from the catalog suggestions.");
-        platformMessage.textContent = "Only platforms listed for the selected game can be used.";
+        platformMessage.textContent = "";
     }
 
-    platform.addEventListener("change", () => {
+    if (!browsing) {
+        platform.addEventListener("change", () => {
+            submit.disabled = !gameId.value || !platform.value;
+        });
         submit.disabled = !gameId.value || !platform.value;
-    });
-    submit.disabled = !gameId.value || !platform.value;
-    if (!gameId.value) input.setCustomValidity("Choose a game from the catalog suggestions.");
+        if (!gameId.value) input.setCustomValidity("Choose a game from the catalog suggestions.");
+    }
 
     function closeResults() {
         results.hidden = true;
@@ -41,6 +45,15 @@
     }
 
     async function selectGame(game) {
+        if (browsing) {
+            clearTimeout(timer);
+            controller?.abort();
+            revision += 1;
+            closeResults();
+            const url = picker.dataset.browseUrl.replace(/0$/, String(game.id));
+            if (!window.VestigiumCatalogNavigation?.go(url)) window.location.assign(url);
+            return;
+        }
         clearTimeout(timer);
         controller?.abort();
         const currentRevision = ++revision;
@@ -73,7 +86,7 @@
             input.setCustomValidity("");
             platform.disabled = false;
             message.textContent = `Selected: ${selected.name}${selected.year ? ` (${selected.year})` : ""}.`;
-            platformMessage.textContent = "Now choose the platform you play on.";
+            platformMessage.textContent = "";
         } catch (error) {
             if (currentRevision !== revision || error.name === "AbortError") return;
             resetSelection();
@@ -90,7 +103,7 @@
         input.removeAttribute("aria-activedescendant");
         if (!games.length) {
             closeResults();
-            message.textContent = "No matching games found. Try a longer title.";
+            message.textContent = browsing ? "No matching games." : "No matching games found. Try a longer title.";
             return;
         }
 
@@ -130,19 +143,19 @@
         });
         results.hidden = false;
         input.setAttribute("aria-expanded", "true");
-        message.textContent = `${games.length} suggestions. Use arrow keys and Enter, or click a game.`;
+        message.textContent = `${games.length} matches.`;
     }
 
-    input.addEventListener("input", () => {
+    function search() {
         clearTimeout(timer);
         controller?.abort();
         const currentRevision = ++revision;
         loadingDetails = false;
-        resetSelection();
+        if (!browsing) resetSelection();
         closeResults();
         const term = input.value.trim();
         if (term.length < 2) {
-            message.textContent = "Type at least 2 characters to search IGDB.";
+            message.textContent = "";
             return;
         }
         message.textContent = "Searching the catalog...";
@@ -151,6 +164,7 @@
             try {
                 const url = new URL(picker.dataset.catalogUrl, window.location.origin);
                 url.searchParams.set("q", term);
+                if (content) url.searchParams.set("content", content.value);
                 const response = await fetch(url, {
                     signal: controller.signal,
                     headers: { Accept: "application/json" },
@@ -165,7 +179,9 @@
                 message.textContent = "Could not load suggestions. Please try again shortly.";
             }
         }, 450);
-    });
+    }
+    input.addEventListener("input", search);
+    content?.addEventListener("change", search);
 
     input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
@@ -175,7 +191,7 @@
             if (loadingDetails) resetSelection();
             loadingDetails = false;
             closeResults();
-            message.textContent = "Suggestions closed. Keep typing to search again.";
+            message.textContent = "Suggestions closed.";
             return;
         }
         if (results.hidden) return;

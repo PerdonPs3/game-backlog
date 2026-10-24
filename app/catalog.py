@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from threading import RLock
 from time import monotonic, sleep
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 import click
@@ -79,7 +79,7 @@ class IGDBClient:
         self._expires_at = monotonic() + max(0, lifetime - 30)
         return token
 
-    def search_games(self, term):
+    def search_games(self, term, *, include_community=False):
         """Cache short-lived results and serialize this process's API requests."""
         term = term.strip()
         if len(term) > 200:
@@ -87,35 +87,46 @@ class IGDBClient:
         if len(term) < 2:
             return []
         with self._lock:
-            cached = self._search_cache.get(term.casefold())
+            cache_key = (term.casefold(), include_community)
+            cached = self._search_cache.get(cache_key)
             if cached and monotonic() < cached[0]:
                 return cached[1]
-            games = self._search_games(term)
+            games = self._search_games(term, include_community=include_community)
             if len(self._search_cache) >= 64:
                 self._search_cache.clear()
-            self._search_cache[term.casefold()] = (monotonic() + 30, games)
+            self._search_cache[cache_key] = (monotonic() + 30, games)
             return games
 
-    def _search_games(self, term):
+    def _search_games(self, term, *, include_community=False):
         term = term.strip()
         if len(term) > 200:
             raise CatalogError("Search must contain no more than 200 characters.")
         if len(term) < 2:
             return []
 
-        # JSON quoting escapes quotes/backslashes in the API's query language.
+        # Match every word, including aliases, without requiring an exact phrase.
+        words = list(dict.fromkeys(re.findall(r"[^\W_]+", term, re.UNICODE)))
+        if not words:
+            return []
+        matches = " & ".join(
+            f"(name ~ *{json.dumps(word)}* | alternative_names.name ~ *{json.dumps(word)}*)"
+            for word in words
+        )
+        excluded = ["Bundle", "Pack", "Pack / Addon", "Port", "bundle", "pack", "port"]
+        if not include_community:
+            excluded.extend(["Mod", "mod", "Fan Game", "fan game"])
         query = (
-            f"search {json.dumps(term)}; "
-            f"fields {GAME_FIELDS}; "
-            'where version_parent = null & game_type.type != '
-            '("Bundle","Pack","Port","bundle","pack","port"); '
-            "limit 30;"
+            f"fields {GAME_FIELDS},total_rating_count,keywords.name; "
+            f"where ({matches}) & version_parent = null & game_type.type != "
+            f"({','.join(json.dumps(value) for value in excluded)}); "
+            "sort total_rating_count desc; limit 500;"
         )
         games = self._query_games(query)
         # Keep distinct remakes/remasters, but never repeat the same catalog ID.
         unique = {}
         for game in games:
-            if not is_game_pack(game) and not is_game_variant(game):
+            if (not is_game_pack(game) and not is_game_variant(game)
+                    and (include_community or not is_community_game(game))):
                 unique.setdefault(game["id"], game)
         return sorted(unique.values(), key=lambda game: search_sort_key(game, term))
 
@@ -128,7 +139,8 @@ class IGDBClient:
             if cached and monotonic() < cached[0]:
                 return cached[1]
             games = self._query_games(
-                f"fields {GAME_FIELDS},summary,genres.name; where id = {game_id}; limit 1;"
+                f"fields {GAME_FIELDS},summary,genres.name,artworks.image_id,screenshots.image_id,videos.name,videos.video_id,"
+                f"involved_companies.company.name,involved_companies.developer,involved_companies.publisher,websites.url,websites.type.type; where id = {game_id}; limit 1;"
             )
             game = next((g for g in games if g["id"] == game_id), None)
             if game is None or is_game_pack(game) or is_game_variant(game):
@@ -209,11 +221,28 @@ GAME_FIELDS = (
 
 
 def search_sort_key(game, term):
-    """Exact titles, title prefixes, then other matches; newest within each group."""
+    """Prefer exact titles and official entries, then rating-count popularity."""
     title = " ".join(game["name"].casefold().split())
     search = " ".join(term.casefold().split())
     relevance = 0 if title == search else 1 if title.startswith(search) else 2
-    return (relevance, *release_date_sort_key(game))
+    count = game.get("total_rating_count")
+    popularity = count if type(count) is int and count > 0 else 0
+    return (0 if relevance == 0 else 1, is_community_game(game), -popularity,
+            relevance, *release_date_sort_key(game))
+
+
+def is_community_game(game):
+    """Use provider classification, never infer licensing from a title."""
+    kind = game.get("game_type")
+    if isinstance(kind, dict) and str(kind.get("type", "")).casefold() in ("mod", "fan game", "fangame"):
+        return True
+    keywords = game.get("keywords", [])
+    if not isinstance(keywords, list):
+        return False
+    return any(isinstance(keyword, dict) and any(
+        marker in str(keyword.get("name", "")).casefold()
+        for marker in ("fangame", "fan game", "rom hack", "romhack")
+    ) for keyword in keywords)
 
 
 def release_date_sort_key(game):
@@ -241,7 +270,7 @@ def is_game_variant(game):
 def is_game_pack(game):
     game_type = game.get("game_type")
     return isinstance(game_type, dict) and str(game_type.get("type", "")).casefold() in (
-        "bundle", "pack",
+        "bundle", "pack", "pack / addon",
     )
 
 
@@ -296,6 +325,82 @@ def game_suggestion(game):
     }
 
 
+def game_media(game):
+    """Expose bounded, validated media on fixed provider hosts only."""
+    items, seen = [], set()
+    videos = game.get('videos')
+    if isinstance(videos, list):
+        for video in videos:
+            if not isinstance(video, dict):
+                continue
+            video_id = video.get('video_id')
+            if not isinstance(video_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id) or video_id in seen:
+                continue
+            seen.add(video_id)
+            title = video.get('name')
+            items.append({'kind': 'video', 'id': video_id,
+                          'title': title[:160] if isinstance(title, str) and title.strip() else 'Trailer',
+                          'preview': f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg',
+                          'url': f'https://www.youtube.com/watch?v={video_id}'})
+            if len(items) == 4:
+                break
+    screenshots = game.get('screenshots')
+    if isinstance(screenshots, list):
+        for image in screenshots:
+            image_id = cover_image_id({'cover': image})
+            if not image_id or image_id in seen:
+                continue
+            seen.add(image_id)
+            items.append({'kind': 'image', 'id': image_id, 'title': f'Screenshot {sum(item["kind"] == "image" for item in items) + 1}',
+                          'preview': f'https://images.igdb.com/igdb/image/upload/t_screenshot_med/{image_id}.jpg',
+                          'url': f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'})
+            if sum(item['kind'] == 'image' for item in items) == 8:
+                break
+    return items
+
+
+def game_facts(game):
+    """Normalize public company credits and safe official/store links."""
+    developers, publishers = set(), set()
+    companies = game.get('involved_companies')
+    if isinstance(companies, list):
+        for credit in companies:
+            if not isinstance(credit, dict) or not isinstance(credit.get('company'), dict):
+                continue
+            name = credit['company'].get('name')
+            if not isinstance(name, str) or not name.strip():
+                continue
+            if credit.get('developer') is True:
+                developers.add(name.strip()[:160])
+            if credit.get('publisher') is True:
+                publishers.add(name.strip()[:160])
+    links = {}
+    websites = game.get('websites')
+    if isinstance(websites, list):
+        for website in websites:
+            if not isinstance(website, dict) or not isinstance(website.get('type'), dict):
+                continue
+            kind, url = website['type'].get('type'), website.get('url')
+            if kind not in ('Official Website', 'Steam', 'GOG') or kind in links:
+                continue
+            if not isinstance(url, str) or len(url) > 2048 or any(character.isspace() or ord(character) < 32 for character in url):
+                continue
+            try:
+                parsed = urlsplit(url)
+                if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
+                    continue
+                if kind == 'Steam' and parsed.hostname != 'store.steampowered.com':
+                    continue
+                if kind == 'GOG' and parsed.hostname not in ('gog.com', 'www.gog.com'):
+                    continue
+            except ValueError:
+                continue
+            links[kind] = url
+    return {'developers': sorted(developers, key=str.casefold)[:12],
+            'publishers': sorted(publishers, key=str.casefold)[:12],
+            'links': [{'label': label, 'url': links[label]} for label in ('Official Website', 'Steam', 'GOG') if label in links]}
+
+
 def game_profile(game):
     """Public catalog details, with safe defaults for optional upstream fields."""
     release = None
@@ -312,7 +417,20 @@ def game_profile(game):
                     if isinstance(genre, dict) and isinstance(genre.get("name"), str)
                     and genre["name"].strip()}, key=str.casefold)
     summary = game.get("summary")
-    return {"release": release, "genres": names,
+    backdrop = None
+    for field in ('artworks', 'screenshots'):
+        images = game.get(field)
+        if isinstance(images, list):
+            for image in images:
+                image_id = cover_image_id({'cover': image})
+                if image_id:
+                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'
+                    break
+        if backdrop:
+            break
+    if not backdrop:
+        backdrop = collection_cover_url(cover_image_id(game))
+    return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game), **game_facts(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
 

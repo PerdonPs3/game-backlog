@@ -1,8 +1,6 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Manage {{ item.name }} · Vestigium{% endblock %}
-{% block page_kicker %}Give your games a place{% endblock %}
-{% block page_heading %}Curate your <span>list</span>{% endblock %}
-{% block page_description %}Rename your list and choose the games that belong here. Nothing is removed from your library.{% endblock %}
+{% block page_heading %}Edit <span>list</span>{% endblock %}
 {% block panel_label %}Edit list and memberships{% endblock %}
 {% block panel %}
     {% for message in get_flashed_messages(category_filter=['list_saved']) %}<p id="list-feedback" class="workspace-success" role="status" tabindex="-1">{{ message }}</p>{% endfor %}
@@ -13,7 +11,7 @@
         <div class="form-wide"><label for="list-name">List name</label><input id="list-name" name="name" value="{{ request.form.get('name', item.name) }}" maxlength="80" required></div>
         <fieldset class="list-game-picker form-wide">
             <legend>Games in this list</legend>
-            <p class="form-note">Check to include, uncheck to remove from this list only.</p>
+            <p class="form-note">Removing a game here keeps it in your library.</p>
             <div class="list-editor-toolbar" id="list-editor-toolbar" hidden>
                 <div role="group" aria-label="Show games" class="list-editor-switch">
                     <button type="button" data-list-view="all" aria-pressed="true">All games</button>
