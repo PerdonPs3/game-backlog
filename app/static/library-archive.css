@@ -81,20 +81,20 @@ html[data-theme="light"] body.library-archive {
 .library-archive .library-heading { padding: .65rem .8rem; border-radius: 10px; background: var(--archive-panel); }
 .library-archive .library-heading .collection-view-switch { margin: 0; }
 .library-archive #filter-message:not(:empty) { width: fit-content; max-width: 100%; padding: .4rem .7rem; color: var(--text); background: var(--archive-panel); border-radius: 8px; }
-.library-archive #game-collection { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
+.library-archive #game-collection { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .library-archive #game-collection > p { grid-column: 1 / -1; padding: 1.5rem; background: var(--archive-panel); border: 1px solid var(--border); border-radius: 12px; }
-.library-archive #game-collection .game-card { display: flex; flex-direction: column; gap: 0; min-width: 0; margin: 0; padding: 0; overflow: hidden; background: var(--color-panel); border: 1px solid var(--border); border-radius: 13px; box-shadow: 0 8px 22px #0004; }
-.library-archive #game-collection .game-card-cover { width: 100%; height: auto; aspect-ratio: 16 / 11; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: radial-gradient(ellipse at center, var(--color-raised), var(--color-field)); }
-.library-archive #game-collection .game-card-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.library-archive #game-collection .game-card-details { display: flex; flex-direction: column; flex: 1; padding: 1rem; }
-.library-archive #game-collection .game-card h2 { font-size: 1.05rem; }
-.library-archive #game-collection .game-card-heading h2 { flex-basis: auto; }
-.library-archive #game-collection .game-card-details > p { font-size: .75rem; }
-.library-archive #game-collection .game-meta { gap: .4rem; }
-.library-archive #game-collection :is(.game-status, .game-rating) { font-size: .7rem; }
-.library-archive #game-collection .game-actions { flex-wrap: wrap; margin-top: auto; padding-top: .8rem; }
-.library-archive #game-collection .game-actions a { padding: .4rem .55rem; font-size: .7rem; }
-.library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.library-archive #game-collection[data-view="shelf"] .game-card { display: flex; flex-direction: column; gap: 0; min-width: 0; margin: 0; padding: 0; overflow: hidden; background: var(--color-panel); border: 1px solid var(--border); border-radius: 13px; box-shadow: 0 8px 22px #0004; }
+.library-archive #game-collection[data-view="shelf"] .game-card-cover { width: 100%; height: auto; aspect-ratio: 16 / 11; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: radial-gradient(ellipse at center, var(--color-raised), var(--color-field)); }
+.library-archive #game-collection[data-view="shelf"] .game-card-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.library-archive #game-collection[data-view="shelf"] .game-card-details { display: flex; flex-direction: column; flex: 1; padding: 1rem; }
+.library-archive #game-collection[data-view="shelf"] .game-card h2 { font-size: 1.05rem; }
+.library-archive #game-collection[data-view="shelf"] .game-card-heading h2 { flex-basis: auto; }
+.library-archive #game-collection[data-view="shelf"] .game-card-details > p { font-size: .75rem; }
+.library-archive #game-collection[data-view="shelf"] .game-meta { gap: .4rem; }
+.library-archive #game-collection[data-view="shelf"] :is(.game-status, .game-rating) { font-size: .7rem; }
+.library-archive #game-collection[data-view="shelf"] .game-actions { flex-wrap: wrap; margin-top: auto; padding-top: .8rem; }
+.library-archive #game-collection[data-view="shelf"] .game-actions a { padding: .4rem .55rem; font-size: .7rem; }
+.library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem; }
 .library-archive #game-collection[data-view="shelf"] .game-card-cover { aspect-ratio: 264 / 374; }
 .library-archive #game-collection[data-view="shelf"] .game-card-cover img { object-position: center; }
 .library-archive #game-collection[data-view="shelf"] .game-card-details { padding: .8rem; }
@@ -115,7 +115,7 @@ html[data-theme="light"] .library-archive .game-actions a { color: var(--accent)
 html[data-theme="light"] .library-archive :is(.collection-view-switch > button[aria-pressed="true"], .backup-actions .library-tool-featured) { background: #f3e7d0; color: var(--accent); border-color: var(--border); }
 html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2380541f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); }
 @media (max-width: 900px) {
-    .library-archive #game-collection, .library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 540px) {
     .library-archive .library-layout .library-hero { padding: 1.25rem; min-height: 0; background: var(--archive-panel); }

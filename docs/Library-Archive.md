@@ -14,9 +14,9 @@ assistive technology and does not intercept input. One existing vector brand
 symbol sits on the fabric banner; the large repeated wordmark and floating logo
 have been removed from the hero.
 
-Cards display three columns on desktop, two on smaller screens, and one on
-phones. Shelf keeps portrait covers, with four columns on desktop and two on
-phones. Both views retain the existing filtering, sorting, saved layout,
+Cards keep the original full-width horizontal layout, complete portrait covers,
+and detailed notes; on phones they retain their original stacked layout. Shelf
+keeps portrait covers in a grid, with four columns on desktop and two on phones. Both views retain the existing filtering, sorting, saved layout,
 details, editing, and deletion controls. Cards retain library notes and dates;
 Shelf retains its existing compact behavior.
 
