@@ -51,6 +51,25 @@ class IGDBClient:
         self._search_cache = {}
         self._game_cache = {}
         self._genre_cache = {}
+        self._card_cache = {}
+
+    def get_game_cards(self, game_ids):
+        """Resolve a bounded page of public titles and covers in one request."""
+        ids = sorted({value for value in game_ids if type(value) is int and 0 < value < 2**63})
+        if len(ids) > 50:
+            raise CatalogError("Too many games requested.")
+        with self._lock:
+            now = monotonic()
+            missing = [value for value in ids if value not in self._card_cache or now >= self._card_cache[value][0]]
+            if missing:
+                if len(self._card_cache) + len(missing) > 256:
+                    self._card_cache.clear()
+                    missing = ids
+                games = self._query_games(f'fields id,name,cover.image_id; where id = ({",".join(map(str, missing))}); limit 50;')
+                found = {game['id']: game for game in games if game['id'] in missing}
+                for value in missing:
+                    self._card_cache[value] = (monotonic() + 300, found.get(value))
+            return {value: self._card_cache[value][1] for value in ids if self._card_cache[value][1] is not None}
 
     def _access_token(self):
         if self._token and monotonic() < self._expires_at:

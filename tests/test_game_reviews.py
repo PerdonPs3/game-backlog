@@ -76,7 +76,7 @@ def test_unknown_catalog_game_does_not_accept_reviews(accounts):
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
 
-def test_reviews_are_visible_directly_with_spoiler_labels_and_escaped_html(accounts):
+def test_reviews_share_profile_reading_behavior_and_escape_html(accounts):
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
     body = '<script>alert(1)</script>' + ' A very long memory.' * 50
@@ -84,10 +84,16 @@ def test_reviews_are_visible_directly_with_spoiler_labels_and_escaped_html(accou
     html = accounts.test_client().get(PATH).get_data(as_text=True)
     assert '<details class="community-review-content">' not in html
     assert 'Spoilers</span>' in html and 'Show review' not in html
+    assert '<details class="profile-review-spoilers">' in html
+    profile_html = accounts.test_client().get('/profile/alice_player').get_data(as_text=True)
+    assert 'class="community-review profile-review-card"' in profile_html
+    assert '<details class="profile-review-spoilers">' in profile_html
     assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html
     assert '<script>alert(1)</script>' not in html
     assert publish(alice, {**DATA, 'body': body}).status_code == 303
     html = accounts.test_client().get(PATH).get_data(as_text=True)
+    assert '<details class="profile-review-expand">' in html
+    assert 'Full review of Portal 2' in html
     assert 'Read full review' not in html
     assert 'class="community-spoiler-label"' not in html
     assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html

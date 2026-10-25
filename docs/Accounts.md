@@ -133,15 +133,19 @@ granting public Data API access.
 Public is the default for new profiles. Existing saved privacy choices are preserved.
 Older named profiles without usernames stay unpublished until they save a valid identity; saved privacy choices are retained. `/players/<username>` works without
 signing in only when the profile is Public. The owner chooses separately whether
-to share the bio and ordered showcase. Display name, username, and silhouette
+to share the bio, ordered showcase, statistics, and recent activity. Display name, username, and silhouette
 color form the minimum public identity. Subsequent changes to shared fields also
 update the public page. Unpublishing returns the same 404 as an unknown username,
 for legacy public-only URLs; the canonical profile remains accessible to its verified owner. Responses use `no-store` and `noindex, nofollow`; these do not
 make an enabled public URL secret or prevent others from copying its content.
 
 Public queries project only selected fields. They do not include account IDs,
-emails, sessions, photo bytes, game entry IDs, reviews, ratings, progress,
-lists, statistics, or unselected library entries. Public showcase cards do not
+emails, sessions, photo bytes, private game entry IDs, private review text,
+lists, or the full collection. Enabled statistics expose aggregate counts,
+completion percentage, and average rating. Enabled activity exposes up to three
+currently playing entries and three dated completions, including title, platform,
+rating, and completion date. Only explicitly published reviews appear in the
+review section. Public showcase and activity cards do not
 link to private game routes. When available, they link to a public catalog page
 using the IGDB ID. See [Public catalog](Public-Catalog.md). Authenticated settings
 require a normal, completed-profile session
@@ -266,6 +270,55 @@ be imported into the intended signed-in account; ownership and credentials never
 appear in exported backups.
 
 ## Access model
+
+### Statistics, activity, and long profile reviews
+
+Apply migration `013_profile_activity_sharing.sql` before deploying this follow-up
+to either hosted environment. The migration was tested locally and applied to
+hosted development on 2026-10-25 for the authorized Preview release. Existing
+row counts and overall profile visibility were preserved. Production remains
+unchanged and requires separate release authorization.
+It adds `share_statistics` and `share_activity`, both enabled by default for
+existing and new profiles under the owner's 2026-10-25 decision. It does not
+change overall public/private visibility, publish photos, or publish reviews.
+Private profiles remain inaccessible to visitors.
+
+Edit profile offers independent controls for Gaming statistics and Playing now &
+recent completions. Turning either off revokes that public section on the next
+request. Legacy submissions without the new controls preserve existing choices;
+new forms carry a marker to distinguish unchecked controls from missing fields.
+The owner's private workspace remains available regardless of those choices.
+
+Public activity queries project no private entry IDs, notes, or account IDs.
+Game links open catalog details; legacy entries without catalog IDs render as
+plain activity items. Public aggregate counts use the same game/platform entry
+semantics and completion rounding as the owner's statistics.
+
+Published reviews over 300 characters or three lines use a closed native disclosure
+with a whitespace-normalized excerpt of at most 260 characters, visually limited
+to three lines. Profile and game pages share one review-card template and
+stylesheet, with one full-width card per row. A compact identity/date header
+and rating badge sit above the readable body; profiles identify the game, while
+game pages identify its reviewer. Read more/Show less
+expands or collapses the escaped original text without JavaScript or a storage
+change; the expanded close control appears after the full text. Spoiler reviews expose no excerpt
+and stay behind a separate closed spoiler disclosure. Private notes never enter
+either disclosure.
+
+Public profiles also display reviews their owners explicitly published through
+Add game or Edit game. Private notes and library records are never queried to
+construct this section. Moderation-hidden and viewer-reported reviews are
+excluded, and privatizing the profile revokes public access. Spoilers use a
+closed disclosure; reviews are paginated in groups of ten. Catalog titles and
+covers are fetched in a cached public metadata batch, with game-ID links if the
+provider is unavailable.
+
+`/players` searches current public display names and usernames only. It does not
+list profiles before a search, search email addresses, or match reserved former
+usernames. Searches require 2–80 characters, return at most 20 public identities
+per page, and use a process-local 60-request/minute budget configurable through
+`PUBLIC_PLAYER_REQUEST_LIMIT`. Search and profile responses are non-cacheable and
+excluded from search-engine indexing. This budget is not a distributed rate limiter.
 
 - The server validates Supabase's current user before each authenticated request.
   It refreshes expiring access tokens while holding a database session-row lock.

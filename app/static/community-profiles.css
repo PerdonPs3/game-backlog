@@ -1,0 +1,31 @@
+.profile-reviews { margin-top: 1.5rem; scroll-margin-top: 110px; }
+.profile-review-pages { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; font-size: .75rem; }
+.profile-review-pages a { color: var(--accent); }
+.profile-reviews-empty { color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
+.player-search { display: block; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); }
+.player-search label { display: block; margin-bottom: .8rem; font-size: .9rem; }
+.player-search > div { display: flex; gap: .8rem; }
+.player-search input { flex: 1; min-width: 0; }
+.player-search button { white-space: nowrap; }
+.player-search small { display: block; color: var(--text-muted); font-size: .65rem; margin-top: .8rem; line-height: 1.6; }
+.player-search-empty { text-align: center; padding: 3rem 1rem; }
+.player-search-empty > span { color: var(--accent); font-size: 2.5rem; }
+.player-search-empty h2 { font-size: 1.2rem; }
+.player-search-empty p, .player-search-count { color: var(--text-muted); font-size: .8rem; }
+.player-search-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; padding: 0; list-style: none; }
+.player-result { display: flex; gap: 1rem; align-items: center; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; background: var(--color-panel); color: var(--text); text-decoration: none; transition: border-color .2s, transform .2s; }
+.player-result:hover { transform: translateY(-2px); border-color: var(--accent); }
+.player-result-avatar { position: relative; display: grid; place-items: center; flex: 0 0 56px; height: 56px; border-radius: 50%; overflow: hidden; background: var(--avatar-color); color: white; font-weight: 700; font-size: 1.3rem; }
+.player-result-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.player-result-name { display: grid; gap: .4rem; min-width: 0; }
+.player-result-name strong { font-size: .9rem; overflow-wrap: anywhere; }
+.player-result-name small { color: var(--text-muted); font-size: .7rem; overflow-wrap: anywhere; }
+.player-result-arrow { color: var(--accent); margin-left: auto; }
+.profile-search-message { color: var(--accent); padding: 1rem; }
+@media (max-width: 600px) {
+    .player-search-grid { grid-template-columns: 1fr; }
+    .player-search > div { flex-direction: column; }
+    .profile-reviews { scroll-margin-top: 160px; }
+
+}
+@media (prefers-reduced-motion: reduce) { .player-result { transition: none; } }

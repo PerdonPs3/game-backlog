@@ -79,10 +79,10 @@ html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #7042b72a
     .workspace-site-header .appearance-bar { gap: .35rem; }
     .workspace-site-header .theme-toggle, .workspace-site-header .github-profile { width: 32px; height: 32px; min-width: 32px; padding: 6px; }
     .workspace-site-header .github-profile-name { display: none; }
-    .workspace-site-header .workspace-nav { flex: 1; }
+    .workspace-site-header .workspace-nav { flex: 1; min-width: max-content; }
     .workspace-site-header .workspace-nav > :not(.workspace-brand) { display: none; }
     .workspace-site-header .workspace-brand { font-size: .95rem; }
-    .workspace-site-header .workspace-header-actions { width: auto; margin-left: 0; }
+    .workspace-site-header .workspace-header-actions { width: auto; margin-left: auto; }
     .workspace-site-header .account-navigation { gap: .25rem; }
     .workspace-site-header .account-navigation > a, .workspace-site-header .account-navigation button { padding: .5rem; font-size: .7rem; white-space: nowrap; }
     .header-search { order: 3; flex-basis: 100%; }

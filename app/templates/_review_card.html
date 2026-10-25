@@ -1,0 +1,17 @@
+{% from '_review_stars.html' import review_stars %}
+{% macro review_card(review, title, profile=false) %}
+<article class="community-review{% if profile %} profile-review-card{% endif %}"{% if not profile %} id="review-{{ review.id }}"{% endif %}>
+<header>{{ caller('identity') }}<div class="community-review-tools">
+{{ caller('tools') }}
+<span class="community-review-score" role="img" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<span aria-hidden="true"><strong>{{ review.rating|star_rating }}</strong><small>/5</small></span></span>
+</div></header>
+            {% if review.has_spoilers %}
+                <details class="profile-review-spoilers"><summary>Contains spoilers · Read review</summary><p>{{ review.body }}</p></details>
+            {% elif review.body|length > 300 or review.body.splitlines()|length > 3 %}
+                {% set excerpt = review.body.split()|join(' ') %}
+                <details class="profile-review-expand"><summary aria-label="Full review of {{ title }}"><span class="profile-review-excerpt">{{ excerpt|truncate(260, false, '…', 0) }}</span><span class="profile-review-more">Read more <span aria-hidden="true">↗</span></span><span class="profile-review-less">Show less <span aria-hidden="true">↑</span></span></summary><p>{{ review.body }}</p></details>
+            {% else %}<p>{{ review.body }}</p>{% endif %}
+
+{% if review.has_spoilers and not profile %}<footer class="community-review-footer"><span class="community-spoiler-label">Spoilers</span></footer>{% endif %}
+</article>
+{% endmacro %}

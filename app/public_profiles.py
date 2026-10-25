@@ -7,12 +7,44 @@ import psycopg
 from flask import Blueprint, Response, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from app.catalog import collection_cover_url
+from app.game_reviews import profile_review_context
 from app.db import get_db
 
 
 profiles = Blueprint('profiles', __name__)
 USERNAME_WAIT_SECONDS = 30 * 24 * 60 * 60
 RESERVED_NAMES = {'admin', 'administrator', 'api', 'auth', 'account', 'accounts', 'discover', 'explore', 'help', 'library', 'login', 'logout', 'moderator', 'official', 'players', 'profile', 'register', 'root', 'security', 'settings', 'staff', 'support', 'system', 'vestigium'}
+
+
+@profiles.get('/players')
+def search():
+    if not current_app.config.get('AUTH_ENABLED'):
+        abort(404)
+    from app.public_catalog import CatalogBudget
+    term = request.args.get('q', '').strip()
+    try:
+        page = int(request.args.get('page', '1'))
+    except ValueError:
+        abort(400)
+    if not 1 <= page <= 10000 or len(term) > 80 or '\x00' in term:
+        abort(400)
+    players, count, error = [], 0, None
+    status = 200
+    if term:
+        if len(term.lstrip('@')) < 2:
+            error, status = 'Enter at least two characters.', 400
+        elif not current_app.extensions.setdefault('public_player_budget', CatalogBudget()).allow(current_app.config.get('PUBLIC_PLAYER_REQUEST_LIMIT', 60)):
+            error, status = 'Player search is busy. Please try again shortly.', 429
+        else:
+            db = get_db()
+            term = term.lstrip('@')
+            condition = "is_public = TRUE AND username IS NOT NULL AND length(trim(display_name)) > 0 AND (strpos(lower(display_name), lower(?)) > 0 OR strpos(username, lower(?)) > 0)"
+            count = db.execute('SELECT COUNT(*) FROM profiles WHERE ' + condition, (term, term)).fetchone()[0]
+            players = db.execute('SELECT display_name, username, avatar_color, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE ' + condition + ' ORDER BY CASE WHEN username = lower(?) THEN 0 ELSE 1 END, lower(display_name), username LIMIT 20 OFFSET ?', (term, term, term, (page - 1) * 20)).fetchall()
+    response = current_app.make_response((render_template('players.html', players=players, query=term, total=count, page=page, has_next=page * 20 < count, error=error), status))
+    if status == 429:
+        response.headers['Retry-After'] = '60'
+    return response
 
 
 def clean_username(value):
@@ -61,7 +93,7 @@ def save_sharing(db, owner, form):
 def update_sharing(db, owner, form):
     """Update identity and privacy inside the caller's atomic profile transaction."""
     username = clean_username(form.get('username', ''))
-    profile = db.execute('SELECT username, username_changed_at FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
+    profile = db.execute('SELECT username, username_changed_at, share_statistics, share_activity FROM profiles WHERE id = ? FOR UPDATE', (owner,)).fetchone()
     if profile['username'] != username:
         now = username_clock(db)
         availability = username_availability(profile, now)
@@ -71,6 +103,10 @@ def update_sharing(db, owner, form):
         db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
     db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
                (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
+    # Older forms do not carry these controls; preserve their current choices.
+    for field in ('share_statistics', 'share_activity'):
+        if form.get('profile_activity_controls') == 'yes' or field in form:
+            db.execute(f'UPDATE profiles SET {field} = ? WHERE id = ?', (form.get(field) == 'yes', owner))
     if form.get('publish_photo') == 'yes':
         db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
 
@@ -97,7 +133,7 @@ def sharing():
             return redirect(url_for('profiles.sharing', _anchor='sharing-feedback'), code=303)
         except ValueError as exc:
             error = str(exc)
-    item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
+    item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase, share_statistics, share_activity FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
     return render_template('profile_sharing.html', sharing=item, error=error, username_state=username_availability(item, username_clock(db)))
 
 
@@ -135,7 +171,33 @@ def public_profile(username):
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()
     showcase = [{'title': row['title'], 'platform': row['platform'], 'position': row['position'], 'catalog_id': row['igdb_id'], 'cover_url': collection_cover_url(row['cover_image_id'])} for row in games]
-    return render_template('public_profile.html', profile=item, showcase=showcase)
+    return render_template('public_profile.html', profile=item, showcase=showcase, **public_activity_context(username), **profile_review_context(username))
+
+
+def public_activity_context(username):
+    """Expose only the enabled aggregate and bounded activity projections."""
+    db = get_db()
+    row = db.execute("SELECT COUNT(g.id) AS total, COUNT(g.id) FILTER (WHERE g.status = 'Completed') AS completed, "
+                     "COUNT(g.id) FILTER (WHERE g.status = 'Playing') AS playing, AVG(g.rating) AS average "
+                     'FROM profiles p LEFT JOIN games g ON g.owner_id = p.id '
+                     'WHERE p.username = ? AND p.is_public = TRUE AND p.share_statistics = TRUE GROUP BY p.id', (username,)).fetchone()
+    stats = dict(row) if row else None
+    if stats is not None:
+        stats['completion_percent'] = int(stats['completed'] * 100 / stats['total'] + .5) if stats['total'] else 0
+    activity_enabled = bool(db.execute('SELECT 1 FROM profiles WHERE username = ? AND is_public = TRUE AND share_activity = TRUE', (username,)).fetchone())
+    playing, completed = [], []
+    if activity_enabled:
+        for status, target, order in [('Playing', playing, 'g.started_on DESC NULLS LAST, g.created_at DESC, g.id DESC'),
+                                      ('Completed', completed, 'g.completed_on DESC, g.id DESC')]:
+            rows = db.execute('SELECT g.title, g.platform, g.rating, g.igdb_id AS catalog_id, g.cover_image_id, g.completed_on '
+                              'FROM games g JOIN profiles p ON p.id = g.owner_id '
+                              'WHERE p.username = ? AND p.is_public = TRUE AND p.share_activity = TRUE AND g.status = ? '
+                              + ('AND g.completed_on IS NOT NULL ' if status == 'Completed' else '')
+                              + 'ORDER BY ' + order + ' LIMIT 3', (username, status)).fetchall()
+            target.extend({'title': r['title'], 'platform': r['platform'], 'rating': r['rating'], 'catalog_id': r['catalog_id'],
+                           'completed_on': r['completed_on'] if status == 'Completed' else None,
+                           'cover_url': collection_cover_url(r['cover_image_id'])} for r in rows)
+    return {'public_stats': stats, 'public_activity_enabled': activity_enabled, 'public_playing': playing, 'public_completed': completed}
 
 
 @profiles.get('/players/<username>/photo')
@@ -156,7 +218,7 @@ def init_app(app):
 
     @app.after_request
     def public_profile_headers(response):
-        if request.endpoint in ('profiles.public_profile', 'profiles.public_photo'):
+        if request.endpoint in ('profiles.public_profile', 'profiles.public_photo', 'profiles.search'):
             response.headers['Cache-Control'] = 'private, no-store'
             response.headers['X-Robots-Tag'] = 'noindex, nofollow'
             response.headers['Referrer-Policy'] = 'same-origin' if request.endpoint == 'profiles.public_profile' else 'no-referrer'

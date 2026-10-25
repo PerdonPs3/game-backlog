@@ -13,6 +13,43 @@ REPORT_REASONS = ('spam', 'abuse', 'spoilers', 'other')
 VISIBLE = 'p.is_public AND p.username IS NOT NULL AND NOT r.moderation_hidden'
 
 
+def profile_review_context(username):
+    """Reuse publication and reporting boundaries without reading private games."""
+    from app.catalog import CatalogError, collection_cover_url, cover_image_id, get_catalog
+    from app.public_catalog import public_request_allowed
+    try:
+        page = int(request.args.get('reviews_page', '1'))
+    except ValueError:
+        abort(400)
+    if not 1 <= page <= 10000:
+        abort(400)
+    db = get_db()
+    visible = bool(username and db.execute('SELECT 1 FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone())
+    rows, count = [], 0
+    if visible:
+        normal = bool(g.user and not g.account_session['recovery'])
+        condition = 'p.username = ? AND ' + VISIBLE
+        params = [username]
+        if normal:
+            condition += ' AND NOT EXISTS (SELECT 1 FROM public_review_reports f WHERE f.review_id = r.id AND f.reporter_id = ?)'
+            params.append(g.user['id'])
+        count = db.execute('SELECT COUNT(*) FROM public_game_reviews r JOIN profiles p ON p.id = r.owner_id WHERE ' + condition, tuple(params)).fetchone()[0]
+        rows = db.execute('SELECT r.id, r.catalog_id, r.rating, r.body, r.has_spoilers, r.updated_at FROM public_game_reviews r JOIN profiles p ON p.id = r.owner_id WHERE ' + condition + ' ORDER BY r.updated_at DESC, r.id DESC LIMIT ? OFFSET ?', (*params, PAGE_SIZE, (page - 1) * PAGE_SIZE)).fetchall()
+    metadata = {}
+    if rows:
+        try:
+            if public_request_allowed():
+                metadata = get_catalog().get_game_cards([row['catalog_id'] for row in rows])
+        except CatalogError:
+            pass
+    cards = []
+    for row in rows:
+        game = metadata.get(row['catalog_id']) or {}
+        cards.append({**dict(row), 'game_title': game.get('name', f'Game #{row["catalog_id"]}')[:200], 'cover_url': collection_cover_url(cover_image_id(game))})
+    return {'profile_reviews': cards, 'profile_review_count': count, 'profile_reviews_page': page,
+            'profile_reviews_has_next': page * PAGE_SIZE < count, 'profile_reviews_visible': visible}
+
+
 def can_publish_public_review():
     if not current_app.config.get('AUTH_ENABLED') or not g.user or g.account_session['recovery'] or not g.profile or not g.profile['username']:
         return False

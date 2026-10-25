@@ -64,6 +64,30 @@ def test_migrations_are_repeatable_and_health_check_is_read_only(postgres_app):
         assert all(row[0] for row in db.execute("SELECT relrowsecurity FROM pg_class WHERE relnamespace = current_schema()::regnamespace AND relname IN ('games', 'game_lists', 'game_list_members')"))
 
 
+def test_activity_sharing_upgrade_adds_defaults_without_publishing_private_profiles(postgres_config, tmp_path, monkeypatch):
+    if not postgres_config:
+        pytest.skip('Requires disposable PostgreSQL schemas')
+    original = migrations.MIGRATIONS
+    for path in sorted(original.glob('[0-9]*.sql'))[:12]:
+        (tmp_path / path.name).write_bytes(path.read_bytes())
+    application = create_app({'TESTING':True,'SECRET_KEY':'migration-tests',**postgres_config})
+    owner = '11111111-1111-4111-8111-111111111111'
+    with monkeypatch.context() as patch:
+        patch.setattr(migrations,'MIGRATIONS',tmp_path)
+        assert application.test_cli_runner().invoke(args=['migrate-db']).exit_code == 0
+        with application.app_context():
+            get_db().execute("INSERT INTO profiles (id,display_name,is_public) VALUES (?,'Existing private player',FALSE)",(owner,))
+    result = application.test_cli_runner().invoke(args=['migrate-db'])
+    assert result.exit_code == 0 and 'Applied 1' in result.output
+    with application.app_context():
+        db = get_db()
+        assert tuple(db.execute('SELECT is_public,share_statistics,share_activity,share_photo FROM profiles WHERE id=?',(owner,)).fetchone()) == (False,True,True,False)
+        db.execute('UPDATE profiles SET share_statistics=FALSE,share_activity=FALSE WHERE id=?',(owner,))
+    assert 'Applied 0' in application.test_cli_runner().invoke(args=['migrate-db']).output
+    with application.app_context():
+        assert tuple(get_db().execute('SELECT share_statistics,share_activity FROM profiles WHERE id=?',(owner,)).fetchone()) == (False,False)
+
+
 def test_failed_schema_migration_rolls_back_ddl_and_version(postgres_app, tmp_path, monkeypatch):
     original = migrations.MIGRATIONS
     for path in original.glob('[0-9]*.sql'):

@@ -7,13 +7,14 @@
 {% block panel_label %}Profile sharing settings{% endblock %}
 {% block panel %}
 <section class="profile-section">
-    <header class="profile-section-heading"><div><p>Your library, notes, ratings, and progress stay private.</p></div><span class="player-private"><span class="sharing-status-dot" aria-hidden="true"></span> {{ ('Public' if sharing.is_public else 'Private') if sharing.username else 'Not set up yet' }}</span></header>
+    <header class="profile-section-heading"><div><p>Choose which profile sections to share. Your full library and personal notes stay private.</p></div><span class="player-private"><span class="sharing-status-dot" aria-hidden="true"></span> {{ ('Public' if sharing.is_public else 'Private') if sharing.username else 'Not set up yet' }}</span></header>
     {% set messages = get_flashed_messages(category_filter=['profile_saved']) %}
     {% if messages %}<p id="sharing-feedback" class="profile-feedback is-saved profile-sharing-notice" role="status" tabindex="-1"><span aria-hidden="true">✓</span> {{ messages[0] }}</p>{% endif %}
     {% if error %}<p class="profile-error" role="alert">{{ error }}</p>{% endif %}
     <form method="post" class="workspace-form profile-sharing-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="publish_photo" value="yes">
+        <input type="hidden" name="profile_activity_controls" value="yes">
         <div class="profile-sharing-top">
             <section class="profile-sharing-card" aria-labelledby="identity-title">
                 <h2 id="identity-title">Player identity</h2>
@@ -26,7 +27,7 @@
             </fieldset>
         </div>
         <fieldset class="profile-sharing-card profile-sharing-choices"><legend>Shared details</legend><h2>Shared details</h2><div class="profile-sharing-options">
-            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if submitted else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong></span></label>{% endfor %}
+            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase'), ('share_statistics', 'Gaming statistics'), ('share_activity', 'Playing now & recent completions')] %}<label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if submitted and (name not in ['share_statistics', 'share_activity'] or request.form.get('profile_activity_controls') == 'yes' or name in request.form) else sharing[name]) %}checked{% endif %}><span><strong>{{ title }}</strong></span></label>{% endfor %}
         </div></fieldset>
         <div class="profile-sharing-footer"><p class="profile-empty-note">Saving also shares your photo when your profile is public.</p><div class="profile-save-actions"><button type="submit">Save changes</button><a href="{{ profile_url() }}">Cancel</a></div></div>
         <details class="profile-sharing-guidelines"><summary>About shared content and old links</summary><p>Previous usernames stay reserved for you and redirect to your current public profile.</p><p>Share only content you have the right to publish. Do not include private information, impersonation, hate, or explicit content.</p></details>

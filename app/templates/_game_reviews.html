@@ -1,4 +1,4 @@
-{% from '_review_stars.html' import review_stars %}
+{% from '_review_card.html' import review_card with context %}
 <section class="community-reviews" id="community-reviews" aria-labelledby="community-reviews-title">
     <header class="community-reviews-heading">
         <div><h2 id="community-reviews-title">Player reviews</h2><p>{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</p></div>
@@ -7,13 +7,13 @@
     {% for message in get_flashed_messages(category_filter=['review_error']) %}<p class="catalog-message" role="alert">{{ message }}</p>{% endfor %}
     <div class="community-review-list">
         {% for review in community_reviews %}
-        <article class="community-review" id="review-{{ review.id }}">
-            <header>
+        {% call(slot) review_card(review, game.name) %}
+{% if slot == 'identity' %}
                 <a class="community-review-author" href="{{ url_for('profiles.public_profile', username=review.username) }}">
                     <span class="community-review-avatar" aria-hidden="true">{% if review.has_public_photo %}<img src="{{ url_for('profiles.public_photo', username=review.username) }}" alt="" width="44" height="44" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% else %}{{ review.display_name[:1]|upper }}{% endif %}</span>
                     <span class="community-review-identity"><span class="community-review-byline"><strong>{{ review.display_name }}</strong><time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time></span><small>@{{ review.username }}</small></span>
                 </a>
-                <div class="community-review-tools">
+{% elif slot == 'tools' %}
                 {% if not review.is_own and review_normal_session %}
                 <details class="community-report"><summary aria-label="Report review" title="Report review"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.7 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></svg></summary>
                 <form method="post" action="{{ url_for('reviews.report', catalog_id=game.id, review_id=review.id) }}">
@@ -25,12 +25,8 @@
                 </form>
                 </details>
                 {% endif %}
-                <span class="community-review-score" role="img" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<span aria-hidden="true"><strong>{{ review.rating|star_rating }}</strong><small>/5</small></span></span>
-                </div>
-            </header>
-            <p>{{ review.body }}</p>
-            {% if review.has_spoilers %}<footer class="community-review-footer"><span class="community-spoiler-label">Spoilers</span></footer>{% endif %}
-        </article>
+{% endif %}
+        {% endcall %}
         {% else %}<p class="community-reviews-empty">No reviews to show yet.</p>{% endfor %}
     </div>
     {% if reviews_page > 1 or reviews_has_next %}

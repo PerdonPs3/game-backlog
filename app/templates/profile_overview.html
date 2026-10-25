@@ -2,6 +2,7 @@
 {% from '_profile_games.html' import cover, activity %}
 {% from '_profile_country.html' import country_flag %}
 {% from '_profile_badges.html' import admin_badge %}
+{% from '_profile_metrics.html' import profile_metrics %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
 {% block page_title %}{{ profile.display_name }} · My profile · Vestigium{% endblock %}
 {% block workspace_hero %}
@@ -17,9 +18,7 @@
 {% block panel %}
 {% if saved_messages %}<p id="profile-feedback" class="profile-feedback is-saved profile-overview-feedback" role="status" tabindex="-1" data-saved="true">✓ {{ saved_messages[0] }}</p>{% endif %}
 {% if pending_catalog_selection %}<p class="profile-catalog-continuation"><span>Your selected game is waiting.</span><a href="{{ url_for('explore.add', catalog_id=pending_catalog_selection.id) }}">Continue to your selected game ↗</a></p>{% endif %}
-<dl class="profile-metrics" aria-label="Your gaming progress">
-    <div><dt>Games collected</dt><dd>{{ stats.total }}</dd></div><div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div><div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div><div><dt>Completion</dt><dd>{{ stats.completion_percent }}<small>%</small></dd></div>
-</dl>
+{{ profile_metrics(stats, 'Your gaming progress') }}
 <section class="profile-section" aria-labelledby="showcase-title">
     <header class="profile-section-heading"><div><h2 id="showcase-title">Showcase</h2></div>{% if showcase %}<a class="profile-text-link" href="{{ url_for('auth.edit_showcase') }}">Edit showcase <span aria-hidden="true">↗</span></a>{% endif %}</header>
     {% if showcase %}<ol class="profile-showcase-grid">
@@ -32,5 +31,6 @@
     <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><div><h2 id="completed-title">Recent completions</h2></div></header>{{ activity(completed, 'Finished a game? Mark it Completed and record its completion date to build your history.') }}</section>
 </div>
 <p class="profile-overview-note">{% if stats.average is not none %}Average rating <strong>{{ '%.1f'|format(stats.average / 2) }}/5</strong> · {% endif %}Your library stays private.</p>
+{% include '_profile_reviews.html' %}
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='profile-overview.js') }}" defer></script>{% endblock %}

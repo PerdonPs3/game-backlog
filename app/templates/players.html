@@ -1,0 +1,19 @@
+{% extends '_profile_base.html' %}
+{% from '_profile_badges.html' import admin_badge %}
+{% block page_title %}Find players · Vestigium{% endblock %}
+{% block workspace_return %}<a href="{{ url_for('explore.index') }}">Explore games</a>{% endblock %}
+{% block page_heading %}Find players.{% endblock %}
+{% block page_description %}Find a player, explore their showcase, and read their public reviews.{% endblock %}
+{% block panel_label %}Find players{% endblock %}
+{% block panel %}
+<form class="player-search" method="get" action="{{ url_for('profiles.search') }}" role="search" aria-label="Search players">
+    <label for="player-query">Player name or @username</label><div><input id="player-query" type="search" name="q" value="{{ query }}" placeholder="Who are you looking for?" minlength="2" maxlength="80" required autocomplete="off" spellcheck="false"><button type="submit">Find players ↗</button></div>
+    <small>Only public profiles appear. Search by name or username, never by email.</small>
+</form>
+{% if error %}<p class="profile-search-message" role="alert">{{ error }}</p>
+{% elif not query %}<div class="player-search-empty"><span aria-hidden="true">◎</span><h2>Every player has a story.</h2><p>Search for a friend to discover the games and reviews they share.</p></div>
+{% elif players %}<p class="player-search-count">{{ total }} {{ 'player' if total == 1 else 'players' }} found</p><ul class="player-search-grid">
+{% for player in players %}<li><a class="player-result" href="{{ url_for('profiles.public_profile', username=player.username) }}"><span class="player-result-avatar" style="--avatar-color: {{ player.avatar_color }}" aria-hidden="true">{{ player.display_name[:1]|upper }}{% if player.has_public_photo %}<img src="{{ url_for('profiles.public_photo', username=player.username) }}" alt="" width="56" height="56" loading="lazy">{% endif %}</span><span class="player-result-name"><strong>{{ player.display_name }} {{ admin_badge(player.admin_badge) }}</strong><small>@{{ player.username }}</small></span><span class="player-result-arrow" aria-hidden="true">↗</span></a></li>{% endfor %}</ul>
+{% else %}<div class="player-search-empty"><h2>No public players found.</h2><p>Try another name or username.</p></div>{% endif %}
+{% if page > 1 or has_next %}<nav class="profile-review-pages" aria-label="Player search pages">{% if page > 1 %}<a href="{{ url_for('profiles.search', q=query, page=page - 1) }}">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if has_next %}<a href="{{ url_for('profiles.search', q=query, page=page + 1) }}">Next →</a>{% endif %}</nav>{% endif %}
+{% endblock %}
