@@ -3,8 +3,31 @@
 The long-term idea is a personal gaming library where finishing adventures also
 helps your player profile grow. The stages below describe a proposed direction,
 not a release schedule. Checked items are implemented; unchecked items are planned.
-For the current proposed execution order, see the [product plan](../Product-Plan.md):
-profile palette pilot, player profile, public catalog, guided homepage, and Discover.
+For the current priority order and release state, see the
+[product plan](../Product-Plan.md#current-priorities--2026-10-25).
+
+## Active priorities — 2026-10-25
+
+Production accounts, profiles, public game reviews, catalog media, and the guided
+homepage are released. Existing development accounts were copied into production
+with their passwords and data preserved; future changes are not synchronized.
+Registration/recovery email delivery remains the highest operational priority,
+paused while the owner defers provider setup.
+
+Discover improvements are implemented and reviewed locally, awaiting publication
+authorization. The next active product delivery is public reviews on player
+profiles plus public-name/username search. Then prioritize a separate wishlist,
+status-aware library suggestions, following, and preference-based catalog
+recommendations. A conversational AI layer is a later optional increment with
+explicit cost and privacy decisions. Historical unchecked release-validation
+items below are not a claim that the production account release is still pending.
+
+- [ ] Publish the reviewed Discover increment after explicit authorization.
+- [ ] Validate and publish public profile reviews and public player search.
+- [ ] Add a wishlist separate from owned games.
+- [ ] Extend the library picker with selected statuses and preference signals.
+- [ ] Define and implement following, including privacy and abuse boundaries.
+- [ ] Add explainable catalog recommendations before an optional AI chatbot.
 
 ### 1. Make the collection easier to manage
 
@@ -110,9 +133,10 @@ completions and externally verified achievements will need clear distinctions.
 
 ### 8. Prepare for a safe public release
 
-Account features are published to `develop`. The project owner reports successful
-manual development testing. Production cutover, configuration, and release gates
-remain separate from that acceptance; see [account setup](../Accounts.md).
+Account features are published to production as well as `develop`. The owner
+confirmed production sign-in after the one-time account transfer. Reliable
+external registration/recovery email delivery remains pending; see
+[account setup](../Accounts.md).
 
 Public access requires accounts, data ownership, and reliable storage. These
 requirements take priority over optional integrations and progression.
@@ -128,7 +152,7 @@ requirements take priority over optional integrations and progression.
       server restarts and deployments.
 - [ ] Configure HTTPS, production sessions, server-only secrets, and a production
       server with debug mode disabled; test authentication and access boundaries.
-- [ ] Start with a small, controlled release for friends before opening access widely.
+- [x] Open the production application under the owner's public-launch decision.
 
 ### 9. Give the project its own identity
 

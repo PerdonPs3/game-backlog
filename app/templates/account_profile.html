@@ -89,7 +89,7 @@
             {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase'), ('share_photo', 'Profile photo')] %}
                 <label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if privacy_submitted else (true if is_setup else profile[name])) %}checked{% endif %}><span>{{ title }}</span></label>
             {% endfor %}
-            </div>{% if not is_setup %}<p class="profile-field-hint"><a href="{{ url_for('auth.edit_showcase') }}">Choose your five showcase games →</a></p>{% endif %}<p class="profile-field-hint">Your email, library, ratings, and reviews stay private.</p>
+            </div>{% if not is_setup %}<p class="profile-field-hint"><a href="{{ url_for('auth.edit_showcase') }}">Choose your five showcase games →</a></p>{% endif %}<p class="profile-field-hint">Your email, full library, and personal notes stay private. Reviews you publish appear on your public profile and game pages. Public profiles can be found by display name or username.</p>
         </fieldset>
         <footer class="profile-save-bar">
             <p class="profile-field-hint">Your sharing choices apply when you save.</p>

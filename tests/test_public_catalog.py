@@ -17,6 +17,7 @@ GAME = {'id':123, 'name':'Portal 2', 'cover':{'image_id':'co1rs4'},
 def fake_catalog(app):
     catalog=Mock()
     catalog.search_games.return_value=[GAME]
+    catalog.get_game_cards.side_effect=lambda ids: {123: GAME} if 123 in ids else {}
     catalog.get_game.side_effect=lambda game_id: GAME if game_id==123 else None
     app.extensions['igdb_client']=catalog
     return catalog

@@ -1,0 +1,22 @@
+{% from '_review_stars.html' import review_stars %}
+<section class="profile-section profile-reviews" id="public-reviews" aria-labelledby="profile-reviews-title">
+    <header class="profile-section-heading"><div><h2 id="profile-reviews-title">Public reviews</h2><p>{{ profile_review_count }} {{ 'review' if profile_review_count == 1 else 'reviews' }}{% if profile_reviews_visible %} · Latest first{% endif %}</p></div></header>
+    {% if not profile_reviews_visible %}<p class="profile-reviews-empty">Your published reviews are hidden while your profile is private.</p>
+    {% elif not profile_reviews %}<p class="profile-reviews-empty">No public reviews to show yet.</p>
+    {% else %}<div class="profile-review-list">
+    {% for review in profile_reviews %}
+    <article class="profile-review-card">
+        <a class="profile-review-cover game-card-cover" href="{{ url_for('explore.game', catalog_id=review.catalog_id, _anchor='community-reviews') }}" aria-label="View {{ review.game_title }}"><span aria-hidden="true">{{ review.game_title[:1] }}</span>{% if review.cover_url %}<img src="{{ review.cover_url }}" alt="" width="96" height="128" loading="lazy" referrerpolicy="no-referrer">{% endif %}</a>
+        <div class="profile-review-content">
+            <header><h3><a href="{{ url_for('explore.game', catalog_id=review.catalog_id, _anchor='community-reviews') }}">{{ review.game_title }}</a></h3><span class="profile-review-score" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<b>{{ review.rating|star_rating }}<small>/5</small></b></span></header>
+            <time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time>
+            {% if review.has_spoilers %}<details class="profile-review-spoilers"><summary>Contains spoilers · Read review</summary><p>{{ review.body }}</p></details>{% else %}<p>{{ review.body }}</p>{% endif %}
+        </div>
+    </article>
+    {% endfor %}</div>{% endif %}
+    {% if profile_reviews_page > 1 or profile_reviews_has_next %}<nav class="profile-review-pages" aria-label="Public review pages">
+        {% if profile_reviews_page > 1 %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page - 1, _anchor='public-reviews')) }}">← Newer reviews</a>{% endif %}
+        <span>Page {{ profile_reviews_page }}</span>
+        {% if profile_reviews_has_next %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page + 1, _anchor='public-reviews')) }}">Older reviews →</a>{% endif %}
+    </nav>{% endif %}
+</section>

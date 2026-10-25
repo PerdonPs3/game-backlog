@@ -267,6 +267,21 @@ appear in exported backups.
 
 ## Access model
 
+Public profiles also display reviews their owners explicitly published through
+Add game or Edit game. Private notes and library records are never queried to
+construct this section. Moderation-hidden and viewer-reported reviews are
+excluded, and privatizing the profile revokes public access. Spoilers use a
+closed disclosure; reviews are paginated in groups of ten. Catalog titles and
+covers are fetched in a cached public metadata batch, with game-ID links if the
+provider is unavailable.
+
+`/players` searches current public display names and usernames only. It does not
+list profiles before a search, search email addresses, or match reserved former
+usernames. Searches require 2–80 characters, return at most 20 public identities
+per page, and use a process-local 60-request/minute budget configurable through
+`PUBLIC_PLAYER_REQUEST_LIMIT`. Search and profile responses are non-cacheable and
+excluded from search-engine indexing. This budget is not a distributed rate limiter.
+
 - The server validates Supabase's current user before each authenticated request.
   It refreshes expiring access tokens while holding a database session-row lock.
 - Browser cookies contain a random account session reference, not access/refresh

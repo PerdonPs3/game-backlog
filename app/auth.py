@@ -426,12 +426,13 @@ def profile_overview():
         return redirect(url_for('profiles.public_profile', username=g.profile['username']), code=302)
     from app.profile_showcase import game_cards, showcase_games
     from app.routes import collection_statistics
+    from app.game_reviews import profile_review_context
     db = get_db()
     user_id = g.user["id"]
     item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, country_code, admin_badge FROM profiles WHERE id = ?", (user_id,)).fetchone()
     playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed))
+    return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']))
 
 
 @auth.route("/profile/showcase", methods=["GET", "POST"])

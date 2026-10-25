@@ -14,5 +14,6 @@
 {% block panel %}
 {% if showcase %}<section class="profile-section" aria-labelledby="showcase-title"><header class="profile-section-heading"><div><h2 id="showcase-title">My showcase</h2></div></header><ol class="profile-showcase-grid">{% for game in showcase %}<li>{% if game.catalog_id %}<a class="profile-featured-game" href="{{ url_for('explore.game', catalog_id=game.catalog_id) }}">{% else %}<div class="profile-featured-game">{% endif %}{{ cover(game) }}<span class="profile-pick-position" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small>{% if game.catalog_id %}</a>{% else %}</div>{% endif %}</li>{% endfor %}</ol></section>{% else %}<section class="profile-section profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>No showcase shared.</h2></section>{% endif %}
 
+{% include '_profile_reviews.html' %}
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}
