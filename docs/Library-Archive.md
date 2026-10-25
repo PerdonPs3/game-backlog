@@ -22,9 +22,8 @@ assistive technology and does not intercept input. One existing vector brand
 symbol sits on the fabric banner; the large repeated wordmark and floating logo
 have been removed from the hero.
 
-The compact hero presents its heading as a small bronze room plaque, aligned
-with the filters. An inset border, restrained metallic gradient, and two small
-fasteners give it depth without adding another logo. It omits the tagline and keeps the primary add action
+The compact hero uses a plain interface heading aligned with the filters,
+with warm yellow-gold text at night and a deeper gold for daylight contrast. It omits the tagline and keeps the primary add action
 beside a quieter, translucent recommendation action in both themes.
 The add button uses a bronze finish with an inset book icon and a directional
 arrow. The recommendation button uses the same proportions with a compass icon;

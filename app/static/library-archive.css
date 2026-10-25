@@ -88,22 +88,8 @@ html[data-theme] .library-archive .library-layout .library-hero::before {
     mask-image: none;
 }
 .library-archive .library-layout .library-hero::after { display: none; }
-.library-archive .library-wordmark {
-    display: inline-flex; align-items: center; gap: .25em; position: relative;
-    margin: 0; padding: .8rem 2.2rem; border: 1px solid #b58b51; border-radius: 7px;
-    color: #f9e6bd; background: linear-gradient(120deg, #322418, #694c2b 48%, #38291b);
-    font-family: inherit; font-size: clamp(1.25rem, 2.2vw, 1.65rem); font-weight: 600;
-    line-height: 1.2; letter-spacing: .015em; text-shadow: 0 1px 2px #160d05;
-    box-shadow: inset 0 0 0 3px #332419, inset 0 0 0 4px #cfaa6459, inset 0 5px 12px #f9d39412, 0 4px 12px #120b0559;
-}
-.library-archive .library-wordmark::before,
-.library-archive .library-wordmark::after {
-    content: ''; position: absolute; top: calc(50% - 2px); width: 4px; height: 4px;
-    border-radius: 50%; background: #d7b479; box-shadow: 0 1px 2px #140a08, inset 0 1px #ffe7b8;
-}
-.library-archive .library-wordmark::before { left: .85rem; }
-.library-archive .library-wordmark::after { right: .85rem; }
-html[data-theme="light"] .library-archive .library-wordmark { color: #fff0d3; background: linear-gradient(120deg, #63452a, #926e3f 48%, #684a2c); border-color: #a37a41; box-shadow: inset 0 0 0 3px #624428, inset 0 0 0 4px #efd09670, inset 0 5px 12px #fff0c81a, 0 4px 12px #41280e38; }
+.library-archive .library-wordmark { margin: 0; color: #f2c45d; font-family: inherit; font-size: clamp(1.8rem, 3vw, 2.3rem); font-weight: 650; line-height: 1.2; letter-spacing: -.035em; text-shadow: 0 1px 8px var(--archive-hero); }
+html[data-theme="light"] .library-archive .library-wordmark { color: #8c5c0b; }
 .library-archive .library-wordmark span { margin-inline-start: 0; background: none; -webkit-text-fill-color: currentColor; color: inherit; }
 .library-archive .library-hero .library-wordmark { margin: 0; }
 .library-archive .library-primary-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
