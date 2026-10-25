@@ -27,7 +27,9 @@ of a rectangular panel. It omits the tagline and keeps the primary add action
 beside a quieter, translucent recommendation action in both themes.
 The add button uses a bronze finish with an inset book icon and a directional
 arrow. The recommendation button uses the same proportions with a compass icon;
-hover movement respects reduced-motion preferences.
+hover movement respects reduced-motion preferences. These two actions sit below
+the filters, to the left of the list, backup, and view controls. The live game
+count sits beside the title to keep the collection toolbar compact.
 
 Cards keep the original full-width horizontal layout, complete portrait covers,
 and detailed notes; on phones they retain their original stacked layout. Shelf
