@@ -108,8 +108,8 @@ def update_sharing(db, owner, form):
     for field in ('share_statistics', 'share_activity'):
         if form.get('profile_activity_controls') == 'yes' or field in form:
             db.execute(f'UPDATE profiles SET {field} = ? WHERE id = ?', (form.get(field) == 'yes', owner))
-    if form.get('wishlist_controls') == 'yes' or 'share_wishlist' in form:
-        db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?', (form.get('share_wishlist') == 'yes', owner))
+    from app.wishlist import save_privacy
+    save_privacy(db, owner, form)
     if form.get('publish_photo') == 'yes':
         db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
 

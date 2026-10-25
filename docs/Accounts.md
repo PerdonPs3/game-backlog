@@ -485,7 +485,8 @@ unchanged.
 
 ## Wishlist privacy
 
-See [Wishlist](Wishlist.md) for the local implementation and migration 015.
-Wishlists are separate from owned libraries and private by default. Public access
-requires both a public profile and explicit wishlist sharing. This increment has
+See [Wishlist](Wishlist.md) for the local implementation and migrations 015–016.
+Wishlists are separate from owned libraries and public by default. Owners can
+choose Private wishlist in Edit profile. A private profile always hides its
+wishlist, regardless of that setting. This increment has
 not been deployed or migrated to hosted environments.

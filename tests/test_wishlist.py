@@ -26,7 +26,7 @@ def publish(client, name='alice_player', share='yes'):
     return submit(client, '/account/profile/sharing', {'username': name, 'is_public': 'yes', 'wishlist_controls': 'yes', 'share_wishlist': share})
 
 
-def test_save_is_private_idempotent_and_never_creates_an_owned_game_or_badge(accounts):
+def test_save_is_public_by_default_idempotent_and_never_creates_an_owned_game_or_badge(accounts):
     fake_catalog(accounts)
     alice = sign_in(accounts, 'alice')
     response = save(alice, owner_id=BOB, title='<script>forged</script>', cover_image_id='evil')
@@ -39,7 +39,7 @@ def test_save_is_private_idempotent_and_never_creates_an_owned_game_or_badge(acc
         db = get_db()
         assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
         assert db.execute('SELECT COUNT(*) FROM profile_achievements').fetchone()[0] == 0
-        assert not db.execute('SELECT share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()[0]
+        assert db.execute('SELECT share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()[0]
         assert db.execute("SELECT relrowsecurity FROM pg_class WHERE oid = 'wishlist_games'::regclass").fetchone()[0]
         assert db.execute("SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema = current_schema() AND table_name = 'wishlist_games' AND grantee = 'PUBLIC'").fetchone()[0] == 0
 
@@ -121,7 +121,7 @@ def test_backup_import_moves_wishes_without_publishing_library_notes(accounts, b
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
 
-def test_public_wishlist_requires_both_public_profile_and_explicit_opt_in(accounts):
+def test_public_wishlist_respects_private_option_and_profile_visibility(accounts):
     fake_catalog(accounts)
     alice = sign_in(accounts, 'alice')
     save(alice)
@@ -135,7 +135,7 @@ def test_public_wishlist_requires_both_public_profile_and_explicit_opt_in(accoun
     html = response.get_data(as_text=True)
     assert response.status_code == 200 and 'Portal 2' in html
     assert 'View game' in html and 'Add to library' not in html and 'wishlist-remove' not in html
-    for private in (ALICE, 'alice@example.test', 'alice-access', 'Sharing settings', 'Remove Portal 2'):
+    for private in (ALICE, 'alice@example.test', 'alice-access', 'Privacy settings', 'Remove Portal 2'):
         assert private not in html
     assert 'no-store' in response.headers['Cache-Control']
     assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'
@@ -154,6 +154,28 @@ def test_editor_can_toggle_sharing_and_legacy_forms_preserve_wishlist_privacy(ac
     assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_controls': 'yes'}).status_code == 303
     with accounts.app_context():
         assert not get_db().execute('SELECT share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()[0]
+
+
+def test_public_default_and_explicit_private_checkbox_persist_without_publishing_private_profiles(accounts):
+    alice = sign_in(accounts, 'alice')
+    submit(alice, '/account/profile/sharing', {'username': 'alice_player', 'is_public': 'yes'})
+    visitor = accounts.test_client()
+    assert visitor.get('/profile/alice_player/wishlist').status_code == 200
+    html = alice.get('/account/profile/edit', follow_redirects=True).get_data(as_text=True)
+    import re
+    checkbox = re.search(r'<input[^>]*name="private_wishlist"[^>]*>', html).group(0)
+    assert 'checked' not in checkbox
+    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes', 'private_wishlist': 'yes'}).status_code == 303
+    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
+    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice'}).status_code == 303
+    assert 'Applied 0' in accounts.test_cli_runner().invoke(args=['migrate-db']).output
+    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
+    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes'}).status_code == 303
+    assert visitor.get('/profile/alice_player/wishlist').status_code == 200
+    submit(alice, '/account/profile/sharing', {'username': 'alice_player'})
+    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
+    with accounts.app_context():
+        assert tuple(get_db().execute('SELECT is_public,share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()) == (False, True)
 
 
 def test_sign_in_returns_to_selected_game_without_silently_saving_a_wish(accounts):
@@ -239,7 +261,7 @@ def test_bounded_pagination_search_escaping_and_capacity(accounts):
     assert save(alice).status_code == 303 and len(saved(accounts)) == 500
 
 
-def test_migration_keeps_existing_public_profiles_and_libraries_but_wishlist_private(postgres_config, tmp_path, monkeypatch):
+def test_migration_keeps_profile_visibility_and_libraries_with_public_wishlist_defaults(postgres_config, tmp_path, monkeypatch):
     if not postgres_config:
         pytest.skip('Requires disposable PostgreSQL schemas')
     original = migrations.MIGRATIONS
@@ -256,10 +278,10 @@ def test_migration_keeps_existing_public_profiles_and_libraries_but_wishlist_pri
             db.execute("UPDATE profiles SET username='existing_player',is_public=TRUE,share_statistics=FALSE WHERE id = ?", (ALICE,))
             db.execute("INSERT INTO games (owner_id,title,platform) VALUES (?,'Private game','PC')", (ALICE,))
     result = application.test_cli_runner().invoke(args=['migrate-db'])
-    assert result.exit_code == 0 and 'Applied 1' in result.output
+    assert result.exit_code == 0 and 'Applied 2' in result.output
     with application.app_context():
         db = get_db()
-        assert tuple(db.execute('SELECT is_public,share_statistics,share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()) == (True, False, False)
+        assert tuple(db.execute('SELECT is_public,share_statistics,share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()) == (True, False, True)
         assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 1
         assert db.execute('SELECT COUNT(*) FROM wishlist_games').fetchone()[0] == 0
     assert 'Applied 0' in application.test_cli_runner().invoke(args=['migrate-db']).output

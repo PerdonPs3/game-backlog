@@ -399,9 +399,9 @@ def profile():
                     db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
                                (request.form.get('share_photo') == 'yes', g.user['id']))
                 save_background(db, g.user['id'], background_selection)
-                if request.form.get('wishlist_controls') == 'yes':
-                    db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?',
-                               (request.form.get('share_wishlist') == 'yes', g.user['id']))
+                if request.form.get('profile_sharing') != 'yes':
+                    from app.wishlist import save_privacy
+                    save_privacy(db, g.user['id'], request.form)
                 save_features(db, g.user['id'], request.form)
                 db.commit()
             except ValueError as exc:

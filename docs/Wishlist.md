@@ -2,9 +2,15 @@
 
 Implemented locally on `feature/wishlist`, based on develop. This increment has
 not been integrated, published, or migrated to either hosted environment.
-Apply `015_wishlist.sql` explicitly before an authorized deployment. It adds an
+Apply migrations `015_wishlist.sql` and `016_wishlist_public_default.sql` explicitly
+before an authorized deployment. They add an
 account-owned table with row-level security and no public API grants, plus
-`profiles.share_wishlist`, defaulting to false for existing and new accounts.
+`profiles.share_wishlist`. Migration 016 corrects the initial, unpublished private
+default: wishlists are public by default for both existing and new accounts.
+This one-time correction does not change overall profile visibility; a private
+profile still hides its wishlist. No hosted wishlist choices exist yet. Later
+explicit opt-outs persist and are never reset by ordinary visits or repeat
+migration runs.
 Existing libraries and profile visibility are preserved.
 
 ## Saving wishes
@@ -39,8 +45,8 @@ inserts an owned game or silently saves a wish.
   applies to wishlist saves.
 - Saved names and validated cover IDs remain readable and removable during
   catalog outages. Browsing a wishlist makes no new catalog metadata requests.
-- Edit profile has an explicit, initially unchecked Wishlist sharing option.
-  This setting does not make a private profile public. Legacy forms without the
+- Edit profile has an initially unchecked **Private wishlist** option.
+  Checking it hides the wishlist. It never makes a private profile public. Legacy forms without the
   control marker preserve its existing choice.
 - `/profile/<username>/wishlist` is visible only when both the profile and
   wishlist are public. The public profile then displays a Wishlist link.
@@ -70,7 +76,7 @@ silently recreate a wish.
 
 Tests use disposable local PostgreSQL schemas and mocked authentication/catalog
 responses. Coverage includes owner isolation, CSRF and recovery sessions, signup
-and sign-in continuation, private defaults, explicit sharing and revocation,
+and sign-in continuation, public defaults, explicit privacy opt-out and revocation,
 aliases, bounded queries/pages/capacity, escaped metadata, catalog failures,
 normal and failed library transfer, simultaneous saves, and backup imports.
 Local browser previews use fictional accounts and public catalog artwork only.

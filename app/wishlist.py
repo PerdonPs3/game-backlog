@@ -15,6 +15,16 @@ PAGE_SIZE = 24
 MAX_WISHES = 500
 
 
+def save_privacy(db, owner, form):
+    """Private is an explicit opt-out; old sharing forms remain compatible."""
+    if form.get('wishlist_privacy_controls') == 'yes':
+        db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?',
+                   (form.get('private_wishlist') != 'yes', owner))
+    elif form.get('wishlist_controls') == 'yes' or 'share_wishlist' in form:
+        db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?',
+                   (form.get('share_wishlist') == 'yes', owner))
+
+
 @wishlist.before_request
 def require_owner():
     if not current_app.config.get('AUTH_ENABLED'):
