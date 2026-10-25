@@ -25,7 +25,7 @@ def test_library_only_reviews_stay_off_profiles_until_explicit_publication(accou
     for client in (alice, anonymous):
         html = client.get('/profile/alice_player').get_data(as_text=True)
         assert 'ONLY IN MY LIBRARY' not in html
-        assert 'class="profile-review-card"' not in html
+        assert 'class="community-review profile-review-card"' not in html
     if publish_from == 'add':
         assert add(alice, platform='PS3', review='EXPLICITLY PUBLISHED', publish_review='yes').status_code == 303
     else:
@@ -98,11 +98,11 @@ def test_review_pagination_is_bounded_and_preserves_profile_route(accounts):
     catalog=fake_catalog(accounts);public_author(accounts,'alice')
     for n in range(11):add_review(accounts,catalog_id=200+n,body=f'REVIEW-{n:02d}')
     first=accounts.test_client().get('/profile/alice_player').get_data(as_text=True)
-    assert first.count('class="profile-review-card"')==10
+    assert first.count('class="community-review profile-review-card"')==10
     assert '/profile/alice_player?reviews_page=2#public-reviews' in first
     assert len(catalog.get_game_cards.call_args.args[0])==10
     second=accounts.test_client().get('/profile/alice_player?reviews_page=2').get_data(as_text=True)
-    assert second.count('class="profile-review-card"')==1 and 'REVIEW-00' in second
+    assert second.count('class="community-review profile-review-card"')==1 and 'REVIEW-00' in second
     for page in ['0','-1','10001','abc']:
         assert accounts.test_client().get('/profile/alice_player?reviews_page='+page).status_code==400
 

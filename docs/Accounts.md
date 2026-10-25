@@ -292,12 +292,12 @@ Game links open catalog details; legacy entries without catalog IDs render as
 plain activity items. Public aggregate counts use the same game/platform entry
 semantics and completion rounding as the owner's statistics.
 
-Profile reviews over 300 characters or three lines use a closed native disclosure
+Published reviews over 300 characters or three lines use a closed native disclosure
 with a whitespace-normalized excerpt of at most 260 characters, visually limited
-to three lines. Reading cards fill a two-column desktop grid and switch to one
-column below 850 px. An unpaired final card fills the remaining row, keeping its
-body at a readable width. Cards have a compact cover/title/date header and body
-text aligned beneath it. Read more/Show less
+to three lines. Profile and game pages share one review-card template and
+stylesheet, with one full-width card per row. A compact identity/date header
+and rating badge sit above the readable body; profiles identify the game, while
+game pages identify its reviewer. Read more/Show less
 expands or collapses the escaped original text without JavaScript or a storage
 change; the expanded close control appears after the full text. Spoiler reviews expose no excerpt
 and stay behind a separate closed spoiler disclosure. Private notes never enter

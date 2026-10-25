@@ -55,3 +55,22 @@
 @media (prefers-reduced-motion: reduce) {
     .community-review, .community-review-identity strong { transition: none; }
 }
+
+/* Profile and game pages share the same card and reading behavior. */
+.profile-review-list { display: grid; gap: 1rem; }
+.community-review-game { height: 60px; border-radius: 6px; }
+.community-review > details { margin: 1.3rem 0; max-width: 78ch; }
+.community-review > details p { white-space: pre-line; overflow-wrap: anywhere; font-size: .9rem; line-height: 1.85; color: var(--text); margin: .8rem 0 0; }
+.profile-review-spoilers { margin-top: 1rem; }
+.profile-review-spoilers summary { color: var(--accent); font-size: .75rem; cursor: pointer; }
+.profile-review-expand[open] { position: relative; padding-bottom: 2.5rem; }
+.profile-review-expand[open] > summary { position: absolute; left: 0; bottom: 0; }
+.profile-review-expand summary { display: block; list-style: none; cursor: pointer; }
+.profile-review-expand summary::-webkit-details-marker { display: none; }
+.profile-review-excerpt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; color: var(--text-muted); font-size: .9rem; line-height: 1.8; }
+.profile-review-more, .profile-review-less { color: var(--accent); font-size: .7rem; font-weight: 600; }
+.profile-review-more { display: inline-block; margin-top: .6rem; }
+.profile-review-less { display: none; }
+.profile-review-expand[open] .profile-review-excerpt, .profile-review-expand[open] .profile-review-more { display: none; }
+.profile-review-expand[open] .profile-review-less { display: inline-block; }
+.profile-review-expand summary:focus-visible, .profile-review-spoilers summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
