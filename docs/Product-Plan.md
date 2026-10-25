@@ -18,7 +18,7 @@ remain separate; this was not ongoing synchronization.
 | --- | --- | --- |
 | P0 | Reliable registration and recovery mail | Still pending provider setup and real external delivery checks. Paused at the owner's request; do not silently resume Google/Brevo onboarding or purchase a service. Existing confirmed accounts are not time-limited by email quotas. |
 | P1 | Finish the Discover increment | Filtered catalog browsing and updates without page reload or scroll reset are implemented and reviewed locally on `feature/discover-catalog`. Await explicit integration/publication authorization; preserve this branch. |
-| P1 | Public reviews on profiles and player search | The next active product increment, on `feature/community-profiles`. Makes existing published content and public identities useful before building a social graph. Local implementation and validation; not yet published. |
+| P1 | Public reviews on profiles and player search | Implemented and locally validated on `feature/community-profiles`. The owner authorized integration/publication to `develop` on 2026-10-25; migration 013 is applied to hosted development. Production remains unchanged. |
 | P2 | Wishlist | Explicitly save catalog games separately from owned library entries, with clear save/remove controls and private-by-default visibility. Do not add a game to the owned collection merely because it is wished for. |
 | P2 | Improve What should I play? | Allow explicit library status selection, then rank owned candidates using available genre and rating preferences. Explain the suggestion and retain useful behavior when preference data or the catalog is unavailable. |
 | P3 | Follow players | Build on public profile discovery. Define follower visibility, private-profile behavior, unfollow/block/report handling, and notification scope before introducing an activity feed. |
@@ -46,8 +46,8 @@ increment before expanding social interactions.
   Activity links must open public catalog details, never private library entries.
 - Collapse long profile reviews into a three-line excerpt with native Read
   more/Show less controls; preserve full escaped text and keep spoilers concealed.
-  Migration 013 is required for the new sharing flags and remains local until
-  authorized deployment to the selected hosted environment.
+  Migration 013 is required for the new sharing flags and is applied to hosted
+  development for the authorized Preview release; production remains unchanged.
 - Search current public display names and usernames only, with no initial bulk
   directory, no email lookup, a bounded query/page size, and a process-local
   request budget. Private/unfinished profiles and previous username aliases must

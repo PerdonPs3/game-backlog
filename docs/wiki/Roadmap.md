@@ -15,8 +15,9 @@ Registration/recovery email delivery remains the highest operational priority,
 paused while the owner defers provider setup.
 
 Discover improvements are implemented and reviewed locally, awaiting publication
-authorization. The next active product delivery is public reviews on player
-profiles plus public-name/username search. Then prioritize a separate wishlist,
+authorization. Public reviews on player profiles plus public-name/username
+search are implemented and locally validated; the owner authorized their
+develop publication on 2026-10-25. Migration 013 is applied to hosted development. Then prioritize a separate wishlist,
 status-aware library suggestions, following, and preference-based catalog
 recommendations. A conversational AI layer is a later optional increment with
 explicit cost and privacy decisions. Historical unchecked release-validation

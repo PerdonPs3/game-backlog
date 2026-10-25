@@ -274,8 +274,10 @@ appear in exported backups.
 ### Statistics, activity, and long profile reviews
 
 Apply migration `013_profile_activity_sharing.sql` before deploying this follow-up
-to either hosted environment. The migration is prepared and tested locally; it
-has not been applied to hosted development or production in this increment.
+to either hosted environment. The migration was tested locally and applied to
+hosted development on 2026-10-25 for the authorized Preview release. Existing
+row counts and overall profile visibility were preserved. Production remains
+unchanged and requires separate release authorization.
 It adds `share_statistics` and `share_activity`, both enabled by default for
 existing and new profiles under the owner's 2026-10-25 decision. It does not
 change overall public/private visibility, publish photos, or publish reviews.
