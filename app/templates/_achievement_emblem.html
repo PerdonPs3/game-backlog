@@ -1,16 +1,21 @@
 {% macro emblem(badge, locked=false) %}
 <span class="achievement-emblem category-{{ badge.category }}{% if locked %} is-locked{% endif %}" aria-hidden="true">
     <svg viewBox="0 0 80 88" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
-        <path class="emblem-shadow" d="M40 3 74 17v42L40 84 6 59V17Z"/>
-        <path class="emblem-face" d="M40 8 69 20v36L40 78 11 56V20Z"/>
-        <path class="emblem-rim" d="m12 21 28-12 28 12M12 22v33l28 22"/>
+        <path class="emblem-shadow" d="M40 4 71 16v29c0 18-18 31-31 38C27 76 9 63 9 45V16Z"/>
+        <path class="emblem-face" d="m40 10 25 10v25c0 14-14 25-25 32-11-7-25-18-25-32V20Z"/>
+        <path class="emblem-rim" d="m16 21 24-10 24 10M16 22v22c0 14 14 25 24 32"/>
         {% if locked %}<rect x="29" y="37" width="22" height="20" rx="3"/><path d="M33 37v-7a7 7 0 0 1 14 0v7m-7 8v5"/>
         {% elif badge.icon == 'books' %}
-        <path class="emblem-symbol" d="m22 31 19-7 18 7-19 7Z"/><path d="M22 31v8l18 7 19-7v-8M22 43v8l18 7 19-7m-37 4v8l18 7 19-7M40 38v8"/>
-        {% elif badge.icon == 'laurel' %}
-        <path d="m29 41 8 8 15-18M26 61C12 51 16 32 23 25m31 36c14-10 10-29 3-36M22 53l-7-1m6-7-6-4m7-4-4-7m36 23 7-1m-6-7 6-4m-7-4 4-7m-32 29 14 8 14-8"/>
+        <path class="emblem-solid" d="M26 26h28v10H26a5 5 0 0 1 0-10Zm-2 13h29v10H24a5 5 0 0 1 0-10Zm2 13h29v10H26a5 5 0 0 1 0-10Z"/>
+        <path class="emblem-cutout" d="M27 31h23M25 44h24M27 57h24"/>
+        <path d="M55 26v10m-1 3v10m2 3v10" opacity=".55"/>
+        {% elif badge.icon == 'trophy' %}
+        <path class="emblem-solid" d="M28 26h24v13c0 9-5 14-12 14s-12-5-12-14Z"/>
+        <path d="M28 30h-7v5c0 8 5 12 11 12m20-17h7v5c0 8-5 12-11 12M40 53v10m-10 3h20m-15-3h10" stroke-width="3"/>
+        <path class="emblem-cutout" d="m34 38 4 4 8-9" stroke-width="2.8"/>
         {% else %}
-        <path class="emblem-symbol" d="m40 21 14 25-14 17-14-17Z"/><path d="M40 21v22m0 9v11m-9 5h18"/><circle cx="40" cy="47" r="4"/>
+        <path class="emblem-solid" d="M55 24c-17-1-30 10-31 27 9 2 24-8 31-27Z"/>
+        <path d="m23 64 25-30m-17 15 12-1m-7-5 1-8m-9 21 10-1M34 65h23" stroke-width="2.5"/>
         {% endif %}
     </svg>
 </span>

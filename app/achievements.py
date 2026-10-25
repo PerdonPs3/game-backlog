@@ -17,8 +17,8 @@ BADGES = tuple(
         ('archivist', 'collection', 25, '25 games collected', 'books'),
         ('curator', 'collection', 50, '50 games collected', 'books'),
         ('legend', 'collection', 100, '100 games collected', 'books'),
-        ('finisher', 'completion', 1, 'Your first game completed', 'laurel'),
-        ('completionist', 'completion', 10, '10 games completed', 'laurel'),
+        ('finisher', 'completion', 1, 'Your first game completed', 'trophy'),
+        ('completionist', 'completion', 10, '10 games completed', 'trophy'),
         ('reviewer', 'reviews', 1, 'Your first public review', 'pen'),
         ('critic', 'reviews', 10, '10 public reviews', 'pen'),
     )
