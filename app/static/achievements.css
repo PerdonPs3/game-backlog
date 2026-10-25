@@ -5,9 +5,8 @@
 .emblem-shadow { fill: #121718; stroke: var(--badge-edge); stroke-width: 2.5; }
 .emblem-face { fill: var(--badge-face); stroke: var(--badge-ink); }
 .emblem-rim { stroke: #fff; opacity: .35; stroke-width: 1; }
-.emblem-symbol { fill: color-mix(in srgb, var(--badge-ink) 15%, transparent); }
-.emblem-solid { fill: var(--badge-ink); stroke: var(--badge-ink); stroke-width: 1.4; }
-.emblem-cutout { fill: none; stroke: var(--badge-face); stroke-width: 1.8; }
+.emblem-glyph { fill: none; stroke: var(--badge-ink); }
+.emblem-glyph-tint { fill: color-mix(in srgb, var(--badge-ink) 18%, var(--badge-face)); }
 .achievement-emblem.is-locked { --badge-ink: #939b9f; --badge-edge: #5b6269; --badge-face: #272c30; filter: none; opacity: .65; }
 html[data-theme="light"] .achievement-emblem { filter: drop-shadow(0 3px 3px #30201a26); }
 html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #6f647e; --badge-edge: #ad9fbc; --badge-face: #f4eff8; }
