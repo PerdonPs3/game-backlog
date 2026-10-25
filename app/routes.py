@@ -142,7 +142,7 @@ def index():
         )
     else:
         response = make_response(render_template(
-            "index.html", stats=collection_statistics(get_db()), **context,
+            "index.html", **context,
         ))
     response.vary.add("Accept")
     return response
