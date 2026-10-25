@@ -61,7 +61,7 @@ html[data-theme="light"] body.library-archive {
 .library-room-day { opacity: 0; }
 html[data-theme="light"] .library-room-day { opacity: 1; }
 .library-room::after { content: ''; position: absolute; inset: 0; background: var(--archive-veil); }
-.library-room-seal { position: absolute; left: 70.7%; top: 7%; width: 6.2%; height: 15%; opacity: .85; filter: drop-shadow(0 2px 2px #0008); }
+.library-room-seal { position: absolute; left: 71.3%; top: 6.8%; width: 5%; height: 11.5%; opacity: .85; filter: drop-shadow(0 2px 2px #0008); }
 /* Keep the old frame opaque so the room never dips to black mid-transition. */
 html:has(body.library-archive)::view-transition-old(root) { animation: none; opacity: 1; }
 html:has(body.library-archive)::view-transition-new(root) { animation: archive-time-shift 2200ms cubic-bezier(.4, 0, .2, 1) both; }
