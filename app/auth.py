@@ -346,7 +346,11 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    from app.achievements import owner_state, save_features
+    from app.profile_backgrounds import PRESETS, validate_background, save_background
+    badge_state = owner_state() if item['display_name'].strip() else {'earned': [], 'featured': []}
+    background_selection = None
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -362,6 +366,7 @@ def profile():
         else:
             try:
                 from app.countries import clean_country
+                background_selection = validate_background(request.form, request.files, item)
                 country = clean_country(request.form.get('country_code', item['country_code'] or ''))
                 if is_setup:
                     from app.public_profiles import clean_username
@@ -390,6 +395,8 @@ def profile():
                     update_sharing(db, g.user['id'], request.form)
                     db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
                                (request.form.get('share_photo') == 'yes', g.user['id']))
+                save_background(db, g.user['id'], background_selection)
+                save_features(db, g.user['id'], request.form)
                 db.commit()
             except ValueError as exc:
                 db.rollback()
@@ -407,7 +414,7 @@ def profile():
     from app.routes import collection_statistics
     from app.public_profiles import RESERVED_NAMES, username_availability, username_clock
     from app.countries import COUNTRIES
-    return render_template("account_profile.html", profile=item, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES), username_state=username_availability(item, username_clock(db)),
+    return render_template("account_profile.html", profile=item, background_presets=PRESETS, badge_state=badge_state, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES), username_state=username_availability(item, username_clock(db)),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 
@@ -427,12 +434,13 @@ def profile_overview():
     from app.profile_showcase import game_cards, showcase_games
     from app.routes import collection_statistics
     from app.game_reviews import profile_review_context
+    from app.achievements import owner_state
     db = get_db()
     user_id = g.user["id"]
-    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, country_code, admin_badge FROM profiles WHERE id = ?", (user_id,)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, username, country_code, admin_badge, background_key FROM profiles WHERE id = ?", (user_id,)).fetchone()
     playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']))
+    return render_template("profile_overview.html", profile=item, badge_state=owner_state(), profile_owner=True, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']))
 
 
 @auth.route("/profile/showcase", methods=["GET", "POST"])
@@ -523,7 +531,7 @@ def init_app(app):
     @app.errorhandler(413)
     def upload_too_large(error):
         if request.endpoint == "auth.profile":
-            flash("Choose a photo smaller than 2 MB. Your previous profile has been kept.", "profile_error")
+            flash("Keep each photo or background under 2 MB. Your previous profile has been kept.", "profile_error")
             return redirect(url_for("auth.profile"), code=303)
         return error
 

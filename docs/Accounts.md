@@ -474,3 +474,11 @@ endpoint exposes only the selected projection described above.
 Recent completions use recorded completion dates, not guessed activity times.
 The Playing section shows up to three entries; collection statistics still cover
 all the owner's entries. Empty profiles include guidance for adding a first game.
+
+## Profile backgrounds and milestones
+
+See [Profile backgrounds and achievements](Profile-Achievements.md) for the local
+implementation, privacy controls, server-earned milestones, notification behavior,
+and migration 014 release requirements. Its develop publication was authorized
+on 2026-10-25; migration 014 is applied to hosted development. Production remains
+unchanged.

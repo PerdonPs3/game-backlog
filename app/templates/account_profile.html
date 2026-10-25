@@ -1,13 +1,14 @@
 {% extends '_workspace_base.html' %}
 {% from '_profile_country.html' import country_flag %}
 {% from '_profile_badges.html' import admin_badge %}
+{% from '_achievement_emblem.html' import emblem %}
 {% set country_code = request.form.get('country_code', profile.country_code or '') %}
 {% set display_name = request.form.get('display_name', profile.display_name) %}
 {% set bio = request.form.get('bio', profile.bio) %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
 {% block page_title %}{{ 'Create your profile' if is_setup else 'My profile' }} · Vestigium{% endblock %}
 {% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='profile-achievements.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='achievements.css') }}">{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
 {% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ profile_url() }}">← Back to profile</a>{% endif %}{% endblock %}
 {% block page_heading %}{{ 'Create' if is_setup else 'Edit' }} <span>profile</span>{% endblock %}
@@ -78,6 +79,23 @@
             </select>
         </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
+        <fieldset class="profile-customization" id="profile-background"><legend>Profile background</legend>
+            <input type="hidden" name="background_controls" value="yes">
+            <p class="profile-field-hint">Choose a preset or upload your own image. Public profiles can share this background with visitors.</p>
+            {% set background_choice = request.form.get('background_key', profile.background_key) %}
+            <div class="background-options">{% for key, label in background_presets %}<label class="background-preset background-{{ key }}"><input type="radio" name="background_key" value="{{ key }}" {% if background_choice == key %}checked{% endif %}>{{ label }}</label>{% endfor %}</div>
+            {% if profile.has_background %}<label><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label><img class="background-editor-preview" src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
+            <label for="profile-background-file">Upload background</label><input id="profile-background-file" type="file" name="background" accept="image/jpeg,image/png,image/webp" aria-describedby="background-hint">
+            <p class="profile-field-hint" id="background-hint">Still JPG, PNG, or WebP · Up to 2 MB. Wide images work best; the center is cropped to fit. Uploading selects Custom.</p>
+            <label><input type="checkbox" name="share_background" value="yes" {% if (request.form.get('share_background') == 'yes' if request.form.get('background_controls') == 'yes' else profile.share_background) %}checked{% endif %}>Show background on my public profile</label>
+        </fieldset>
+        <fieldset class="profile-customization" id="profile-badges"><legend>Featured badges</legend>
+            <input type="hidden" name="badge_controls" value="yes">
+            <p class="profile-field-hint">Choose up to three earned badges. Milestones remain yours after you remove a game. Public badges reveal the milestones you earned.</p>
+            {% set selected_badges = request.form.getlist('featured_badges') if request.form.get('badge_controls') == 'yes' else badge_state.featured|map(attribute='key')|list %}
+            <div class="badge-options">{% for badge in badge_state.earned %}<label><input type="checkbox" name="featured_badges" value="{{ badge.key }}" {% if badge.key in selected_badges %}checked{% endif %}>{{ emblem(badge) }}<span>{{ badge.name }}<small>{{ badge.description }}</small></span></label>{% else %}<p class="profile-field-hint">Add a game to your library to unlock your first badge.</p>{% endfor %}</div>
+            <label><input type="checkbox" name="share_badges" value="yes" {% if (request.form.get('share_badges') == 'yes' if request.form.get('badge_controls') == 'yes' else profile.share_badges) %}checked{% endif %}>Show earned badges on my public profile</label>
+        </fieldset>
         {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_sharing') == 'yes' %}
         {% set public_selected = request.form.get('is_public') == 'yes' if request.method == 'POST' and (privacy_submitted or 'is_public' in request.form) else (true if is_setup else profile.is_public) %}
         <input type="hidden" name="profile_sharing" value="yes">
@@ -117,4 +135,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}

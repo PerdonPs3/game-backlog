@@ -1,0 +1,89 @@
+.profile-banner.profile-overview-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(400px, 1.15fr); align-items: center; gap: 1.75rem 2rem; min-height: 260px; padding: 2rem; position: relative; isolation: isolate; overflow: hidden; border-radius: 20px; }
+.profile-banner-summary { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
+.profile-banner-toolbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding-top: 1rem; border-top: 1px solid #ffffff26; }
+.profile-banner-art { position: absolute; inset: 0; z-index: -2; background: #18232c; }
+.profile-banner-art img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.profile-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #0b111ae6, #0c111770 50%, #0b111a4d), linear-gradient(0deg, #101418f0, transparent 80%); }
+.background-aurora .profile-banner-art, .background-preset.background-aurora { background: radial-gradient(ellipse at 70% 0%, #478f8b 0%, transparent 55%), radial-gradient(ellipse at 25% 80%, #684b91 0%, transparent 60%), #102e3b; }
+.background-obsidian .profile-banner-art, .background-preset.background-obsidian { background: radial-gradient(ellipse at 75% 30%, #65513a 0%, transparent 65%), linear-gradient(120deg, #191d25, #303441); }
+.profile-banner .profile-portrait { width: 96px; height: 96px; flex: 0 0 96px; border: 2px solid #ecc9908c; box-shadow: 0 8px 30px #0003; }
+.profile-banner .profile-identity { min-width: 0; }
+.profile-banner .profile-name-row { gap: .5rem; }
+.profile-banner .profile-name-row h1 { font-size: clamp(1.6rem, 2.8vw, 2.5rem); color: #fff; }
+.profile-banner .profile-overview-bio { font-size: .8rem; color: #e5e3e0; max-width: 40ch; }
+.profile-banner .profile-public-handle { color: #ddd6cd; font-size: .8rem; margin: .5rem 0; }
+.profile-banner .profile-identity-meta { color: #dfdcd6; font-size: .65rem; }
+.profile-banner .profile-hero-actions { flex-direction: row; flex-wrap: wrap; margin: 0; gap: .5rem; }
+.profile-banner .profile-action { font-size: .7rem; padding: .6rem .75rem; color: #f8eddb; border-color: #e5d3ad55; background: #11171bbd; }
+.profile-banner .profile-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin: 0; }
+.profile-banner .summary-stat { min-height: 118px; padding: 1rem .8rem; }
+.profile-banner .summary-stat dt { font-size: .55rem; gap: .45rem; letter-spacing: .04em; }
+.profile-banner .summary-stat dd { font-size: 2.25rem; }
+.profile-banner .summary-stat dd small { font-size: 1rem; }
+.profile-banner .summary-stat .summary-icon { flex-basis: 26px; height: 26px; border-radius: 8px; }
+.profile-banner .summary-stat::after { left: .8rem; right: .8rem; }
+.profile-background-action { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .7rem; font-size: .65rem; color: #f5eee1; background: #10171bd9; border: 1px solid #f1d29a55; border-radius: 8px; text-decoration: none; }
+.profile-background-action:hover { border-color: #f1d29a; }
+.profile-achievements { margin-bottom: 1.5rem; scroll-margin-top: 110px; }
+.badge-heading { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.badge-heading > span { color: var(--text-muted); font-size: .7rem; }
+.achievement-showcase { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.achievement-card { --badge-tint: #d7a454; display: flex; align-items: center; gap: .8rem; padding: .8rem; border: 1px solid color-mix(in srgb, var(--badge-tint) 25%, var(--border)); border-radius: 12px; background: linear-gradient(110deg, color-mix(in srgb, var(--badge-tint) 10%, var(--profile-field)), var(--profile-field)); min-width: 0; }
+.achievement-card.category-completion { --badge-tint: #5fbb9f; }
+.achievement-card.category-reviews { --badge-tint: #a48bdb; }
+.achievement-card > div { min-width: 0; }
+.achievement-card h3, .achievement-mini h3 { font-size: .9rem; margin: 0 0 .35rem; color: var(--text); overflow-wrap: anywhere; }
+.achievement-card p, .achievement-mini p { color: var(--text-muted); font-size: .65rem; line-height: 1.5; margin: 0; }
+.achievement-progress { display: flex; align-items: center; gap: .8rem; margin-top: .8rem; padding: .5rem .8rem; background: var(--profile-field); border: 1px solid var(--border); border-radius: 10px; }
+.achievement-progress .achievement-emblem { width: 36px; height: 42px; flex-basis: 36px; }
+.achievement-progress > div { min-width: 110px; }
+.achievement-progress small { display: block; font-size: .55rem; color: var(--text-muted); margin-bottom: .25rem; }
+.achievement-progress strong { font-size: .75rem; }
+.achievement-progress > span:last-child { font-size: .65rem; color: var(--text-muted); white-space: nowrap; }
+.achievement-progress progress { flex: 1; min-width: 30px; height: 7px; border: 0; border-radius: 6px; overflow: hidden; accent-color: var(--accent); background: var(--border); }
+.achievement-progress progress::-webkit-progress-bar { background: var(--border); border-radius: 6px; }
+.achievement-progress progress::-webkit-progress-value { background: var(--accent); border-radius: 6px; }
+.achievement-progress progress::-moz-progress-bar { background: var(--accent); border-radius: 6px; }
+.achievement-all { margin-top: 1rem; }
+.achievement-all summary { cursor: pointer; color: var(--accent); font-size: .7rem; width: fit-content; }
+.achievement-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.achievement-mini { display: flex; align-items: center; gap: .75rem; padding: .8rem; border: 1px solid var(--border); border-radius: 10px; }
+.achievement-mini .achievement-emblem { width: 40px; height: 46px; flex-basis: 40px; }
+.achievement-mini small { display: block; font-size: .55rem; color: var(--text-muted); margin-top: .4rem; }
+html[data-theme="light"] .profile-banner::before { background: linear-gradient(90deg, #eeeef3e8, #f2ede870 50%, #edf1f233), linear-gradient(0deg, #f1edf2ba, transparent 80%); }
+html[data-theme="light"] .profile-banner .profile-name-row h1 { color: #211b2b; }
+html[data-theme="light"] .profile-banner :is(.profile-overview-bio, .profile-public-handle, .profile-identity-meta) { color: #39313f; }
+html[data-theme="light"] .profile-banner :is(.profile-action, .profile-background-action) { color: #39234f; background: #fffffff0; border-color: #bcb0c9; }
+html[data-theme="light"] .achievement-card { background: linear-gradient(110deg, color-mix(in srgb, var(--badge-tint) 10%, white), white 75%); }
+.profile-customization { margin: .5rem 0; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; min-width: 0; scroll-margin-top: 110px; }
+.profile-customization legend { font-size: .9rem; padding: 0 .4rem; }
+.background-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; margin: .75rem 0; }
+.background-preset { display: flex; align-items: flex-end; gap: .4rem; min-height: 74px; padding: .6rem; border: 2px solid transparent; border-radius: 10px; color: #fff; font-size: .7rem; text-shadow: 0 1px 5px #000; cursor: pointer; }
+.background-preset.background-castle { background: linear-gradient(0deg, #000b, transparent), url('images/backgrounds/castle.webp') center/cover; }
+.background-preset:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 2px var(--profile-field); }
+.profile-customization input[type="radio"], .profile-customization input[type="checkbox"] { width: 16px; height: 16px; padding: 0; flex-shrink: 0; accent-color: var(--accent); }
+.profile-customization > label { display: flex; align-items: center; gap: .5rem; font-size: .75rem; margin: .75rem 0; }
+.profile-customization input[type="file"] { max-width: 100%; font-size: .7rem; }
+.background-editor-preview { height: 100px; width: 100%; object-fit: cover; border: 1px solid var(--border); border-radius: 10px; margin: .5rem 0; }
+.badge-options { display: grid; gap: .5rem; }
+.badge-options label { display: flex; align-items: center; gap: .65rem; padding: .5rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.badge-options .achievement-emblem { width: 32px; height: 38px; flex-basis: 32px; }
+.badge-options label > span:last-child { font-size: .75rem; }
+.badge-options label small { display: block; font-size: .6rem; color: var(--text-muted); margin-top: .25rem; }
+.badge-options label:has(input:checked) { background: var(--profile-tint); border-color: var(--accent); }
+.profile-customization :is(a, input, summary):focus-visible, .profile-background-action:focus-visible, .achievement-all > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (max-width: 1000px) {
+    .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .85fr); padding: 1.5rem; gap: 1.5rem; }
+    .profile-banner .profile-portrait { width: 80px; height: 80px; flex-basis: 80px; }
+    .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-banner .summary-stat { padding: .75rem; min-height: 110px; }
+    .profile-banner .profile-metrics dt { min-height: 0; }
+    .achievement-card { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 700px) {
+    .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+    .profile-banner .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .profile-banner .profile-hero-actions { width: auto; }
+}
+html[data-theme="light"] .profile-banner-toolbar { border-color: #43374b26; }
+@media (max-width: 650px) { .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }

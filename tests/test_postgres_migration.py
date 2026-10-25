@@ -78,7 +78,7 @@ def test_activity_sharing_upgrade_adds_defaults_without_publishing_private_profi
         with application.app_context():
             get_db().execute("INSERT INTO profiles (id,display_name,is_public) VALUES (?,'Existing private player',FALSE)",(owner,))
     result = application.test_cli_runner().invoke(args=['migrate-db'])
-    assert result.exit_code == 0 and 'Applied 1' in result.output
+    assert result.exit_code == 0 and f'Applied {len(list(original.glob("[0-9]*.sql"))) - 12}' in result.output
     with application.app_context():
         db = get_db()
         assert tuple(db.execute('SELECT is_public,share_statistics,share_activity,share_photo FROM profiles WHERE id=?',(owner,)).fetchone()) == (False,True,True,False)

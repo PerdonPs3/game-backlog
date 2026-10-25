@@ -1,0 +1,12 @@
+{% from '_achievement_emblem.html' import emblem %}
+{% if badge_state is not none %}
+<section class="profile-section profile-achievements" id="badges" aria-labelledby="badges-title">
+    <header class="profile-section-heading"><div class="badge-heading"><h2 id="badges-title">Badges</h2><span>Featured · {{ badge_state.featured|length }}/3</span></div>{% if profile_owner %}<a class="profile-text-link" href="{{ url_for('auth.profile', _anchor='profile-badges') }}">Customize ↗</a>{% endif %}</header>
+    {% if badge_state.featured %}<div class="achievement-showcase">
+    {% for badge in badge_state.featured %}<article class="achievement-card category-{{ badge.category }}">{{ emblem(badge) }}<div><h3>{{ badge.name }}</h3><p>{{ badge.description }}</p></div></article>{% endfor %}
+    </div>{% else %}<p class="profile-empty-note">{% if profile_owner %}{{ 'Choose your featured badges in Edit profile.' if badge_state.earned else 'Every collection starts somewhere. Add your first game to earn Newcomer.' }}{% else %}No badges featured yet.{% endif %}</p>{% endif %}
+    {% if profile_owner and badge_state.next %}{% set next = badge_state.next %}
+    <div class="achievement-progress">{{ emblem(next, locked=true) }}<div><small>Next milestone</small><strong>{{ next.name }}</strong></div><progress value="{{ next.progress }}" max="{{ next.target }}" aria-label="Progress toward {{ next.name }}"></progress><span>{{ next.progress }} / {{ next.target }} {{ 'reviews' if next.category == 'reviews' else 'completed' if next.category == 'completion' else 'games' }}</span></div>{% endif %}
+    <details class="achievement-all"><summary>View all · {{ badge_state.earned|length }} earned</summary><div class="achievement-gallery">{% for badge in badge_state.earned %}<article class="achievement-mini">{{ emblem(badge) }}<div><h3>{{ badge.name }}</h3><p>{{ badge.description }}</p><small>Earned {{ badge.earned_at[:10] }}</small></div></article>{% else %}<p>Your milestones will appear here.</p>{% endfor %}</div></details>
+</section>
+{% endif %}

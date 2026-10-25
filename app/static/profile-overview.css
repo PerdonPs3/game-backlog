@@ -100,8 +100,6 @@ html[data-theme="light"] .profile-action-primary { color: #fff; }
     .showcase-slot-field { flex-basis: calc(100% - 90px); }
 }
 
-html:not([data-theme="light"]) .profile-metrics > div:nth-child(2) dd { color: #a855f7; }
-html:not([data-theme="light"]) .profile-metrics > div:nth-child(3) dd { color: #10b981; }
 
 .profile-overview-note a { color: var(--text-muted); text-underline-offset: .2em; }
 .profile-public-handle { color: var(--accent); font-size: .85rem; margin: .6rem 0; overflow-wrap: anywhere; }

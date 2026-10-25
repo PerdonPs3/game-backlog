@@ -1,0 +1,25 @@
+{% from '_profile_country.html' import country_flag %}
+{% from '_profile_badges.html' import admin_badge %}
+{% from '_profile_metrics.html' import profile_metrics %}
+{% macro profile_hero(profile, stats=none, owner=false) %}
+<header class="profile-overview-hero profile-banner background-{{ profile.background_key }}">
+    <div class="profile-banner-art" aria-hidden="true">
+        {% if profile.background_key == 'castle' %}<img src="{{ url_for('static', filename='images/backgrounds/castle.webp') }}" alt="" fetchpriority="high">
+        {% elif profile.background_key == 'custom' %}<img src="{{ url_for('backgrounds.own_image') if owner else url_for('backgrounds.public_image', username=profile.username) }}" alt="" fetchpriority="high">{% endif %}
+    </div>
+    <div class="profile-banner-summary">
+    <div class="profile-portrait" style="--avatar-color: {{ profile.avatar_color }}" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="17" r="9" fill="currentColor"/><path d="M7 44v-5a17 17 0 0 1 34 0v5Z" fill="currentColor"/></svg>{% if (profile.has_photo if owner else profile.has_public_photo) %}<img src="{{ url_for('auth.profile_photo') if owner else url_for('profiles.public_photo', username=profile.username) }}" alt="" width="112" height="112">{% endif %}</div>
+    <div class="profile-identity">
+        <div class="profile-name-row"><h1>{{ profile.display_name }}</h1>{{ country_flag(profile.country_code) }}{{ admin_badge(profile.admin_badge) }}</div>
+        {% if profile.username %}<p class="profile-public-handle">@{{ profile.username }}</p>{% endif %}
+        {% if profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
+        {% if not owner %}<span class="profile-identity-meta">Public profile</span>{% endif %}
+    </div>
+    </div>
+    {% if stats is not none %}{{ profile_metrics(stats, 'Your gaming progress' if owner else 'Public gaming statistics') }}{% endif %}
+    {% if owner %}<div class="profile-banner-toolbar">
+        <div class="profile-hero-actions"><a class="profile-action" href="{{ url_for('auth.profile') }}">Edit profile <span aria-hidden="true">↗</span></a><a class="profile-action" href="{{ url_for('main.index') }}">Open library</a></div>
+        <a class="profile-background-action" href="{{ url_for('auth.profile', _anchor='profile-background') }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><path d="m3 17 6-6 4 4 3-3 5 5"/></svg>Change background</a>
+    </div>{% endif %}
+</header>
+{% endmacro %}
