@@ -479,4 +479,6 @@ all the owner's entries. Empty profiles include guidance for adding a first game
 
 See [Profile backgrounds and achievements](Profile-Achievements.md) for the local
 implementation, privacy controls, server-earned milestones, notification behavior,
-and migration 014 release requirements. This increment has not been deployed.
+and migration 014 release requirements. Its develop publication was authorized
+on 2026-10-25; migration 014 is applied to hosted development. Production remains
+unchanged.

@@ -1,9 +1,10 @@
 # Profile backgrounds and achievements
 
-This increment is implemented locally on `feature/profile-achievements`.
-Migration `014_profile_achievements.sql` must be applied explicitly before any
-authorized hosted deployment. It has not been applied to hosted development or
-production. It adds cosmetic settings and a persistent, account-owned achievement
+The owner authorized publication to `develop` on 2026-10-25 after reviewing
+`feature/profile-achievements`. Migration `014_profile_achievements.sql` was
+applied to hosted development, preserving existing row counts and privacy flags.
+Production remains unchanged and requires separate release authorization.
+The migration adds cosmetic settings and a persistent, account-owned achievement
 table, with row-level security and no grants to public API roles.
 
 ## Profile layout
@@ -11,6 +12,8 @@ table, with row-level security and no grants to public API roles.
 The owner and visitor use the same banner component. The four existing metrics
 sit alongside the player's identity on desktop, then move below it on smaller
 screens. Existing statistics and overall profile privacy choices remain in force.
+Library and profile metrics share the same statistic-card component and styling,
+including icons, number hierarchy, themed surfaces, and the first-card accent.
 Earned badges appear directly below the banner, followed by the existing showcase,
 activity, and explicitly published reviews.
 
