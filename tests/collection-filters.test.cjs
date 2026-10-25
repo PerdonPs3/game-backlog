@@ -15,7 +15,7 @@ class Element {
 
 function setup() {
     const ids = ["collection-filters", "title-search", "status-filter", "apply-filters",
-                 "filter-reset", "game-collection", "filter-message", "collection-sort", "list-filter"];
+                 "filter-reset", "game-collection", "filter-message", "collection-sort", "list-filter", "collection-count"];
     const nodes = Object.fromEntries(ids.map((id) => [id, new Element()]));
     const form = nodes["collection-filters"];
     form.action = "http://localhost/";
@@ -39,7 +39,7 @@ function setup() {
         clearTimeout(id) { timers.delete(id); },
         fetch(url, options) {
             return new Promise((resolve) => requests.push({ url: String(url), options,
-                reply(html, count, ok = true) { resolve({ ok, json: async () => ({ html, count }) }); },
+                reply(html, count, ok = true, total = count) { resolve({ ok, json: async () => ({ html, count, total }) }); },
             }));
         },
     });
@@ -79,11 +79,12 @@ test("typing is debounced and combines title and status without reloading inputs
     ui["status-filter"].fire("change");
     const pending = ui.run();
     assert.equal(ui.requests[0].url, "http://localhost/?q=res&status=Completed");
-    ui.requests[0].reply("<article>Resident</article>", 1);
+    ui.requests[0].reply("<article>Resident</article>", 1, true, 3);
     await pending;
     assert.equal(ui["game-collection"].innerHTML, "<article>Resident</article>");
     assert.equal(ui["title-search"].value, "res");
-    assert.equal(ui["filter-message"].textContent, "1 game found.");
+    assert.equal(ui["collection-count"].textContent, "1 of 3 games");
+    assert.equal(ui["filter-message"].textContent, "");
     assert.equal(ui["filter-reset"].hidden, false);
     assert.equal(ui["game-collection"].attributes["aria-busy"], "false");
     assert.equal(ui.events[0], "collection:updated");
@@ -99,11 +100,12 @@ test("older responses never replace the newest search", async () => {
     ui["title-search"].fire("input");
     assert.equal(ui.requests[0].options.signal.aborted, true);
     const newer = ui.run();
-    ui.requests[1].reply("Portal", 1);
+    ui.requests[1].reply("Portal", 1, true, 5);
     await newer;
     ui.requests[0].reply("Resident", 2);
     await older;
     assert.equal(ui["game-collection"].innerHTML, "Portal");
+    assert.equal(ui["collection-count"].textContent, "1 of 5 games");
     assert.equal(ui.history.length, 1);
 });
 
@@ -120,6 +122,7 @@ test("clearing filters requests all games", async () => {
     assert.equal(ui["filter-reset"].hidden, true);
     assert.equal(ui["title-search"].value, "");
     assert.equal(ui["status-filter"].value, "");
+    assert.equal(ui["collection-count"].textContent, "3 games");
 });
 
 test("failed requests preserve current cards and expose a retry", async () => {

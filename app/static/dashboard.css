@@ -53,7 +53,7 @@ html[data-theme="light"] :is(.library-layout, .profile-banner) {
 .library-layout .hero-actions a { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 0.65rem; }
 .hero-action-arrow { margin-left: 0.6rem; transition: transform 200ms ease; }
 .hero-add-game:is(:hover, :focus-visible) .hero-action-arrow { transform: translate(2px, -2px); }
-.library-layout .collection-summary { margin-top: 2rem; }
+.library-layout #collection-filters { margin-top: 2rem; }
 .library-layout .summary-heading h2 { font-size: 1.05rem; letter-spacing: -0.02em; }
 .library-layout .summary-heading p { max-width: 26rem; color: var(--text-muted); font-size: 0.7rem; }
 :is(.library-layout, .profile-banner) .summary-stat {

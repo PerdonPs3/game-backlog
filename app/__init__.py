@@ -90,6 +90,9 @@ def create_app(test_config=None):
     from app.profile_backgrounds import backgrounds
     app.register_blueprint(backgrounds)
 
+    from app.wishlist import init_app as init_wishlist
+    init_wishlist(app)
+
     from app.community import init_app as init_community
     init_community(app)
 

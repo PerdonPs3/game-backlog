@@ -3,6 +3,7 @@ import re
 import pytest
 
 from app.db import get_db
+from app.routes import collection_statistics
 
 
 def titles(response):
@@ -78,9 +79,11 @@ def test_invalid_sort_never_reaches_sql(client, seed_game, stored_games, sort):
     assert stored_games() == before
 
 
-def test_sorting_does_not_change_global_statistics(client, seed_game):
+def test_sorting_does_not_change_global_statistics(app, client, seed_game):
     seed_game()
     seed_game(status="Completed")
-    original = re.search(r'<section id="collection-summary".*?</section>', client.get("/library").get_data(as_text=True), re.S).group(0)
-    sorted_summary = re.search(r'<section id="collection-summary".*?</section>', client.get("/library?sort=rating").get_data(as_text=True), re.S).group(0)
-    assert sorted_summary == original
+    with app.app_context():
+        original = collection_statistics(get_db())
+    assert client.get("/library?sort=rating").status_code == 200
+    with app.app_context():
+        assert collection_statistics(get_db()) == original

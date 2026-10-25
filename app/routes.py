@@ -3,6 +3,7 @@ from random import choice, sample
 
 from flask import Blueprint, abort, current_app, flash, g, jsonify, make_response, redirect, render_template, request, url_for
 from app.achievements import award_current
+from app.wishlist import consume_owned_wishes, wish_state
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
@@ -132,16 +133,17 @@ def index():
         for game in get_db().execute(query, parameters).fetchall()
     ]
 
-    context = dict(games=games, selected_status=status, search_query=search_query,
+    total = get_db().execute(f"SELECT COUNT(*) FROM games WHERE {owned()}").fetchone()[0] if search_query or status or selected_list else len(games)
+    context = dict(games=games, collection_total=total, selected_status=status, search_query=search_query,
                    selected_sort=selected_sort, sort_options=COLLECTION_SORTS,
                    selected_list=selected_list, lists=all_lists(get_db()))
     if request.accept_mimetypes.best == "application/json":
         response = jsonify(
-            html=render_template("_game_collection.html", **context), count=len(games),
+            html=render_template("_game_collection.html", **context), count=len(games), total=total,
         )
     else:
         response = make_response(render_template(
-            "index.html", stats=collection_statistics(get_db()), **context,
+            "index.html", **context,
         ))
     response.vary.add("Accept")
     return response
@@ -380,6 +382,7 @@ def import_backup():
                         list_id = db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone()[0]
                         insert_members(db,
                                        [(list_id, saved_ids[index]) for index in item["games"]])
+                    consume_owned_wishes(db)
                     award_current()
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
@@ -479,6 +482,7 @@ def create():
                     )
                     if publish_requested:
                         save_public_review(db, selected_game['id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    consume_owned_wishes(db)
                     award_current()
                     db.commit()
             except DATABASE_ERRORS as exc:
@@ -496,7 +500,8 @@ def create():
 
     return render_template("create.html", error=error, selected_game=selected_game,
                            duplicate_game_id=duplicate_game_id,
-                           review_publication_available=review_publication_available)
+                           review_publication_available=review_publication_available,
+                           from_wishlist=bool(selected_game and wish_state(selected_game["id"])))
 
 
 @main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])
@@ -606,6 +611,7 @@ def edit(game_id):
                     )
                     if publish_requested:
                         save_public_review(db, game['igdb_id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    consume_owned_wishes(db)
                     award_current()
                     db.commit()
             except DATABASE_ERRORS as exc:

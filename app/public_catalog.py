@@ -11,6 +11,7 @@ from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
 from app.game_reviews import review_context
+from app.wishlist import wish_state
 
 
 explore = Blueprint('explore', __name__, url_prefix='/explore')
@@ -128,6 +129,7 @@ def game(catalog_id):
     available_platforms = [platform for platform in item['platforms'] if platform.strip().casefold() not in saved_platforms] if item else []
     return render_template('catalog_game.html', game=item, profile=profile, error=error,
                            can_manage=can_manage, entries=entries, available_platforms=available_platforms,
+                           wishlist_saved=wish_state(catalog_id) if item else False,
                            **(review_context(catalog_id) if item else {})), status
 
 

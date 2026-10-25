@@ -12,36 +12,25 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='library-archive.css') }}">
 </head>
-<body class="library-page">
+<body class="library-page library-archive">
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
+    <div class="library-room" aria-hidden="true">
+        <div class="library-room-art">
+            <img class="library-room-image library-room-night" src="{{ url_for('static', filename='images/backgrounds/library-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+            <img class="library-room-image library-room-day" src="{{ url_for('static', filename='images/backgrounds/library-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+            <svg class="library-room-seal" viewBox="55 40 330 365" focusable="false"><use href="#brand-symbol" /></svg>
+        </div>
+    </div>
     <main class="library-layout">
         <header class="library-hero">
-            <div class="library-cover-scene" aria-hidden="true">
-                {% set personal_covers = games|selectattr('cover_url')|map(attribute='cover_url')|unique|list %}
-                {% set fallback_covers = ['co1rs4', 'co4jni', 'co1q1f'] %}
-                {% for slot in range(3) %}
-                <div class="library-scene-poster"><img src="{{ personal_covers[slot] if slot < personal_covers|length else 'https://images.igdb.com/igdb/image/upload/t_cover_big/' ~ fallback_covers[slot] ~ '.jpg' }}" alt="" width="264" height="374" decoding="async" referrerpolicy="no-referrer"></div>
-                {% endfor %}
-            </div>
             <div class="hero-copy">
 
-                <h1 class="library-wordmark"><span>Vestigium</span></h1>
-                <p class="hero-description">Every game leaves a mark.</p>
-                <div class="hero-actions">
-                    <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
-                        <span aria-hidden="true">＋</span> Add game <span class="hero-action-arrow" aria-hidden="true">↗</span>
-                    </a>
-                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h1m8 0h1M11.5 12h1M7 17h1m8 0h1" stroke-linecap="round"/></svg>What should I play?</a>
-                </div>
-            </div>
-            <div class="hero-emblem" data-hero-logo aria-hidden="true">
-                <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false">
-                    <use href="#brand-symbol" />
-                </svg>
+                <h1 class="library-wordmark">Your <span>library</span></h1>
+
             </div>
         </header>
-        {% include '_collection_summary.html' %}
         <form id="collection-filters" method="get" action="{{ url_for('main.index') }}">
             <div class="filter-search">
                 <label for="title-search">Search your collection</label>
@@ -99,7 +88,18 @@
         </form>
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
         <div class="library-heading">
-            <h2 id="library-title">Your library</h2>
+            <div class="library-primary-tools">
+                <span id="collection-count" class="collection-count" role="status" aria-live="polite">{% if search_query or selected_status or selected_list %}{{ games|length }} of {{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% else %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% endif %}</span>
+                <div class="hero-actions">
+                    <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
+                        <span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9a2 2 0 0 1 2 2v5M5 4a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7M5 4v13M3 19a2 2 0 0 0 2 2h7m6-7v8m-4-4h8"/></svg></span>
+                        <span>Add game</span>
+                        <svg class="archive-action-arrow" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+                    </a>
+                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}"><span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 6.2L21 12l-6.2 2.8L12 21l-2.8-6.2L3 12l6.2-2.8Z"/><path d="m12 8 1.2 2.8L16 12l-2.8 1.2L12 16l-1.2-2.8L8 12l2.8-1.2Z"/></svg></span><span>What should I play?</span></a>
+                </div>
+            </div>
+
             <div class="backup-actions">
                 <a class="library-tool library-tool-featured" href="{{ url_for('main.lists') }}">
                     <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h2m3 0h5M7 14h2m3 0h5"/></svg>
@@ -113,11 +113,11 @@
                     <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4M4 16v4h16v-4"/></svg>
                     <span>Import backup</span>
                 </a>
+                <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>
+                    <button type="button" data-collection-view="cards" aria-pressed="true" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Cards</button>
+                    <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
+                </div>
             </div>
-        </div>
-        <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>
-            <button type="button" data-collection-view="cards" aria-pressed="true" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Cards</button>
-            <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
         </div>
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}

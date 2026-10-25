@@ -3,6 +3,7 @@
 {% block page_heading %}Add a <span>game</span>{% endblock %}
 {% block panel %}
         <p class="catalog-message"><a href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a></p>
+        {% if from_wishlist %}<p class="catalog-message">On your wishlist. Saving this game moves it to your library.</p>{% endif %}
         {% if error %}
             <p role="alert">{{ error }}</p>
         {% endif %}

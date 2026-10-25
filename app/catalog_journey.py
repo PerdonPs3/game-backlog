@@ -11,14 +11,17 @@ def pending_selection():
     selected = session.get('catalog_selection')
     if (isinstance(selected, dict) and type(selected.get('id')) is int
             and 0 < selected['id'] < 2**63 and type(selected.get('at')) is int
-            and 0 <= time() - selected['at'] <= SELECTION_SECONDS):
+            and 0 <= time() - selected['at'] <= SELECTION_SECONDS
+            and selected.get('intent', 'library') in ('library', 'wishlist')):
         return selected
     session.pop('catalog_selection', None)
     return None
 
 
-def remember_selection(catalog_id):
+def remember_selection(catalog_id, *, intent='library'):
     session['catalog_selection'] = {'id': catalog_id, 'at': int(time())}
+    if intent == 'wishlist':
+        session['catalog_selection']['intent'] = 'wishlist'
 
 
 def take_selection():

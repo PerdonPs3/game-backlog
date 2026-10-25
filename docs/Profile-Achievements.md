@@ -81,9 +81,22 @@ service, email, or paid provider is used.
 
 ## Visual assets
 
-Shield emblems are native SVG in `_achievement_emblem.html`, with amber, teal,
-and lavender categories, opaque enamel faces, and contrasting outlines in both
-themes. The original Castle artwork is packaged as
+Each earned milestone has its own illustrated gold shield, with amber, teal,
+or purple enamel. Nine transparent WebP assets are packaged in
+`app/static/images/achievements/` (about 2.5 MB combined). The shared
+`_achievement_emblem.html` macro uses the same artwork in featured cards, the
+earned gallery, profile editing, and unlock notifications. Images retain their
+original square dimensions and alpha; CSS contains rather than crops them.
+Featured artwork is 112 px, gallery artwork 64 px, and editor artwork 56 px.
+The next locked milestone retains a neutral SVG lock, distinguishing it from
+earned artwork in both themes.
+
+The illustrations were extracted individually from the user-approved milestone
+mockup using the built-in imagegen tool, then encoded to WebP without resizing
+or changing the generated alpha. The complete prompt set, source filenames, and
+final project asset paths are in [Badge-Artwork-Prompts.json](Badge-Artwork-Prompts.json).
+
+The original Castle artwork is packaged as
 `app/static/images/backgrounds/castle.webp` (about 275 KB). It was generated with
 the built-in `image_gen` tool, then encoded to WebP for delivery.
 

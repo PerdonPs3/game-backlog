@@ -29,6 +29,7 @@
 .badge-heading > span { color: var(--text-muted); font-size: .7rem; }
 .achievement-showcase { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
 .achievement-card { --badge-tint: #d7a454; display: flex; align-items: center; gap: .8rem; padding: .8rem; border: 1px solid color-mix(in srgb, var(--badge-tint) 25%, var(--border)); border-radius: 12px; background: linear-gradient(110deg, color-mix(in srgb, var(--badge-tint) 10%, var(--profile-field)), var(--profile-field)); min-width: 0; }
+.achievement-card .achievement-emblem { width: 112px; height: 112px; flex-basis: 112px; }
 .achievement-card.category-completion { --badge-tint: #5fbb9f; }
 .achievement-card.category-reviews { --badge-tint: #a48bdb; }
 .achievement-card > div { min-width: 0; }
@@ -48,7 +49,7 @@
 .achievement-all summary { cursor: pointer; color: var(--accent); font-size: .7rem; width: fit-content; }
 .achievement-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
 .achievement-mini { display: flex; align-items: center; gap: .75rem; padding: .8rem; border: 1px solid var(--border); border-radius: 10px; }
-.achievement-mini .achievement-emblem { width: 40px; height: 46px; flex-basis: 40px; }
+.achievement-mini .achievement-emblem { width: 64px; height: 64px; flex-basis: 64px; }
 .achievement-mini small { display: block; font-size: .55rem; color: var(--text-muted); margin-top: .4rem; }
 html[data-theme="light"] .profile-banner::before { background: linear-gradient(90deg, #eeeef3e8, #f2ede870 50%, #edf1f233), linear-gradient(0deg, #f1edf2ba, transparent 80%); }
 html[data-theme="light"] .profile-banner .profile-name-row h1 { color: #211b2b; }
@@ -67,7 +68,7 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 .background-editor-preview { height: 100px; width: 100%; object-fit: cover; border: 1px solid var(--border); border-radius: 10px; margin: .5rem 0; }
 .badge-options { display: grid; gap: .5rem; }
 .badge-options label { display: flex; align-items: center; gap: .65rem; padding: .5rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
-.badge-options .achievement-emblem { width: 32px; height: 38px; flex-basis: 32px; }
+.badge-options .achievement-emblem { width: 56px; height: 56px; flex-basis: 56px; }
 .badge-options label > span:last-child { font-size: .75rem; }
 .badge-options label small { display: block; font-size: .6rem; color: var(--text-muted); margin-top: .25rem; }
 .badge-options label:has(input:checked) { background: var(--profile-tint); border-color: var(--accent); }
@@ -86,4 +87,6 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
     .profile-banner .profile-hero-actions { width: auto; }
 }
 html[data-theme="light"] .profile-banner-toolbar { border-color: #43374b26; }
-@media (max-width: 650px) { .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
+@media (max-width: 650px) { .profile-achievements { scroll-margin-top: 170px; } .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
+
+.profile-wishlist-link { color: inherit; text-underline-offset: .25em; }

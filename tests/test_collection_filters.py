@@ -9,6 +9,8 @@ def test_live_filter_combines_title_and_status(client, seed_game, stored_games):
     response = client.get("/library?q=res&status=Completed", headers={"Accept": "application/json"})
     assert response.status_code == 200
     assert response.json["count"] == 1
+    assert response.json["total"] == 3
+    assert 'aria-live="polite">1 of 3 games</span>' in client.get("/library?q=res&status=Completed").get_data(as_text=True)
     assert "Resident Finished" in response.json["html"]
     assert "Resident Pending" not in response.json["html"]
     assert "Portal Finished" not in response.json["html"]
@@ -22,12 +24,16 @@ def test_live_filter_can_restore_entire_collection(client, seed_game):
     seed_game(title="Resident Evil")
     response = client.get("/library", headers={"Accept": "application/json"})
     assert response.json["count"] == 2
+    assert response.json["total"] == 2
+    assert 'aria-live="polite">2 games</span>' in client.get("/library").get_data(as_text=True)
 
 
 def test_live_filter_empty_result_is_helpful(client, seed_game):
     seed_game()
     response = client.get("/library?q=no-match", headers={"Accept": "application/json"})
     assert response.json["count"] == 0
+    assert response.json["total"] == 1
+    assert 'aria-live="polite">0 of 1 game</span>' in client.get("/library?q=no-match").get_data(as_text=True)
     assert "No games match your search" in response.json["html"]
 
 
