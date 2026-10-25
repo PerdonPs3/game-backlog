@@ -485,8 +485,9 @@ unchanged.
 
 ## Wishlist privacy
 
-See [Wishlist](Wishlist.md) for the local implementation and migrations 015–016.
+See [Wishlist](Wishlist.md) for the implementation and migrations 015–016.
 Wishlists are separate from owned libraries and public by default. Owners can
 choose Private wishlist in Edit profile. A private profile always hides its
-wishlist, regardless of that setting. This increment has
-not been deployed or migrated to hosted environments.
+wishlist, regardless of that setting. Develop publication was authorized on
+2026-10-25; migrations 015–016 are applied to hosted development. Production
+remains unchanged.

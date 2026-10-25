@@ -1,9 +1,11 @@
 # Wishlist
 
-Implemented locally on `feature/wishlist`, based on develop. This increment has
-not been integrated, published, or migrated to either hosted environment.
-Apply migrations `015_wishlist.sql` and `016_wishlist_public_default.sql` explicitly
-before an authorized deployment. They add an
+Implemented on `feature/wishlist`, based on develop. Develop publication was
+authorized on 2026-10-25. Migrations `015_wishlist.sql` and
+`016_wishlist_public_default.sql` are applied to hosted development, with existing
+account, library, review, and session counts and profile visibility preserved.
+Production remains unchanged. Apply both migrations explicitly before any
+separately authorized production deployment. They add an
 account-owned table with row-level security and no public API grants, plus
 `profiles.share_wishlist`. Migration 016 corrects the initial, unpublished private
 default: wishlists are public by default for both existing and new accounts.
