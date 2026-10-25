@@ -16,7 +16,13 @@
 </head>
 <body class="library-page library-archive">
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
-    <div class="library-room" aria-hidden="true"><div class="library-room-art"><svg class="library-room-seal" viewBox="55 40 330 365" focusable="false"><use href="#brand-symbol" /></svg></div></div>
+    <div class="library-room" aria-hidden="true">
+        <div class="library-room-art">
+            <img class="library-room-image library-room-night" src="{{ url_for('static', filename='images/backgrounds/library-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+            <img class="library-room-image library-room-day" src="{{ url_for('static', filename='images/backgrounds/library-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+            <svg class="library-room-seal" viewBox="55 40 330 365" focusable="false"><use href="#brand-symbol" /></svg>
+        </div>
+    </div>
     <main class="library-layout">
         <header class="library-hero">
             <div class="hero-copy">

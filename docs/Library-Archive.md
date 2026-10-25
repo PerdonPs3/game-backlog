@@ -6,6 +6,14 @@ and daylight artwork. Its palette is scoped to `body.library-archive` in
 keep their existing themes. The normal theme switch selects the matching
 background without introducing a separate preference.
 
+The night illustration is a lighting edit of the daylight room: the left window
+shows a moon, stars, and dark mountains; cool moonlight replaces sunbeams while
+the existing candles retain their warm glow. Both images load as decorative
+layers before switching. The library uses a 2.2-second view-transition crossfade
+with an opaque old frame, avoiding a dip to black. Browsers without view
+transitions fade the daylight layer with CSS instead. Reduced-motion preferences
+disable both animations. Other screens retain their normal theme transition.
+
 The light palette uses ivory surfaces, espresso text, walnut secondary text,
 bronze outlines, and honey-gold primary actions. The dark palette uses walnut,
 charcoal, cream text, and gold. Nearly opaque panels keep controls and personal
@@ -22,11 +30,12 @@ Shelf retains its existing compact behavior.
 
 Packaged assets:
 
-- `app/static/images/backgrounds/library-night.webp` (about 380 KB).
+- `app/static/images/backgrounds/library-night.webp` (about 325 KB).
 - `app/static/images/backgrounds/library-day.webp` (about 429 KB).
 
-Both were generated individually with the built-in imagegen tool from the
-user-approved mockups. They are encoded to WebP at the original 1536 × 1024
+The daylight room was generated with the built-in imagegen tool from the
+user-approved mockups, then edited into the matching moonlit room. Both are
+encoded to WebP at the original 1536 × 1024
 dimensions. No application UI or game covers are baked into the backgrounds.
 The complete prompts and source filenames are recorded in
 [Library-Artwork-Prompts.json](Library-Artwork-Prompts.json).

@@ -22,7 +22,6 @@ body.library-archive {
     --archive-panel: #211c18f5;
     --archive-veil: #100a0561;
     --archive-hero: #17120be0;
-    --archive-art: url('images/backgrounds/library-night.webp');
     position: relative;
     isolation: isolate;
     background: var(--background);
@@ -48,7 +47,6 @@ html[data-theme="light"] body.library-archive {
     --archive-panel: #fffaf0f7;
     --archive-veil: #f5ecd522;
     --archive-hero: #fff7e6f0;
-    --archive-art: url('images/backgrounds/library-day.webp');
     --background: var(--color-canvas);
     --surface: var(--color-panel);
     --text: var(--color-text);
@@ -58,9 +56,23 @@ html[data-theme="light"] body.library-archive {
     background: var(--background);
 }
 .library-room { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-.library-room-art { position: absolute; top: 0; left: 50%; width: max(100vw, 150vh); aspect-ratio: 3 / 2; transform: translateX(-50%); background: var(--archive-art) center / cover no-repeat; }
+.library-room-art { position: absolute; top: 0; left: 50%; width: max(100vw, 150vh); aspect-ratio: 3 / 2; transform: translateX(-50%); }
+.library-room-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.library-room-day { opacity: 0; }
+html[data-theme="light"] .library-room-day { opacity: 1; }
 .library-room::after { content: ''; position: absolute; inset: 0; background: var(--archive-veil); }
 .library-room-seal { position: absolute; left: 70.7%; top: 7%; width: 6.2%; height: 15%; opacity: .85; filter: drop-shadow(0 2px 2px #0008); }
+/* Keep the old frame opaque so the room never dips to black mid-transition. */
+html:has(body.library-archive)::view-transition-old(root) { animation: none; opacity: 1; }
+html:has(body.library-archive)::view-transition-new(root) { animation: archive-time-shift 2200ms cubic-bezier(.4, 0, .2, 1) both; }
+@keyframes archive-time-shift { from { opacity: 0; } to { opacity: 1; } }
+@supports not (view-transition-name: root) {
+    html[data-theme-ready] .library-room-day { transition: opacity 2200ms cubic-bezier(.4, 0, .2, 1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    html:has(body.library-archive)::view-transition-new(root) { animation: none; }
+    html[data-theme-ready] .library-room-day { transition: none; }
+}
 .library-archive .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 95%, transparent); backdrop-filter: blur(14px); }
 .library-archive .site-footer { background: var(--archive-panel); }
 .library-archive main.library-layout { max-width: 1120px; }
