@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import psycopg
 from flask import Blueprint, Response, abort, current_app, flash, g, redirect, render_template, request, url_for
 
+from app.achievements import public_badges
 from app.catalog import collection_cover_url
 from app.game_reviews import profile_review_context
 from app.db import get_db
@@ -166,12 +167,12 @@ def public_profile(username):
         # always resolve directly to the current name, never an alias chain.
         return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
-    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
+    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, CASE WHEN share_background THEN background_key ELSE \'obsidian\' END AS background_key, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()
     showcase = [{'title': row['title'], 'platform': row['platform'], 'position': row['position'], 'catalog_id': row['igdb_id'], 'cover_url': collection_cover_url(row['cover_image_id'])} for row in games]
-    return render_template('public_profile.html', profile=item, showcase=showcase, **public_activity_context(username), **profile_review_context(username))
+    return render_template('public_profile.html', profile=item, badge_state=public_badges(username), profile_owner=False, showcase=showcase, **public_activity_context(username), **profile_review_context(username))
 
 
 def public_activity_context(username):

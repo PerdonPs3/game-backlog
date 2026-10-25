@@ -1,0 +1,17 @@
+{% macro emblem(badge, locked=false) %}
+<span class="achievement-emblem category-{{ badge.category }}{% if locked %} is-locked{% endif %}" aria-hidden="true">
+    <svg viewBox="0 0 80 88" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+        <path class="emblem-shadow" d="M40 3 74 17v42L40 84 6 59V17Z"/>
+        <path class="emblem-face" d="M40 8 69 20v36L40 78 11 56V20Z"/>
+        <path class="emblem-rim" d="m12 21 28-12 28 12M12 22v33l28 22"/>
+        {% if locked %}<rect x="29" y="37" width="22" height="20" rx="3"/><path d="M33 37v-7a7 7 0 0 1 14 0v7m-7 8v5"/>
+        {% elif badge.icon == 'books' %}
+        <path class="emblem-symbol" d="m22 31 19-7 18 7-19 7Z"/><path d="M22 31v8l18 7 19-7v-8M22 43v8l18 7 19-7m-37 4v8l18 7 19-7M40 38v8"/>
+        {% elif badge.icon == 'laurel' %}
+        <path d="m29 41 8 8 15-18M26 61C12 51 16 32 23 25m31 36c14-10 10-29 3-36M22 53l-7-1m6-7-6-4m7-4-4-7m36 23 7-1m-6-7 6-4m-7-4 4-7m-32 29 14 8 14-8"/>
+        {% else %}
+        <path class="emblem-symbol" d="m40 21 14 25-14 17-14-17Z"/><path d="M40 21v22m0 9v11m-9 5h18"/><circle cx="40" cy="47" r="4"/>
+        {% endif %}
+    </svg>
+</span>
+{% endmacro %}

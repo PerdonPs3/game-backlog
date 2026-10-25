@@ -1,0 +1,34 @@
+.achievement-emblem { --badge-ink: #efbb65; --badge-face: #342c20; --badge-edge: #9a733a; display: inline-grid; place-items: center; flex: 0 0 68px; width: 68px; height: 76px; color: var(--badge-ink); filter: drop-shadow(0 4px 5px #0004); }
+.achievement-emblem.category-completion { --badge-ink: #83d7b9; --badge-face: #163c39; --badge-edge: #519e8c; }
+.achievement-emblem.category-reviews { --badge-ink: #c7afff; --badge-face: #35254d; --badge-edge: #8971ac; }
+.achievement-emblem svg { width: 100%; height: 100%; }
+.emblem-shadow { fill: #121718; stroke: var(--badge-edge); stroke-width: 3; }
+.emblem-face { fill: var(--badge-face); stroke: var(--badge-ink); }
+.emblem-rim { stroke: #fff; opacity: .35; stroke-width: 1; }
+.emblem-symbol { fill: color-mix(in srgb, var(--badge-ink) 15%, transparent); }
+.achievement-emblem.is-locked { --badge-ink: #939b9f; --badge-edge: #5b6269; --badge-face: #272c30; filter: none; opacity: .65; }
+html[data-theme="light"] .achievement-emblem { filter: drop-shadow(0 3px 3px #30201a26); }
+html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #6f647e; --badge-edge: #ad9fbc; --badge-face: #f4eff8; }
+.achievement-notice { position: fixed; z-index: 100; right: 1.5rem; top: 94px; width: min(390px, calc(100vw - 2rem)); box-sizing: border-box; padding: 1rem 2.2rem 1.2rem 1rem; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); border-radius: 16px; background: var(--color-panel, #1b1d1e); color: var(--text); box-shadow: 0 12px 44px #0004, 0 0 30px color-mix(in srgb, var(--accent) 12%, transparent); animation: achievement-arrival .7s cubic-bezier(.18,.8,.3,1.2) both; overflow: hidden; }
+.achievement-notice-content { display: flex; align-items: center; gap: .9rem; }
+.achievement-notice-content > div { min-width: 0; }
+.achievement-notice-content small { color: var(--accent); font-size: .6rem; letter-spacing: .12em; }
+.achievement-notice-content strong { display: block; font-size: 1.25rem; margin: .25rem 0; }
+.achievement-notice-content p { margin: .25rem 0 .5rem; font-size: .75rem; line-height: 1.5; color: var(--text-muted); }
+.achievement-notice-content a { color: var(--accent); font-size: .75rem; text-decoration: none; }
+.achievement-notice > button { position: absolute; right: .5rem; top: .4rem; border: 0; background: transparent; color: var(--text-muted); padding: .35rem; min-width: 28px; cursor: pointer; font-size: 1.25rem; }
+.achievement-timer { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; background: var(--accent); transform-origin: left; }
+.achievement-notice.is-timed .achievement-timer { animation: achievement-countdown 10s linear forwards; }
+.achievement-notice:is(:hover, :focus-within) .achievement-timer { animation-play-state: paused; }
+.achievement-notice::before, .achievement-notice::after { content: '✦'; position: absolute; pointer-events: none; color: var(--accent); font-size: .75rem; animation: achievement-spark 1.5s ease-out both; }
+.achievement-notice::before { top: .45rem; left: .65rem; }
+.achievement-notice::after { left: 5.5rem; bottom: .5rem; animation-delay: .2s; }
+.achievement-notice.is-dismissed { animation: achievement-exit .2s ease-in both; pointer-events: none; }
+.achievement-notice :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+html[data-theme="light"] .achievement-notice { background: #fff; box-shadow: 0 12px 40px #3c235126; }
+@keyframes achievement-arrival { from { opacity: 0; transform: translate(24px, -12px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes achievement-exit { to { opacity: 0; transform: translateX(25px); } }
+@keyframes achievement-spark { 0% { opacity: 0; transform: scale(.3) rotate(-30deg); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5) rotate(30deg); } }
+@keyframes achievement-countdown { to { transform: scaleX(0); } }
+@media (max-width: 600px) { .achievement-notice { right: 1rem; top: auto; bottom: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .achievement-notice, .achievement-notice::before, .achievement-notice::after, .achievement-notice.is-dismissed, .achievement-notice.is-timed .achievement-timer { animation: none; } .achievement-notice::before, .achievement-notice::after { display: none; } }

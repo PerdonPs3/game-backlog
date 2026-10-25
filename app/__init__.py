@@ -85,6 +85,11 @@ def create_app(test_config=None):
     from app.game_reviews import init_app as init_game_reviews
     init_game_reviews(app)
 
+    from app.achievements import init_app as init_achievements
+    init_achievements(app)
+    from app.profile_backgrounds import backgrounds
+    app.register_blueprint(backgrounds)
+
     from app.community import init_app as init_community
     init_community(app)
 
