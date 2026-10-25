@@ -78,7 +78,8 @@ html[data-theme="light"] body.library-archive {
 .library-archive #collection-filters :is(input, select) { background-color: var(--color-field); color: var(--text); }
 .library-archive :is(.secondary-action, .backup-actions a, .collection-view-switch, .game-actions a) { background: var(--archive-panel); color: var(--accent); border-color: var(--border); }
 .library-archive :is(.hero-add-game, #apply-filters) { background: linear-gradient(135deg, #ffd877, var(--color-action)); color: var(--color-on-action); border-color: #cf982d; box-shadow: 0 4px 16px #8c591a22; }
-.library-archive .library-heading { justify-content: flex-end; padding: .4rem 0; }
+.library-archive .library-heading { justify-content: space-between; align-items: center; padding: .4rem 0; }
+.library-archive .library-heading .collection-count { padding: .55rem .8rem; border: 1px solid var(--border); border-radius: 9px; background: var(--archive-panel); color: var(--text); font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .library-archive .library-heading .collection-view-switch { margin: 0; }
 .library-archive #filter-message:not(:empty) { width: fit-content; max-width: 100%; padding: .4rem .7rem; color: var(--text); background: var(--archive-panel); border-radius: 8px; }
 .library-archive #game-collection { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }

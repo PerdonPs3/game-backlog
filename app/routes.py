@@ -133,12 +133,13 @@ def index():
         for game in get_db().execute(query, parameters).fetchall()
     ]
 
-    context = dict(games=games, selected_status=status, search_query=search_query,
+    total = get_db().execute(f"SELECT COUNT(*) FROM games WHERE {owned()}").fetchone()[0] if search_query or status or selected_list else len(games)
+    context = dict(games=games, collection_total=total, selected_status=status, search_query=search_query,
                    selected_sort=selected_sort, sort_options=COLLECTION_SORTS,
                    selected_list=selected_list, lists=all_lists(get_db()))
     if request.accept_mimetypes.best == "application/json":
         response = jsonify(
-            html=render_template("_game_collection.html", **context), count=len(games),
+            html=render_template("_game_collection.html", **context), count=len(games), total=total,
         )
     else:
         response = make_response(render_template(
