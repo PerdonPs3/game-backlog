@@ -346,7 +346,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()

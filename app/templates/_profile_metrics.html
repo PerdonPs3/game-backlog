@@ -1,0 +1,8 @@
+{% macro profile_metrics(stats, label) %}
+<dl class="profile-metrics" aria-label="{{ label }}">
+    <div><dt>Games collected</dt><dd>{{ stats.total }}</dd></div>
+    <div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div>
+    <div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div>
+    <div><dt>Completion</dt><dd>{{ stats.completion_percent }}<small>%</small></dd></div>
+</dl>
+{% endmacro %}

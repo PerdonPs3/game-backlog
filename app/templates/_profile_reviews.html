@@ -10,7 +10,12 @@
         <div class="profile-review-content">
             <header><h3><a href="{{ url_for('explore.game', catalog_id=review.catalog_id, _anchor='community-reviews') }}">{{ review.game_title }}</a></h3><span class="profile-review-score" aria-label="Rating: {{ review.rating|star_rating }}/5">{{ review_stars(review.rating) }}<b>{{ review.rating|star_rating }}<small>/5</small></b></span></header>
             <time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time>
-            {% if review.has_spoilers %}<details class="profile-review-spoilers"><summary>Contains spoilers · Read review</summary><p>{{ review.body }}</p></details>{% else %}<p>{{ review.body }}</p>{% endif %}
+            {% if review.has_spoilers %}
+                <details class="profile-review-spoilers"><summary>Contains spoilers · Read review</summary><p>{{ review.body }}</p></details>
+            {% elif review.body|length > 300 or review.body.splitlines()|length > 3 %}
+                {% set excerpt = review.body.split()|join(' ') %}
+                <details class="profile-review-expand"><summary aria-label="Full review of {{ review.game_title }}"><span class="profile-review-excerpt">{{ excerpt|truncate(260, false, '…', 0) }}</span><span class="profile-review-more">Read more <span aria-hidden="true">↗</span></span><span class="profile-review-less">Show less <span aria-hidden="true">↑</span></span></summary><p>{{ review.body }}</p></details>
+            {% else %}<p>{{ review.body }}</p>{% endif %}
         </div>
     </article>
     {% endfor %}</div>{% endif %}

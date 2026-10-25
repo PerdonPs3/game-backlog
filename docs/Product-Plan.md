@@ -35,11 +35,19 @@ increment before expanding social interactions.
 
 - Show already-published reviews on both the owner's profile and its public view,
   including public catalog title/artwork, five-star rating, date, and game link.
-- Never infer public content from private notes, library titles, ratings, or
-  progress. Hidden, deleted, and reporter-hidden reviews stay excluded. A private
+- Review cards must never infer public review content from private notes or
+  collection ratings. Hidden, deleted, and reporter-hidden reviews stay excluded. A private
   profile hides its publications from visitors immediately.
 - Keep spoiler text behind a native disclosure. Bound review pages to ten cards;
   fetch public catalog metadata in one cached batch with a readable outage fallback.
+- Default public statistics and bounded recent activity to visible, with separate
+  opt-out controls in Edit profile, as requested on 2026-10-25. Preserve overall
+  private-profile visibility, photo consent, and explicit review publication.
+  Activity links must open public catalog details, never private library entries.
+- Collapse long profile reviews into a three-line excerpt with native Read
+  more/Show less controls; preserve full escaped text and keep spoilers concealed.
+  Migration 013 is required for the new sharing flags and remains local until
+  authorized deployment to the selected hosted environment.
 - Search current public display names and usernames only, with no initial bulk
   directory, no email lookup, a bounded query/page size, and a process-local
   request budget. Private/unfinished profiles and previous username aliases must

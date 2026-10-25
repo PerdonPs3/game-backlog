@@ -17,6 +17,16 @@
 .profile-review-score .review-score-stars svg { display: block; width: 100%; height: 100%; }
 .profile-review-spoilers { margin-top: 1rem; }
 .profile-review-spoilers summary { color: var(--accent); font-size: .75rem; cursor: pointer; }
+.profile-review-expand { margin-top: 1rem; }
+.profile-review-expand summary { display: block; list-style: none; cursor: pointer; }
+.profile-review-expand summary::-webkit-details-marker { display: none; }
+.profile-review-excerpt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; color: var(--text-muted); font-size: .82rem; line-height: 1.8; }
+.profile-review-more, .profile-review-less { color: var(--accent); font-size: .7rem; font-weight: 600; }
+.profile-review-more { display: inline-block; margin-top: .6rem; }
+.profile-review-less { display: none; }
+.profile-review-expand[open] .profile-review-excerpt, .profile-review-expand[open] .profile-review-more { display: none; }
+.profile-review-expand[open] .profile-review-less { display: inline-block; }
+.profile-review-expand summary:focus-visible, .profile-review-spoilers summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
 .profile-review-pages { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; font-size: .75rem; }
 .profile-review-pages a { color: var(--accent); }
 .profile-reviews-empty { color: var(--text-muted); font-size: .8rem; line-height: 1.7; }

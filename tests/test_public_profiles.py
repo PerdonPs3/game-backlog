@@ -14,7 +14,7 @@ def test_private_by_default_and_selective_publication(accounts):
     alice, bob = sign_in(accounts, 'alice'), sign_in(accounts, 'bob')
     with accounts.app_context():
         db = get_db()
-        db.execute("UPDATE profiles SET bio = 'Alice public bio', avatar_image = ? WHERE id = ?", (b'private-photo', ALICE))
+        db.execute("UPDATE profiles SET bio = 'Alice public bio', avatar_image = ?, share_statistics = FALSE, share_activity = FALSE WHERE id = ?", (b'private-photo', ALICE))
         own = db.execute("INSERT INTO games (title, platform, review, rating, status, owner_id) VALUES ('Chosen game', 'PC', 'SECRET REVIEW', 7, 'Playing', ?) RETURNING id", (ALICE,)).fetchone()[0]
         db.execute("INSERT INTO games (title, platform, owner_id) VALUES ('SECRET UNSELECTED', 'PC', ?)", (ALICE,))
         foreign = db.execute("INSERT INTO games (title, platform, owner_id) VALUES ('BOB SECRET', 'PC', ?) RETURNING id", (BOB,)).fetchone()[0]

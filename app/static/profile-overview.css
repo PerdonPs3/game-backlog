@@ -49,9 +49,9 @@
 .profile-activity-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 12px #10b98144; }
 .profile-activity-list { list-style: none; padding: 0; margin: 0; }
 .profile-activity-list li + li { border-top: 1px solid var(--profile-line); }
-.profile-activity-list a { display: flex; align-items: center; gap: .85rem; padding: .85rem 0; color: var(--text); text-decoration: none; }
-.profile-activity-list li:first-child a { padding-top: 0; }
-.profile-activity-list li:last-child a { padding-bottom: 0; }
+.profile-activity-list .profile-activity-item { display: flex; align-items: center; gap: .85rem; padding: .85rem 0; color: var(--text); text-decoration: none; }
+.profile-activity-list li:first-child .profile-activity-item { padding-top: 0; }
+.profile-activity-list li:last-child .profile-activity-item { padding-bottom: 0; }
 .profile-activity-list .profile-cover { width: 45px; flex: 0 0 45px; border-radius: 6px; }
 .profile-activity-list .profile-cover > span { font-size: 1rem; }
 .profile-activity-copy { flex: 1; min-width: 0; }
