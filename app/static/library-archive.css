@@ -77,19 +77,19 @@ html:has(body.library-archive)::view-transition-new(root) { animation: archive-t
 .library-archive .site-footer { background: var(--archive-panel); }
 .library-archive main.library-layout { max-width: 1120px; }
 .library-archive .library-layout .library-hero {
-    display: block; min-height: 100px; padding: 1.4rem 1.75rem; border: 0;
+    display: block; min-height: 100px; padding: 1.4rem 0; border: 0;
     border-radius: 0; background: none; overflow: visible; isolation: isolate;
     box-shadow: none;
 }
 html[data-theme] .library-archive .library-layout .library-hero::before {
     display: block; content: ''; position: absolute; inset: -2rem auto -2rem -3rem;
-    width: min(760px, calc(100% + 6rem)); z-index: 0; pointer-events: none;
-    background: radial-gradient(ellipse at 35% 50%, var(--archive-hero) 8%, transparent 72%);
+    width: min(560px, calc(100% + 6rem)); z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 30% 50%, var(--archive-hero), transparent 68%);
     mask-image: none;
 }
 .library-archive .library-layout .library-hero::after { display: none; }
-.library-archive .library-wordmark { margin: 0 0 1.2rem; color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 500; line-height: 1.12; letter-spacing: -.035em; text-shadow: 0 1px 12px var(--archive-hero); }
-.library-archive .library-wordmark span { margin-inline-start: .15em; background: none; -webkit-text-fill-color: currentColor; color: var(--color-action); }
+.library-archive .library-wordmark { margin: 0; color: var(--text); font-family: inherit; font-size: clamp(1.8rem, 3vw, 2.3rem); font-weight: 650; line-height: 1.2; letter-spacing: -.035em; text-shadow: 0 1px 8px var(--archive-hero); }
+.library-archive .library-wordmark span { margin-inline-start: 0; background: none; -webkit-text-fill-color: currentColor; color: inherit; }
 .library-archive .library-hero .library-wordmark { margin: 0; }
 .library-archive .library-primary-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
 .library-archive .library-layout .hero-actions { gap: .85rem; }
@@ -156,7 +156,7 @@ html[data-theme] .library-archive .library-layout .library-hero::before {
 .library-archive #game-collection[data-view="shelf"] .game-card-details { padding: .8rem; }
 .library-archive #game-collection .game-card:is(:hover, :focus-within) { border-color: var(--accent); }
 .library-archive :is(a, button, input, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-html[data-theme="light"] .library-archive .library-wordmark span { color: #936122; background: none; -webkit-text-fill-color: currentColor; }
+html[data-theme="light"] .library-archive .library-wordmark span { color: inherit; background: none; -webkit-text-fill-color: currentColor; }
 html[data-theme="light"] .library-archive .workspace-brand { color: #80541f; }
 html[data-theme="light"] .library-archive #brand-gold .brand-metal-light { stop-color: #ffe8a9; }
 html[data-theme="light"] .library-archive #brand-gold .brand-metal-highlight { stop-color: #f4cf78; }
@@ -174,7 +174,7 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 540px) {
-    .library-archive .library-layout .library-hero { padding: 1rem .5rem; min-height: 0; }
+    .library-archive .library-layout .library-hero { padding: 1rem 0; min-height: 0; }
     .library-archive .library-layout .hero-actions { gap: .6rem; }
     .library-archive .library-layout #collection-filters { padding: 1rem; }
     .library-archive #game-collection { grid-template-columns: minmax(0, 1fr); }

@@ -22,7 +22,8 @@ assistive technology and does not intercept input. One existing vector brand
 symbol sits on the fabric banner; the large repeated wordmark and floating logo
 have been removed from the hero.
 
-The compact hero uses a serif heading and a soft radial lighting veil instead
+The compact hero uses the interface font in a smaller, single-color heading,
+aligned with the filters, and a soft radial lighting veil instead
 of a rectangular panel. It omits the tagline and keeps the primary add action
 beside a quieter, translucent recommendation action in both themes.
 The add button uses a bronze finish with an inset book icon and a directional
