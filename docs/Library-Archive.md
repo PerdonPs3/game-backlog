@@ -25,6 +25,9 @@ have been removed from the hero.
 The compact hero uses a serif heading and a soft radial lighting veil instead
 of a rectangular panel. It omits the tagline and keeps the primary add action
 beside a quieter, translucent recommendation action in both themes.
+The add button uses a bronze finish with an inset book icon and a directional
+arrow. The recommendation button uses the same proportions with a compass icon;
+hover movement respects reduced-motion preferences.
 
 Cards keep the original full-width horizontal layout, complete portrait covers,
 and detailed notes; on phones they retain their original stacked layout. Shelf
