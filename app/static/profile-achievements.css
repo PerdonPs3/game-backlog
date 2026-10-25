@@ -1,24 +1,26 @@
-.profile-banner.profile-overview-hero { display: grid; grid-template-columns: 96px minmax(170px, .85fr) minmax(400px, 1.4fr); align-items: center; gap: 1.5rem; min-height: 300px; padding: 2.5rem 2rem 3.5rem; position: relative; isolation: isolate; overflow: hidden; border-radius: 20px; }
+.profile-banner.profile-overview-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(400px, 1.15fr); align-items: center; gap: 1.75rem 2rem; min-height: 260px; padding: 2rem; position: relative; isolation: isolate; overflow: hidden; border-radius: 20px; }
+.profile-banner-summary { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
+.profile-banner-toolbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding-top: 1rem; border-top: 1px solid #ffffff26; }
 .profile-banner-art { position: absolute; inset: 0; z-index: -2; background: #18232c; }
 .profile-banner-art img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .profile-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #0b111ae6, #0c111770 50%, #0b111a4d), linear-gradient(0deg, #101418f0, transparent 80%); }
 .background-aurora .profile-banner-art, .background-preset.background-aurora { background: radial-gradient(ellipse at 70% 0%, #478f8b 0%, transparent 55%), radial-gradient(ellipse at 25% 80%, #684b91 0%, transparent 60%), #102e3b; }
 .background-obsidian .profile-banner-art, .background-preset.background-obsidian { background: radial-gradient(ellipse at 75% 30%, #65513a 0%, transparent 65%), linear-gradient(120deg, #191d25, #303441); }
-.profile-banner .profile-portrait { width: 96px; height: 96px; border: 2px solid #ecc9908c; box-shadow: 0 8px 30px #0003; }
+.profile-banner .profile-portrait { width: 96px; height: 96px; flex: 0 0 96px; border: 2px solid #ecc9908c; box-shadow: 0 8px 30px #0003; }
 .profile-banner .profile-identity { min-width: 0; }
 .profile-banner .profile-name-row { gap: .5rem; }
 .profile-banner .profile-name-row h1 { font-size: clamp(1.6rem, 2.8vw, 2.5rem); color: #fff; }
 .profile-banner .profile-overview-bio { font-size: .8rem; color: #e5e3e0; max-width: 40ch; }
 .profile-banner .profile-public-handle { color: #ddd6cd; font-size: .8rem; margin: .5rem 0; }
 .profile-banner .profile-identity-meta { color: #dfdcd6; font-size: .65rem; }
-.profile-banner .profile-hero-actions { flex-direction: row; flex-wrap: wrap; margin-top: 1rem; gap: .5rem; }
+.profile-banner .profile-hero-actions { flex-direction: row; flex-wrap: wrap; margin: 0; gap: .5rem; }
 .profile-banner .profile-action { font-size: .7rem; padding: .6rem .75rem; color: #f8eddb; border-color: #e5d3ad55; background: #11171bbd; }
 .profile-banner .profile-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin: 0; }
 .profile-banner .profile-metrics > div { padding: 1rem .8rem; background: #12191cd9; border-color: #d4c9b440; backdrop-filter: blur(12px); border-radius: 10px; min-width: 0; }
 .profile-banner .profile-metrics dt { font-size: .6rem; color: #ddd7cd; min-height: 2.7em; }
 .profile-banner .profile-metrics dd { font-size: 1.65rem; margin-top: .45rem; color: #fff !important; }
 .profile-banner .profile-metrics dd small { font-size: .85rem; }
-.profile-background-action { position: absolute; bottom: 1rem; right: 1.25rem; display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .7rem; font-size: .65rem; color: #f5eee1; background: #10171bd9; border: 1px solid #f1d29a55; border-radius: 8px; text-decoration: none; }
+.profile-background-action { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .7rem; font-size: .65rem; color: #f5eee1; background: #10171bd9; border: 1px solid #f1d29a55; border-radius: 8px; text-decoration: none; }
 .profile-background-action:hover { border-color: #f1d29a; }
 .profile-achievements { margin-bottom: 1.5rem; scroll-margin-top: 110px; }
 .badge-heading { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
@@ -71,5 +73,18 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 .badge-options label small { display: block; font-size: .6rem; color: var(--text-muted); margin-top: .25rem; }
 .badge-options label:has(input:checked) { background: var(--profile-tint); border-color: var(--accent); }
 .profile-customization :is(a, input, summary):focus-visible, .profile-background-action:focus-visible, .achievement-all > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-@media (max-width: 1000px) { .profile-banner.profile-overview-hero { grid-template-columns: 86px minmax(0, 1fr); padding: 2rem 1.5rem 3.5rem; gap: 1.25rem; } .profile-banner .profile-portrait { width: 86px; height: 86px; } .profile-banner .profile-metrics { grid-column: 1 / -1; } .achievement-card { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 1000px) {
+    .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .85fr); padding: 1.5rem; gap: 1.5rem; }
+    .profile-banner .profile-portrait { width: 80px; height: 80px; flex-basis: 80px; }
+    .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-banner .profile-metrics > div { padding: .75rem; }
+    .profile-banner .profile-metrics dt { min-height: 0; }
+    .achievement-card { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 700px) {
+    .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+    .profile-banner .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .profile-banner .profile-hero-actions { width: auto; }
+}
+html[data-theme="light"] .profile-banner-toolbar { border-color: #43374b26; }
 @media (max-width: 650px) { .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
