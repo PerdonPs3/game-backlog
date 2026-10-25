@@ -43,18 +43,18 @@ html[data-theme="light"] :is(.library-wordmark span, .workspace-hero h1 span) {
 }
 html[data-theme="light"] :is(.hero-kicker, .aside-kicker, .workspace-brand span, .summary-icon, .sticker-option strong, .details-toolbar h2, .adventure-match-count, .list-art-caption, .list-card-icon) { color: var(--accent); }
 html[data-theme="light"] #collection-filters label,
-html[data-theme="light"] :is(.hero-description, .workspace-nav a, .workspace-footer, .workspace-form label, .library-layout .summary-stat dt) { color: var(--text-muted); }
+html[data-theme="light"] :is(.hero-description, .workspace-nav a, .workspace-footer, .workspace-form label, :is(.library-layout, .profile-banner) .summary-stat dt) { color: var(--text-muted); }
 html[data-theme="light"] .workspace-nav a.workspace-brand { color: var(--text); }
 html[data-theme="light"] #collection-filters,
 html[data-theme="light"] #game-collection[data-view="shelf"] .game-card,
-html[data-theme="light"] :is(.library-layout .summary-stat, .summary-footer, .library-layout .game-card, .workspace-panel, .workspace-aside, .personal-list-card, .delete-dialog, .game-details-dialog) {
+html[data-theme="light"] :is(:is(.library-layout, .profile-banner) .summary-stat, .summary-footer, .library-layout .game-card, .workspace-panel, .workspace-aside, .personal-list-card, .delete-dialog, .game-details-dialog) {
     background: linear-gradient(145deg, #fff, #fcfaff);
     border-color: var(--border);
     box-shadow: var(--light-shadow);
 }
-html[data-theme="light"] .library-layout .summary-stat:first-child { background: linear-gradient(135deg, #eee3fa, #faf7ff); border-color: var(--light-accent-border); }
-html[data-theme="light"] .library-layout .summary-stat dd { color: var(--text); }
-html[data-theme="light"] .library-layout .summary-stat:first-child dd { color: var(--accent); }
+html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat:first-child { background: linear-gradient(135deg, #eee3fa, #faf7ff); border-color: var(--light-accent-border); }
+html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat dd { color: var(--text); }
+html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat:first-child dd { color: var(--accent); }
 html[data-theme="light"] :is(.summary-average, .game-actions, .form-actions, .personal-footer, .details-toolbar, .personal-score) { border-color: var(--border); }
 html[data-theme="light"] #collection-filters input,
 html[data-theme="light"] #collection-filters select,

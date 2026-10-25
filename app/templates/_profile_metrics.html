@@ -1,8 +1,9 @@
+{% from '_stat_card.html' import stat_card %}
 {% macro profile_metrics(stats, label) %}
 <dl class="profile-metrics" aria-label="{{ label }}">
-    <div><dt>Games collected</dt><dd>{{ stats.total }}</dd></div>
-    <div><dt>Completed</dt><dd>{{ stats.completed }}</dd></div>
-    <div><dt>Playing</dt><dd>{{ stats.playing }}</dd></div>
-    <div><dt>Completion</dt><dd>{{ stats.completion_percent }}<small>%</small></dd></div>
+    {{ stat_card('Games collected', stats.total, 'total') }}
+    {{ stat_card('Completed', stats.completed, 'completed') }}
+    {{ stat_card('Playing', stats.playing, 'playing') }}
+    {{ stat_card('Completion', stats.completion_percent, 'completion', suffix='%') }}
 </dl>
 {% endmacro %}

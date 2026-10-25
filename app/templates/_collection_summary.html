@@ -1,25 +1,14 @@
+{% from '_stat_card.html' import stat_card %}
 <section id="collection-summary" class="collection-summary" aria-labelledby="summary-title">
     <div class="summary-heading">
         <h2 id="summary-title">Your progress</h2>
         <p>Whole collection · each platform entry counts separately.</p>
     </div>
     <dl class="summary-grid">
-        <div class="summary-stat">
-            <dt><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Total games</dt>
-            <dd id="summary-total">{{ stats.total }}</dd>
-        </div>
-        <div class="summary-stat">
-            <dt><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>Completed</dt>
-            <dd id="summary-completed">{{ stats.completed }}</dd>
-        </div>
-        <div class="summary-stat">
-            <dt><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z"/></svg></span>Playing</dt>
-            <dd id="summary-playing">{{ stats.playing }}</dd>
-        </div>
-        <div class="summary-stat">
-            <dt><span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4Z"/></svg></span>Backlog</dt>
-            <dd id="summary-backlog">{{ stats.backlog }}</dd>
-        </div>
+        {{ stat_card('Total games', stats.total, 'total', 'summary-total') }}
+        {{ stat_card('Completed', stats.completed, 'completed', 'summary-completed') }}
+        {{ stat_card('Playing', stats.playing, 'playing', 'summary-playing') }}
+        {{ stat_card('Backlog', stats.backlog, 'backlog', 'summary-backlog') }}
     </dl>
     {% if stats.on_hold or stats.dropped %}
         <p class="summary-paused">On hold: <strong>{{ stats.on_hold }}</strong> · Dropped: <strong>{{ stats.dropped }}</strong></p>

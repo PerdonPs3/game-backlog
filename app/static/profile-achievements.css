@@ -16,10 +16,12 @@
 .profile-banner .profile-hero-actions { flex-direction: row; flex-wrap: wrap; margin: 0; gap: .5rem; }
 .profile-banner .profile-action { font-size: .7rem; padding: .6rem .75rem; color: #f8eddb; border-color: #e5d3ad55; background: #11171bbd; }
 .profile-banner .profile-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin: 0; }
-.profile-banner .profile-metrics > div { padding: 1rem .8rem; background: #12191cd9; border-color: #d4c9b440; backdrop-filter: blur(12px); border-radius: 10px; min-width: 0; }
-.profile-banner .profile-metrics dt { font-size: .6rem; color: #ddd7cd; min-height: 2.7em; }
-.profile-banner .profile-metrics dd { font-size: 1.65rem; margin-top: .45rem; color: #fff !important; }
-.profile-banner .profile-metrics dd small { font-size: .85rem; }
+.profile-banner .summary-stat { min-height: 118px; padding: 1rem .8rem; }
+.profile-banner .summary-stat dt { font-size: .55rem; gap: .45rem; letter-spacing: .04em; }
+.profile-banner .summary-stat dd { font-size: 2.25rem; }
+.profile-banner .summary-stat dd small { font-size: 1rem; }
+.profile-banner .summary-stat .summary-icon { flex-basis: 26px; height: 26px; border-radius: 8px; }
+.profile-banner .summary-stat::after { left: .8rem; right: .8rem; }
 .profile-background-action { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .7rem; font-size: .65rem; color: #f5eee1; background: #10171bd9; border: 1px solid #f1d29a55; border-radius: 8px; text-decoration: none; }
 .profile-background-action:hover { border-color: #f1d29a; }
 .profile-achievements { margin-bottom: 1.5rem; scroll-margin-top: 110px; }
@@ -51,9 +53,6 @@
 html[data-theme="light"] .profile-banner::before { background: linear-gradient(90deg, #eeeef3e8, #f2ede870 50%, #edf1f233), linear-gradient(0deg, #f1edf2ba, transparent 80%); }
 html[data-theme="light"] .profile-banner .profile-name-row h1 { color: #211b2b; }
 html[data-theme="light"] .profile-banner :is(.profile-overview-bio, .profile-public-handle, .profile-identity-meta) { color: #39313f; }
-html[data-theme="light"] .profile-banner .profile-metrics > div { background: #fffc; border-color: #ffffffbd; }
-html[data-theme="light"] .profile-banner .profile-metrics dd { color: #241c2f !important; }
-html[data-theme="light"] .profile-banner .profile-metrics dt { color: #4e4558; }
 html[data-theme="light"] .profile-banner :is(.profile-action, .profile-background-action) { color: #39234f; background: #fffffff0; border-color: #bcb0c9; }
 html[data-theme="light"] .achievement-card { background: linear-gradient(110deg, color-mix(in srgb, var(--badge-tint) 10%, white), white 75%); }
 .profile-customization { margin: .5rem 0; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; min-width: 0; scroll-margin-top: 110px; }
@@ -77,7 +76,7 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
     .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .85fr); padding: 1.5rem; gap: 1.5rem; }
     .profile-banner .profile-portrait { width: 80px; height: 80px; flex-basis: 80px; }
     .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .profile-banner .profile-metrics > div { padding: .75rem; }
+    .profile-banner .summary-stat { padding: .75rem; min-height: 110px; }
     .profile-banner .profile-metrics dt { min-height: 0; }
     .achievement-card { flex-direction: column; align-items: flex-start; }
 }
