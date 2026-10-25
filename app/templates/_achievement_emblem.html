@@ -1,24 +1,16 @@
 {% macro emblem(badge, locked=false) %}
 <span class="achievement-emblem category-{{ badge.category }}{% if locked %} is-locked{% endif %}" aria-hidden="true">
+    {% if not locked %}
+    <img src="{{ url_for('static', filename='images/achievements/' ~ badge.key ~ '.webp') }}" width="1254" height="1254" alt="" decoding="async" loading="lazy">
+    {% else %}
     <svg viewBox="0 0 80 88" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
         <path class="emblem-shadow" d="M40 4 71 16v29c0 18-18 31-31 38C27 76 9 63 9 45V16Z"/>
         <path class="emblem-face" d="m40 10 25 10v25c0 14-14 25-25 32-11-7-25-18-25-32V20Z"/>
         <path class="emblem-rim" d="m16 21 24-10 24 10M16 22v22c0 14 14 25 24 32"/>
         <g class="emblem-glyph" transform="translate(20 23) scale(1.666667)" stroke-width="1.7">
-        {% if locked %}
         <rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v2"/>
-        {% elif badge.icon == 'books' %}
-        <path class="emblem-glyph-tint" d="M6 3h14v5H6a2.5 2.5 0 0 1 0-5Zm-1 7h14v5H5a2.5 2.5 0 0 1 0-5Zm1 7h14v5H6a2.5 2.5 0 0 1 0-5Z"/>
-        <path d="M7 5.5h10M6 12.5h10M7 19.5h10" stroke-width="1"/>
-        {% elif badge.icon == 'trophy' %}
-        <path d="M7 5H4v2a5 5 0 0 0 5 5m8-7h3v2a5 5 0 0 1-5 5"/>
-        <path class="emblem-glyph-tint" d="M7 3h10v6a5 5 0 0 1-10 0Z"/>
-        <path d="M12 14v5m-4 2h8m-6-2h4"/>
-        {% else %}
-        <path class="emblem-glyph-tint" d="M21 3C11 3 5 8 5 17c9 0 15-5 16-14Z"/>
-        <path d="m3 21 13-13"/>
-        {% endif %}
         </g>
     </svg>
+    {% endif %}
 </span>
 {% endmacro %}

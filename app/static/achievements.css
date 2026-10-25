@@ -1,12 +1,12 @@
-.achievement-emblem { --badge-ink: #efbb65; --badge-face: #342c20; --badge-edge: #9a733a; display: inline-grid; place-items: center; flex: 0 0 68px; width: 68px; height: 76px; color: var(--badge-ink); filter: drop-shadow(0 4px 5px #0004); }
+.achievement-emblem { --badge-ink: #efbb65; --badge-face: #342c20; --badge-edge: #9a733a; display: inline-grid; place-items: center; flex: 0 0 88px; width: 88px; height: 88px; color: var(--badge-ink); filter: drop-shadow(0 4px 5px #0004); }
 .achievement-emblem.category-completion { --badge-ink: #83d7b9; --badge-face: #163c39; --badge-edge: #519e8c; }
 .achievement-emblem.category-reviews { --badge-ink: #c7afff; --badge-face: #35254d; --badge-edge: #8971ac; }
-.achievement-emblem svg { width: 100%; height: 100%; }
+.achievement-emblem :is(svg, img) { display: block; width: 100%; height: 100%; }
+.achievement-emblem img { object-fit: contain; }
 .emblem-shadow { fill: #121718; stroke: var(--badge-edge); stroke-width: 2.5; }
 .emblem-face { fill: var(--badge-face); stroke: var(--badge-ink); }
 .emblem-rim { stroke: #fff; opacity: .35; stroke-width: 1; }
 .emblem-glyph { fill: none; stroke: var(--badge-ink); }
-.emblem-glyph-tint { fill: color-mix(in srgb, var(--badge-ink) 18%, var(--badge-face)); }
 .achievement-emblem.is-locked { --badge-ink: #939b9f; --badge-edge: #5b6269; --badge-face: #272c30; filter: none; opacity: .65; }
 html[data-theme="light"] .achievement-emblem { filter: drop-shadow(0 3px 3px #30201a26); }
 html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #6f647e; --badge-edge: #ad9fbc; --badge-face: #f4eff8; }
