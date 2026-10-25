@@ -294,8 +294,10 @@ semantics and completion rounding as the owner's statistics.
 
 Profile reviews over 300 characters or three lines use a closed native disclosure
 with a whitespace-normalized excerpt of at most 260 characters, visually limited
-to three lines. Read more/Show less expands or collapses the escaped original
-text without JavaScript or a storage change. Spoiler reviews expose no excerpt
+to three lines. Reading cards use a centered, bounded width with a compact
+cover/title/date header and body text aligned beneath it. Read more/Show less
+expands or collapses the escaped original text without JavaScript or a storage
+change; the expanded close control appears after the full text. Spoiler reviews expose no excerpt
 and stay behind a separate closed spoiler disclosure. Private notes never enter
 either disclosure.
 
