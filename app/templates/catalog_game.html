@@ -1,7 +1,7 @@
 {% extends '_catalog_base.html' %}
 {% from '_review_stars.html' import review_stars %}
 {% block page_title %}{{ game.name if game else 'Game unavailable' }} · Vestigium{% endblock %}
-{% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}">{% endblock %}
+{% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='wishlist.css') }}">{% endblock %}
 {% block body_class %}{{ super() }}{% if game and profile.backdrop_url %} catalog-illustrated-page{% endif %}{% endblock %}
 {% block workspace_backdrop %}{% if game and profile.backdrop_url %}<div class="catalog-game-backdrop" aria-hidden="true"><img src="{{ profile.backdrop_url }}" alt="" fetchpriority="low" decoding="async" referrerpolicy="no-referrer"></div>{% endif %}{% endblock %}
 {% block workspace_hero %}{% if not game %}<header class="workspace-hero"><div><h1>Game <span>unavailable.</span></h1><p>{{ error }}</p></div></header>{% endif %}{% endblock %}
@@ -21,7 +21,8 @@
                     <span class="catalog-rating-label">{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</span>
                 </a>
                 {% endif %}
-                <div class="catalog-game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button></div>
+                <div class="catalog-game-actions" id="game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button>{% include '_wishlist_button.html' %}</div>
+                {% for message in get_flashed_messages(category_filter=['wishlist_saved']) %}<p class="wishlist-feedback" role="status">✓ {{ message }}</p>{% endfor %}
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>

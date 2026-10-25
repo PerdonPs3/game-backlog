@@ -112,6 +112,8 @@
                 {% set activity_submitted = request.method == 'POST' and (request.form.get('profile_activity_controls') == 'yes' or name in request.form) %}
                 <label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if activity_submitted else profile[name]) %}checked{% endif %}><span>{{ title }}</span></label>
             {% endfor %}
+            <input type="hidden" name="wishlist_controls" value="yes">
+            <label><input type="checkbox" name="share_wishlist" value="yes" {% if (request.form.get('share_wishlist') == 'yes' if request.form.get('wishlist_controls') == 'yes' else profile.share_wishlist) %}checked{% endif %}><span>Wishlist <small>Share the catalog games you want. Your profile must also be public.</small></span></label>
             </div>{% if not is_setup %}<p class="profile-field-hint"><a href="{{ url_for('auth.edit_showcase') }}">Choose your five showcase games →</a></p>{% endif %}<p class="profile-field-hint">Public profiles share statistics and recent activity by default, including game names, platforms, ratings, and completion dates. Uncheck a section to hide it. Your email, full library, and personal notes stay private. Only reviews you explicitly publish appear on your profile and game pages. Public profiles can be found by display name or username.</p>
         </fieldset>
         <footer class="profile-save-bar">

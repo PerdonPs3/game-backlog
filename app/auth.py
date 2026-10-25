@@ -202,8 +202,11 @@ def login():
             g.user, g.profile = user, saved
             g.account_session = {"recovery": False}
             if saved['display_name'].strip():
+                selected = pending_selection()
                 selected_id = take_selection()
                 if selected_id:
+                    if selected.get('intent') == 'wishlist':
+                        return redirect(url_for('explore.game', catalog_id=selected_id, _anchor='game-actions'))
                     return redirect(url_for('main.create', igdb_id=selected_id))
             identity = {"username": saved["username"]} if saved["display_name"].strip() and saved["username"] else {}
             return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile", **identity))
@@ -346,7 +349,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, share_wishlist, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     from app.achievements import owner_state, save_features
     from app.profile_backgrounds import PRESETS, validate_background, save_background
     badge_state = owner_state() if item['display_name'].strip() else {'earned': [], 'featured': []}
@@ -396,6 +399,9 @@ def profile():
                     db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
                                (request.form.get('share_photo') == 'yes', g.user['id']))
                 save_background(db, g.user['id'], background_selection)
+                if request.form.get('wishlist_controls') == 'yes':
+                    db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?',
+                               (request.form.get('share_wishlist') == 'yes', g.user['id']))
                 save_features(db, g.user['id'], request.form)
                 db.commit()
             except ValueError as exc:

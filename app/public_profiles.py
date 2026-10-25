@@ -108,6 +108,8 @@ def update_sharing(db, owner, form):
     for field in ('share_statistics', 'share_activity'):
         if form.get('profile_activity_controls') == 'yes' or field in form:
             db.execute(f'UPDATE profiles SET {field} = ? WHERE id = ?', (form.get(field) == 'yes', owner))
+    if form.get('wishlist_controls') == 'yes' or 'share_wishlist' in form:
+        db.execute('UPDATE profiles SET share_wishlist = ? WHERE id = ?', (form.get('share_wishlist') == 'yes', owner))
     if form.get('publish_photo') == 'yes':
         db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL WHERE id = ?', (owner,))
 
@@ -167,7 +169,7 @@ def public_profile(username):
         # always resolve directly to the current name, never an alias chain.
         return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
-    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, CASE WHEN share_background THEN background_key ELSE \'obsidian\' END AS background_key, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
+    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, CASE WHEN share_background THEN background_key ELSE \'obsidian\' END AS background_key, share_wishlist, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()

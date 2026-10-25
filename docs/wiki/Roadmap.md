@@ -25,7 +25,7 @@ items below are not a claim that the production account release is still pending
 
 - [ ] Publish the reviewed Discover increment after explicit authorization.
 - [ ] Validate and publish public profile reviews and public player search.
-- [ ] Add a wishlist separate from owned games.
+- [x] Implement a wishlist separate from owned games, with explicit sharing and library transfer (local review; not yet published).
 - [ ] Extend the library picker with selected statuses and preference signals.
 - [ ] Define and implement following, including privacy and abuse boundaries.
 - [ ] Add explainable catalog recommendations before an optional AI chatbot.

@@ -482,3 +482,10 @@ implementation, privacy controls, server-earned milestones, notification behavio
 and migration 014 release requirements. Its develop publication was authorized
 on 2026-10-25; migration 014 is applied to hosted development. Production remains
 unchanged.
+
+## Wishlist privacy
+
+See [Wishlist](Wishlist.md) for the local implementation and migration 015.
+Wishlists are separate from owned libraries and private by default. Public access
+requires both a public profile and explicit wishlist sharing. This increment has
+not been deployed or migrated to hosted environments.

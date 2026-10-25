@@ -87,3 +87,5 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 }
 html[data-theme="light"] .profile-banner-toolbar { border-color: #43374b26; }
 @media (max-width: 650px) { .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
+
+.profile-wishlist-link { color: inherit; text-underline-offset: .25em; }

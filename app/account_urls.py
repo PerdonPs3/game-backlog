@@ -8,6 +8,7 @@ from app.db import get_db
 
 
 ACCOUNT_PAGES = {
+    "wishlist.index": ("/account/<username>/wishlist", ["GET"]),
     "main.index": ("/account/<username>/library", ["GET"]),
     "auth.profile_overview": ("/account/<username>/profile", ["GET", "POST"]),
     "auth.profile": ("/account/<username>/profile/edit", ["GET", "POST"]),
