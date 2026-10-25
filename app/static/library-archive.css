@@ -121,13 +121,13 @@ html[data-theme] .library-archive .library-layout .library-hero::before {
 .library-archive #collection-filters :is(input, select) { background-color: var(--color-field); color: var(--text); }
 .library-archive :is(.secondary-action, .backup-actions a, .collection-view-switch, .game-actions a) { background: var(--archive-panel); color: var(--accent); border-color: var(--border); }
 .library-archive #apply-filters { background: linear-gradient(135deg, #ffd877, var(--color-action)); color: var(--color-on-action); border-color: #cf982d; box-shadow: 0 4px 16px #8c591a22; }
-.library-archive .library-heading { justify-content: space-between; align-items: center; gap: 1rem; padding: .65rem; background: var(--archive-panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 4px 18px #0002; margin-block: .85rem 1rem; }
+.library-archive .library-heading { justify-content: flex-start; align-items: center; gap: .5rem; padding: .65rem; background: var(--archive-panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 4px 18px #0002; margin-block: .85rem 1rem; }
 .library-archive .library-heading::after { display: none; }
 .library-archive .library-heading .backup-actions { order: 1; gap: .5rem; }
-.library-archive .library-primary-tools { gap: .5rem; }
+.library-archive .library-primary-tools { gap: .5rem; flex: 1 1 auto; }
 .library-archive .library-primary-tools .collection-count { min-height: 44px; padding: .6rem .7rem; border-radius: 8px; white-space: nowrap; }
-.library-archive .library-heading .hero-actions { gap: .5rem; }
-.library-archive .library-heading .hero-actions a { min-height: 44px; padding: .35rem .7rem .35rem .35rem; gap: .55rem; font-size: .8rem; }
+.library-archive .library-heading .hero-actions { gap: .5rem; flex: 1 1 auto; }
+.library-archive .library-heading .hero-actions a { min-height: 44px; padding: .35rem .7rem .35rem .35rem; gap: .55rem; font-size: .8rem; flex: 1 1 auto; }
 .library-archive .library-heading a { border-radius: 8px; }
 .library-archive .library-heading .backup-actions > a { min-height: 44px; padding-inline: .65rem; box-shadow: none; }
 .library-archive .library-heading .archive-action-icon { width: 30px; height: 30px; flex-basis: 30px; }
@@ -183,7 +183,7 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive #game-collection[data-view="shelf"] .game-meta { display: block; }
     .library-archive #game-collection[data-view="shelf"] .game-rating { margin-top: .4rem; }
     .library-archive #game-collection[data-view="shelf"] .collection-rating-star { width: 10px; height: 10px; }
-    .library-archive .library-heading { gap: .8rem; }
+    .library-archive .library-heading { gap: .5rem; }
     .library-archive .library-heading::after { display: none; }
     .library-archive .backup-actions { flex-wrap: wrap; }
 }

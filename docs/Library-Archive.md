@@ -33,6 +33,8 @@ count remains at the start of that toolbar, immediately beside the two actions.
 One shared tray aligns all controls to a 44-pixel height, with consistent corner
 radii and spacing. The primary group stays on the left and collection utilities
 stay on the right, wrapping as groups when the available width is smaller.
+All neighboring controls use the same half-rem gap; primary actions expand to
+use spare width rather than leaving a large gap between groups.
 
 Cards keep the original full-width horizontal layout, complete portrait covers,
 and detailed notes; on phones they retain their original stacked layout. Shelf
