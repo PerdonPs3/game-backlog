@@ -78,8 +78,11 @@ html[data-theme="light"] body.library-archive {
 .library-archive #collection-filters :is(input, select) { background-color: var(--color-field); color: var(--text); }
 .library-archive :is(.secondary-action, .backup-actions a, .collection-view-switch, .game-actions a) { background: var(--archive-panel); color: var(--accent); border-color: var(--border); }
 .library-archive :is(.hero-add-game, #apply-filters) { background: linear-gradient(135deg, #ffd877, var(--color-action)); color: var(--color-on-action); border-color: #cf982d; box-shadow: 0 4px 16px #8c591a22; }
-.library-archive .library-heading { justify-content: flex-start; align-items: center; gap: .75rem; padding: .4rem 0; }
-.library-archive .library-heading .collection-count { padding: .55rem .8rem; border: 1px solid var(--border); border-radius: 9px; background: var(--archive-panel); color: var(--text); font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.library-archive .library-heading { justify-content: space-between; align-items: center; gap: .75rem; padding: .4rem 0; }
+.library-archive .library-heading::after { content: ''; flex: 1; min-width: 1rem; height: 1px; background: linear-gradient(90deg, var(--border), color-mix(in srgb, var(--accent) 65%, transparent), var(--border)); opacity: .65; }
+.library-archive .library-heading .backup-actions { order: 1; }
+.library-archive .library-heading .collection-count { display: inline-flex; align-items: center; gap: .55rem; min-height: 42px; padding: .6rem .85rem; border: 1px solid var(--border); border-radius: 10px; background: var(--archive-panel); color: var(--accent); font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.library-archive .collection-count::before { content: ''; width: 16px; height: 16px; flex: 0 0 16px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1'/%3E%3C/svg%3E") center / contain no-repeat; }
 .library-archive .library-heading .collection-view-switch { margin: 0; }
 .library-archive #filter-message:not(:empty) { width: fit-content; max-width: 100%; padding: .4rem .7rem; color: var(--text); background: var(--archive-panel); border-radius: 8px; }
 .library-archive #game-collection { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
@@ -129,5 +132,6 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive #game-collection[data-view="shelf"] .game-rating { margin-top: .4rem; }
     .library-archive #game-collection[data-view="shelf"] .collection-rating-star { width: 10px; height: 10px; }
     .library-archive .library-heading { gap: .8rem; }
+    .library-archive .library-heading::after { display: none; }
     .library-archive .backup-actions { flex-wrap: wrap; }
 }
