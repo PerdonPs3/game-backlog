@@ -29,7 +29,7 @@ The add button uses a bronze finish with an inset book icon and a directional
 arrow. The recommendation button uses the same proportions with a compass icon;
 hover movement respects reduced-motion preferences. These two actions sit below
 the filters, to the left of the list, backup, and view controls. The live game
-count sits beside the title to keep the collection toolbar compact.
+count remains at the start of that toolbar, immediately beside the two actions.
 
 Cards keep the original full-width horizontal layout, complete portrait covers,
 and detailed notes; on phones they retain their original stacked layout. Shelf
