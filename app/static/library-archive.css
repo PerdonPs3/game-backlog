@@ -77,15 +77,21 @@ html:has(body.library-archive)::view-transition-new(root) { animation: archive-t
 .library-archive .site-footer { background: var(--archive-panel); }
 .library-archive main.library-layout { max-width: 1120px; }
 .library-archive .library-layout .library-hero {
-    display: block; min-height: 180px; padding: 1.25rem 2rem; border: 0;
-    border-radius: 16px; background: linear-gradient(90deg, var(--archive-hero), transparent 80%);
+    display: block; min-height: 156px; padding: 1.4rem 1.75rem; border: 0;
+    border-radius: 0; background: none; overflow: visible; isolation: isolate;
     box-shadow: none;
 }
-.library-archive .library-layout .library-hero::before,
+html[data-theme] .library-archive .library-layout .library-hero::before {
+    display: block; content: ''; position: absolute; inset: -2rem auto -2rem -3rem;
+    width: min(760px, calc(100% + 6rem)); z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 35% 50%, var(--archive-hero) 8%, transparent 72%);
+    mask-image: none;
+}
 .library-archive .library-layout .library-hero::after { display: none; }
-.library-archive .library-wordmark { margin: 0 0 .6rem; color: var(--text); font-size: clamp(2.4rem, 5vw, 4rem); letter-spacing: -.045em; }
+.library-archive .library-wordmark { margin: 0 0 1.2rem; color: var(--text); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 500; line-height: 1.12; letter-spacing: -.035em; text-shadow: 0 1px 12px var(--archive-hero); }
 .library-archive .library-wordmark span { margin-inline-start: .15em; background: none; -webkit-text-fill-color: currentColor; color: var(--color-action); }
-.library-archive .library-layout .hero-description { margin: 0 0 1.4rem; color: var(--text); }
+.library-archive .library-layout .hero-actions a { min-height: 44px; border-radius: 9px; font-size: .85rem; }
+.library-archive .library-layout .hero-actions .secondary-action { background: color-mix(in srgb, var(--color-panel) 80%, transparent); border-color: color-mix(in srgb, var(--border) 65%, transparent); backdrop-filter: blur(8px); }
 .library-archive .library-layout #collection-filters { margin-top: 1.2rem; padding: 1.2rem 1.4rem; background: var(--archive-panel); border-color: var(--border); box-shadow: 0 8px 26px #0002; }
 .library-archive #collection-filters :is(input, select) { background-color: var(--color-field); color: var(--text); }
 .library-archive :is(.secondary-action, .backup-actions a, .collection-view-switch, .game-actions a) { background: var(--archive-panel); color: var(--accent); border-color: var(--border); }
@@ -134,7 +140,7 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 540px) {
-    .library-archive .library-layout .library-hero { padding: 1.25rem; min-height: 0; background: var(--archive-panel); }
+    .library-archive .library-layout .library-hero { padding: 1rem .5rem; min-height: 0; }
     .library-archive .library-layout .hero-actions { gap: .6rem; }
     .library-archive .library-layout #collection-filters { padding: 1rem; }
     .library-archive #game-collection { grid-template-columns: minmax(0, 1fr); }
