@@ -1,6 +1,8 @@
 .profile-reviews { margin-top: 1.5rem; scroll-margin-top: 110px; }
-.profile-review-list { display: grid; gap: 1rem; }
-.profile-review-card { display: grid; grid-template-columns: 64px minmax(0,1fr); gap: .6rem 1rem; width: 100%; max-width: 80ch; box-sizing: border-box; margin-inline: auto; padding: 1.5rem; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(130deg, color-mix(in srgb, var(--accent) 4%, var(--color-field)), var(--color-field) 65%); }
+.profile-review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1rem; }
+.profile-review-card { display: grid; grid-template-columns: 64px minmax(0,1fr); gap: .6rem 1rem; width: 100%; box-sizing: border-box; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(130deg, color-mix(in srgb, var(--accent) 4%, var(--color-field)), var(--color-field) 65%); }
+.profile-review-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.profile-review-card:last-child:nth-child(odd) .profile-review-content > p, .profile-review-card:last-child:nth-child(odd) .profile-review-content > details { max-width: 78ch; }
 .profile-review-cover.game-card-cover { display: grid; place-items: center; position: relative; width: 100%; aspect-ratio: 3 / 4; min-height: 0; align-self: start; overflow: hidden; border-radius: 8px; background: var(--color-panel); color: var(--accent); }
 .profile-review-cover img { position: absolute; inset: 0; height: 100%; width: 100%; object-fit: cover; }
 .profile-review-cover { grid-row: 1; }
@@ -54,6 +56,7 @@
 .player-result-name small { color: var(--text-muted); font-size: .7rem; overflow-wrap: anywhere; }
 .player-result-arrow { color: var(--accent); margin-left: auto; }
 .profile-search-message { color: var(--accent); padding: 1rem; }
+@media (max-width: 850px) { .profile-review-list { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
     .player-search-grid { grid-template-columns: 1fr; }
     .player-search > div { flex-direction: column; }
