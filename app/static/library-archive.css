@@ -77,7 +77,7 @@ html:has(body.library-archive)::view-transition-new(root) { animation: archive-t
 .library-archive .site-footer { background: var(--archive-panel); }
 .library-archive main.library-layout { max-width: 1120px; }
 .library-archive .library-layout .library-hero {
-    display: block; min-height: 100px; padding: 1.4rem 0; border: 0;
+    display: block; min-height: 0; padding: .75rem 0 0; border: 0;
     border-radius: 0; background: none; overflow: visible; isolation: isolate;
     box-shadow: none;
 }
@@ -118,7 +118,7 @@ html[data-theme="light"] .library-archive .library-wordmark { color: #8c5c0b; }
     .library-archive .library-layout .hero-actions a, .library-archive .archive-action-arrow { transition: none; }
     .library-archive .library-layout .hero-actions a:is(:hover, :focus-visible), .library-archive .hero-add-game:is(:hover, :focus-visible) .archive-action-arrow { transform: none; }
 }
-.library-archive .library-layout #collection-filters { margin-top: 1.2rem; padding: 1.2rem 1.4rem; background: var(--archive-panel); border-color: var(--border); box-shadow: 0 8px 26px #0002; }
+.library-archive .library-layout #collection-filters { margin-top: 20px; padding: 1.2rem 1.4rem; background: var(--archive-panel); border-color: var(--border); box-shadow: 0 8px 26px #0002; }
 .library-archive #collection-filters :is(input, select) { background-color: var(--color-field); color: var(--text); }
 .library-archive :is(.secondary-action, .backup-actions a, .collection-view-switch, .game-actions a) { background: var(--archive-panel); color: var(--accent); border-color: var(--border); }
 .library-archive #apply-filters { background: linear-gradient(135deg, #ffd877, var(--color-action)); color: var(--color-on-action); border-color: #cf982d; box-shadow: 0 4px 16px #8c591a22; }
@@ -175,7 +175,7 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive #game-collection[data-view="shelf"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 540px) {
-    .library-archive .library-layout .library-hero { padding: 1rem 0; min-height: 0; }
+    .library-archive .library-layout .library-hero { padding: .75rem 0 0; }
     .library-archive .library-layout .hero-actions { gap: .6rem; }
     .library-archive .library-layout #collection-filters { padding: 1rem; }
     .library-archive #game-collection { grid-template-columns: minmax(0, 1fr); }
