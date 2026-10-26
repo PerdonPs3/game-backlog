@@ -25,13 +25,13 @@
 .entry-progress { border-top: 2px solid color-mix(in srgb, var(--accent) 65%, var(--border)); background: linear-gradient(180deg, color-mix(in srgb, var(--color-action) 4%, var(--color-panel)), var(--color-panel)); }
 .entry-core-fields { display: grid; grid-template-columns: 1fr 1fr 1.1fr; align-items: start; gap: 1.5rem; }
 .entry-core-fields > div > label { display: block; margin-bottom: .6rem; }
-.entry-core-fields .rating-stars { width: 100%; height: 48px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border)); border-radius: 9px; background: linear-gradient(135deg, color-mix(in srgb, var(--color-action) 9%, var(--color-field)), var(--color-field)); }
+.entry-core-fields .rating-stars { width: min(100%, 200px); height: 48px; }
 .entry-core-fields .rating-artwork > span, .entry-core-fields .rating-choice { height: 46px; }
-.entry-core-fields .rating-artwork svg { top: 7px; }
+.entry-core-fields .rating-artwork svg { width: 28px; height: 28px; top: 9px; }
 .entry-core-fields .rating-outline { stroke: var(--accent); opacity: .7; }
 .entry-core-fields .rating-picker legend { font-size: .85rem; margin-bottom: .6rem; }
 .entry-core-fields .rating-optional { float: none; margin-left: .6rem; font-size: .6rem; }
-.entry-core-fields .rating-caption { justify-content: space-between; min-height: 24px; margin-top: .25rem; font-size: .7rem; }
+.entry-core-fields .rating-caption { justify-content: flex-start; gap: 1rem; min-height: 24px; margin-top: 0; font-size: .7rem; }
 .entry-core-fields .rating-clear { min-height: 24px; font-size: .65rem; }
 .entry-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .entry-section-heading h2 { margin: 0; }
