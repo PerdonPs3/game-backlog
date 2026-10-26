@@ -106,8 +106,8 @@ test("light theme readable foregrounds contrast with their intended surfaces", (
             .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
         return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
     };
-    for (const [foreground, background] of [["29213d", "ffffff"], ["665d75", "faf8f5"],
-        ["7042b7", "ffffff"], ["ffffff", "8250bf"], ["613297", "f2ecfa"]]) {
+    for (const [foreground, background] of [["30271f", "fffdf7"], ["6d5845", "f5f0e6"],
+        ["80541f", "fffdf7"], ["30200d", "edb646"], ["73501d", "f3e7d0"]]) {
         const levels = [luminance(foreground), luminance(background)].sort((a, b) => a - b);
         assert.ok((levels[1] + 0.05) / (levels[0] + 0.05) >= 4.5, `${foreground}/${background}`);
     }

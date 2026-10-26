@@ -1,45 +1,45 @@
-/* White and purple counterparts to the shared Obsidian color roles. */
+/* Ivory, espresso, and bronze counterparts to the shared Obsidian color roles. */
 html[data-theme="light"] {
     color-scheme: light;
-    --color-canvas: #faf8f5;
-    --color-panel: #ffffff;
-    --color-surface: #ffffff;
-    --color-raised: #f2ecfa;
-    --color-field: #fcfaff;
-    --color-border: #ddd4e9;
-    --color-text: #29213d;
-    --color-muted: #665d75;
-    --color-outline: #74677e;
-    --color-accent: #7042b7;
-    --color-accent-soft: #8250bf;
-    --color-action: #7042b7;
-    --color-on-action: #ffffff;
-    --background: #faf8f5;
-    --surface: #ffffff;
-    --text: #29213d;
-    --text-muted: #665d75;
-    --accent: #7042b7;
-    --border: #ddd4e9;
-    --light-tint: #f2ecfa;
-    --light-accent-border: #c7b2e2;
-    --light-shadow: 0 10px 30px #4323660a;
+    --color-canvas: #f5f0e6;
+    --color-panel: #fffdf7;
+    --color-surface: #f9f3e8;
+    --color-raised: #eee1cb;
+    --color-field: #fffdf8;
+    --color-border: #bda17b;
+    --color-text: #30271f;
+    --color-muted: #6d5845;
+    --color-outline: #80613d;
+    --color-accent: #80541f;
+    --color-accent-soft: #976527;
+    --color-action: #edb646;
+    --color-on-action: #30200d;
+    --background: #f5f0e6;
+    --surface: #fffdf7;
+    --text: #30271f;
+    --text-muted: #6d5845;
+    --accent: #80541f;
+    --border: #bda17b;
+    --light-tint: #f3e7d0;
+    --light-accent-border: #bda17b;
+    --light-shadow: 0 10px 30px #4930130a;
 }
 html[data-theme="light"] body.library-page {
-    --background: #faf8f5;
-    --surface: #ffffff;
-    --text-muted: #665d75;
-    --border: #ddd4e9;
-    background: radial-gradient(ellipse at 8% 0%, #e8dcf666, transparent 42%), radial-gradient(ellipse at 100% 30%, #f2e6d966, transparent 45%), var(--background);
+    --background: #f5f0e6;
+    --surface: #fffdf7;
+    --text-muted: #6d5845;
+    --border: #bda17b;
+    background: radial-gradient(ellipse at 8% 0%, #e9d8b966, transparent 42%), radial-gradient(ellipse at 100% 30%, #f1dfbf66, transparent 45%), var(--background);
     background-attachment: fixed;
 }
 html[data-theme="light"] :is(.library-hero, .workspace-hero) {
-    background: radial-gradient(ellipse at 95% 35%, #dac7ef55, transparent 60%), linear-gradient(120deg, #fff, #f5f0fa);
+    background: radial-gradient(ellipse at 95% 35%, #e5cda455, transparent 60%), linear-gradient(120deg, #fffdf7, #faf3e6);
     border-color: var(--light-accent-border);
     box-shadow: var(--light-shadow);
 }
 html[data-theme="light"] :is(.library-wordmark, .workspace-hero h1, .workspace-nav .workspace-brand) { color: var(--text); }
 html[data-theme="light"] :is(.library-wordmark span, .workspace-hero h1 span) {
-    background-image: linear-gradient(125deg, #9461cc, #7042b7 65%, #4d277f);
+    background-image: linear-gradient(125deg, #b17d32, #80541f 65%, #624014);
 }
 html[data-theme="light"] :is(.hero-kicker, .aside-kicker, .workspace-brand span, .summary-icon, .sticker-option strong, .details-toolbar h2, .adventure-match-count, .list-art-caption, .list-card-icon) { color: var(--accent); }
 html[data-theme="light"] #collection-filters label,
@@ -48,66 +48,67 @@ html[data-theme="light"] .workspace-nav a.workspace-brand { color: var(--text); 
 html[data-theme="light"] #collection-filters,
 html[data-theme="light"] #game-collection[data-view="shelf"] .game-card,
 html[data-theme="light"] :is(:is(.library-layout, .profile-banner) .summary-stat, .summary-footer, .library-layout .game-card, .workspace-panel, .workspace-aside, .personal-list-card, .delete-dialog, .game-details-dialog) {
-    background: linear-gradient(145deg, #fff, #fcfaff);
+    background: linear-gradient(145deg, #fffdf7, #fffdf8);
     border-color: var(--border);
     box-shadow: var(--light-shadow);
 }
-html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat:first-child { background: linear-gradient(135deg, #eee3fa, #faf7ff); border-color: var(--light-accent-border); }
+html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat:first-child { background: linear-gradient(135deg, #f1e3c9, #fff8e9); border-color: var(--light-accent-border); }
 html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat dd { color: var(--text); }
 html[data-theme="light"] :is(.library-layout, .profile-banner) .summary-stat:first-child dd { color: var(--accent); }
 html[data-theme="light"] :is(.summary-average, .game-actions, .form-actions, .personal-footer, .details-toolbar, .personal-score) { border-color: var(--border); }
 html[data-theme="light"] #collection-filters input,
 html[data-theme="light"] #collection-filters select,
 html[data-theme="light"] :is(input, select, textarea, .workspace-form input:not([type="checkbox"]), .workspace-form select, .workspace-form textarea) {
-    background-color: #fff;
+    background-color: #fffdf7;
     border-color: var(--border);
     color: var(--text);
 }
-html[data-theme="light"] input::placeholder, html[data-theme="light"] textarea::placeholder { color: #776d88; opacity: 1; }
-html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background-color: #f4f0f8; color: var(--text-muted); }
-html[data-theme="light"] :is(.workspace-form .play-dates, .sticker-picker, .file-upload-panel, .adventure-preferences, .list-game-picker, .profile-personal) { background: linear-gradient(140deg, #f8f3ff, #fff); border-color: var(--border); }
-html[data-theme="light"] :is(.workspace-form .sticker-option, .workspace-form .list-game-choice, .collection-view-switch, .list-editor-switch) { background: #fff; border-color: var(--border); }
+html[data-theme="light"] input::placeholder, html[data-theme="light"] textarea::placeholder { color: #79634b; opacity: 1; }
+html[data-theme="light"] input:autofill { -webkit-text-fill-color: var(--text); caret-color: var(--text); box-shadow: inset 0 0 0 1000px var(--color-field); }
+html[data-theme="light"] :is(.workspace-form input[readonly], select:disabled) { background-color: #f0e8db; color: var(--text-muted); }
+html[data-theme="light"] :is(.workspace-form .play-dates, .sticker-picker, .file-upload-panel, .adventure-preferences, .list-game-picker, .profile-personal) { background: linear-gradient(140deg, #faf4e9, #fffdf7); border-color: var(--border); }
+html[data-theme="light"] :is(.workspace-form .sticker-option, .workspace-form .list-game-choice, .collection-view-switch, .list-editor-switch) { background: #fffdf7; border-color: var(--border); }
 html[data-theme="light"] :is(.workspace-form .sticker-option:has(input:checked), .workspace-form .list-game-choice:has(input:checked)) { background: var(--light-tint); border-color: var(--light-accent-border); }
 html[data-theme="light"] .workspace-form .list-game-choice input { accent-color: var(--accent); }
-html[data-theme="light"] :is(.game-card .game-status, .game-card .game-rating, .game-sticker, .personal-status, .aside-status, .list-entry-count) { background: var(--light-tint); border-color: var(--light-accent-border); color: #613297; }
+html[data-theme="light"] :is(.game-card .game-status, .game-card .game-rating, .game-sticker, .personal-status, .aside-status, .list-entry-count) { background: var(--light-tint); border-color: var(--light-accent-border); color: #73501d; }
 html[data-theme="light"] .game-sticker.sticker-goty {
-    background: linear-gradient(135deg, #8250bf, #613297);
-    color: #fff;
-    border-color: #7042b7;
-    box-shadow: 0 3px 10px #7042b730, inset 0 1px 0 #ffffff30;
+    background: linear-gradient(135deg, #976527, #73501d);
+    color: #fffdf7;
+    border-color: #80541f;
+    box-shadow: 0 3px 10px #80541f30, inset 0 1px 0 #fffdf730;
 }
 html[data-theme="light"] .game-sticker.sticker-favorite {
-    color: #613297;
-    background: linear-gradient(135deg, #f3e8ff, #fff);
-    border-color: #ad87d2;
+    color: #73501d;
+    background: linear-gradient(135deg, #f7ebd4, #fffdf7);
+    border-color: #bb945a;
 }
 html[data-theme="light"] .game-card .game-rating {
-    color: #552887;
-    background: linear-gradient(135deg, #e6d4fa, #f4eafd);
-    border-color: #af86d6;
+    color: #6b461b;
+    background: linear-gradient(135deg, #efdfbd, #faf0dd);
+    border-color: #bd995e;
     box-shadow: inset 0 1px 0 #fff9;
 }
 html[data-theme="light"] :is(.game-card .game-review, .game-card-cover, .library-layout .game-card-cover, .profile-cover) { border-color: var(--light-accent-border); }
 html[data-theme="light"] :is(.game-card-cover, #game-collection[data-view="shelf"] .game-card-cover, .profile-cover, .roulette-cover, .catalog-cover) { background: var(--light-tint); box-shadow: none; }
 html[data-theme="light"] #confirm-delete,
 html[data-theme="light"] #apply-filters,
-html[data-theme="light"] :is(.hero-add-game, .hero-add-game:hover, .workspace-form .form-actions > button, .workspace-panel .button-link) { background: linear-gradient(135deg, #8250bf, #613297); color: #fff; border-color: #7042b7; box-shadow: 0 4px 14px #7042b715; }
-html[data-theme="light"] .button-link { color: #fff; }
-html[data-theme="light"] :is(.secondary-action, .secondary-button, .game-actions a, .verdict-edit, .theme-toggle, .backup-actions a) { background: #fff; color: var(--accent); border-color: var(--light-accent-border); box-shadow: none; }
+html[data-theme="light"] :is(.hero-add-game, .hero-add-game:hover, .workspace-form .form-actions > button, .workspace-panel .button-link) { background: linear-gradient(135deg, #f6ce77, #edb646); color: var(--color-on-action); border-color: #b98a35; box-shadow: 0 4px 14px #80541f15; }
+html[data-theme="light"] .button-link { color: var(--color-on-action); }
+html[data-theme="light"] :is(.secondary-action, .secondary-button, .game-actions a, .verdict-edit, .theme-toggle, .backup-actions a) { background: #fffdf7; color: var(--accent); border-color: var(--light-accent-border); box-shadow: none; }
 html[data-theme="light"] :is(.secondary-action:hover, .secondary-button:hover, .game-actions a:hover, .verdict-edit:hover, .theme-toggle:hover, .backup-actions a:hover) { background: var(--light-tint); border-color: var(--accent); }
 html[data-theme="light"] :is(.backup-actions .library-tool-featured, .collection-view-switch > button[aria-pressed="true"], .list-editor-switch > button[aria-pressed="true"], .roulette-controls button[aria-pressed="true"]) { background: var(--light-tint); color: var(--accent); border-color: var(--light-accent-border); }
 html[data-theme="light"] :is(.backup-actions a svg, .collection-view-switch > button:hover) { color: var(--accent); }
 html[data-theme="light"] :is(.form-actions > a:not(.button-link), .workspace-panel .page-actions > a:not(.button-link)) { color: var(--accent); }
-html[data-theme="light"] :is(.workspace-panel [role="alert"], .workspace-success) { background: var(--light-tint); border-color: var(--light-accent-border); color: #613297; }
+html[data-theme="light"] :is(.workspace-panel [role="alert"], .workspace-success) { background: var(--light-tint); border-color: var(--light-accent-border); color: #73501d; }
 html[data-theme="light"] .workspace-form input[type="file"]::file-selector-button { background: var(--light-tint); border-color: var(--light-accent-border); color: var(--accent); }
 html[data-theme="light"] .catalog-results { box-shadow: var(--light-shadow); }
 html[data-theme="light"] :is(.catalog-option:hover, .catalog-option[aria-selected="true"]) { background: var(--light-tint); }
-/* Lift the covers off the warm background with lavender depth, not glare. */
+/* Lift the covers off the warm background with warm ivory depth. */
 html[data-theme="light"] .library-layout .game-card,
 html[data-theme="light"] #game-collection[data-view="shelf"] .game-card {
-    background: linear-gradient(155deg, #fff 55%, #f7f2fc);
-    border-color: #ded4e9;
-    box-shadow: 0 5px 16px #62328a0e;
+    background: linear-gradient(155deg, #fffdf7 55%, #faf2e4);
+    border-color: #c9b391;
+    box-shadow: 0 5px 16px #7652270e;
 }
 html[data-theme="light"] .game-card:hover,
 html[data-theme="light"] .game-card:focus-within,
@@ -116,59 +117,59 @@ html[data-theme="light"] .library-layout .game-card:focus-within,
 html[data-theme="light"] #game-collection[data-view="shelf"] .game-card:hover,
 html[data-theme="light"] #game-collection[data-view="shelf"] .game-card:focus-within,
 html[data-theme="light"] .personal-list-card:hover {
-    border-color: #b59acc;
-    box-shadow: 0 9px 22px #7042b71a;
+    border-color: #ac854e;
+    box-shadow: 0 9px 22px #80541f1a;
 }
 html[data-theme="light"] .game-actions a {
-    color: #613297;
-    border-color: #ad87d2;
-    background: #fff;
+    color: #73501d;
+    border-color: #bb945a;
+    background: #fffdf7;
     box-shadow: none;
 }
 html[data-theme="light"] .game-actions a:hover,
 html[data-theme="light"] .game-actions a:focus-visible {
-    color: #613297;
-    border-color: #7042b7;
-    background: #fff;
+    color: #73501d;
+    border-color: #80541f;
+    background: #fffdf7;
     box-shadow: none;
 }
-html[data-theme="light"] :is(.game-details-dialog, .delete-dialog)::backdrop { background: #33234466; }
-html[data-theme="light"] .list-card-art { background: radial-gradient(ellipse at 50% 100%, #d4b9ed55, transparent 75%), linear-gradient(135deg, #f5effc, #fff); border-color: var(--border); }
-html[data-theme="light"] .list-preview-cover { background: linear-gradient(135deg, #e4d6f3, #faf6ff); border-color: var(--light-accent-border); box-shadow: -5px 5px 14px #43236620; }
+html[data-theme="light"] :is(.game-details-dialog, .delete-dialog)::backdrop { background: #45301c66; }
+html[data-theme="light"] .list-card-art { background: radial-gradient(ellipse at 50% 100%, #d6b77f55, transparent 75%), linear-gradient(135deg, #faf1df, #fffdf7); border-color: var(--border); }
+html[data-theme="light"] .list-preview-cover { background: linear-gradient(135deg, #ebdcc1, #fff8eb); border-color: var(--light-accent-border); box-shadow: -5px 5px 14px #49301320; }
 html[data-theme="light"] .list-preview-cover span { color: var(--accent); }
 html[data-theme="light"] :is(.score-value strong, .quote-mark) { color: var(--accent); text-shadow: none; }
 html[data-theme="light"] :is(.verdict-quote .profile-text, .personal-history time) { color: var(--text); }
 html[data-theme="light"] .profile-personal::before { background: linear-gradient(90deg, var(--accent), transparent); }
-html[data-theme="light"] .score-segments span { background: #e6ddef; }
+html[data-theme="light"] .score-segments span { background: #e8dbc6; }
 html[data-theme="light"] .score-segments .is-filled { background: var(--accent); box-shadow: none; }
-html[data-theme="light"] .summary-progress progress { background: #e6ddef; }
-html[data-theme="light"] .summary-progress progress::-webkit-progress-bar { background: #e6ddef; }
-html[data-theme="light"] .summary-progress progress::-webkit-progress-value { background: linear-gradient(90deg, #7042b7, #ad7bd9); }
-html[data-theme="light"] .summary-progress progress::-moz-progress-bar { background: linear-gradient(90deg, #7042b7, #ad7bd9); }
-html[data-theme="light"] .adventure-roulette { background: radial-gradient(ellipse at center, #e6d5f733, transparent), #fcfaff; border-color: var(--light-accent-border); }
-html[data-theme="light"] .roulette-viewport::after { background: linear-gradient(90deg, #fcfaffe6, transparent 18%, transparent 82%, #fcfaffe6); }
-html[data-theme="light"] .roulette-marker { background: linear-gradient(#7042b7, #7042b744 20%, #7042b744 80%, #7042b7); box-shadow: 0 0 14px #7042b722; }
+html[data-theme="light"] .summary-progress progress { background: #e8dbc6; }
+html[data-theme="light"] .summary-progress progress::-webkit-progress-bar { background: #e8dbc6; }
+html[data-theme="light"] .summary-progress progress::-webkit-progress-value { background: linear-gradient(90deg, #80541f, #c99543); }
+html[data-theme="light"] .summary-progress progress::-moz-progress-bar { background: linear-gradient(90deg, #80541f, #c99543); }
+html[data-theme="light"] .adventure-roulette { background: radial-gradient(ellipse at center, #efdfbf33, transparent), #fffdf8; border-color: var(--light-accent-border); }
+html[data-theme="light"] .roulette-viewport::after { background: linear-gradient(90deg, #fffdf8e6, transparent 18%, transparent 82%, #fffdf8e6); }
+html[data-theme="light"] .roulette-marker { background: linear-gradient(#80541f, #80541f44 20%, #80541f44 80%, #80541f); box-shadow: 0 0 14px #80541f22; }
 html[data-theme="light"] .roulette-marker::before { border-top-color: var(--accent); }
-html[data-theme="light"] .roulette-tile { background: #fff; border-color: var(--border); }
-html[data-theme="light"] .roulette-tile.is-winner { border-color: var(--accent); box-shadow: 0 0 18px #7042b733; }
+html[data-theme="light"] .roulette-tile { background: #fffdf7; border-color: var(--border); }
+html[data-theme="light"] .roulette-tile.is-winner { border-color: var(--accent); box-shadow: 0 0 18px #80541f33; }
 html[data-theme="light"] :is(.game-title-link:focus-visible, a.game-card-cover:focus-visible, .backup-actions a:focus-visible, .collection-view-switch > button:focus-visible, .list-editor-switch > button:focus-visible, .verdict-edit:focus-visible, .sound-icon-button:focus-visible) { outline-color: var(--accent); }
-html[data-theme="light"] .cursor-glow { background: radial-gradient(ellipse at center, #7042b70a, transparent 65%); mix-blend-mode: multiply; }
+html[data-theme="light"] .cursor-glow { background: radial-gradient(ellipse at center, #80541f0a, transparent 65%); mix-blend-mode: multiply; }
 /* Both logos share these gradient stops; dark mode keeps the original gold. */
-html[data-theme="light"] #brand-gold stop:nth-child(1) { stop-color: #c49ae9; }
-html[data-theme="light"] #brand-gold stop:nth-child(2) { stop-color: #9461cc; }
-html[data-theme="light"] #brand-gold stop:nth-child(3) { stop-color: #6938a2; }
-html[data-theme="light"] #brand-symbol { stroke: #7042b7; }
+html[data-theme="light"] #brand-gold stop:nth-child(1) { stop-color: #e8c584; }
+html[data-theme="light"] #brand-gold stop:nth-child(2) { stop-color: #b17d32; }
+html[data-theme="light"] #brand-gold stop:nth-child(3) { stop-color: #80541f; }
+html[data-theme="light"] #brand-symbol { stroke: #80541f; }
 html[data-theme="light"] .brand-easter-egg {
-    filter: drop-shadow(0 0 5px rgb(148 97 204 / var(--logo-light)))
-            drop-shadow(0 0 14px rgb(112 66 183 / calc(var(--logo-light) * 0.6)));
+    filter: drop-shadow(0 0 5px rgb(177 125 50 / var(--logo-light)))
+            drop-shadow(0 0 14px rgb(128 84 31 / calc(var(--logo-light) * 0.6)));
 }
 html[data-theme="light"] .hero-emblem {
-    filter: drop-shadow(0 0 18px rgb(112 66 183 / calc(0.12 + var(--logo-light) * 0.45)));
+    filter: drop-shadow(0 0 18px rgb(128 84 31 / calc(0.12 + var(--logo-light) * 0.45)));
 }
-html[data-theme="light"] .hero-emblem svg { animation-name: emblem-breathe-violet; }
-@keyframes emblem-breathe-violet {
-    0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 4px #7042b718); }
-    50% { opacity: 1; filter: drop-shadow(0 0 16px #9461cc55); }
+html[data-theme="light"] .hero-emblem svg { animation-name: emblem-breathe-gold; }
+@keyframes emblem-breathe-gold {
+    0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 4px #80541f18); }
+    50% { opacity: 1; filter: drop-shadow(0 0 16px #b17d3255); }
 }
 @media (prefers-reduced-motion: reduce) {
     html[data-theme="light"] .hero-emblem svg { animation: none; opacity: 1; filter: none; }

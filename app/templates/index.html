@@ -31,6 +31,9 @@
 
             </div>
         </header>
+        {% for message in get_flashed_messages(category_filter=['catalog_saved']) %}
+        <p class="workspace-success library-save-feedback" role="status"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>{{ message }}</p>
+        {% endfor %}
         <form id="collection-filters" method="get" action="{{ url_for('main.index') }}">
             <div class="filter-search">
                 <label for="title-search">Search your collection</label>

@@ -98,7 +98,7 @@ class IGDBClient:
         self._expires_at = monotonic() + max(0, lifetime - 30)
         return token
 
-    def search_games(self, term, *, include_community=False):
+    def search_games(self, term, *, include_community=False, suggestions=False):
         """Cache short-lived results and serialize this process's API requests."""
         term = term.strip()
         if len(term) > 200:
@@ -106,17 +106,17 @@ class IGDBClient:
         if len(term) < 2:
             return []
         with self._lock:
-            cache_key = (term.casefold(), include_community)
+            cache_key = (term.casefold(), include_community, suggestions)
             cached = self._search_cache.get(cache_key)
             if cached and monotonic() < cached[0]:
                 return cached[1]
-            games = self._search_games(term, include_community=include_community)
+            games = self._search_games(term, include_community=include_community, suggestions=suggestions)
             if len(self._search_cache) >= 64:
                 self._search_cache.clear()
-            self._search_cache[cache_key] = (monotonic() + 30, games)
+            self._search_cache[cache_key] = (monotonic() + (300 if suggestions else 30), games)
             return games
 
-    def _search_games(self, term, *, include_community=False):
+    def _search_games(self, term, *, include_community=False, suggestions=False):
         term = term.strip()
         if len(term) > 200:
             raise CatalogError("Search must contain no more than 200 characters.")
@@ -140,7 +140,25 @@ class IGDBClient:
             f"({','.join(json.dumps(value) for value in excluded)}); "
             "sort total_rating_count desc; limit 500;"
         )
-        games = self._query_games(query)
+        if suggestions:
+            # Autocomplete needs titles and covers, not hundreds of platform records.
+            games = self._query_games(
+                'fields id,name,alternative_names.name,first_release_date,cover.image_id,'
+                'game_type.type,version_parent,total_rating_count,keywords.name; '
+                f'search {json.dumps(term)}; where version_parent = null & game_type.type != '
+                f'({",".join(json.dumps(value) for value in excluded)}); limit 40;'
+            )
+            games = [game for game in games if all(
+                any(word.casefold() in name.casefold() for name in [
+                    game['name'], *[alias.get('name', '') for alias in game.get('alternative_names', [])]
+                ]) for word in words
+            ) and not is_game_pack(game) and not is_game_variant(game)
+                and (include_community or not is_community_game(game))]
+            if not games:
+                # Preserve uncommon aliases that the indexed search does not return.
+                games = self._query_games(query)
+        else:
+            games = self._query_games(query)
         # Keep distinct remakes/remasters, but never repeat the same catalog ID.
         unique = {}
         for game in games:

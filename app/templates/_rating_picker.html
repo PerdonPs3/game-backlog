@@ -1,4 +1,4 @@
-{% macro rating_picker(value='', optional=true) %}
+{% macro rating_picker(value='', optional=true, compact=false) %}
 {% set score = value|int if value else 0 %}
 <fieldset class="rating-picker" data-rating-picker>
     <legend>Your rating <span class="rating-optional">{{ 'Optional' if optional else 'Required' }}</span></legend>
@@ -17,6 +17,6 @@
         </label>
     {% endfor %}
     </div>
-    <div class="rating-caption"><output data-rating-score>{{ (score|star_rating ~ '/5') if score else 'Not rated' }}</output><label class="rating-clear"><input type="radio" name="rating" value="" aria-label="Clear rating"{% if not score %} checked{% endif %}><span>Clear</span></label></div>
+    <div class="rating-caption"><output data-rating-score>{{ (score|star_rating ~ '/5') if score else 'Not rated' }}</output><label class="rating-clear"{% if compact %} title="Clear rating"{% endif %}><input type="radio" name="rating" value="" aria-label="Clear rating"{% if not score %} checked{% endif %}><span{% if compact %} aria-hidden="true"{% endif %}>{% if compact %}&times;{% else %}Clear{% endif %}</span></label></div>
 </fieldset>
 {% endmacro %}

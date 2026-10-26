@@ -13,14 +13,84 @@
     const gameId = document.querySelector("#igdb-id");
     const submit = document.querySelector("#add-game-button");
     const platformMessage = document.querySelector("#platform-message");
+    const preview = document.querySelector("[data-entry-preview]");
+    const selectionPanel = document.querySelector("[data-entry-catalog]");
+    const changeGame = document.querySelector("[data-entry-change]");
     let timer;
     let controller;
+    let activeSearch;
+    let suggestionsOpen = false;
     let revision = 0;
     let matches = [];
     let active = -1;
     let loadingDetails = false;
+    const recentSearches = new Map();
+
+    function searchKey() {
+        return `${content?.value || "official"}:${input.value.trim().toLowerCase()}`;
+    }
+
+    function cachedResults(key) {
+        const cached = recentSearches.get(key);
+        if (!cached) return null;
+        if (Date.now() - cached.savedAt >= 120000) {
+            recentSearches.delete(key);
+            return null;
+        }
+        return cached.games;
+    }
+
+    function showRecentMatches() {
+        if (!suggestionsOpen) return false;
+        const scope = `${content?.value || "official"}:`;
+        const words = input.value.trim().toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
+        if (!words.length || input.value.trim().length < 2) return false;
+        const found = new Map();
+        for (const key of [...recentSearches.keys()].reverse()) {
+            if (!key.startsWith(scope)) continue;
+            for (const game of cachedResults(key) || []) {
+                if (words.every(word => game.name.toLowerCase().includes(word))) found.set(game.id, game);
+            }
+        }
+        if (!found.size) return false;
+        showResults([...found.values()].slice(0, 10));
+        message.textContent = "Updating matches...";
+        return true;
+    }
+
+    function showSelection(selected) {
+        if (!preview) return;
+        preview.hidden = !selected;
+        if (!selected) return;
+        preview.querySelector("[data-entry-title]").textContent = selected.name;
+        preview.querySelector("[data-entry-year]").textContent = selected.year || "";
+        const cover = preview.querySelector("[data-entry-cover]");
+        const placeholder = document.createElement("span");
+        placeholder.textContent = "No cover";
+        cover.replaceChildren(placeholder);
+        if (selected.cover_url) {
+            const image = document.createElement("img");
+            image.src = selected.cover_url.replace("/t_cover_small/", "/t_cover_big/");
+            image.alt = "";
+            image.referrerPolicy = "no-referrer";
+            image.addEventListener("error", () => image.remove());
+            cover.append(image);
+        }
+        if (selectionPanel) {
+            selectionPanel.hidden = true;
+            changeGame?.setAttribute("aria-expanded", "false");
+            platform.focus();
+        }
+    }
+
+    changeGame?.addEventListener("click", () => {
+        selectionPanel.hidden = false;
+        changeGame.setAttribute("aria-expanded", "true");
+        input.focus();
+    });
 
     function resetSelection(label = "Choose a game first") {
+        showSelection(null);
         gameId.value = "";
         platform.replaceChildren(new Option(label, ""));
         platform.disabled = true;
@@ -45,6 +115,7 @@
     }
 
     async function selectGame(game) {
+        suggestionsOpen = false;
         if (browsing) {
             clearTimeout(timer);
             controller?.abort();
@@ -87,6 +158,7 @@
             platform.disabled = false;
             message.textContent = `Selected: ${selected.name}${selected.year ? ` (${selected.year})` : ""}.`;
             platformMessage.textContent = "";
+            showSelection(selected);
         } catch (error) {
             if (currentRevision !== revision || error.name === "AbortError") return;
             resetSelection();
@@ -146,45 +218,86 @@
         message.textContent = `${games.length} matches.`;
     }
 
-    function search() {
+    function search({ immediate = false, reset = true } = {}) {
         clearTimeout(timer);
-        controller?.abort();
+        if (loadingDetails) controller?.abort();
         const currentRevision = ++revision;
+        suggestionsOpen = true;
         loadingDetails = false;
-        if (!browsing) resetSelection();
+        if (!browsing && reset) resetSelection();
         closeResults();
         const term = input.value.trim();
         if (term.length < 2) {
             message.textContent = "";
             return;
         }
-        message.textContent = "Searching the catalog...";
-        timer = setTimeout(async () => {
-            controller = new AbortController();
-            try {
-                const url = new URL(picker.dataset.catalogUrl, window.location.origin);
-                url.searchParams.set("q", term);
-                if (content) url.searchParams.set("content", content.value);
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    headers: { Accept: "application/json" },
-                });
-                const data = await response.json();
+        const key = searchKey();
+        const scope = content?.value;
+        const cached = cachedResults(key);
+        if (cached) {
+            showResults(cached);
+            return;
+        }
+        if (!showRecentMatches()) message.textContent = "Searching the catalog...";
+        const load = async () => {
+            // Aborting fetch does not stop the server's upstream request. Coalesce
+            // typing into the latest query instead of queuing obsolete searches.
+            if (activeSearch) {
+                await activeSearch;
                 if (currentRevision !== revision) return;
-                if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
-                showResults(data.games);
-            } catch (error) {
-                if (error.name === "AbortError" || currentRevision !== revision) return;
-                closeResults();
-                message.textContent = "Could not load suggestions. Please try again shortly.";
+                return load();
             }
-        }, 450);
+            if (currentRevision !== revision) return;
+            const run = async () => {
+                controller = new AbortController();
+                try {
+                    const url = new URL(picker.dataset.catalogUrl, window.location.origin);
+                    url.searchParams.set("q", term);
+                    if (content) url.searchParams.set("content", scope);
+                    const response = await fetch(url, {
+                        signal: controller.signal,
+                        headers: { Accept: "application/json" },
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
+                    if (recentSearches.size >= 20) recentSearches.delete(recentSearches.keys().next().value);
+                    recentSearches.set(key, { games: data.games, savedAt: Date.now() });
+                    if (currentRevision !== revision) {
+                        showRecentMatches();
+                        return;
+                    }
+                    showResults(data.games);
+                } catch (error) {
+                    if (error.name === "AbortError" || currentRevision !== revision) return;
+                    closeResults();
+                    message.textContent = "Could not load suggestions. Please try again shortly.";
+                }
+            };
+            const pending = run();
+            activeSearch = pending;
+            try {
+                await pending;
+            } finally {
+                if (activeSearch === pending) activeSearch = null;
+            }
+        };
+        if (immediate) return load();
+        timer = setTimeout(load, 100);
     }
     input.addEventListener("input", search);
     content?.addEventListener("change", search);
+    input.addEventListener("focus", () => {
+        if (!loadingDetails) return search({ immediate: true, reset: false });
+    });
+    input.addEventListener("click", () => {
+        if (!results.hidden || loadingDetails) return;
+        const cached = cachedResults(searchKey());
+        if (cached) showResults(cached);
+    });
 
     input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
+            suggestionsOpen = false;
             clearTimeout(timer);
             controller?.abort();
             revision += 1;
@@ -214,7 +327,8 @@
     });
 
     document.addEventListener("click", (event) => {
-        if (!picker.contains(event.target)) {
+        if (!picker.contains(event.target) && !changeGame?.contains(event.target)) {
+            suggestionsOpen = false;
             clearTimeout(timer);
             if (!loadingDetails) {
                 controller?.abort();
@@ -224,6 +338,7 @@
         }
     });
     input.addEventListener("blur", () => {
+        suggestionsOpen = false;
         clearTimeout(timer);
         if (!loadingDetails) {
             controller?.abort();

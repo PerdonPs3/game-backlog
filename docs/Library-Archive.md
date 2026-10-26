@@ -1,9 +1,9 @@
 # Illustrated library preview
 
 The collection screen uses an illustrated archive interior with separate night
-and daylight artwork. Its palette is scoped to `body.library-archive` in
-`app/static/library-archive.css`; profile, catalog, account, and landing pages
-keep their existing themes. The normal theme switch selects the matching
+and daylight artwork. Its room and dark palette are scoped to `body.library-archive`
+in `app/static/library-archive.css`. The ivory light palette is shared with the
+other screens as described in [Light theme](Light-Theme.md). The normal theme switch selects the matching
 background without introducing a separate preference.
 
 The night illustration is a lighting edit of the daylight room: the left window

@@ -62,7 +62,7 @@
 .github-profile:is(:hover, :focus-visible) .github-profile-name { grid-template-columns: 1fr; opacity: 1; }
 .appearance-bar .github-profile:hover { color: var(--accent); border-color: var(--accent); }
 .github-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-html[data-theme="light"] .appearance-bar .github-profile { background: #fff; border-color: var(--light-accent-border); }
+html[data-theme="light"] .appearance-bar .github-profile { background: #fffdf7; border-color: var(--light-accent-border); }
 @media (prefers-reduced-motion: reduce) {
     .github-profile-name { transition: none; }
 }
@@ -101,7 +101,7 @@ html[data-theme="light"] .appearance-bar .github-profile { background: #fff; bor
     border-color: var(--accent);
 }
 html[data-theme="light"] .appearance-bar :is(.theme-toggle, .github-profile) {
-    background: #fff;
+    background: #fffdf7;
     border-color: var(--light-accent-border);
 }
 html[data-theme="light"] .appearance-bar :is(.theme-toggle, .github-profile):hover {

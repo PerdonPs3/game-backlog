@@ -78,7 +78,7 @@
 .showcase-order-actions button:hover:enabled { border-color: var(--accent); color: var(--accent); }
 .showcase-order-actions button:disabled { opacity: .3; cursor: default; }
 .profile-showcase-actions { display: flex; align-items: center; gap: 1.25rem; margin-top: 1.5rem; }
-html[data-theme="light"] .profile-action-primary { color: #fff; }
+html[data-theme="light"] .profile-action-primary { color: var(--color-on-action); }
 @media (max-width: 760px) {
     .profile-overview-hero { flex-wrap: wrap; padding: 1.5rem; gap: 1.25rem; }
     .profile-portrait { position: relative; width: 86px; height: 86px; flex-basis: 86px; }
@@ -144,10 +144,10 @@ html[data-theme="light"] .profile-action-primary { color: #fff; }
 .profile-username-note time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
 .profile-username-note a { display: inline-block; margin-top: .4rem; }
 .sharing-status-dot { display: inline-block; width: 6px; height: 6px; margin-right: .25rem; border-radius: 50%; background: currentColor; }
-html[data-theme="light"] .profile-sharing-card { background: #fff; border-color: #e6dfee; box-shadow: 0 3px 14px #43236605; }
-html[data-theme="light"] .profile-link-preview { background: #faf8fd; border-color: #e6dfee; }
-html[data-theme="light"] .profile-sharing-form .profile-field input[readonly] { background: #f7f5f9; border-color: #c7bdd1; color: var(--text-muted); }
-html[data-theme="light"] .profile-sharing-form :is(.profile-visibility-option, .profile-sharing-options label):has(input:checked) { background: #f7f2fc; border-color: var(--accent); }
+html[data-theme="light"] .profile-sharing-card { background: #fffdf7; border-color: #ddccb0; box-shadow: 0 3px 14px #49301305; }
+html[data-theme="light"] .profile-link-preview { background: #fffaf0; border-color: #ddccb0; }
+html[data-theme="light"] .profile-sharing-form .profile-field input[readonly] { background: #f5eddf; border-color: #bda17b; color: var(--text-muted); }
+html[data-theme="light"] .profile-sharing-form :is(.profile-visibility-option, .profile-sharing-options label):has(input:checked) { background: #faf2e4; border-color: var(--accent); }
 @media (max-width: 700px) {
     .profile-sharing-top, .profile-sharing-options { grid-template-columns: minmax(0, 1fr); }
     .profile-sharing-card { padding: 1rem; }

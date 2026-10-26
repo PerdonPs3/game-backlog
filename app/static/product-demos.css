@@ -36,7 +36,7 @@
 .demo-progress { display: flex; gap: 5px; }
 .demo-progress i { width: 18px; height: 3px; border-radius: 3px; background: var(--demo-line); }
 .product-demo[data-step="0"] .demo-progress i:first-child, .product-demo[data-step="1"] .demo-progress i:nth-child(-n+2), .product-demo[data-step="2"] .demo-progress i { background: var(--welcome-accent); }
-html[data-theme="light"] .product-demo { --demo-surface: #faf8fd; --demo-raised: #f1eaf7; --demo-line: #7042b72a; }
+html[data-theme="light"] .product-demo { --demo-surface: #fffaf0; --demo-raised: #f3e7d0; --demo-line: #80541f2a; }
 @media (prefers-reduced-motion: no-preference) {
     .demo-card { transition: border-color 600ms ease, box-shadow 600ms ease, transform 600ms ease; }
     .demo-pick { transition: opacity 700ms ease, transform 700ms ease; transition-delay: calc(var(--pick) * 90ms); }

@@ -1,0 +1,27 @@
+{% set editing = game is defined %}
+{% set entry_name = game.title if editing else (selected_game.name if selected_game else '') %}
+{% set entry_image = entry_cover if editing else (selected_game.cover_url|replace('/t_cover_small/', '/t_cover_big/') if selected_game and selected_game.cover_url else '') %}
+<section class="entry-identity" data-entry-preview{% if not entry_name %} hidden{% endif %} aria-label="Selected game">
+    <div class="entry-cover" data-entry-cover>
+        <span>No cover</span>
+        {% if entry_image %}<img src="{{ entry_image }}" alt="" referrerpolicy="no-referrer" decoding="async">{% endif %}
+    </div>
+    <div class="entry-identity-copy">
+        <p class="entry-eyebrow">{{ 'In your library' if editing else 'Selected game' }}</p>
+        {% if editing %}
+        {% if game.igdb_id is not none %}
+        <h2>{{ game.title }}</h2>
+        <input type="hidden" id="title" name="title" value="{{ game.title }}">
+        {% else %}
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" value="{{ request.form.get('title', game.title) }}" maxlength="200" required>
+        {% endif %}
+        {% else %}
+        <h2 data-entry-title>{{ entry_name }}</h2>
+        <p class="entry-year" data-entry-year>{{ selected_game.year if selected_game and selected_game.year else '' }}</p>
+        {% endif %}
+    </div>
+    {% if not editing %}
+    <button type="button" class="entry-change" data-entry-change aria-controls="entry-catalog" aria-expanded="false"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-1 12-12a2.8 2.8 0 0 0-4-4L4 15Z"/></svg>Change game</button>
+    {% endif %}
+</section>

@@ -33,7 +33,9 @@ def test_opt_in_creates_both_records_and_explicitly_updates_existing_public_revi
     fake_catalog(accounts)
     client = public_author(accounts, 'alice')
     response = add(client, publish_review='yes', public_review_spoilers='yes', owner_id='forged')
-    assert response.status_code == 303 and response.location.endswith('#community-reviews')
+    assert response.status_code == 303 and response.location.endswith('/account/alice_player/library')
+    assert b'Added to your library and published your review.' in client.get(response.location).data
+    assert b'Added to your library and published your review.' not in client.get(response.location).data
     with accounts.app_context():
         db = get_db()
         assert tuple(db.execute('SELECT review, rating FROM games').fetchone()) == (DATA['review'], 9)
@@ -105,3 +107,12 @@ def test_rate_limit_and_missing_csrf_never_create_partial_records(accounts):
         db = get_db()
         assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
         assert db.execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
+
+
+def test_publishing_from_catalog_add_flow_returns_to_library(accounts):
+    fake_catalog(accounts)
+    client = public_author(accounts, 'alice')
+    response = add(client, publish_review='yes', return_to_catalog='yes')
+    assert response.status_code == 303
+    assert response.location.endswith('/account/alice_player/library')
+    assert b'Added to your library and published your review.' in client.get(response.location).data
