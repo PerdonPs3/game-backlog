@@ -22,6 +22,21 @@
     let matches = [];
     let active = -1;
     let loadingDetails = false;
+    const recentSearches = new Map();
+
+    function searchKey() {
+        return `${content?.value || "official"}:${input.value.trim().toLowerCase()}`;
+    }
+
+    function cachedResults(key) {
+        const cached = recentSearches.get(key);
+        if (!cached) return null;
+        if (Date.now() - cached.savedAt >= 120000) {
+            recentSearches.delete(key);
+            return null;
+        }
+        return cached.games;
+    }
 
     function showSelection(selected) {
         if (!preview) return;
@@ -182,20 +197,26 @@
         message.textContent = `${games.length} matches.`;
     }
 
-    function search() {
+    function search({ immediate = false, reset = true } = {}) {
         clearTimeout(timer);
         controller?.abort();
         const currentRevision = ++revision;
         loadingDetails = false;
-        if (!browsing) resetSelection();
+        if (!browsing && reset) resetSelection();
         closeResults();
         const term = input.value.trim();
         if (term.length < 2) {
             message.textContent = "";
             return;
         }
+        const key = searchKey();
+        const cached = cachedResults(key);
+        if (cached) {
+            showResults(cached);
+            return;
+        }
         message.textContent = "Searching the catalog...";
-        timer = setTimeout(async () => {
+        const load = async () => {
             controller = new AbortController();
             try {
                 const url = new URL(picker.dataset.catalogUrl, window.location.origin);
@@ -208,16 +229,28 @@
                 const data = await response.json();
                 if (currentRevision !== revision) return;
                 if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
+                if (recentSearches.size >= 20) recentSearches.delete(recentSearches.keys().next().value);
+                recentSearches.set(key, { games: data.games, savedAt: Date.now() });
                 showResults(data.games);
             } catch (error) {
                 if (error.name === "AbortError" || currentRevision !== revision) return;
                 closeResults();
                 message.textContent = "Could not load suggestions. Please try again shortly.";
             }
-        }, 450);
+        };
+        if (immediate) return load();
+        timer = setTimeout(load, 200);
     }
     input.addEventListener("input", search);
     content?.addEventListener("change", search);
+    input.addEventListener("focus", () => {
+        if (!loadingDetails) return search({ immediate: true, reset: false });
+    });
+    input.addEventListener("click", () => {
+        if (!results.hidden || loadingDetails) return;
+        const cached = cachedResults(searchKey());
+        if (cached) showResults(cached);
+    });
 
     input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
@@ -250,7 +283,7 @@
     });
 
     document.addEventListener("click", (event) => {
-        if (!picker.contains(event.target)) {
+        if (!picker.contains(event.target) && !changeGame?.contains(event.target)) {
             clearTimeout(timer);
             if (!loadingDetails) {
                 controller?.abort();

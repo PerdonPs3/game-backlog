@@ -8,6 +8,11 @@ keyboard navigation, platform validation, and safe server-resolved metadata.
 Search is always open until a game is selected, without a collapse control.
 Selecting a game reveals its cover, hides the search, and focuses Platform.
 A separate pencil button beside the selected title reopens the catalog search.
+Autocomplete waits 200 milliseconds after typing, and keeps up to 20 recent
+query/filter combinations in page memory for two minutes. Refocusing or clicking
+the field restores those suggestions without another request; interrupted or
+expired searches retry immediately on focus. Refocusing never clears an already
+resolved game or platform. First-time lookup latency still depends on IGDB.
 
 Platform, status, and the existing five-star picker appear together; stars sit
 inside a field matching the platform and status controls, with the optional label
