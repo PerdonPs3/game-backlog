@@ -44,7 +44,7 @@
 .wishlist-feedback, .wishlist-error { font-size: .8rem; line-height: 1.7; margin: .7rem 0; color: var(--accent); }
 .wishlist-error { color: var(--text); padding: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--color-panel); }
 .wishlist-workspace :is(a, button, input):focus-visible, .wishlist-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-html[data-theme="light"] .wishlist-card { background: #fff; box-shadow: 0 3px 16px #43236608; }
+html[data-theme="light"] .wishlist-card { background: #fffdf7; box-shadow: 0 3px 16px #49301308; }
 @media (max-width: 1000px) { .wishlist-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .wishlist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; } .wishlist-card-body { padding: .75rem; } .wishlist-search > div { flex-wrap: wrap; } .wishlist-search input { flex-basis: 65%; } }
 @media (max-width: 380px) { .wishlist-grid { grid-template-columns: minmax(0, 1fr); } }

@@ -9,7 +9,7 @@
 .emblem-glyph { fill: none; stroke: var(--badge-ink); }
 .achievement-emblem.is-locked { --badge-ink: #939b9f; --badge-edge: #5b6269; --badge-face: #272c30; filter: none; opacity: .65; }
 html[data-theme="light"] .achievement-emblem { filter: drop-shadow(0 3px 3px #30201a26); }
-html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #6f647e; --badge-edge: #ad9fbc; --badge-face: #f4eff8; }
+html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #78664c; --badge-edge: #bba98b; --badge-face: #f4eddf; }
 .achievement-notice { position: fixed; z-index: 100; right: 1.5rem; top: 94px; width: min(390px, calc(100vw - 2rem)); box-sizing: border-box; padding: 1rem 2.2rem 1.2rem 1rem; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); border-radius: 16px; background: var(--color-panel, #1b1d1e); color: var(--text); box-shadow: 0 12px 44px #0004, 0 0 30px color-mix(in srgb, var(--accent) 12%, transparent); animation: achievement-arrival .7s cubic-bezier(.18,.8,.3,1.2) both; overflow: hidden; }
 .achievement-notice-content { display: flex; align-items: center; gap: .9rem; }
 .achievement-notice-content > div { min-width: 0; }
@@ -26,7 +26,7 @@ html[data-theme="light"] .achievement-emblem.is-locked { --badge-ink: #6f647e; -
 .achievement-notice::after { left: 5.5rem; bottom: .5rem; animation-delay: .2s; }
 .achievement-notice.is-dismissed { animation: achievement-exit .2s ease-in both; pointer-events: none; }
 .achievement-notice :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-html[data-theme="light"] .achievement-notice { background: #fff; box-shadow: 0 12px 40px #3c235126; }
+html[data-theme="light"] .achievement-notice { background: #fffdf7; box-shadow: 0 12px 40px #49301326; }
 @keyframes achievement-arrival { from { opacity: 0; transform: translate(24px, -12px) scale(.94); } to { opacity: 1; transform: none; } }
 @keyframes achievement-exit { to { opacity: 0; transform: translateX(25px); } }
 @keyframes achievement-spark { 0% { opacity: 0; transform: scale(.3) rotate(-30deg); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5) rotate(30deg); } }

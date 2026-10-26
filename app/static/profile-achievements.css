@@ -51,10 +51,10 @@
 .achievement-mini { display: flex; align-items: center; gap: .75rem; padding: .8rem; border: 1px solid var(--border); border-radius: 10px; }
 .achievement-mini .achievement-emblem { width: 64px; height: 64px; flex-basis: 64px; }
 .achievement-mini small { display: block; font-size: .55rem; color: var(--text-muted); margin-top: .4rem; }
-html[data-theme="light"] .profile-banner::before { background: linear-gradient(90deg, #eeeef3e8, #f2ede870 50%, #edf1f233), linear-gradient(0deg, #f1edf2ba, transparent 80%); }
-html[data-theme="light"] .profile-banner .profile-name-row h1 { color: #211b2b; }
-html[data-theme="light"] .profile-banner :is(.profile-overview-bio, .profile-public-handle, .profile-identity-meta) { color: #39313f; }
-html[data-theme="light"] .profile-banner :is(.profile-action, .profile-background-action) { color: #39234f; background: #fffffff0; border-color: #bcb0c9; }
+html[data-theme="light"] .profile-banner::before { background: linear-gradient(90deg, #f5eddbe8, #f6ecd970 50%, #f5eddb33), linear-gradient(0deg, #f0e4ccba, transparent 80%); }
+html[data-theme="light"] .profile-banner .profile-name-row h1 { color: #30271f; }
+html[data-theme="light"] .profile-banner :is(.profile-overview-bio, .profile-public-handle, .profile-identity-meta) { color: #584530; }
+html[data-theme="light"] .profile-banner :is(.profile-action, .profile-background-action) { color: #614522; background: #fffdf7f0; border-color: #bda17b; }
 html[data-theme="light"] .achievement-card { background: linear-gradient(110deg, color-mix(in srgb, var(--badge-tint) 10%, white), white 75%); }
 .profile-customization { margin: .5rem 0; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; min-width: 0; scroll-margin-top: 110px; }
 .profile-customization legend { font-size: .9rem; padding: 0 .4rem; }
@@ -86,7 +86,7 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
     .profile-banner .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .profile-banner .profile-hero-actions { width: auto; }
 }
-html[data-theme="light"] .profile-banner-toolbar { border-color: #43374b26; }
+html[data-theme="light"] .profile-banner-toolbar { border-color: #614a3026; }
 @media (max-width: 650px) { .profile-achievements { scroll-margin-top: 170px; } .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
 
 .profile-wishlist-link { color: inherit; text-underline-offset: .25em; }

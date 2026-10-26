@@ -1,6 +1,6 @@
 /* One frame for the homepage, library, and every workspace. */
 select:not([multiple]):not([size]) { appearance: none; padding-right: 2.5rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffc880' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .85rem center; background-size: 14px 14px; }
-html[data-theme="light"] select:not([multiple]):not([size]) { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%237042b7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); }
+html[data-theme="light"] select:not([multiple]):not([size]) { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2380541f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); }
 body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .workspace-site-header { position: sticky; top: 0; z-index: 96; flex-shrink: 0; background: var(--color-canvas); border-bottom: 1px solid var(--border); }
 .workspace-site-header .workspace-topbar { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; width: 100%; min-height: 76px; margin: 0; padding: .9rem 1.5rem; border: 0; }
@@ -53,12 +53,12 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .brand-metal-mid { stop-color: #ffc880; }
 .brand-metal-shadow { stop-color: #b97216; }
 .brand-metal-edge { stop-color: #f5a623; }
-html[data-theme="light"] .brand-metal-light { stop-color: #d7bbf4; }
-html[data-theme="light"] .brand-metal-highlight { stop-color: #ae7be2; }
-html[data-theme="light"] .brand-metal-mid { stop-color: #8250bf; }
-html[data-theme="light"] .brand-metal-shadow { stop-color: #4d277f; }
-html[data-theme="light"] .brand-metal-edge { stop-color: #7042b7; }
-html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #7042b72a); }
+html[data-theme="light"] .brand-metal-light { stop-color: #ffe8a9; }
+html[data-theme="light"] .brand-metal-highlight { stop-color: #f4cf78; }
+html[data-theme="light"] .brand-metal-mid { stop-color: #d5a144; }
+html[data-theme="light"] .brand-metal-shadow { stop-color: #87551c; }
+html[data-theme="light"] .brand-metal-edge { stop-color: #ad7830; }
+html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #80541f2a); }
 
 @media (max-width: 640px) {
     .workspace-site-header .workspace-topbar { padding: .75rem 1rem; gap: .6rem 1rem; }
