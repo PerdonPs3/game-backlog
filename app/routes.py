@@ -624,7 +624,7 @@ def edit(game_id):
                     return redirect(url_for('explore.game', catalog_id=game['igdb_id'], _anchor='community-reviews'), code=303)
                 return redirect(url_for("main.index"))
 
-    return render_template("edit.html", game=game, error=error,
+    return render_template("edit.html", game=game, entry_cover=collection_cover_url(game['cover_image_id']), error=error,
                            available_platforms=available_platforms,
                            duplicate_game_id=duplicate_game_id,
                            review_publication_available=review_publication_available,

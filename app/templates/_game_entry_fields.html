@@ -1,0 +1,51 @@
+{% set editing = game is defined %}
+<section class="entry-section entry-progress" aria-labelledby="entry-progress-heading">
+    <h2 id="entry-progress-heading">Library entry</h2>
+    <div class="entry-core-fields">
+        <div>
+            <label for="platform">Platform</label>
+            {% if not editing or game.igdb_id is not none %}
+            <select id="platform" name="platform" required aria-describedby="platform-message"{% if not editing and not selected_game %} disabled{% endif %}>
+                <option value="">{{ 'Choose a platform' if editing or selected_game else 'Choose a game first' }}</option>
+                {% for platform in (available_platforms if editing else (selected_game.platforms if selected_game else [])) %}
+                <option value="{{ platform }}"{% if request.form.get('platform', game.platform if editing else '') == platform %} selected{% endif %}>{{ platform }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <input type="text" id="platform" name="platform" value="{{ request.form.get('platform', game.platform) }}" maxlength="80" required>
+            {% endif %}
+            <p id="platform-message" class="catalog-message" role="status"></p>
+        </div>
+        <div>
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                {% for status in game_statuses %}<option value="{{ status }}"{% if request.form.get('status', game.status if editing else 'Backlog') == status %} selected{% endif %}>{{ status }}</option>{% endfor %}
+            </select>
+        </div>
+        {% from '_rating_picker.html' import rating_picker %}
+        {{ rating_picker(request.form.get('rating', game.rating if editing and game.rating is not none else '')) }}
+    </div>
+</section>
+<section class="entry-section entry-review" aria-labelledby="entry-review-heading">
+    <div class="entry-section-heading"><h2 id="entry-review-heading">Your review</h2><span>Optional</span></div>
+    <label for="review" class="entry-review-label">Review</label>
+    <textarea id="review" name="review" rows="4" maxlength="2000" placeholder="What did you think of the game?">{{ request.form.get('review', game.review if editing else '') }}</textarea>
+    {% include '_review_publication.html' %}
+    {% if editing and has_public_review %}
+    <div class="review-publication-management">
+        {% if public_review_hidden %}<p class="catalog-message">Your review is hidden by moderation. Editing it will not republish it.</p>{% endif %}
+        <button type="submit" class="secondary-button danger-link" formaction="{{ url_for('reviews.delete', catalog_id=game.igdb_id) }}" formnovalidate>Delete public review</button>
+    </div>
+    {% endif %}
+</section>
+<details class="entry-section entry-more"{% if error %} open{% endif %}>
+    <summary><span>More details<small>Play dates and personal stickers</small></span><span class="entry-disclosure" aria-hidden="true">⌄</span></summary>
+    <div class="entry-more-content">
+        {% include '_play_dates.html' %}
+        {% include '_game_stickers.html' %}
+    </div>
+</details>
+<div class="form-actions">
+    <button{% if not editing %} id="add-game-button"{% endif %} type="submit"{% if not editing and not selected_game %} disabled{% endif %}>{{ 'Save changes' if editing else 'Add game' }}</button>
+    <a href="{{ url_for('main.index') }}">Cancel</a>
+</div>

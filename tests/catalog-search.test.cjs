@@ -27,7 +27,7 @@ class Element {
     scrollIntoView() {}
 }
 
-function setup(browsing = false, withFilter = false) {
+function setup(browsing = false, withFilter = false, withPreview = false) {
     const elements = Object.fromEntries([
         "title", "catalog-query", "catalog-results", "catalog-message", "platform", "igdb-id",
         "add-game-button", "platform-message",
@@ -35,6 +35,15 @@ function setup(browsing = false, withFilter = false) {
     if (withFilter) {
         elements['[data-catalog-content]'] = new Element();
         elements['[data-catalog-content]'].value = 'official';
+    }
+    if (withPreview) {
+        const previewFields = Object.fromEntries(['[data-entry-title]', '[data-entry-year]', '[data-entry-cover]'].map(key => [key, new Element()]));
+        elements['[data-entry-preview]'] = new Element();
+        elements['[data-entry-preview]'].querySelector = selector => previewFields[selector];
+        elements['[data-entry-catalog]'] = new Element();
+        elements['[data-entry-catalog]'].querySelector = () => elements['[data-entry-catalog-label]'];
+        elements['[data-entry-catalog-label]'] = new Element();
+        Object.assign(elements, previewFields);
     }
     const picker = new Element();
     picker.dataset = { catalogUrl: "/catalog/search", detailsUrl: "/catalog/games/0" };
@@ -66,6 +75,9 @@ function setup(browsing = false, withFilter = false) {
     return {
         ...Object.fromEntries(Object.entries(elements).map(([key, value]) => [key.slice(1), value])),
         requests, navigations, content: elements['[data-catalog-content]'],
+        preview: elements['[data-entry-preview]'], previewTitle: elements['[data-entry-title]'],
+        previewYear: elements['[data-entry-year]'], previewCover: elements['[data-entry-cover]'],
+        selectionPanel: elements['[data-entry-catalog]'], selectionLabel: elements['[data-entry-catalog-label]'],
         flush: () => scheduled(),
         async search(games) {
             const input = elements[browsing ? "#catalog-query" : "#title"];
@@ -80,6 +92,26 @@ function setup(browsing = false, withFilter = false) {
 
 const original = { id: 1, name: "Resident Evil", year: 1996, platforms: ["PC", "PlayStation"] };
 const remake = { id: 2, name: "Resident Evil", year: 2002, platforms: ["Nintendo GameCube"] };
+
+test("the entry preview follows only the resolved game and clears when searching again", async () => {
+    const ui = setup(false, false, true);
+    const selected = { ...original, cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_small/example.jpg' };
+    await ui.search([selected]);
+    const pending = ui['catalog-results'].children[0].fire('click');
+    assert.equal(ui.preview.hidden, true);
+    ui.requests.at(-1).reply({ game: selected });
+    await pending;
+    assert.equal(ui.preview.hidden, false);
+    assert.equal(ui.previewTitle.textContent, selected.name);
+    assert.equal(ui.previewYear.textContent, selected.year);
+    assert.match(ui.previewCover.children[1].src, /\/t_cover_big\//);
+    assert.equal(ui.selectionPanel.open, false);
+    assert.equal(ui.selectionLabel.textContent, 'Change game');
+    ui.title.value = 'Portal';
+    ui.title.fire('input');
+    assert.equal(ui.preview.hidden, true);
+    assert.equal(ui['igdb-id'].value, '');
+});
 
 test("platforms remain locked until a game is resolved, then require a choice", async () => {
     const ui = setup();

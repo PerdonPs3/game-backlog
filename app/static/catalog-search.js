@@ -13,6 +13,8 @@
     const gameId = document.querySelector("#igdb-id");
     const submit = document.querySelector("#add-game-button");
     const platformMessage = document.querySelector("#platform-message");
+    const preview = document.querySelector("[data-entry-preview]");
+    const selectionPanel = document.querySelector("[data-entry-catalog]");
     let timer;
     let controller;
     let revision = 0;
@@ -20,7 +22,33 @@
     let active = -1;
     let loadingDetails = false;
 
+    function showSelection(selected) {
+        if (!preview) return;
+        preview.hidden = !selected;
+        if (!selected) return;
+        preview.querySelector("[data-entry-title]").textContent = selected.name;
+        preview.querySelector("[data-entry-year]").textContent = selected.year || "";
+        const cover = preview.querySelector("[data-entry-cover]");
+        const placeholder = document.createElement("span");
+        placeholder.textContent = "No cover";
+        cover.replaceChildren(placeholder);
+        if (selected.cover_url) {
+            const image = document.createElement("img");
+            image.src = selected.cover_url.replace("/t_cover_small/", "/t_cover_big/");
+            image.alt = "";
+            image.referrerPolicy = "no-referrer";
+            image.addEventListener("error", () => image.remove());
+            cover.append(image);
+        }
+        if (selectionPanel) {
+            selectionPanel.open = false;
+            selectionPanel.querySelector("[data-entry-catalog-label]").textContent = "Change game";
+            platform.focus();
+        }
+    }
+
     function resetSelection(label = "Choose a game first") {
+        showSelection(null);
         gameId.value = "";
         platform.replaceChildren(new Option(label, ""));
         platform.disabled = true;
@@ -87,6 +115,7 @@
             platform.disabled = false;
             message.textContent = `Selected: ${selected.name}${selected.year ? ` (${selected.year})` : ""}.`;
             platformMessage.textContent = "";
+            showSelection(selected);
         } catch (error) {
             if (currentRevision !== revision || error.name === "AbortError") return;
             resetSelection();

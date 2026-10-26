@@ -1,0 +1,66 @@
+/* Shared Add/Edit flow; all colors inherit the active theme. */
+.workspace-layout.game-entry-layout { max-width: 1000px; }
+.workspace-layout.game-entry-layout .workspace-hero { display: block; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.game-entry-layout .workspace-hero h1 { font-size: clamp(1.7rem, 3vw, 2.2rem); }
+.game-entry-layout .workspace-hero .hero-emblem { display: none; }
+.workspace-layout.game-entry-layout .workspace-body .workspace-panel { padding: 0; border: 0; background: none; box-shadow: none; }
+.game-entry-layout .workspace-form { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+.game-entry-layout .entry-identity { display: flex; align-items: center; gap: 1.5rem; padding: 1.4rem; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 9%, var(--color-panel)), var(--color-panel)); }
+.game-entry-layout .entry-identity[hidden] { display: none; }
+.entry-cover { display: grid; place-items: center; position: relative; overflow: hidden; flex: 0 0 96px; width: 96px; height: 136px; border: 1px solid var(--border); border-radius: 8px; background: var(--color-raised); color: var(--text-muted); font-size: .65rem; box-shadow: 0 5px 14px #0002; }
+.entry-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.entry-identity-copy { min-width: 0; flex: 1; }
+.entry-eyebrow { margin: 0 0 .6rem; color: var(--accent); font-size: .6rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.entry-identity h2 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.2; overflow-wrap: anywhere; }
+.game-entry-layout .entry-identity-copy label { display: block; margin-bottom: .4rem; font-size: .7rem; }
+.game-entry-layout .entry-identity-copy input { font-size: 1.5rem; font-weight: 650; padding: .4rem .6rem; }
+.entry-year { margin: .55rem 0 0; color: var(--text-muted); font-size: .8rem; }
+.entry-year:empty { display: none; }
+.entry-section { min-width: 0; padding: 1.5rem; margin: 0; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); }
+.entry-section h2 { margin: 0 0 1.25rem; font-size: 1rem; }
+.entry-core-fields { display: grid; grid-template-columns: 1fr 1fr 1.1fr; align-items: start; gap: 1.5rem; }
+.entry-core-fields > div > label { display: block; margin-bottom: .6rem; }
+.entry-core-fields .rating-stars { width: min(100%, 220px); }
+.entry-core-fields .rating-picker legend { font-size: .85rem; margin-bottom: .3rem; }
+.entry-core-fields .rating-optional { margin-left: .8rem; }
+.entry-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.entry-section-heading h2 { margin: 0; }
+.entry-section-heading > span { color: var(--text-muted); font-size: .7rem; }
+.entry-review-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.game-entry-layout .entry-review textarea { min-height: 130px; line-height: 1.7; }
+.game-entry-layout .review-publication { padding: .7rem 1rem; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); }
+.game-entry-layout .review-publication label { margin: .25rem 0; }
+.game-entry-layout .review-publication-options { padding-left: 1.5rem; }
+.entry-more summary, .entry-catalog summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; list-style: none; font-size: .9rem; font-weight: 600; }
+.entry-more summary::-webkit-details-marker, .entry-catalog summary::-webkit-details-marker { display: none; }
+.entry-more summary small { display: block; margin-top: .35rem; color: var(--text-muted); font-size: .7rem; font-weight: 400; }
+.entry-disclosure { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); transition: transform 180ms ease; }
+.entry-section[open] > summary .entry-disclosure { transform: rotate(180deg); }
+.entry-section > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
+.entry-more-content { display: grid; gap: 1.25rem; padding-top: 1.5rem; }
+.game-entry-layout .entry-more .play-dates, .game-entry-layout .entry-more .sticker-picker { margin: 0; }
+.entry-catalog .catalog-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem 1rem; margin-top: 1.25rem; }
+.entry-catalog .catalog-picker label[for="title"] { grid-column: 1; grid-row: 1; align-self: center; }
+.entry-catalog .catalog-picker label[for="catalog-content"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.game-entry-layout .entry-catalog #catalog-content { grid-column: 2; grid-row: 1; width: auto; padding-block: .4rem; font-size: .7rem; }
+.entry-catalog .catalog-input-wrapper, .entry-catalog #catalog-message { grid-column: 1 / -1; }
+.entry-catalog-link { display: inline-block; margin-top: .6rem; color: var(--accent); font-size: .7rem; }
+.entry-catalog:not([open]) { padding: 0 .3rem; border: 0; background: none; }
+.entry-catalog:not([open]) > summary { justify-content: flex-end; gap: .5rem; color: var(--accent); font-size: .75rem; }
+.game-entry-layout .review-publication-options { margin-left: 0; padding-left: 1.8rem; }
+.game-entry-layout .form-actions { margin: 0; padding: .25rem 0; border: 0; gap: 1.25rem; }
+.game-entry-layout .form-actions > button { min-width: 170px; min-height: 48px; }
+@media (max-width: 760px) {
+    .entry-core-fields { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .entry-core-fields .rating-picker { grid-column: 1 / -1; max-width: 260px; }
+}
+@media (max-width: 480px) {
+    .game-entry-layout .entry-identity { gap: 1rem; padding: 1rem; }
+    .entry-cover { flex-basis: 72px; width: 72px; height: 102px; }
+    .entry-section { padding: 1rem; }
+    .entry-core-fields { grid-template-columns: minmax(0, 1fr); }
+    .entry-catalog .catalog-picker { grid-template-columns: minmax(0, 1fr); }
+    .game-entry-layout .entry-catalog #catalog-content { grid-column: 1; grid-row: 2; width: 100%; }
+    .game-entry-layout .review-publication { padding: .6rem; }
+}
+@media (prefers-reduced-motion: reduce) { .entry-disclosure { transition: none; } }

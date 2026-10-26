@@ -1,8 +1,9 @@
 {% extends '_workspace_base.html' %}
 {% block page_title %}Add a game · Vestigium{% endblock %}
 {% block page_heading %}Add a <span>game</span>{% endblock %}
+{% block layout_class %}game-entry-layout{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='game-entry.css') }}">{% endblock %}
 {% block panel %}
-        <p class="catalog-message"><a href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a></p>
         {% if from_wishlist %}<p class="catalog-message">On your wishlist. Saving this game moves it to your library.</p>{% endif %}
         {% if error %}
             <p role="alert">{{ error }}</p>
@@ -12,9 +13,10 @@
         {% endif %}
         <form method="post" class="workspace-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" id="igdb-id" name="igdb_id"
-                   value="{{ selected_game['id'] if selected_game else '' }}">
-
+            <input type="hidden" id="igdb-id" name="igdb_id" value="{{ selected_game.id if selected_game else '' }}">
+            {% include '_game_entry_identity.html' %}
+            <details class="entry-section entry-catalog" data-entry-catalog{% if not selected_game %} open{% endif %}>
+                <summary><span data-entry-catalog-label>{{ 'Change game' if selected_game else 'Choose a game' }}</span><span class="entry-disclosure" aria-hidden="true">⌄</span></summary>
             <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
                  data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
                 <label for="catalog-content">Show</label>
@@ -48,59 +50,10 @@
                 </p>
             </div>
 
-            <div>
-                <label for="platform">Platform</label>
-                <select id="platform" name="platform" required
-                        aria-describedby="platform-message" {% if not selected_game %}disabled{% endif %}>
-                    <option value="">{{ 'Choose a platform' if selected_game else 'Choose a game first' }}</option>
-                    {% if selected_game %}
-                        {% for platform in selected_game['platforms'] %}
-                            <option value="{{ platform }}" {% if request.form.get('platform') == platform %}selected{% endif %}>
-                                {{ platform }}
-                            </option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-                <p id="platform-message" class="catalog-message" role="status">
-
-                </p>
-            </div>
-
-            <div>
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    {% for status in game_statuses %}
-                        <option
-                            value="{{ status }}"
-                            {% if request.form.get('status', 'Backlog') == status %}selected{% endif %}
-                        >
-                            {{ status }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% include '_play_dates.html' %}
-            {% include '_game_stickers.html' %}
-            {% from '_rating_picker.html' import rating_picker %}
-            {{ rating_picker(request.form.get('rating', '')) }}
-
-            <div class="form-wide">
-                <label for="review">Review (optional)</label>
-                <textarea
-                    id="review"
-                    name="review"
-                    rows="4"
-                    maxlength="2000"
-                >{{ request.form.get('review', '') }}</textarea>
-                {% include '_review_publication.html' %}
-            </div>
-            <div class="form-actions">
-                <button id="add-game-button" type="submit" {% if not selected_game %}disabled{% endif %}>Add game</button>
-                <a href="{{ url_for('main.index') }}">Cancel</a>
-            </div>
+                <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a>
+            </details>
+            {% include '_game_entry_fields.html' %}
         </form>
-
-
 {% endblock %}
 {% block page_scripts %}
     <script src="{{ url_for('static', filename='catalog-search.js') }}" defer></script>
