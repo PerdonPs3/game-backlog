@@ -2,6 +2,8 @@
 {% block page_title %}Edit game · Vestigium{% endblock %}
 {% block page_heading %}Edit <span>game</span>{% endblock %}
 {% block layout_class %}game-entry-layout{% endblock %}
+{% block body_class %}library-page workspace-page game-entry-scene{% endblock %}
+{% block workspace_backdrop %}{% include '_game_entry_backdrop.html' %}{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='game-entry.css') }}">{% endblock %}
 {% block panel %}
 
