@@ -93,7 +93,7 @@ def suggestions():
     if not public_request_allowed():
         return jsonify(error='The catalog is busy. Please wait a minute and try again.'), 429
     try:
-        games = [catalog_card(game) for game in get_catalog().search_games(term, include_community=content == 'all')[:10]
+        games = [catalog_card(game) for game in get_catalog().search_games(term, include_community=content == 'all', suggestions=True)[:10]
                  if type(game.get('id')) is int and 0 < game['id'] < 2**63]
     except CatalogError:
         return jsonify(error='The catalog is temporarily unavailable. Please try again shortly.'), 503

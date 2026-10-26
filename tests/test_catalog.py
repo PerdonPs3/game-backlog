@@ -183,7 +183,7 @@ def test_catalog_endpoint_returns_suggestions(client, app, stored_games):
     response = client.get("/catalog/search?q=Portal")
     assert response.status_code == 200
     assert response.json["games"][0]["id"] == 123
-    fake_client.search_games.assert_called_once_with("Portal", include_community=False)
+    fake_client.search_games.assert_called_once_with("Portal", include_community=False, suggestions=True)
     assert stored_games() == []
 
 
@@ -239,3 +239,41 @@ def test_multiword_search_does_not_require_contiguous_title_words(monkeypatch):
     for word in ('breath', 'of', 'wild'):
         assert f'name ~ *"{word}"*' in body
         assert f'alternative_names.name ~ *"{word}"*' in body
+
+
+def test_suggestions_use_bounded_indexed_search_and_keep_aliases(monkeypatch):
+    alias = {"id": 9, "name": "Five Nights at Freddy's", "alternative_names": [{"name": "FNAF"}]}
+    unrelated = {"id": 10, "name": "Fuzzy match"}
+    community = {"id": 11, "name": "FNAF Fan Game", "keywords": [{"name": "fan game"}]}
+    request_json = Mock(side_effect=[TOKEN, [unrelated, alias, community]])
+    monkeypatch.setattr(catalog, "_request_json", request_json)
+    client = catalog.IGDBClient("fake-id", "fake-secret")
+    assert client.search_games("fnaf", suggestions=True) == [alias]
+    query = request_json.call_args.args[0].data.decode()
+    assert 'search "fnaf";' in query
+    assert 'limit 40;' in query
+    assert 'alternative_names.name' in query
+    assert 'platforms' not in query
+    assert client.search_games("FNAF", suggestions=True) == [alias]
+    assert request_json.call_count == 2
+
+
+def test_suggestions_fall_back_for_uncommon_aliases_and_do_not_replace_full_search(monkeypatch):
+    game = {"id": 7, "name": "Rare title"}
+    request_json = Mock(side_effect=[TOKEN, [], [game], [game]])
+    monkeypatch.setattr(catalog, "_request_json", request_json)
+    client = catalog.IGDBClient("fake-id", "fake-secret")
+    assert client.search_games("alias", suggestions=True) == [game]
+    assert 'alternative_names.name ~ *"alias"*' in request_json.call_args.args[0].data.decode()
+    assert client.search_games("alias") == [game]
+    assert request_json.call_count == 4
+    assert 'limit 500;' in request_json.call_args.args[0].data.decode()
+
+
+def test_suggestions_can_include_community_games(monkeypatch):
+    game = {"id": 7, "name": "Portal mod", "game_type": {"type": "Mod"}}
+    request_json = Mock(side_effect=[TOKEN, [game]])
+    monkeypatch.setattr(catalog, "_request_json", request_json)
+    assert catalog.IGDBClient("fake-id", "fake-secret").search_games(
+        "Portal", include_community=True, suggestions=True
+    ) == [game]

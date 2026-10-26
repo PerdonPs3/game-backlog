@@ -268,7 +268,7 @@ def catalog_search():
     if len(term) < 2:
         return jsonify(games=[])
     try:
-        games = get_catalog().search_games(term, include_community=content == "all")[:10]
+        games = get_catalog().search_games(term, include_community=content == "all", suggestions=True)[:10]
     except CatalogError:
         return jsonify(error="The catalog is unavailable. Please try again shortly."), 503
     return jsonify(games=[game_suggestion(game) for game in games])

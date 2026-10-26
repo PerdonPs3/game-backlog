@@ -125,9 +125,10 @@ test("refocusing an interrupted search retries immediately and ignores the old r
     const old = ui.flush();
     ui.title.fire('blur');
     const current = ui.title.fire('focus');
-    assert.equal(ui.requests.length, 2);
+    assert.equal(ui.requests.length, 1);
     assert.equal(ui.requests[0].options.signal.aborted, true);
     ui.requests[0].reply({ games: [original] }); await old;
+    assert.equal(ui.requests.length, 2);
     assert.equal(ui['catalog-results'].hidden, true);
     ui.requests[1].reply({ games: [remake] }); await current;
     assert.equal(ui['catalog-results'].hidden, false);
@@ -286,7 +287,7 @@ test("public suggestions discard stale searches and remain closed after Escape",
     const pending = ui.flush();
     input.value = "gods";
     input.fire("input");
-    assert.equal(ui.requests[0].options.signal.aborted, true);
+    assert.equal(ui.requests[0].options.signal.aborted, false);
     ui.requests[0].reply({ games: [original] });
     await pending;
     assert.equal(ui["catalog-results"].hidden, true);
@@ -306,10 +307,33 @@ test('changing the content filter cancels stale suggestions and searches the cho
     ui.content.value = 'all';
     ui.content.fire('change');
     const filteredRequest = ui.flush();
+    assert.equal(ui.requests.length, 1);
+    ui.requests[0].reply({games: [original]}); await originalRequest;
     assert.match(ui.requests[1].url, /content=all/);
     ui.requests[1].reply({games: [remake]}); await filteredRequest;
-    ui.requests[0].reply({games: [original]}); await originalRequest;
     assert.equal(ui['catalog-results'].children.length, 1);
     await ui['catalog-results'].children[0].fire('click');
     assert.deepEqual(ui.navigations, ['/explore/games/2']);
+});
+
+
+test('typing during an active search sends only the latest queued query', async () => {
+    const ui = setup();
+    ui.title.value = 'res'; ui.title.fire('input');
+    const first = ui.flush();
+    const queued = [];
+    for (const term of ['resi', 'resid', 'resident']) {
+        ui.title.value = term; ui.title.fire('input');
+        queued.push(ui.flush());
+    }
+    assert.equal(ui.requests.length, 1);
+    assert.equal(ui.requests[0].options.signal.aborted, false);
+    ui.requests[0].reply({ games: [remake] }); await first;
+    assert.equal(ui.requests.length, 2);
+    assert.match(ui.requests[1].url, /q=resident$/);
+    assert.equal(ui['catalog-results'].hidden, true);
+    ui.requests[1].reply({ games: [original] });
+    await Promise.all(queued);
+    assert.equal(ui['catalog-results'].children.length, 1);
+    assert.equal(ui['catalog-results'].children[0].children[1].children[0].textContent, original.name);
 });

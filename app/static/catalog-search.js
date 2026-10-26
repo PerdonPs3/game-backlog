@@ -18,6 +18,7 @@
     const changeGame = document.querySelector("[data-entry-change]");
     let timer;
     let controller;
+    let activeSearch;
     let revision = 0;
     let matches = [];
     let active = -1;
@@ -199,7 +200,7 @@
 
     function search({ immediate = false, reset = true } = {}) {
         clearTimeout(timer);
-        controller?.abort();
+        if (loadingDetails) controller?.abort();
         const currentRevision = ++revision;
         loadingDetails = false;
         if (!browsing && reset) resetSelection();
@@ -210,6 +211,7 @@
             return;
         }
         const key = searchKey();
+        const scope = content?.value;
         const cached = cachedResults(key);
         if (cached) {
             showResults(cached);
@@ -217,25 +219,42 @@
         }
         message.textContent = "Searching the catalog...";
         const load = async () => {
-            controller = new AbortController();
-            try {
-                const url = new URL(picker.dataset.catalogUrl, window.location.origin);
-                url.searchParams.set("q", term);
-                if (content) url.searchParams.set("content", content.value);
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    headers: { Accept: "application/json" },
-                });
-                const data = await response.json();
+            // Aborting fetch does not stop the server's upstream request. Coalesce
+            // typing into the latest query instead of queuing obsolete searches.
+            if (activeSearch) {
+                await activeSearch;
                 if (currentRevision !== revision) return;
-                if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
-                if (recentSearches.size >= 20) recentSearches.delete(recentSearches.keys().next().value);
-                recentSearches.set(key, { games: data.games, savedAt: Date.now() });
-                showResults(data.games);
-            } catch (error) {
-                if (error.name === "AbortError" || currentRevision !== revision) return;
-                closeResults();
-                message.textContent = "Could not load suggestions. Please try again shortly.";
+                return load();
+            }
+            if (currentRevision !== revision) return;
+            const run = async () => {
+                controller = new AbortController();
+                try {
+                    const url = new URL(picker.dataset.catalogUrl, window.location.origin);
+                    url.searchParams.set("q", term);
+                    if (content) url.searchParams.set("content", scope);
+                    const response = await fetch(url, {
+                        signal: controller.signal,
+                        headers: { Accept: "application/json" },
+                    });
+                    const data = await response.json();
+                    if (currentRevision !== revision) return;
+                    if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
+                    if (recentSearches.size >= 20) recentSearches.delete(recentSearches.keys().next().value);
+                    recentSearches.set(key, { games: data.games, savedAt: Date.now() });
+                    showResults(data.games);
+                } catch (error) {
+                    if (error.name === "AbortError" || currentRevision !== revision) return;
+                    closeResults();
+                    message.textContent = "Could not load suggestions. Please try again shortly.";
+                }
+            };
+            const pending = run();
+            activeSearch = pending;
+            try {
+                await pending;
+            } finally {
+                if (activeSearch === pending) activeSearch = null;
             }
         };
         if (immediate) return load();

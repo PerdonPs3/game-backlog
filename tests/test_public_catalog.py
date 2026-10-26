@@ -242,7 +242,7 @@ def test_filtered_search_paginates_and_preserves_the_filter(app):
     assert 'Match 031' in second and 'Match 060' in second and 'Match 001' not in second
     catalog.search_games.assert_called_with('zelda', include_community=True)
     client.get('/explore/suggestions?q=zelda&content=official')
-    catalog.search_games.assert_called_with('zelda', include_community=False)
+    catalog.search_games.assert_called_with('zelda', include_community=False, suggestions=True)
 
 
 @pytest.mark.parametrize('url', ['/explore?q=zelda&content=invalid', '/explore?q=zelda&page=-1', '/explore?q=zelda&page=oops', '/explore?q=zelda&page=999', '/explore/suggestions?q=zelda&content=invalid', '/catalog/search?q=zelda&content=invalid'])
