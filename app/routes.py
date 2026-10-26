@@ -10,6 +10,7 @@ from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_writ
 from app.game_fields import STATUSES, validate_dates
 from app.game_reviews import begin_review_write, can_publish_public_review, save_public_review, validate_public_review
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
+from app.library_picker import preference_games, recommend
 
 from app.ownership import owned, member_owned, insert_owned, insert_members
 
@@ -279,34 +280,47 @@ def pick_game():
     pick_requested = request.args.get("pick") == "1"
     selected_platform = request.args.get("platform", "")
     selected_genre = request.args.get("genre", "")
-    if len(selected_platform) > 80 or len(selected_genre) > 100:
+    mode = request.args.get("mode", "recommended")
+    raw_statuses = request.args.getlist("status")
+    if not raw_statuses and request.args.get("status_filter") != "1":
+        raw_statuses = ["Backlog"]
+    if (len(selected_platform) > 80 or len(selected_genre) > 100
+            or mode not in ("recommended", "random") or len(raw_statuses) > len(STATUSES)
+            or any(status not in STATUSES for status in raw_statuses)):
         abort(400)
-    backlog = get_db().execute(f"SELECT * FROM games WHERE status = 'Backlog' AND {owned()}").fetchall()
-    platforms = sorted({row["platform"] for row in backlog}, key=str.casefold)
+    selected_statuses = [status for status in STATUSES if status in raw_statuses]
+    library = get_db().execute(f"SELECT * FROM games WHERE {owned()}").fetchall()
+    selected_entries = [row for row in library if row["status"] in selected_statuses]
+    platforms = sorted({row["platform"] for row in library}, key=str.casefold)
     if selected_platform and selected_platform not in platforms:
         abort(400)
+    signals = preference_games(library) if mode == "recommended" else []
     genre_map = {}
     error = None
-    catalog_ids = {row["igdb_id"] for row in backlog if row["igdb_id"] is not None}
+    catalog_ids = {row["igdb_id"] for row in [*selected_entries, *signals] if row["igdb_id"] is not None} if selected_entries else set()
     if catalog_ids:
         try:
             genre_map = get_catalog().get_game_genres(catalog_ids)
         except CatalogError:
             error = "Genre preferences are temporarily unavailable. You can still pick with Any genre."
-    genres = sorted({genre for names in genre_map.values() for genre in names}, key=str.casefold)
-    if selected_genre and error is None and selected_genre not in genres:
+    candidate_genres = {genre for row in selected_entries for genre in genre_map.get(row["igdb_id"], ())}
+    genres = sorted(candidate_genres, key=str.casefold)
+    if selected_statuses and selected_genre and error is None and selected_genre not in genres:
         abort(400)
-    candidates = [row for row in backlog
+    candidates = [row for row in selected_entries
                   if (not selected_platform or row["platform"] == selected_platform)
                   and (not selected_genre or selected_genre in genre_map.get(row["igdb_id"], ()))]
     # A failed genre lookup must never silently suggest a non-matching game.
     if selected_genre and error:
         candidates = []
-    game = choice(candidates) if pick_requested and candidates else None
+    recommended, reasons = recommend(candidates, signals, genre_map) if mode == "recommended" else ([], {})
+    pool = recommended or candidates
+    game = choice(pool) if pick_requested and pool else None
+    reason = reasons.get(game["id"]) if game is not None and recommended else None
     games = [{**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}] if game else []
     roulette = None
-    if game is not None:
-        # The animation is decorative: the fair draw above remains authoritative.
+    if game is not None and not reason:
+        # The animation reveals the server's random selection without changing it.
         preview = sample(candidates, min(12, len(candidates)))
         if not any(row["id"] == game["id"] for row in preview):
             preview[0] = game
@@ -315,9 +329,10 @@ def pick_game():
              "cover_url": collection_cover_url(row["cover_image_id"])} for row in preview
         ]}
     response = make_response(render_template(
-        "pick.html", games=games, selected_status="Backlog", search_query="",
+        "pick.html", games=games, selected_status="", search_query="",
         platforms=platforms, genres=genres, selected_platform=selected_platform,
-        selected_genre=selected_genre, genre_error=error, has_backlog=bool(backlog),
+        selected_genre=selected_genre, genre_error=error, has_backlog=bool(selected_entries),
+        selected_statuses=selected_statuses, pick_statuses=STATUSES, mode=mode, recommendation=reason,
         candidate_count=len(candidates), pick_requested=pick_requested, roulette=roulette,
     ))
     response.headers["Cache-Control"] = "no-store"

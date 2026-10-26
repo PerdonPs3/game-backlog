@@ -1,0 +1,17 @@
+.pick-modes, .pick-statuses { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0; }
+.pick-modes legend, .pick-statuses legend { margin-bottom: .75rem; color: var(--accent); font-size: .8rem; font-weight: 600; }
+.pick-mode-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.pick-mode-options label { display: flex; align-items: center; gap: .65rem; margin: 0; padding: .85rem; border: 1px solid var(--border); border-radius: 10px; background: var(--color-panel); cursor: pointer; }
+.pick-mode-options label:has(input:checked), .pick-status-options label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--color-panel)); }
+.pick-mode-options input, .pick-status-options input { flex: 0 0 16px; width: 16px; height: 16px; margin: 0; padding: 0; accent-color: var(--accent); }
+.pick-mode-options strong { display: block; color: var(--accent); font-size: .85rem; }
+.pick-mode-options small { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .65rem; line-height: 1.5; }
+.pick-status-options { display: flex; flex-wrap: wrap; gap: .5rem; }
+.pick-status-options label { display: inline-flex; align-items: center; gap: .45rem; margin: 0; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--color-panel); font-size: .7rem; cursor: pointer; }
+.pick-statuses > p { margin: .65rem 0 0; color: var(--text-muted); font-size: .7rem; line-height: 1.6; }
+.pick-explanation { margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); }
+.pick-explanation p { margin: 0; color: var(--text-muted); font-size: .8rem; line-height: 1.8; overflow-wrap: anywhere; }
+.pick-explanation .pick-explanation-label { margin-bottom: .4rem; color: var(--accent); font-size: .7rem; font-weight: 600; }
+.pick-explanation strong { color: var(--accent); }
+.pick-fallback { margin: 0 0 1rem; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
+@media (max-width: 480px) { .pick-mode-options { grid-template-columns: minmax(0, 1fr); } }
