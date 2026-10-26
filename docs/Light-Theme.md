@@ -12,8 +12,8 @@ Success, error, status, avatar, and achievement colors retain their meanings.
 
 Changes are scoped to light-mode selectors. Theme storage, transitions, reduced
 motion, dark palettes, page structure, and the illustrated library remain intact.
-This increment is a local preview on `feature/ivory-light-theme`; it requires no
-database migration and has not been published to develop or production.
+This palette requires no database migration. Production publication is managed
+separately from develop integration.
 
 Validation includes the existing theme behavior and contrast checks, page-shell
 tests against disposable local PostgreSQL schemas, and browser inspection of
