@@ -24,17 +24,17 @@
 .entry-catalog[hidden] { display: none; }
 .entry-progress { border-top: 2px solid color-mix(in srgb, var(--accent) 65%, var(--border)); background: linear-gradient(180deg, color-mix(in srgb, var(--color-action) 4%, var(--color-panel)), var(--color-panel)); }
 .entry-core-fields { display: grid; grid-template-columns: 1fr 1fr 1.1fr; align-items: start; gap: 1.5rem; }
-.entry-core-fields > div > label { display: block; margin-bottom: .6rem; }
+.entry-core-fields > div > label { display: block; margin-bottom: .6rem; color: var(--accent); font-weight: 600; }
 .entry-core-fields .rating-picker { display: grid; grid-template-columns: minmax(0, 170px) max-content; column-gap: .6rem; align-items: center; }
 .entry-core-fields .rating-stars { width: 100%; height: 48px; }
 .entry-core-fields .rating-artwork > span, .entry-core-fields .rating-choice { height: 48px; }
 .entry-core-fields .rating-artwork svg { width: 28px; height: 28px; top: 10px; }
 .entry-core-fields .rating-outline { fill: none; stroke: var(--accent); opacity: .65; }
-.entry-core-fields .rating-picker legend { font-size: .85rem; margin-bottom: .6rem; }
+.entry-core-fields .rating-picker legend { color: var(--accent); font-weight: 600; font-size: .85rem; margin-bottom: .6rem; }
 .entry-core-fields .rating-optional { font-size: .6rem; }
 .entry-core-fields .rating-caption { gap: .35rem; min-height: 48px; margin: 0; font-size: .7rem; white-space: nowrap; }
-.entry-core-fields .rating-caption output { min-width: 3.3rem; }
-.entry-core-fields .rating-clear { justify-content: center; width: 26px; min-height: 28px; border-radius: 50%; font-size: 1.1rem; }
+.entry-core-fields .rating-caption output { min-width: 3.3rem; color: var(--accent); font-size: .8rem; font-weight: 600; }
+.entry-core-fields .rating-clear { color: var(--accent); justify-content: center; width: 26px; min-height: 28px; border-radius: 50%; font-size: 1.1rem; }
 .entry-core-fields .rating-clear span { text-decoration: none; }
 .entry-core-fields .rating-clear:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .entry-core-fields .rating-picker:has(.rating-clear input:checked) .rating-clear { visibility: hidden; }
