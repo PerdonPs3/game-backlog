@@ -106,7 +106,7 @@
 /* A cartography room connects game discovery to the illustrated library. */
 body.game-entry-scene { position: relative; isolation: isolate; --entry-scene-panel: #211c18f0; --entry-scene-veil: #100a0533; --entry-heading-shadow: #100a05d9; }
 html[data-theme="light"] body.game-entry-scene { --entry-scene-panel: #fffaf0f5; --entry-scene-veil: #f5ecd51a; --entry-heading-shadow: #fffaf0ed; }
-.entry-map-room { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.entry-map-room { position: fixed; inset: var(--entry-header-height, 76px) 0 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .entry-map-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .entry-map-day { opacity: 0; }
 html[data-theme="light"] .entry-map-day { opacity: 1; }
