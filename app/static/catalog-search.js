@@ -15,6 +15,7 @@
     const platformMessage = document.querySelector("#platform-message");
     const preview = document.querySelector("[data-entry-preview]");
     const selectionPanel = document.querySelector("[data-entry-catalog]");
+    const changeGame = document.querySelector("[data-entry-change]");
     let timer;
     let controller;
     let revision = 0;
@@ -41,11 +42,17 @@
             cover.append(image);
         }
         if (selectionPanel) {
-            selectionPanel.open = false;
-            selectionPanel.querySelector("[data-entry-catalog-label]").textContent = "Change game";
+            selectionPanel.hidden = true;
+            changeGame?.setAttribute("aria-expanded", "false");
             platform.focus();
         }
     }
+
+    changeGame?.addEventListener("click", () => {
+        selectionPanel.hidden = false;
+        changeGame.setAttribute("aria-expanded", "true");
+        input.focus();
+    });
 
     function resetSelection(label = "Choose a game first") {
         showSelection(null);

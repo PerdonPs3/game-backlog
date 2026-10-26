@@ -41,8 +41,8 @@ function setup(browsing = false, withFilter = false, withPreview = false) {
         elements['[data-entry-preview]'] = new Element();
         elements['[data-entry-preview]'].querySelector = selector => previewFields[selector];
         elements['[data-entry-catalog]'] = new Element();
-        elements['[data-entry-catalog]'].querySelector = () => elements['[data-entry-catalog-label]'];
-        elements['[data-entry-catalog-label]'] = new Element();
+        elements['[data-entry-catalog]'].hidden = false;
+        elements['[data-entry-change]'] = new Element();
         Object.assign(elements, previewFields);
     }
     const picker = new Element();
@@ -77,7 +77,7 @@ function setup(browsing = false, withFilter = false, withPreview = false) {
         requests, navigations, content: elements['[data-catalog-content]'],
         preview: elements['[data-entry-preview]'], previewTitle: elements['[data-entry-title]'],
         previewYear: elements['[data-entry-year]'], previewCover: elements['[data-entry-cover]'],
-        selectionPanel: elements['[data-entry-catalog]'], selectionLabel: elements['[data-entry-catalog-label]'],
+        selectionPanel: elements['[data-entry-catalog]'], changeGame: elements['[data-entry-change]'],
         flush: () => scheduled(),
         async search(games) {
             const input = elements[browsing ? "#catalog-query" : "#title"];
@@ -105,8 +105,12 @@ test("the entry preview follows only the resolved game and clears when searching
     assert.equal(ui.previewTitle.textContent, selected.name);
     assert.equal(ui.previewYear.textContent, selected.year);
     assert.match(ui.previewCover.children[1].src, /\/t_cover_big\//);
-    assert.equal(ui.selectionPanel.open, false);
-    assert.equal(ui.selectionLabel.textContent, 'Change game');
+    assert.equal(ui.selectionPanel.hidden, true);
+    assert.equal(ui.changeGame.attributes['aria-expanded'], 'false');
+    ui.changeGame.fire('click');
+    assert.equal(ui.selectionPanel.hidden, false);
+    assert.equal(ui.changeGame.attributes['aria-expanded'], 'true');
+    assert.equal(ui['igdb-id'].value, String(selected.id));
     ui.title.value = 'Portal';
     ui.title.fire('input');
     assert.equal(ui.preview.hidden, true);

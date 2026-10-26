@@ -15,8 +15,8 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="igdb-id" name="igdb_id" value="{{ selected_game.id if selected_game else '' }}">
             {% include '_game_entry_identity.html' %}
-            <details class="entry-section entry-catalog" data-entry-catalog{% if not selected_game %} open{% endif %}>
-                <summary><span data-entry-catalog-label>{{ 'Change game' if selected_game else 'Choose a game' }}</span><span class="entry-disclosure" aria-hidden="true">⌄</span></summary>
+            <section class="entry-section entry-catalog" id="entry-catalog" data-entry-catalog{% if selected_game %} hidden{% endif %}>
+                <h2>Choose a game</h2>
             <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
                  data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
                 <label for="catalog-content">Show</label>
@@ -51,7 +51,7 @@
             </div>
 
                 <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a>
-            </details>
+            </section>
             {% include '_game_entry_fields.html' %}
         </form>
 {% endblock %}
