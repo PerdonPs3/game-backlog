@@ -277,3 +277,22 @@ def test_suggestions_can_include_community_games(monkeypatch):
     assert catalog.IGDBClient("fake-id", "fake-secret").search_games(
         "Portal", include_community=True, suggestions=True
     ) == [game]
+
+
+def test_suggestion_cache_reuses_results_for_five_minutes_without_extending_full_search(monkeypatch):
+    request_json = Mock(side_effect=[TOKEN, [GAME], [GAME], [GAME], [GAME]])
+    clock = Mock(return_value=100)
+    monkeypatch.setattr(catalog, "_request_json", request_json)
+    monkeypatch.setattr(catalog, "monotonic", clock)
+    client = catalog.IGDBClient("fake-id", "fake-secret")
+    client.search_games("Resident", suggestions=True)
+    clock.return_value = 101
+    client.search_games("Resident")
+    clock.return_value = 132
+    client.search_games("Resident", suggestions=True)
+    assert request_json.call_count == 3
+    client.search_games("Resident")
+    assert request_json.call_count == 4
+    clock.return_value = 401
+    client.search_games("Resident", suggestions=True)
+    assert request_json.call_count == 5

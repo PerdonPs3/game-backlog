@@ -19,6 +19,7 @@
     let timer;
     let controller;
     let activeSearch;
+    let suggestionsOpen = false;
     let revision = 0;
     let matches = [];
     let active = -1;
@@ -37,6 +38,24 @@
             return null;
         }
         return cached.games;
+    }
+
+    function showRecentMatches() {
+        if (!suggestionsOpen) return false;
+        const scope = `${content?.value || "official"}:`;
+        const words = input.value.trim().toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
+        if (!words.length || input.value.trim().length < 2) return false;
+        const found = new Map();
+        for (const key of [...recentSearches.keys()].reverse()) {
+            if (!key.startsWith(scope)) continue;
+            for (const game of cachedResults(key) || []) {
+                if (words.every(word => game.name.toLowerCase().includes(word))) found.set(game.id, game);
+            }
+        }
+        if (!found.size) return false;
+        showResults([...found.values()].slice(0, 10));
+        message.textContent = "Updating matches...";
+        return true;
     }
 
     function showSelection(selected) {
@@ -96,6 +115,7 @@
     }
 
     async function selectGame(game) {
+        suggestionsOpen = false;
         if (browsing) {
             clearTimeout(timer);
             controller?.abort();
@@ -202,6 +222,7 @@
         clearTimeout(timer);
         if (loadingDetails) controller?.abort();
         const currentRevision = ++revision;
+        suggestionsOpen = true;
         loadingDetails = false;
         if (!browsing && reset) resetSelection();
         closeResults();
@@ -217,7 +238,7 @@
             showResults(cached);
             return;
         }
-        message.textContent = "Searching the catalog...";
+        if (!showRecentMatches()) message.textContent = "Searching the catalog...";
         const load = async () => {
             // Aborting fetch does not stop the server's upstream request. Coalesce
             // typing into the latest query instead of queuing obsolete searches.
@@ -238,10 +259,13 @@
                         headers: { Accept: "application/json" },
                     });
                     const data = await response.json();
-                    if (currentRevision !== revision) return;
                     if (!response.ok) throw new Error(data.error || "Catalog unavailable.");
                     if (recentSearches.size >= 20) recentSearches.delete(recentSearches.keys().next().value);
                     recentSearches.set(key, { games: data.games, savedAt: Date.now() });
+                    if (currentRevision !== revision) {
+                        showRecentMatches();
+                        return;
+                    }
                     showResults(data.games);
                 } catch (error) {
                     if (error.name === "AbortError" || currentRevision !== revision) return;
@@ -258,7 +282,7 @@
             }
         };
         if (immediate) return load();
-        timer = setTimeout(load, 200);
+        timer = setTimeout(load, 100);
     }
     input.addEventListener("input", search);
     content?.addEventListener("change", search);
@@ -273,6 +297,7 @@
 
     input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
+            suggestionsOpen = false;
             clearTimeout(timer);
             controller?.abort();
             revision += 1;
@@ -303,6 +328,7 @@
 
     document.addEventListener("click", (event) => {
         if (!picker.contains(event.target) && !changeGame?.contains(event.target)) {
+            suggestionsOpen = false;
             clearTimeout(timer);
             if (!loadingDetails) {
                 controller?.abort();
@@ -312,6 +338,7 @@
         }
     });
     input.addEventListener("blur", () => {
+        suggestionsOpen = false;
         clearTimeout(timer);
         if (!loadingDetails) {
             controller?.abort();

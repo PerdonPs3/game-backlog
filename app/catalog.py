@@ -113,7 +113,7 @@ class IGDBClient:
             games = self._search_games(term, include_community=include_community, suggestions=suggestions)
             if len(self._search_cache) >= 64:
                 self._search_cache.clear()
-            self._search_cache[cache_key] = (monotonic() + 30, games)
+            self._search_cache[cache_key] = (monotonic() + (300 if suggestions else 30), games)
             return games
 
     def _search_games(self, term, *, include_community=False, suggestions=False):

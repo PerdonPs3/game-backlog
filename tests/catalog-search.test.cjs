@@ -104,7 +104,7 @@ test("returning to the input restores recent suggestions without typing or a net
         const ui = setup(browsing);
         const input = browsing ? ui['catalog-query'] : ui.title;
         await ui.search([original, remake]);
-        assert.ok(ui.delay() > 0 && ui.delay() <= 200);
+        assert.ok(ui.delay() > 0 && ui.delay() <= 100);
         input.fire('blur');
         assert.equal(ui['catalog-results'].hidden, true);
         input.fire('focus');
@@ -331,9 +331,48 @@ test('typing during an active search sends only the latest queued query', async 
     ui.requests[0].reply({ games: [remake] }); await first;
     assert.equal(ui.requests.length, 2);
     assert.match(ui.requests[1].url, /q=resident$/);
-    assert.equal(ui['catalog-results'].hidden, true);
+    assert.equal(ui['catalog-results'].hidden, false);
+    assert.equal(ui['catalog-message'].textContent, 'Updating matches...');
     ui.requests[1].reply({ games: [original] });
     await Promise.all(queued);
     assert.equal(ui['catalog-results'].children.length, 1);
     assert.equal(ui['catalog-results'].children[0].children[1].children[0].textContent, original.name);
+});
+
+
+test('matching recent titles appear immediately while a more specific query refreshes', async () => {
+    const ui = setup();
+    await ui.search([original, remake]);
+    ui.title.value = 'Resident Evil'; ui.title.fire('input');
+    assert.equal(ui['catalog-results'].hidden, false);
+    assert.equal(ui['catalog-results'].children.length, 2);
+    assert.equal(ui['catalog-message'].textContent, 'Updating matches...');
+    assert.equal(ui.requests.length, 1);
+    const pending = ui.flush();
+    ui.requests[1].reply({ games: [original] }); await pending;
+    assert.equal(ui['catalog-results'].children.length, 1);
+    assert.equal(ui['catalog-message'].textContent, '1 matches.');
+});
+
+test('partial responses never reopen suggestions after blur or Escape', async () => {
+    for (const close of ['blur', 'Escape']) {
+        const ui = setup();
+        ui.title.value = 'Resident'; ui.title.fire('input');
+        const pending = ui.flush();
+        ui.title.value = 'Resident Evil'; ui.title.fire('input');
+        if (close === 'blur') ui.title.fire('blur');
+        else ui.title.fire('keydown', { key: 'Escape' });
+        ui.requests[0].reply({ games: [original] }); await pending;
+        assert.equal(ui['catalog-results'].hidden, true);
+    }
+});
+
+test('recent title previews respect the selected content scope', async () => {
+    const ui = setup(true, true);
+    ui.content.value = 'all';
+    await ui.search([original]);
+    ui.content.value = 'official'; ui.content.fire('change');
+    assert.equal(ui['catalog-results'].hidden, true);
+    const pending = ui.flush();
+    ui.requests[1].reply({ games: [] }); await pending;
 });
