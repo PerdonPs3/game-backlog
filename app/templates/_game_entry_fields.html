@@ -23,7 +23,7 @@
             </select>
         </div>
         {% from '_rating_picker.html' import rating_picker %}
-        {{ rating_picker(request.form.get('rating', game.rating if editing and game.rating is not none else '')) }}
+        {{ rating_picker(request.form.get('rating', game.rating if editing and game.rating is not none else ''), compact=true) }}
     </div>
 </section>
 <section class="entry-section entry-review" aria-labelledby="entry-review-heading">
