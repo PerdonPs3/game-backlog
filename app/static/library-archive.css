@@ -188,3 +188,6 @@ html[data-theme="light"] .library-archive select:not([multiple]):not([size]) { b
     .library-archive .library-heading::after { display: none; }
     .library-archive .backup-actions { flex-wrap: wrap; }
 }
+
+.library-archive .library-save-feedback { display: flex; align-items: center; gap: .65rem; margin: .5rem 0 1rem; background: var(--archive-panel); }
+.library-save-feedback svg { flex-shrink: 0; }

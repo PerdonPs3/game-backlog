@@ -492,7 +492,7 @@ def create():
             if error is None:
                 if publish_requested:
                     flash('Added to your library and published your review.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='community-reviews'), code=303)
+                    return redirect(url_for('main.index'), code=303)
                 if request.form.get('return_to_catalog') == 'yes':
                     flash('Added to your library.', 'catalog_saved')
                     return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
@@ -621,7 +621,7 @@ def edit(game_id):
             if error is None:
                 if publish_requested:
                     flash('Saved your changes and published your review.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=game['igdb_id'], _anchor='community-reviews'), code=303)
+                    return redirect(url_for('main.index'), code=303)
                 return redirect(url_for("main.index"))
 
     return render_template("edit.html", game=game, entry_cover=collection_cover_url(game['cover_image_id']), error=error,

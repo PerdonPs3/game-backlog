@@ -26,7 +26,9 @@ def test_edit_link_from_catalog_can_publish_an_existing_private_review(accounts)
     assert 'name="publish_review" value="yes">' in editor
     assert DATA['review'] in editor
     response = submit(client, path, {**DATA, 'publish_review': 'yes'})
-    assert response.status_code == 303 and response.location.endswith('#community-reviews')
+    assert response.status_code == 303 and response.location.endswith('/account/alice_player/library')
+    assert b'Saved your changes and published your review.' in client.get(response.location).data
+    assert b'Saved your changes and published your review.' not in client.get(response.location).data
     with accounts.app_context():
         assert get_db().execute('SELECT body FROM public_game_reviews').fetchone()[0] == DATA['review']
 
