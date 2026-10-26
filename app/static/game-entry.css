@@ -64,12 +64,21 @@
     .entry-more[open]::details-content { block-size: auto; opacity: 1; }
 }
 .game-entry-layout .entry-more .play-dates, .game-entry-layout .entry-more .sticker-picker { margin: 0; }
-.entry-catalog .catalog-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem 1rem; margin-top: 0; }
-.entry-catalog .catalog-picker label[for="title"] { grid-column: 1; grid-row: 1; align-self: center; }
-.entry-catalog .catalog-picker label[for="catalog-content"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.game-entry-layout .entry-catalog #catalog-content { grid-column: 2; grid-row: 1; width: auto; padding-block: .4rem; font-size: .7rem; }
+.entry-catalog .catalog-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.1rem 1rem; margin-top: 0; }
+.entry-catalog .catalog-picker h2 { grid-column: 1; grid-row: 1; margin: 0; }
+.entry-catalog .catalog-picker > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.game-entry-layout .entry-catalog #catalog-content { grid-column: 2; grid-row: 1; width: auto; margin: 0; min-height: 36px; padding-block: .4rem; border-color: var(--border); border-radius: 8px; background-color: color-mix(in srgb, var(--accent) 4%, var(--color-panel)); color: var(--text-muted); font-size: .7rem; }
 .entry-catalog .catalog-input-wrapper, .entry-catalog #catalog-message { grid-column: 1 / -1; }
-.entry-catalog-link { display: inline-block; margin-top: .6rem; color: var(--accent); font-size: .7rem; }
+.entry-catalog .entry-search-icon { position: absolute; left: 1rem; top: 18px; z-index: 1; pointer-events: none; color: var(--accent); opacity: .8; transition: opacity 180ms ease; }
+.game-entry-layout .entry-catalog #title { min-height: 56px; margin: 0; padding: 1rem 1rem 1rem 3rem; border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); border-radius: 12px; background: var(--color-field); font-size: .9rem; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.game-entry-layout .entry-catalog #title:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent); }
+.entry-catalog .catalog-input-wrapper:focus-within .entry-search-icon { opacity: 1; }
+.entry-catalog .catalog-results { top: calc(100% + .5rem); border-radius: 12px; }
+.entry-catalog #catalog-message { margin: -.4rem 0 0; font-size: .7rem; color: var(--text-muted); }
+.entry-catalog-link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; padding-block: .2rem; color: var(--accent); font-size: .7rem; text-decoration: none; }
+.entry-catalog-link svg { transition: transform 180ms ease; }
+.entry-catalog-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.entry-catalog-link:hover svg { transform: translateX(3px); }
 .game-entry-layout .review-publication-options { margin-left: 0; padding-left: 1.8rem; }
 .game-entry-layout .form-actions { margin: 0; padding: .25rem 0; border: 0; gap: 1.25rem; }
 .game-entry-layout .form-actions > button { min-width: 170px; min-height: 48px; }
@@ -91,4 +100,4 @@
     .game-entry-layout .entry-catalog #catalog-content { grid-column: 1; grid-row: 2; width: 100%; }
     .game-entry-layout .review-publication { padding: .6rem; }
 }
-@media (prefers-reduced-motion: reduce) { .entry-disclosure, .entry-more::details-content, .game-entry-layout .entry-change { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .entry-disclosure, .entry-more::details-content, .game-entry-layout .entry-change, .entry-search-icon, .entry-catalog-link svg, .game-entry-layout .entry-catalog #title { transition: none; } }

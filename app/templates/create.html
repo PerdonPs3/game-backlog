@@ -16,41 +16,36 @@
             <input type="hidden" id="igdb-id" name="igdb_id" value="{{ selected_game.id if selected_game else '' }}">
             {% include '_game_entry_identity.html' %}
             <section class="entry-section entry-catalog" id="entry-catalog" data-entry-catalog{% if selected_game %} hidden{% endif %}>
-                <h2>Choose a game</h2>
-            <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
-                 data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
-                <label for="catalog-content">Show</label>
-                <select id="catalog-content" data-catalog-content><option value="official">Official games</option><option value="all">Include mods &amp; fan games</option></select>
-                <label for="title">Title</label>
-                <div class="catalog-input-wrapper">
-                    <input
-                        type="text"
-                        id="title"
-                        placeholder="Search games…"
-                        name="title"
-                        value="{{ request.form.get('title', selected_game.name if selected_game else '') }}"
-                        maxlength="200"
-                        autocomplete="off"
-                        role="combobox"
-                        aria-autocomplete="list"
-                        aria-expanded="false"
-                        aria-controls="catalog-results"
-                        aria-describedby="catalog-message"
-                        required
-                    >
-                    <div id="catalog-results" class="catalog-results" role="listbox"
-                         aria-label="Matching games" hidden></div>
+                <div class="catalog-picker" data-catalog-url="{{ url_for('main.catalog_search') }}"
+                     data-details-url="{{ url_for('main.catalog_game_details', catalog_id=0) }}">
+                    <h2>Choose a game</h2>
+                    <label for="catalog-content">Show</label>
+                    <select id="catalog-content" data-catalog-content><option value="official">Official games</option><option value="all">Include mods &amp; fan games</option></select>
+                    <label for="title">Title</label>
+                    <div class="catalog-input-wrapper">
+                        <svg class="entry-search-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+                        <input
+                            type="text"
+                            id="title"
+                            placeholder="Search games…"
+                            name="title"
+                            value="{{ request.form.get('title', selected_game.name if selected_game else '') }}"
+                            maxlength="200"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            aria-controls="catalog-results"
+                            aria-describedby="catalog-message"
+                            required
+                        >
+                        <div id="catalog-results" class="catalog-results" role="listbox"
+                             aria-label="Matching games" hidden></div>
+                    </div>
+                    <p id="catalog-message" class="catalog-message" role="status">{% if selected_game %}Choose a platform.{% endif %}</p>
                 </div>
-                <p id="catalog-message" class="catalog-message" role="status">
-                    {% if selected_game %}
-                        Choose a platform.
-                    {% else %}
 
-                    {% endif %}
-                </p>
-            </div>
-
-                <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog ↗</a>
+                <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
             </section>
             {% include '_game_entry_fields.html' %}
         </form>
