@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='library-archive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='room-navigation.css') }}">
+    <script src="{{ url_for('static', filename='room-navigation.js') }}"></script>
 </head>
 <body class="library-page library-archive">
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}

@@ -4,7 +4,7 @@
 {% block layout_class %}game-entry-layout{% endblock %}
 {% block body_class %}library-page workspace-page game-entry-scene{% endblock %}
 {% block workspace_backdrop %}{% include '_game_entry_backdrop.html' %}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='game-entry.css') }}">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='game-entry.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='room-navigation.css') }}"><script src="{{ url_for('static', filename='room-navigation.js') }}"></script>{% endblock %}
 {% block panel %}
         {% if from_wishlist %}<p class="catalog-message">On your wishlist. Saving this game moves it to your library.</p>{% endif %}
         {% if error %}
