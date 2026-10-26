@@ -3,17 +3,23 @@
 (() => {
     const root = document.documentElement;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    function prepare(event) {
+    let currentTransition;
+    function prepare(event, direction) {
         const transition = event.viewTransition;
         if (!transition) return;
         if (motion.matches) {
             transition.skipTransition();
             return;
         }
-        root.dataset.roomNavigation = "true";
-        const clear = () => { delete root.dataset.roomNavigation; };
+        currentTransition = transition;
+        root.dataset.roomNavigation = direction;
+        const clear = () => {
+            if (currentTransition !== transition) return;
+            delete root.dataset.roomNavigation;
+            currentTransition = null;
+        };
         transition.finished.then(clear, clear);
     }
-    window.addEventListener("pageswap", prepare);
-    window.addEventListener("pagereveal", prepare);
+    window.addEventListener("pageswap", (event) => prepare(event, "out"));
+    window.addEventListener("pagereveal", (event) => prepare(event, "in"));
 })();

@@ -1,13 +1,24 @@
 /* Native navigation keeps the old room visible until the next page is ready. */
 @view-transition { navigation: auto; }
 html[data-room-navigation]:root::view-transition-old(root) { animation: none; opacity: 1; }
-html[data-room-navigation]:root::view-transition-new(root) { animation: room-arrive 460ms cubic-bezier(.4, 0, .2, 1) both; mix-blend-mode: normal; }
+html[data-room-navigation]:root::view-transition-new(root) { animation: room-arrive 380ms cubic-bezier(.4, 0, .2, 1) both; mix-blend-mode: normal; }
 html[data-room-navigation] .workspace-site-header { view-transition-name: room-header; }
 html[data-room-navigation]::view-transition-group(room-header) { animation: none; }
 html[data-room-navigation]::view-transition-old(room-header) { animation: none; opacity: 0; }
 html[data-room-navigation]::view-transition-new(room-header) { animation: none; }
+/* Different snapshot names preserve each page's own width and position. */
+html[data-room-navigation="out"] main { view-transition-name: room-exit; }
+html[data-room-navigation="in"] main { view-transition-name: room-enter; }
+html[data-room-navigation]::view-transition-group(room-exit),
+html[data-room-navigation]::view-transition-group(room-enter) { animation: none; }
+html[data-room-navigation]::view-transition-old(room-exit) { animation: room-content-out 380ms ease both; }
+html[data-room-navigation]::view-transition-new(room-enter) { animation: room-content-in 380ms ease both; }
+@keyframes room-content-out { 0% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes room-content-in { 0%, 45% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes room-arrive { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
     @view-transition { navigation: none; }
-    html[data-room-navigation]:root::view-transition-new(root) { animation: none; }
+    html[data-room-navigation]:root::view-transition-new(root),
+    html[data-room-navigation]::view-transition-old(room-exit),
+    html[data-room-navigation]::view-transition-new(room-enter) { animation: none; }
 }

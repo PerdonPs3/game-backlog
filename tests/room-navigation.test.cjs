@@ -30,7 +30,7 @@ test('both navigation directions remove their styles after finishing or cancella
             let finish, reject;
             const finished = new Promise((resolve, fail) => { finish = resolve; reject = fail; });
             ui.events[name]({ viewTransition: { finished } });
-            assert.equal(ui.root.dataset.roomNavigation, 'true');
+            assert.equal(ui.root.dataset.roomNavigation, name === 'pageswap' ? 'out' : 'in');
             if (cancel) reject(new Error('Navigation cancelled'));
             else finish();
             await Promise.resolve();
@@ -44,5 +44,17 @@ test('reduced motion skips the transition without changing page styles', () => {
     let skips = 0;
     ui.events.pagereveal({ viewTransition: { skipTransition() { skips++; } } });
     assert.equal(skips, 1);
+    assert.equal(ui.root.dataset.roomNavigation, undefined);
+});
+
+
+test('a previous navigation finishing cannot clear a new incoming transition', async () => {
+    const ui = setup();
+    let finishOld, finishNew;
+    ui.events.pageswap({ viewTransition: { finished: new Promise(resolve => { finishOld = resolve; }) } });
+    ui.events.pagereveal({ viewTransition: { finished: new Promise(resolve => { finishNew = resolve; }) } });
+    finishOld(); await Promise.resolve();
+    assert.equal(ui.root.dataset.roomNavigation, 'in');
+    finishNew(); await Promise.resolve();
     assert.equal(ui.root.dataset.roomNavigation, undefined);
 });
