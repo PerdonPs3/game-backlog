@@ -49,10 +49,20 @@
 .entry-more summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; list-style: none; font-size: .9rem; font-weight: 600; }
 .entry-more summary::-webkit-details-marker { display: none; }
 .entry-more summary small { display: block; margin-top: .35rem; color: var(--text-muted); font-size: .7rem; font-weight: 400; }
-.entry-disclosure { display: block; flex: 0 0 20px; width: 20px; height: 20px; color: var(--accent); transition: transform 180ms ease; }
+.entry-disclosure { display: block; flex: 0 0 20px; width: 20px; height: 20px; color: var(--accent); transition: transform 300ms cubic-bezier(.22, 1, .36, 1); }
 .entry-section[open] > summary .entry-disclosure { transform: rotate(180deg); }
 .entry-section > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
 .entry-more-content { display: grid; gap: 1.25rem; padding-top: 1.5rem; }
+@supports (interpolate-size: allow-keywords) and selector(details::details-content) {
+    .entry-more { interpolate-size: allow-keywords; }
+    .entry-more::details-content {
+        block-size: 0;
+        opacity: 0;
+        overflow: clip;
+        transition: block-size 300ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease, content-visibility 300ms allow-discrete;
+    }
+    .entry-more[open]::details-content { block-size: auto; opacity: 1; }
+}
 .game-entry-layout .entry-more .play-dates, .game-entry-layout .entry-more .sticker-picker { margin: 0; }
 .entry-catalog .catalog-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem 1rem; margin-top: 0; }
 .entry-catalog .catalog-picker label[for="title"] { grid-column: 1; grid-row: 1; align-self: center; }
@@ -81,4 +91,4 @@
     .game-entry-layout .entry-catalog #catalog-content { grid-column: 1; grid-row: 2; width: 100%; }
     .game-entry-layout .review-publication { padding: .6rem; }
 }
-@media (prefers-reduced-motion: reduce) { .entry-disclosure, .game-entry-layout .entry-change { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .entry-disclosure, .entry-more::details-content, .game-entry-layout .entry-change { transition: none; } }
