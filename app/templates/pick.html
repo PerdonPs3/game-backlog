@@ -10,8 +10,8 @@
         <fieldset class="pick-modes">
             <legend>Selection</legend>
             <div class="pick-mode-options">
-                <label><input type="radio" name="mode" value="recommended"{% if mode == 'recommended' %} checked{% endif %}><span><strong>For you</strong><small>Based on your ratings</small></span></label>
-                <label><input type="radio" name="mode" value="random"{% if mode == 'random' %} checked{% endif %}><span><strong>Random</strong><small>Let the roulette decide</small></span></label>
+                <label><input type="radio" name="mode" value="recommended"{% if mode == 'recommended' %} checked{% endif %}><span><strong>Based on your taste</strong><small>Matches genres you rated highly</small></span></label>
+                <label><input type="radio" name="mode" value="random"{% if mode == 'random' %} checked{% endif %}><span><strong>Random pick</strong><small>Every matching entry has an equal chance</small></span></label>
             </div>
         </fieldset>
         <fieldset class="pick-statuses" aria-describedby="pick-status-help">
@@ -52,8 +52,8 @@
         <h2>How picks work</h2>
         <p class="aside-note">Your selected states define the pool. Completed and Dropped games are included only if you select them.</p>
         <p class="aside-note">Picking a game does not change its status.</p>
-        <p class="aside-note">For you compares genres with your saved ratings: 4 stars or more are positive signals, and 2 stars or less reduce similar matches. Ratings in between are neutral.</p>
-        <p class="aside-note">Random gives every matching platform entry an equal chance. Picks may repeat.</p>
+        <p class="aside-note">Based on your taste compares genres with your saved ratings: 4 stars or more are positive signals, and 2 stars or less reduce similar matches. Ratings in between are neutral.</p>
+        <p class="aside-note">Random pick gives every matching platform entry an equal chance. Picks may repeat.</p>
     </aside>
 {% endblock %}
 {% block page_scripts %}

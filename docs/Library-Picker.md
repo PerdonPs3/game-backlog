@@ -7,7 +7,7 @@ no states produces a helpful message without silently reverting to Backlog.
 Repeat links preserve the mode, states, platform, and genre. Reset returns to
 Backlog with no platform or genre preference.
 
-## For you
+## Based on your taste
 
 Recommendations use only the current owner's library and existing ratings.
 The most recently added rated platform entry represents each catalog game,
@@ -33,7 +33,7 @@ eligible for random selection when Any genre is selected.
 
 ## Random and privacy
 
-Every matching platform entry has an equal chance in Random mode. The existing
+Every matching platform entry has an equal chance in Random pick mode. The existing
 roulette reveals the server-selected winner; it never changes the result.
 With JavaScript enabled, Pick a game and Pick again update only the outcome,
 preserving the filters and page instead of reloading at the top. An offscreen
@@ -42,7 +42,7 @@ revealed and brought into view afterward. Reduced motion skips the reel;
 without JavaScript, normal GET navigation still returns the full result.
 Failed requests retain the previous result and allow retrying. Preference edits
 during a request discard the stale response.
-For you uses the same decorative reel, then reveals the recommendation and its
+Based on your taste uses the same decorative reel, then reveals the recommendation and its
 explanation. The reel does not change preference ranking or select its winner.
 Both modes leave
 library states, ratings, notes, and public reviews unchanged.
