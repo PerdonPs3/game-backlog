@@ -54,3 +54,17 @@ paid service, database migration, or hosted data change is required.
 
 Implementation is local on `feature/personalized-library-picker` for owner review.
 Integration and publication require separate authorization.
+
+## Games salon background
+
+The picker has its own illustrated room within the library: a games table,
+cards, dice, bookshelves, fireplace, and an arched window. Light mode shows day;
+dark mode shows night. The aligned images crossfade with the existing theme
+switch and respect reduced motion. The fixed backdrop follows the actual
+header height through the shared scene alignment script. Opaque-enough panels
+keep the controls and results readable independently of the illustration.
+
+Artwork is stored as WebP in `app/static/images/backgrounds/games-salon-day.webp`
+and `games-salon-night.webp`, at 1672 × 941 pixels. The built-in image generation
+tool produced both assets; prompts and provenance are preserved in
+`docs/Games-Salon-Artwork-Prompts.json`.
