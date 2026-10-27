@@ -15,3 +15,7 @@
 .pick-explanation strong { color: var(--accent); }
 .pick-fallback { margin: 0 0 1rem; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
 @media (max-width: 480px) { .pick-mode-options { grid-template-columns: minmax(0, 1fr); } }
+
+#pick-outcome { overflow-anchor: none; }
+#adventure-roulette, #adventure-result, #pick-outcome { scroll-margin-top: 110px; }
+.pick-feedback { color: var(--accent); font-size: .8rem; line-height: 1.6; margin: 0 0 1rem; }

@@ -35,6 +35,13 @@ eligible for random selection when Any genre is selected.
 
 Every matching platform entry has an equal chance in Random mode. The existing
 roulette reveals the server-selected winner; it never changes the result.
+With JavaScript enabled, Pick a game and Pick again update only the outcome,
+preserving the filters and page instead of reloading at the top. An offscreen
+roulette scrolls into view before its animation starts. The selected game is
+revealed and brought into view afterward. Reduced motion skips the reel;
+without JavaScript, normal GET navigation still returns the full result.
+Failed requests retain the previous result and allow retrying. Preference edits
+during a request discard the stale response.
 Personalized results appear directly with their explanation. Both modes leave
 library states, ratings, notes, and public reviews unchanged.
 

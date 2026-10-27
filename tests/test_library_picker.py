@@ -160,3 +160,21 @@ def test_other_accounts_never_supply_preference_signals_or_catalog_requests(acco
     assert response.status_code == 200
     assert b'bob secret game' not in response.data and b'Why this pick' not in response.data
     provider.get_game_genres.assert_called_once_with({100})
+
+
+def test_async_random_draw_returns_only_safe_outcome_with_native_fallback(client, seed_game, stored_games):
+    seed_game(title='<script>Private adventure</script>', status='Playing')
+    before = stored_games()
+    response = client.get('/games/pick?pick=1&mode=random&status=Playing', headers={'Accept': 'application/json'})
+    assert response.status_code == 200
+    assert response.is_json
+    data = response.get_json()
+    assert 'adventure-roulette' in data['html']
+    assert 'data-pick-again' in data['html']
+    assert '&lt;script&gt;Private adventure&lt;/script&gt;' in data['html']
+    assert '<script>Private adventure</script>' not in data['html']
+    assert '<form' not in data['html'] and '<!DOCTYPE' not in data['html']
+    assert data['genres'] == []
+    assert 'no-store' in response.headers['Cache-Control']
+    assert stored_games() == before
+    assert b'adventure-preferences' in client.get('/games/pick').data

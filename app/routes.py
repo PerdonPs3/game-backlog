@@ -328,13 +328,17 @@ def pick_game():
             {"id": row["id"], "title": row["title"],
              "cover_url": collection_cover_url(row["cover_image_id"])} for row in preview
         ]}
-    response = make_response(render_template(
-        "pick.html", games=games, selected_status="", search_query="",
+    context = dict(
+        games=games, selected_status="", search_query="",
         platforms=platforms, genres=genres, selected_platform=selected_platform,
         selected_genre=selected_genre, genre_error=error, has_backlog=bool(selected_entries),
         selected_statuses=selected_statuses, pick_statuses=STATUSES, mode=mode, recommendation=reason,
         candidate_count=len(candidates), pick_requested=pick_requested, roulette=roulette,
-    ))
+    )
+    if request.accept_mimetypes.best == "application/json":
+        response = jsonify(html=render_template('_pick_outcome.html', **context), genres=genres)
+    else:
+        response = make_response(render_template('pick.html', **context))
     response.headers["Cache-Control"] = "no-store"
     return response
 
