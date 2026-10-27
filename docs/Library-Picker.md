@@ -52,8 +52,8 @@ non-cacheable. Genre metadata is fetched through the existing bounded, cached
 IGDB batches; no ratings or review text are sent to a new service. No AI provider,
 paid service, database migration, or hosted data change is required.
 
-Implementation is local on `feature/personalized-library-picker` for owner review.
-Integration and publication require separate authorization.
+The owner reviewed the picker and authorized integration and publication to
+`develop` on 2026-10-27. Production publication remains a separate decision.
 
 ## Games salon background
 

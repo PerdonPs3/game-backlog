@@ -26,7 +26,7 @@ items below are not a claim that the production account release is still pending
 - [ ] Publish the reviewed Discover increment after explicit authorization.
 - [ ] Validate and publish public profile reviews and public player search.
 - [x] Implement a wishlist separate from owned games, public by default with a privacy opt-out and library transfer (develop publication authorized on 2026-10-25; migrations 015–016 applied to hosted development).
-- [x] Extend the library picker with selected statuses and preference signals (implemented locally on `feature/personalized-library-picker`; owner review and publication pending).
+- [x] Extend the library picker with selected statuses and preference signals, inline roulette reveals in both modes, and day/night salon artwork (reviewed; develop publication authorized on 2026-10-27).
 - [ ] Define and implement following, including privacy and abuse boundaries.
 - [ ] Add explainable catalog recommendations before an optional AI chatbot.
 
