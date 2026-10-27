@@ -1,0 +1,73 @@
+.pick-modes, .pick-statuses { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0; }
+.pick-modes legend, .pick-statuses legend { margin-bottom: .75rem; color: var(--accent); font-size: .8rem; font-weight: 600; }
+.pick-mode-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.pick-mode-options label { display: flex; align-items: center; gap: .65rem; margin: 0; padding: .85rem; border: 1px solid var(--border); border-radius: 10px; background: var(--color-panel); cursor: pointer; }
+.pick-mode-options label:has(input:checked), .pick-status-options label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--color-panel)); }
+.pick-mode-options input, .pick-status-options input { flex: 0 0 16px; width: 16px; height: 16px; margin: 0; padding: 0; accent-color: var(--accent); }
+.pick-mode-options strong { display: block; color: var(--accent); font-size: .85rem; }
+.pick-mode-options small { display: block; margin-top: .25rem; color: var(--text-muted); font-size: .65rem; line-height: 1.5; }
+.pick-status-options { display: flex; flex-wrap: wrap; gap: .5rem; }
+.pick-status-options label { display: inline-flex; align-items: center; gap: .45rem; margin: 0; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--color-panel); font-size: .7rem; cursor: pointer; }
+.pick-statuses > p { margin: .65rem 0 0; color: var(--text-muted); font-size: .7rem; line-height: 1.6; }
+.pick-explanation { margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); }
+.pick-explanation p { margin: 0; color: var(--text-muted); font-size: .8rem; line-height: 1.8; overflow-wrap: anywhere; }
+.pick-explanation .pick-explanation-label { margin-bottom: .4rem; color: var(--accent); font-size: .7rem; font-weight: 600; }
+.pick-explanation strong { color: var(--accent); }
+.pick-fallback { margin: 0 0 1rem; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }
+@media (max-width: 480px) { .pick-mode-options { grid-template-columns: minmax(0, 1fr); } }
+
+#pick-outcome { overflow-anchor: none; }
+#adventure-roulette, #adventure-result, #pick-outcome { scroll-margin-top: 110px; }
+.pick-feedback { color: var(--accent); font-size: .8rem; line-height: 1.6; margin: 0 0 1rem; }
+
+/* A games salon is another room in the illustrated library. */
+body.picker-salon {
+    position: relative; isolation: isolate;
+    --picker-panel: #211c18f5;
+    --picker-veil: #100a053d;
+    --picker-heading-glow: #100a05ed;
+}
+html[data-theme="light"] body.picker-salon {
+    --picker-panel: #fffaf0f5;
+    --picker-veil: #f5ecd514;
+    --picker-heading-glow: #fffaf0;
+}
+.picker-room { position: fixed; inset: var(--entry-header-height, 76px) 0 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.picker-room-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.picker-room-day { opacity: 0; }
+html[data-theme="light"] .picker-room-day { opacity: 1; }
+.picker-room::after { content: ''; position: absolute; inset: 0; background: var(--picker-veil); }
+.picker-salon .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 94%, transparent); backdrop-filter: blur(12px); }
+.picker-salon .site-footer { background: var(--picker-panel); }
+html[data-theme] .picker-salon .workspace-hero,
+html[data-theme] .picker-salon .workspace-panel { border: 0; background: none; box-shadow: none; }
+.picker-salon .workspace-hero { display: block; padding: .5rem 0; }
+.picker-salon .workspace-hero .hero-emblem { display: none; }
+html[data-theme] .picker-salon .workspace-hero h1 {
+    position: relative;
+    color: var(--accent); font-size: clamp(1.8rem, 4vw, 2.5rem);
+    text-shadow: 0 1px 3px var(--picker-heading-glow), 0 0 6px var(--picker-heading-glow);
+}
+html[data-theme="light"] .picker-salon .workspace-hero h1 { color: #603b13; text-shadow: 1px 1px 2px #fffaf0, -1px -1px 2px #fffaf0, 0 0 5px #fffaf0; }
+html[data-theme] .picker-salon .workspace-hero h1 span { color: inherit; background: none; -webkit-text-fill-color: currentColor; }
+html[data-theme] .picker-salon .workspace-panel { padding: 0; }
+html[data-theme] .picker-salon :is(.adventure-preferences, .workspace-aside, .adventure-roulette, #adventure-result, .workspace-empty) {
+    background: var(--picker-panel); border: 1px solid var(--border); border-radius: 16px;
+    box-shadow: 0 8px 28px #0002;
+}
+.picker-salon .adventure-preferences { padding: clamp(1.25rem, 2.5vw, 1.75rem); }
+.picker-salon #adventure-result { margin-top: 1.25rem; padding: clamp(1.25rem, 2.5vw, 1.75rem); }
+.picker-salon .workspace-empty { padding: 1.5rem; }
+.picker-salon .pick-feedback { padding: .75rem 1rem; border-radius: 10px; background: var(--picker-panel); }
+/* Crossfade the same room between day and night without a black frame. */
+html:has(body.picker-salon)::view-transition-old(root) { animation: none; opacity: 1; }
+html:has(body.picker-salon)::view-transition-new(root) { animation: picker-time-shift 2200ms cubic-bezier(.4, 0, .2, 1) both; }
+@keyframes picker-time-shift { from { opacity: 0; } to { opacity: 1; } }
+@supports not (view-transition-name: root) {
+    html[data-theme-ready] .picker-room-day { transition: opacity 2200ms cubic-bezier(.4, 0, .2, 1); }
+}
+@media (max-width: 600px) { .picker-room-image { object-position: 68% top; } }
+@media (prefers-reduced-motion: reduce) {
+    html:has(body.picker-salon)::view-transition-new(root) { animation: none; }
+    html[data-theme-ready] .picker-room-day { transition: none; }
+}
