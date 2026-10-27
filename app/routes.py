@@ -319,8 +319,9 @@ def pick_game():
     reason = reasons.get(game["id"]) if game is not None and recommended else None
     games = [{**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}] if game else []
     roulette = None
-    if game is not None and not reason:
-        # The animation reveals the server's random selection without changing it.
+    if game is not None:
+        # The decorative reel reveals the server's choice in either mode.
+        # Recommendations keep their preference ranking and explanation.
         preview = sample(candidates, min(12, len(candidates)))
         if not any(row["id"] == game["id"] for row in preview):
             preview[0] = game

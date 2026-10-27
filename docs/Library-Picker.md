@@ -42,7 +42,9 @@ revealed and brought into view afterward. Reduced motion skips the reel;
 without JavaScript, normal GET navigation still returns the full result.
 Failed requests retain the previous result and allow retrying. Preference edits
 during a request discard the stale response.
-Personalized results appear directly with their explanation. Both modes leave
+For you uses the same decorative reel, then reveals the recommendation and its
+explanation. The reel does not change preference ranking or select its winner.
+Both modes leave
 library states, ratings, notes, and public reviews unchanged.
 
 All source queries use the authenticated owner's predicate. Responses are

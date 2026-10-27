@@ -1,3 +1,5 @@
+import json
+import re
 from unittest.mock import Mock
 
 import pytest
@@ -120,9 +122,12 @@ def test_personalized_pick_explains_the_evidence_and_keeps_the_library_unchanged
     response = client.get('/games/pick?pick=1')
     assert b'Recommended for you' in response.data and b'Next puzzle' in response.data
     assert b'Why this pick' in response.data and b'5/5' in response.data
-    assert b'id="roulette-data"' not in response.data
+    reel = json.loads(re.search(rb'<script id="roulette-data"[^>]*>(.*?)</script>', response.data, re.S)[1])
+    winner = next(row for row in reel['games'] if row['id'] == reel['winner_id'])
+    assert winner['title'] == 'Next puzzle'
+    assert {row['title'] for row in reel['games']} == {'Next puzzle', 'Other shooter'}
     assert b'&lt;Favorite puzzle&gt;' in response.data
-    assert b'<Favorite puzzle>' not in response.data and b'Other shooter' not in response.data
+    assert b'<Favorite puzzle>' not in response.data
     assert stored_games() == before
     assert response.headers['Cache-Control'] == 'no-store'
 
