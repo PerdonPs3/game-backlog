@@ -1,0 +1,21 @@
+{% if connections %}
+<section class="profile-connections" aria-label="Player connections">
+    {% for message in get_flashed_messages(category_filter=['connections_saved']) %}<p class="connection-feedback" role="status">{{ message }}</p>{% endfor %}
+    <div class="connection-toolbar">
+        <div class="connection-counts">
+        {% for kind, count in connections.counts.items() %}<a href="{{ url_for('following.manage', view=kind) if connections.owner else url_for('following.public_list', username=connections.username, kind=kind) }}"><strong>{{ count }}</strong> {{ ('follower' if count == 1 else 'followers') if kind == 'followers' else 'following' }}</a>{% endfor %}
+        </div>
+        <div class="connection-actions">
+        {% if connections.owner %}<a class="profile-action" href="{{ url_for('following.manage') }}">Manage connections ↗</a>
+        {% elif connections.signed_in %}
+            <form method="post" action="{{ url_for('following.change', username=connections.username, action='unfollow' if connections.state == 'accepted' else 'cancel' if connections.state == 'pending' else 'follow') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="return_to" value="profile">
+                <button type="submit">{{ 'Unfollow' if connections.state == 'accepted' else 'Cancel request' if connections.state == 'pending' else 'Follow' }}</button>
+            </form>
+            <details class="connection-block"><summary>Block player</summary><p>Remove connections and requests in both directions. Hide each other's profile and reviews while signed in.</p><form method="post" action="{{ url_for('following.change', username=connections.username, action='block') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="view" value="blocked"><button type="submit">Confirm block</button></form></details>
+        {% else %}<a class="profile-action" href="{{ url_for('auth.login') }}">Sign in to follow</a>{% endif %}
+        </div>
+    </div>
+    {% if connections.state == 'accepted' %}<p class="connection-note">Following @{{ connections.username }}</p>{% elif connections.state == 'pending' %}<p class="connection-note">Follow request pending approval.</p>{% endif %}
+</section>
+{% endif %}

@@ -1,0 +1,23 @@
+.profile-connections { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.connection-toolbar, .connection-actions, .connection-counts, .connection-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.connection-toolbar { justify-content: space-between; }
+.connection-counts a { color: var(--text-muted); text-decoration: none; font-size: .85rem; }
+.connection-counts strong { color: var(--text); font-size: 1.2rem; margin-right: .3rem; }
+.connection-actions form { margin: 0; }
+.connection-actions button { padding: .65rem 1rem; font-size: .8rem; }
+.connection-tabs { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.connection-tabs a { color: var(--text-muted); font-size: .85rem; text-decoration: none; padding: .5rem; border-radius: 8px; }
+.connection-tabs a[aria-current] { color: var(--accent); background: var(--color-panel); outline: 1px solid var(--accent); }
+.connection-feedback { padding: 1rem; border-left: 3px solid var(--accent); color: var(--text); background: var(--color-panel); }
+.connection-find { margin: 1.5rem 0; }
+.connection-find > summary, .connection-block > summary { color: var(--accent); cursor: pointer; font-size: .8rem; }
+.connection-find .player-search { margin-top: 1rem; }
+.connection-note, .connection-block p { color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
+.connection-block { max-width: 24rem; }
+.connection-list { list-style: none; padding: 0; display: grid; gap: .8rem; }
+.connection-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem; border: 1px solid var(--border); border-radius: 14px; background: var(--color-panel); }
+.connection-player, .connection-player a { display: grid; gap: .4rem; overflow-wrap: anywhere; min-width: 0; }
+.connection-player a { color: var(--text); text-decoration: none; }
+.connection-player span { color: var(--text-muted); font-size: .8rem; }
+.connection-empty { color: var(--text-muted); text-align: center; padding: 3rem 1rem; }
+@media (max-width: 600px) { .connection-card, .connection-toolbar { align-items: flex-start; flex-direction: column; } .connection-actions { gap: .6rem; } }

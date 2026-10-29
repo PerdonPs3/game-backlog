@@ -1,0 +1,31 @@
+{% extends '_profile_base.html' %}
+{% block page_title %}{{ title }} · Vestigium{% endblock %}
+{% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">← Back to profile</a>{% endblock %}
+{% block page_heading %}{{ 'Your connections' if connection_owner else title }}{% endblock %}
+{% block panel_label %}{{ title }}{% endblock %}
+{% macro action_form(player, action, label) %}
+<form method="post" action="{{ url_for('following.change', username=player.username, action=action) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="view" value="{{ kind }}"><button type="submit" aria-label="{{ label }} @{{ player.username }}">{{ label }}</button></form>
+{% endmacro %}
+{% block panel %}
+{% for message in get_flashed_messages(category_filter=['connections_saved']) %}<p class="connection-feedback" role="status">{{ message }}</p>{% endfor %}
+{% if connection_owner %}
+<nav class="connection-tabs" aria-label="Connection lists">{% for view, label in views.items() %}<a href="{{ url_for('following.manage', view=view) }}" {% if kind == view %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
+<details class="connection-find"><summary>Follow a player by username</summary><form class="player-search" method="post" action="{{ url_for('following.follow_by_username') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="follow-username">Exact @username</label><div><input id="follow-username" name="username" minlength="3" maxlength="25" pattern="@?[A-Za-z][A-Za-z0-9_]{2,23}" title="Use 3–24 letters, numbers, or underscores, starting with a letter." placeholder="@player_name" aria-describedby="follow-username-hint" required autocomplete="off" spellcheck="false"><button type="submit">Follow player</button></div><small id="follow-username-hint">Public players are followed immediately. Private players must approve your request. Following never grants access to a private profile or hidden details.</small></form></details>
+{% if kind == 'blocked' %}<p class="connection-note">Unblocking does not restore previous connections. Public content remains accessible when signed out.</p>{% endif %}
+{% else %}<p class="connection-note">@{{ username }} · Only public players appear in shared lists and counts.</p>{% endif %}
+<header class="profile-section-heading"><h2>{{ title }}</h2><span>{{ total }}</span></header>
+<ul class="connection-list">
+{% for player in players %}
+<li class="connection-card"><div class="connection-player">{% if player.is_public and kind != 'blocked' %}<a href="{{ url_for('profiles.public_profile', username=player.username) }}"><strong>{{ player.display_name }}</strong><span>@{{ player.username }}</span></a>{% else %}<strong>{{ 'Blocked player' if kind == 'blocked' else player.display_name }}</strong><span>@{{ player.username }}</span>{% endif %}</div>
+{% if connection_owner %}<div class="connection-actions">
+{% if kind == 'requests' %}{{ action_form(player, 'approve', 'Approve') }}{{ action_form(player, 'decline', 'Decline') }}
+{% elif kind == 'sent' %}{{ action_form(player, 'cancel', 'Cancel request') }}
+{% elif kind == 'followers' %}{{ action_form(player, 'remove', 'Remove follower') }}
+{% elif kind == 'following' %}{{ action_form(player, 'unfollow', 'Unfollow') }}
+{% elif kind == 'blocked' %}{{ action_form(player, 'unblock', 'Unblock') }}{% endif %}
+{% if kind != 'blocked' %}<details class="connection-block"><summary>Block</summary><p>Remove connections and requests in both directions.</p>{{ action_form(player, 'block', 'Confirm block') }}</details>{% endif %}
+</div>{% endif %}</li>
+{% else %}<li class="connection-empty">{{ 'No follow requests to review.' if kind == 'requests' else 'No pending requests.' if kind == 'sent' else 'No blocked players.' if kind == 'blocked' else 'No players to show yet.' }}</li>{% endfor %}
+</ul>
+{% if page > 1 or has_next %}<nav class="profile-review-pages" aria-label="Connection pages">{% if page > 1 %}<a href="{{ url_for('following.manage', view=kind, page=page-1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page-1) }}">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if has_next %}<a href="{{ url_for('following.manage', view=kind, page=page+1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page+1) }}">Next →</a>{% endif %}</nav>{% endif %}
+{% endblock %}
