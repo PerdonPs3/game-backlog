@@ -5,21 +5,33 @@ const { join } = require('node:path');
 const { runInNewContext } = require('node:vm');
 const source = readFileSync(join(__dirname, '../app/static/library-transitions.js'), 'utf8');
 
-function setup({ reduced = false, activation } = {}) {
+function setup({ reduced = false, activation, decode = () => Promise.resolve() } = {}) {
     const events = {};
     const dataset = {};
+    const destinations = [];
+    const images = [];
     const motion = { matches: reduced, addEventListener: (name, fn) => events.motion = fn };
     runInNewContext(source, {
         URL,
-        document: { documentElement: { dataset } },
+        setTimeout, clearTimeout,
+        Image: class {
+            constructor() { images.push(this); }
+            decode() { return decode(this.src); }
+        },
+        document: {
+            documentElement: { dataset },
+            currentScript: { src: 'http://localhost/static/library-transitions.js' },
+            addEventListener: (name, fn) => events[name] = fn,
+        },
         window: {
-            location: { href: 'http://localhost/library', origin: 'http://localhost' },
+            location: { href: 'http://localhost/library', origin: 'http://localhost', assign: url => destinations.push(url) },
+            onpageswap: null,
             navigation: { activation },
             matchMedia: () => motion,
             addEventListener: (name, fn) => events[name] = fn,
         },
     });
-    return { events, dataset };
+    return { events, dataset, destinations, images };
 }
 function route(from, to) {
     return { from: { url: from }, entry: { url: to } };
@@ -72,4 +84,100 @@ test('reduced motion skips travel and can stop an active camera move', () => {
     normal.events.pageswap({ type: 'pageswap', activation, viewTransition: active });
     normal.events.motion({ matches: true });
     assert.equal(active.skipped, true);
+});
+
+function click(href, overrides = {}) {
+    const link = { href, hasAttribute: () => false };
+    return { button: 0, prevented: false,
+        target: { closest: selector => selector === '.section-navigation a' ? link : null },
+        preventDefault() { this.prevented = true; }, stopImmediatePropagation() {}, ...overrides };
+}
+
+test('navigation waits for decoded artwork and preserves the full filtered destination', async () => {
+    let release;
+    const ui = setup({ decode: () => new Promise(resolve => release = resolve) });
+    const destination = 'http://localhost/library/wishlist?from=%2Flibrary%3Fq%3DPortal';
+    const event = click(destination);
+    const pending = ui.events.click(event);
+    assert.equal(event.prevented, true);
+    assert.deepEqual(ui.destinations, []);
+    release();
+    await pending;
+    assert.deepEqual(ui.destinations, [destination]);
+    assert.equal(ui.images[0].src, 'http://localhost/static/images/backgrounds/wishlist-observatory-night.webp');
+});
+
+test('rapid clicks during loading select the latest destination and never navigate twice', async () => {
+    const releases = [];
+    const ui = setup({ decode: () => new Promise(resolve => releases.push(resolve)) });
+    const first = ui.events.click(click('http://localhost/library/wishlist'));
+    const second = ui.events.click(click('http://localhost/library/lists'));
+    releases.forEach(resolve => resolve());
+    await Promise.all([first, second]);
+    assert.deepEqual(ui.destinations, ['http://localhost/library/lists']);
+    await ui.events.click(click('http://localhost/library/pick'));
+    assert.equal(ui.destinations.length, 1);
+});
+
+test('active travel cannot be interrupted by another tab click', async () => {
+    const ui = setup();
+    const animation = transition();
+    ui.events.pageswap({ type: 'pageswap', activation: route('/library', '/library/lists'), viewTransition: animation });
+    const event = click('http://localhost/library/pick');
+    await ui.events.click(event);
+    assert.equal(event.prevented, true);
+    assert.deepEqual(ui.destinations, []);
+    animation.finish();
+});
+
+test('new tabs and same-room filters retain native link behavior', async () => {
+    const ui = setup();
+    for (const event of [click('http://localhost/library/lists', { ctrlKey: true }), click('http://localhost/library?q=Portal')]) {
+        await ui.events.click(event);
+        assert.equal(event.prevented, false);
+    }
+    assert.equal(ui.images.length, 0);
+});
+
+test('unavailable artwork never traps navigation or cancels a captured departure', async () => {
+    const ui = setup({ decode: () => Promise.reject(new Error('Image unavailable')),
+        activation: route('/library', '/library/lists') });
+    await ui.events.click(click('http://localhost/library/lists'));
+    assert.equal(ui.destinations.length, 1);
+    const animation = transition();
+    ui.events.pagereveal({ type: 'pagereveal', viewTransition: animation });
+    assert.equal(animation.skipped, false);
+    animation.finish();
+});
+
+test('a stalled image cannot leave navigation waiting indefinitely', async () => {
+    const ui = setup({ decode: () => new Promise(() => {}) });
+    await ui.events.click(click('http://localhost/library/wishlist'));
+    assert.deepEqual(ui.destinations, ['http://localhost/library/wishlist']);
+});
+
+test('restoring a document cancels stale pending navigation and releases the departure lock', async () => {
+    let release;
+    const ui = setup({ decode: () => new Promise(resolve => release = resolve) });
+    const waiting = ui.events.click(click('http://localhost/library/lists'));
+    ui.events.pageshow();
+    release();
+    await waiting;
+    assert.deepEqual(ui.destinations, []);
+    await ui.events.click(click('http://localhost/library/lists'));
+    assert.equal(ui.destinations.length, 1);
+    ui.events.pageshow();
+    await ui.events.click(click('http://localhost/library/lists'));
+    assert.equal(ui.destinations.length, 2);
+});
+
+test('theme controls cannot cancel an active room transition', async () => {
+    const ui = setup();
+    const animation = transition();
+    ui.events.pageswap({ type: 'pageswap', activation: route('/library', '/library/lists'), viewTransition: animation });
+    const event = click('', { target: { closest: selector => selector === '[data-theme-toggle]' ? {} : null } });
+    await ui.events.click(event);
+    assert.equal(event.prevented, true);
+    assert.equal(animation.skipped, false);
+    animation.finish();
 });

@@ -84,4 +84,16 @@ filters, and browser history remain native. Reduced-motion preferences skip the
 animation; browsers without document-transition support navigate normally.
 The separate, slower day/night theme dissolve remains unchanged.
 
+Room navigation prepares and decodes the destination's static artwork before
+leaving (with a 1.2-second maximum wait). Pointer/focus intent and idle time warm
+only the selected theme's artwork, never private page responses; idle warming
+respects Save-Data. Rapid clicks while loading choose the latest destination,
+and tab/theme clicks during active travel cannot start a competing transition.
+An image failure or timeout falls back to normal navigation without waiting
+indefinitely. Arrival does not cancel an already captured outgoing transition
+based on the new image element's initial loading flag.
+All room snapshots cover the same viewport to avoid a size change at the salon.
+The theme toggle is revealed during `pagereveal`, before the navigation snapshot,
+so its later initialization cannot shift the header at arrival.
+
 Regression coverage includes owner/other-player/anonymous game views, ID collisions, old owner aliases, manual entries, catalog outages, unsafe return destinations, filtered navigation, login continuation, and wishlist returns. Browser verification uses a local PostgreSQL preview with fictitious accounts, not hosted development or production data.

@@ -28,6 +28,7 @@ function setup({ saved = null, light = false, blocked = false, animated = false,
     runInNewContext(readFileSync(join(__dirname, "../app/static/theme.js"), "utf8"), { document, window });
     return { root, button, caption, writes, media, events, transitions,
         ready() { ready = true; events.DOMContentLoaded(); },
+        reveal() { ready = true; events.pagereveal(); },
         system(light) { media.matches = light; mediaEvents.change(); },
     };
 }
@@ -39,6 +40,16 @@ test("applies system theme before page content loads and reveals the accessible 
     ui.ready();
     assert.equal(ui.button.hidden, false);
     assert.equal(ui.button.attributes["aria-label"], "Switch to dark mode");
+});
+
+test("page reveal lays out the theme toggle before the navigation snapshot", () => {
+    const ui = setup({ saved: 'dark', animated: true });
+    ui.reveal();
+    assert.equal(ui.button.hidden, false);
+    assert.equal(ui.button.attributes['aria-label'], 'Switch to light mode');
+    assert.equal(ui.transitions.length, 0);
+    ui.ready();
+    assert.equal(typeof ui.button.click, 'function');
 });
 
 test("saved preference overrides system and switching remembers the next theme", () => {

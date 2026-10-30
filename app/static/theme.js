@@ -35,6 +35,8 @@
         render(theme);
     }
     apply();
+    // Reveal the header toggle before a cross-document transition captures it.
+    window.addEventListener("pagereveal", () => render(root.dataset.theme));
     document.addEventListener("DOMContentLoaded", () => {
         apply();
         root.dataset.themeReady = "true";
