@@ -69,7 +69,7 @@
 }
 .library-archive .library-hero .collection-count::before { display: none; }
 .library-archive .library-heading {
-    display: grid; grid-template-columns: minmax(140px, 1.35fr) minmax(0, 2fr) minmax(0, 4fr);
+    display: grid; grid-template-columns: minmax(140px, 1.35fr) minmax(0, 4fr) minmax(0, 2fr);
     width: 100%; max-width: 100%; gap: .75rem; padding: .5rem;
 }
 .library-archive .library-heading .library-primary-tools { display: contents; }
@@ -88,7 +88,7 @@
 .library-archive .library-heading .hero-actions .hero-add-game {
     width: 100%; min-width: 0; min-height: 40px; padding: .3rem .75rem .3rem .4rem;
 }
-.library-archive .library-heading .backup-actions { width: 100%; min-width: 0; margin: 0; order: 0; }
+.library-archive .library-heading .backup-actions { width: 100%; min-width: 0; margin: 0; order: 0; padding-left: .75rem; border-left: 1px solid var(--border); }
 .library-archive .library-heading .collection-view-switch {
     width: 100%; height: 40px; padding: 0; background: none; border: 0;
 }
@@ -96,14 +96,17 @@
 .library-archive .library-heading .collection-view-switch:not([hidden]) {
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem;
 }
+@media(max-width:950px) {
+    .library-archive .library-heading .backup-actions { border-left: 0; padding-left: 0; }
+}
 @media(min-width:701px) and (max-width:950px) {
     .library-archive .library-heading { grid-template-columns: 1fr 1fr; }
-    .library-heading .section-navigation { grid-column: 1 / -1; border-left: 0; padding-left: 0; }
+    .library-heading .section-navigation { grid-column: 1 / -1; grid-row: 1; border-left: 0; padding-left: 0; }
     .library-archive .library-heading .hero-actions { padding-left: 0; border-left: 0; }
 }
 @media(max-width:700px) {
     .library-archive .library-heading { display: grid; grid-template-columns: auto minmax(0, 1fr); width: 100%; gap: .5rem; }
-    .library-heading .section-navigation { grid-column: 1 / -1; width: 100%; justify-content: space-between; border-left: 0; padding-left: 0; }
+    .library-heading .section-navigation { grid-column: 1 / -1; grid-row: 1; width: 100%; justify-content: space-between; border-left: 0; padding-left: 0; }
     .library-heading .section-navigation a { padding-inline: .5rem; font-size: .74rem; }
     .library-archive .library-heading .hero-actions { padding-left: 0; border-left: 0; }
     .library-archive .library-heading .backup-actions { min-width: 0; justify-content: flex-end; }
