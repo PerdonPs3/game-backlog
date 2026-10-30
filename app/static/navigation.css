@@ -58,3 +58,10 @@
     .catalog-personal-progress { padding: 1rem; }
     .catalog-personal-progress > header { display: block; }
 }
+
+.library-heading .section-navigation {
+    margin: 0; padding: 0; border: 0; background: none; gap: .25rem;
+}
+.library-heading .section-navigation a {
+    display: inline-flex; align-items: center; min-height: 44px; padding: .6rem .7rem;
+}
