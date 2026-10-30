@@ -3,7 +3,7 @@
     <a href="{{ url_for('discovery.index') }}" {% if navigation_group == 'discover' %}aria-current="page"{% endif %}>Discover</a>
     {% if accounts_enabled %}<a href="{{ url_for('profiles.search') }}" {% if navigation_group == 'community' %}aria-current="page"{% endif %}>Community</a>
     {% if account_user %}
-    <details class="account-menu"><summary aria-label="Your account"><span class="account-menu-avatar" aria-hidden="true">{{ navigation_initial }}</span><span class="account-menu-label">Account</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel">
+    <details class="account-menu"><summary aria-label="Your account"><span class="account-menu-avatar" aria-hidden="true">{{ navigation_initial }}</span><span class="account-menu-label">Account</span><svg class="account-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="account-menu-panel">
         <a href="{{ profile_url() }}">My profile</a><a href="{{ url_for('auth.profile') }}">Settings</a><a href="{{ url_for('navigation.data') }}">Data &amp; backups</a>
         <form action="{{ url_for('auth.logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
     </div></details>

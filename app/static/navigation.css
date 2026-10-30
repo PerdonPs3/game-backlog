@@ -8,6 +8,8 @@
 .account-menu { position: relative; margin-left: .5rem; }
 .account-menu summary { display: flex; align-items: center; gap: .5rem; cursor: pointer; list-style: none; font-size: .78rem; color: var(--text); border: 1px solid var(--border); border-radius: 99px; padding: .3rem .65rem .3rem .3rem; }
 .account-menu summary::-webkit-details-marker { display: none; }
+.account-menu .account-menu-chevron { display: block; flex: 0 0 14px; width: 14px; height: 14px; opacity: .8; }
+.account-menu[open] .account-menu-chevron { transform: rotate(180deg); }
 .account-menu-avatar { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid color-mix(in srgb,var(--accent) 40%,var(--border)); border-radius: 50%; background: color-mix(in srgb,var(--accent) 12%,var(--color-panel)); color: var(--accent); font-weight: 700; }
 .account-menu-panel { position: absolute; top: calc(100% + .65rem); right: 0; min-width: 190px; padding: .4rem; border: 1px solid var(--border); background: var(--color-panel); border-radius: 13px; box-shadow: 0 12px 40px #0005; z-index: 110; }
 .account-menu-panel a,.account-menu-panel button { display: block; width: 100%; padding: .75rem; margin: 0; text-align: left; background: none; border: 0; border-radius: 8px; color: var(--text-muted); font-size: .8rem; text-decoration: none; }
