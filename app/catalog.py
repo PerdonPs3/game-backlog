@@ -52,6 +52,40 @@ class IGDBClient:
         self._game_cache = {}
         self._genre_cache = {}
         self._card_cache = {}
+        self._discovery_cache = {}
+
+    def get_discovery_games(self, genres=(), platform=None):
+        """Cache bounded public candidate pools; never cache personal rankings."""
+        genres = tuple(sorted(set(genres)))
+        if len(genres) > 6 or any(not isinstance(value, str) or not 1 <= len(value) <= 80 for value in genres):
+            raise CatalogError("Choose valid genres.")
+        if platform is not None and (type(platform) is not int or not 0 < platform < 1000000):
+            raise CatalogError("Choose a valid platform.")
+        with self._lock:
+            key = (genres, platform)
+            cached = self._discovery_cache.get(key)
+            if cached and monotonic() < cached[0]:
+                return cached[1]
+            conditions = ['version_parent = null', 'cover != null',
+                          f'first_release_date <= {int(datetime.now(timezone.utc).timestamp())}',
+                          'game_type.type != ("Bundle","Pack","Pack / Addon","Port","Mod","Fan Game")']
+            if genres:
+                conditions.append(f'genres.name = ({",".join(json.dumps(value) for value in genres)})')
+            if platform:
+                conditions.append(f'platforms = ({platform})')
+            raw = self._query_games(
+                f'fields {GAME_FIELDS},genres.name,total_rating_count,keywords.name; '
+                f'where {" & ".join(conditions)}; sort total_rating_count desc; limit 200;'
+            )
+            unique = {}
+            for game in raw:
+                if not is_game_pack(game) and not is_game_variant(game) and not is_community_game(game):
+                    unique.setdefault(game['id'], game)
+            games = list(unique.values())
+            if len(self._discovery_cache) >= 32:
+                self._discovery_cache.clear()
+            self._discovery_cache[key] = (monotonic() + 300, games)
+            return games
 
     def get_game_cards(self, game_ids):
         """Resolve a bounded page of public titles and covers in one request."""

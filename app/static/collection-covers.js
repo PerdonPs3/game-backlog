@@ -2,7 +2,7 @@
 
 (() => {
     function bindCoverFallbacks() {
-        document.querySelectorAll(".game-card-cover img").forEach((image) => {
+        document.querySelectorAll(".game-card-cover img, .discover-cover img").forEach((image) => {
             if (!image.dataset.fallbackBound) {
                 image.addEventListener("error", () => image.remove());
                 image.dataset.fallbackBound = "true";

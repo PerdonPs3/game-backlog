@@ -1,0 +1,20 @@
+{
+  "generator": "Built-in ImageGen",
+  "reference": "Owner-approved third Connections mockup: moonlit courtyard",
+  "assets": [
+    {
+      "path": "app/static/images/backgrounds/discover-courtyard-night.webp",
+      "prompt": "Use case: stylized-concept. Asset type: full-bleed decorative website background, landscape 3:2. Input image is a STYLE AND ARCHITECTURE REFERENCE: the approved moonlit courtyard mockup for Vestigium. Create the clean underlying courtyard illustration without ANY interface. Rebuild the areas hidden by all panels and text as continuous scenery. A romantic gothic castle courtyard in a richly painted fantasy adventure game, ivy-wrapped stone arches framing both edges, blue flowering shrubs, warm golden lanterns, a small stone fountain at lower right, reflective cobblestones and steps in foreground, cypress trees and distant castle towers under a deep blue starry moonlit sky. Central middle area quiet and open for real HTML cards to overlay later. Same elegant realistic painterly style as the reference. Maintain midnight blues and warm amber lights, peaceful welcoming adventurous mood. Wide scene with usable edge decoration at desktop and center crop on phone. Absolutely no text, no lettering, no logo, no UI, no frames, no buttons, no people, no portraits."
+    },
+    {
+      "path": "app/static/images/backgrounds/discover-courtyard-day.webp",
+      "prompt": "Use case: lighting-weather. Edit target: the clean moonlit courtyard illustration. Change ONLY the time of day to a beautiful sunlit late-morning version of exactly the same scene. Preserve every arch, lantern, flowering ivy vine, stone terrace, fountain, cypress tree, distant castle silhouette, mountain, camera perspective and framing in precisely aligned positions. Pale blue daytime sky, remove visible moon and stars, warm sun on limestone, verdant foliage with blue and cream flowers, sparkling fountain water, soft shadows, inviting elegant fantasy atmosphere. Lanterns remain in same place with very faint daylight glow. Same polished realistic painterly fantasy game art. Maintain detailed texture and usable quiet central area for webpage overlays. Landscape 3:2. Absolutely no text, interface, buttons, labels, logos or people."
+    }
+  ],
+  "export": {
+    "format": "WebP",
+    "width": 1536,
+    "height": 1024,
+    "quality": 88
+  }
+}
