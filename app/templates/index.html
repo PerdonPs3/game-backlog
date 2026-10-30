@@ -93,6 +93,7 @@
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
         <div class="library-heading">
             <div class="library-primary-tools">
+                {% include '_section_nav.html' %}
                 <span id="collection-count" class="collection-count" role="status" aria-live="polite">{% if search_query or selected_status or selected_list %}{{ games|length }} of {{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% else %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% endif %}</span>
                 <div class="hero-actions">
                     <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
@@ -101,7 +102,6 @@
                         <svg class="archive-action-arrow" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
                     </a>
                 </div>
-                {% include '_section_nav.html' %}
             </div>
 
             <div class="backup-actions">
