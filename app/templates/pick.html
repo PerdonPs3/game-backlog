@@ -13,6 +13,7 @@
 {% block panel_label %}Your suggested game{% endblock %}
 {% block panel %}
     <form method="get" action="{{ url_for('main.pick_game') }}" class="workspace-form adventure-preferences">
+        {% if library_section and '?' in library_home_url() %}<input type="hidden" name="from" value="{{ library_home_url() }}">{% endif %}
         <input type="hidden" name="pick" value="1">
         <input type="hidden" name="status_filter" value="1">
         <fieldset class="pick-modes">
@@ -48,7 +49,7 @@
         <p id="pick-genre-help" class="adventure-hint">Genres come from catalog-linked games in your selected states. Entries without a known genre are included only with Any genre.</p>
         <div class="form-actions">
             <button type="submit">Pick a game <span aria-hidden="true">↗</span></button>
-            {% if selected_platform or selected_genre or selected_statuses != ['Backlog'] or mode != 'recommended' %}<a href="{{ url_for('main.pick_game') }}">Reset preferences</a>{% endif %}
+            {% if selected_platform or selected_genre or selected_statuses != ['Backlog'] or mode != 'recommended' %}<a href="{{ library_section_url('main.pick_game') }}">Reset preferences</a>{% endif %}
         </div>
     </form>
     <p id="pick-feedback" class="pick-feedback" role="status" hidden></p>

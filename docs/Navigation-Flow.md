@@ -11,6 +11,21 @@ Implemented locally on `refactor/navigation-flow`; integration and publication r
 
 Settings contains Profile, Privacy, and Data & backups. Contextual return links sit below the header so they remain available on small screens.
 
+## A shared library shell
+
+All games, Wishlist, Lists, and Pick a game share the same `Your library` heading,
+owner-scoped gamepad counter, Add game action, section tabs, and Cards/Shelf control.
+The toolbar stays above the section's search or preferences at the same position.
+The picker retains its illustrated day/night salon; the other private library tabs
+use the archive background. Public wishlists retain their separate public layout.
+
+Validated collection search, status, sort, and personal-list filters travel between
+tabs in local `from` context. Live filtering updates sibling links as well. Return
+context remains in the current journey's URL; shared browser storage and account
+history are not used for these filters. A removed
+or foreign list is discarded from the return context. Cards/Shelf on a sibling tab
+opens All games in that view with the retained collection filters.
+
 ## Canonical routes
 
 | Purpose | Address |

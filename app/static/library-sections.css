@@ -1,0 +1,17 @@
+/* The same library shell anchors every private section. */
+.library-section-page main.library-layout { width: min(100% - 2.5rem, 1120px); padding: 0; }
+.library-section-page .library-heading { margin-block: 1.5rem; }
+.library-section-page .library-hero { min-height: 56px; }
+.library-section-page .workspace-body { margin-top: 0; }
+.library-section-page .workspace-panel { background: var(--archive-panel); border-color: var(--border); }
+.library-section-heading { margin-bottom: 1.5rem; }
+.library-section-heading h2 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); color: var(--accent); letter-spacing: -.025em; }
+.library-section-heading p { margin: .6rem 0 0; color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
+.library-section-page .library-layout #filter-message:empty { display: none; }
+.library-section-page .library-layout #collection-filters { margin-top: 0; }
+.library-section-page:not(.picker-salon) .workspace-body { grid-template-columns: minmax(0, 1fr); }
+.library-section-page .library-hero .hero-copy { flex-wrap: wrap; }
+@media(max-width:760px) {
+    .library-section-page main.library-layout { width: calc(100% - 1.5rem); }
+    .library-section-page .library-heading { margin-block: 1.25rem; }
+}

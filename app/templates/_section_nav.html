@@ -1,9 +1,9 @@
 {% if navigation_group == 'library' and (account_user or not accounts_enabled) %}
 <nav class="section-navigation" aria-label="Library sections">
-    <a href="{{ url_for('main.index') }}" {% if request.endpoint == 'main.index' %}aria-current="page"{% endif %}>All games</a>
-    {% if account_user %}<a href="{{ url_for('wishlist.index') }}" {% if request.endpoint == 'wishlist.index' %}aria-current="page"{% endif %}>Wishlist</a>{% endif %}
-    <a href="{{ url_for('main.lists') }}" {% if request.endpoint in ['main.lists','main.edit_list'] %}aria-current="page"{% endif %}>Lists</a>
-    <a href="{{ url_for('main.pick_game') }}" {% if request.endpoint == 'main.pick_game' %}aria-current="page"{% endif %}>Pick a game</a>
+    <a href="{{ library_home_url() if library_section else url_for('main.index') }}" {% if request.endpoint == 'main.index' %}aria-current="page"{% endif %}>All games</a>
+    {% if account_user %}<a href="{{ library_section_url('wishlist.index') if library_section else url_for('wishlist.index') }}" {% if request.endpoint == 'wishlist.index' %}aria-current="page"{% endif %}>Wishlist</a>{% endif %}
+    <a href="{{ library_section_url('main.lists') if library_section else url_for('main.lists') }}" {% if request.endpoint in ['main.lists','main.edit_list'] %}aria-current="page"{% endif %}>Lists</a>
+    <a href="{{ library_section_url('main.pick_game') if library_section else url_for('main.pick_game') }}" {% if request.endpoint == 'main.pick_game' %}aria-current="page"{% endif %}>Pick a game</a>
 </nav>
 {% elif navigation_group == 'community' %}
 <nav class="section-navigation" aria-label="Community sections"><a href="{{ url_for('profiles.search') }}" {% if request.endpoint == 'profiles.search' %}aria-current="page"{% endif %}>Find players</a>{% if account_user %}<a href="{{ url_for('following.manage') }}" {% if request.endpoint == 'following.manage' %}aria-current="page"{% endif %}>Connections</a>{% endif %}</nav>

@@ -27,9 +27,12 @@ def test_secondary_pages_share_design_accessible_heading_and_navigation(client, 
     assert sum(tag == "main" for tag, _ in parser.tags) == 1
     body_classes = next(attrs.get("class", "").split() for tag, attrs in parser.tags if tag == "body")
     assert {"library-page", "workspace-page"}.issubset(body_classes)
-    assert 'class="workspace-hero"' in html
+    assert ('class="library-hero"' if page == 'pick' else 'class="workspace-hero"') in html
     assert 'aria-label="Site navigation"' in html
-    assert 'class="hero-emblem" data-hero-logo aria-hidden="true"' in html
+    if page == 'pick':
+        assert 'aria-label="Library sections"' in html
+    else:
+        assert 'class="hero-emblem" data-hero-logo aria-hidden="true"' in html
     assert "cursor-glow.js" in html
     assert ("Back to collection" if page == "pick" else "Back to Library") in html
     if page != "pick":

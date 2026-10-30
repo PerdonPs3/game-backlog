@@ -122,9 +122,55 @@ def game_url(catalog_id, title=None, *, origin=True, section=None):
     return url_for('explore.game', **values)
 
 
+LIBRARY_SECTIONS = {'main.index', 'wishlist.index', 'main.lists', 'main.pick_game'}
+
+
+def library_home_url():
+    """Carry collection filters through sibling tabs without storing private queries."""
+    if hasattr(g, 'library_home'):
+        return g.library_home
+    source = navigation_origin() if request.endpoint == 'main.index' else safe_destination(request.args.get('from'))
+    values = {}
+    if source:
+        parsed = urlsplit(source)
+        try:
+            endpoint, _ = current_app.url_map.bind('').match(parsed.path, method='GET')
+        except HTTPException:
+            endpoint = None
+        if endpoint == 'main.index':
+            from app.game_fields import STATUSES
+            from app.db import get_db
+            from app.ownership import owned
+            options = dict(parse_qsl(parsed.query))
+            if options.get('q') and len(options['q']) <= 200:
+                values['q'] = options['q']
+            if options.get('status') in STATUSES:
+                values['status'] = options['status']
+            if options.get('sort') in ('oldest', 'title', 'rating'):
+                values['sort'] = options['sort']
+            list_id = options.get('list', '')
+            if (list_id.isascii() and list_id.isdigit() and len(list_id) <= 18
+                    and get_db().execute(f'SELECT 1 FROM game_lists WHERE id = ? AND {owned()}', (int(list_id),)).fetchone()):
+                values['list'] = list_id
+    g.library_home = url_for('main.index', **values)
+    return g.library_home
+
+
+def library_section_url(endpoint, **values):
+    if endpoint not in LIBRARY_SECTIONS:
+        raise ValueError('Choose a library section.')
+    if endpoint == 'main.index':
+        return library_home_url()
+    home = library_home_url()
+    if '?' in home:
+        values['from'] = home
+    return url_for(endpoint, **values)
+
+
 def init_app(app):
     app.jinja_env.globals.update(game_url=game_url, navigation_return=navigation_return,
-                                navigation_origin=navigation_origin)
+                                navigation_origin=navigation_origin,
+                                library_home_url=library_home_url, library_section_url=library_section_url)
     @app.url_defaults
     def navigation_defaults(endpoint, values):
         if endpoint == 'explore.game':
@@ -145,9 +191,16 @@ def init_app(app):
         if endpoint in ('auth.profile', 'auth.edit_showcase', 'main.export_backup', 'main.import_backup', 'navigation.data'):
             group = 'settings'
         profile = getattr(g, 'profile', None)
+        library_section = endpoint in LIBRARY_SECTIONS
+        library_total = 0
+        if library_section and endpoint != 'main.index' and (not current_app.config.get('AUTH_ENABLED') or normal_owner()):
+            from app.db import get_db
+            from app.ownership import owned
+            library_total = get_db().execute(f'SELECT COUNT(*) FROM games WHERE {owned()}').fetchone()[0]
         return {'game_url': game_url, 'navigation_return': navigation_return,
                 'navigation_return_label': navigation_return_label,
                 'navigation_origin': navigation_origin, 'navigation_group': group,
+                'library_section': library_section, 'library_total': library_total,
                 'navigation_initial': ((profile['display_name'] if profile else 'You') or 'You')[:1].upper()}
 
     from flask import render_template, redirect

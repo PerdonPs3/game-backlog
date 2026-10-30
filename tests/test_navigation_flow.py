@@ -137,3 +137,46 @@ def test_wishlist_save_retains_validated_discover_context(accounts):
     assert result.status_code == 303 and result.location == target
     forged = submit(alice,'/wishlist/games/123/remove',{'return_path':'//evil.example'},source='/library/wishlist')
     assert forged.status_code == 303 and forged.location == '/library/wishlist'
+
+
+@pytest.mark.parametrize('path', ['/library', '/library/wishlist', '/library/lists', '/library/pick'])
+def test_library_tabs_share_one_heading_toolbar_and_owner_scoped_counter(accounts, path):
+    from tests.test_library_layout import LibraryParser
+    fake_catalog(accounts)
+    alice = sign_in(accounts,'alice')
+    sign_in(accounts,'bob')
+    seed(accounts,ALICE)
+    seed(accounts,BOB,notes='OTHER PRIVATE')
+    page = alice.get(path)
+    assert page.status_code == 200
+    parser = LibraryParser(); parser.feed(page.text)
+    assert sum(tag == 'h1' for tag, _ in parser.tags) == 1
+    assert 'class="library-wordmark"' in page.text
+    assert 'library-section-page' in page.text and page.text.count('class="library-heading"') == 1
+    assert any(tag == 'a' and attrs.get('href') == path and attrs.get('aria-current') == 'page' for tag,attrs in parser.tags)
+    assert any(attrs.get('id') == 'collection-count' and attrs.get('aria-label') == '1 game' for _,attrs in parser.tags)
+    assert 'OTHER PRIVATE' not in page.text
+    assert page.text.index('class="library-heading"') < page.text.index('id="game-collection"' if path == '/library' else 'class="workspace-body"')
+
+
+def test_library_tabs_carry_filters_without_accepting_external_or_foreign_origins(accounts):
+    from tests.test_library_layout import LibraryParser
+    fake_catalog(accounts)
+    alice = sign_in(accounts,'alice')
+    sign_in(accounts,'bob')
+    with accounts.app_context():
+        foreign = get_db().execute("INSERT INTO game_lists (name,name_key,owner_id) VALUES ('Private','private',?) RETURNING id", (BOB,)).fetchone()[0]
+    root = '/library?q=Portal&status=Playing&sort=rating'
+    page = alice.get('/library/wishlist',query_string={'from':root})
+    parser = LibraryParser();parser.feed(page.text)
+    links = [attrs for tag,attrs in parser.tags if tag == 'a']
+    assert any(attrs.get('href') == root for attrs in links)
+    picker = next(attrs['href'] for attrs in links if urlsplit(attrs.get('href','')).path == '/library/pick')
+    assert parse_qs(urlsplit(picker).query)['from'] == [root]
+    pick_page = alice.get(picker)
+    assert 'name="from"' in pick_page.text and 'data-library-url="/library?q=Portal&amp;status=Playing&amp;sort=rating"' in pick_page.text
+    for origin in ('https://evil.example', '/players/alice_player', f'/library?list={foreign}'):
+        page = alice.get('/library/lists',query_string={'from':origin})
+        parser = LibraryParser();parser.feed(page.text)
+        homes = [attrs['href'] for tag,attrs in parser.tags if tag == 'a' and urlsplit(attrs.get('href','')).path == '/library']
+        assert homes and all(home == '/library' for home in homes)

@@ -14,29 +14,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='library-archive.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='navigation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='library-sections.css') }}">
 </head>
-<body class="library-page library-archive">
+<body class="library-page library-archive library-section-page">
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
-    <div class="library-room" aria-hidden="true">
-        <div class="library-room-art">
-            <img class="library-room-image library-room-night" src="{{ url_for('static', filename='images/backgrounds/library-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
-            <img class="library-room-image library-room-day" src="{{ url_for('static', filename='images/backgrounds/library-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
-            <svg class="library-room-seal" viewBox="55 40 330 365" focusable="false"><use href="#brand-symbol" /></svg>
-        </div>
-    </div>
+    {% include '_library_backdrop.html' %}
     <main class="library-layout">
-        <header class="library-hero">
-            <div class="hero-copy">
-
-                <h1 class="library-wordmark">Your <span>library</span></h1>
-                {% set filtered_collection = search_query or selected_status or selected_list %}
-                <span class="collection-count" role="status" aria-live="polite">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12h4m-2-2v4m7-1h.01M17 10h.01M6.8 6h10.4a4 4 0 0 1 3.95 3.35l1.1 6.7a3 3 0 0 1-5.1 2.6L15.5 17h-7l-1.65 1.65a3 3 0 0 1-5.1-2.6l1.1-6.7A4 4 0 0 1 6.8 6Z"/></svg>
-                    <span id="collection-count" aria-label="{% if filtered_collection %}{{ games|length }} of {% endif %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}">{% if filtered_collection %}{{ games|length }} / {% endif %}{{ collection_total }}</span>
-                </span>
-
-            </div>
-        </header>
+        {% include '_library_header.html' %}
+        {% include '_library_toolbar.html' %}
         {% for message in get_flashed_messages(category_filter=['catalog_saved']) %}
         <p class="workspace-success library-save-feedback" role="status"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>{{ message }}</p>
         {% endfor %}
@@ -96,25 +81,6 @@
             </div>
         </form>
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
-        <div class="library-heading">
-            <div class="library-primary-tools">
-                <div class="hero-actions">
-                    <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
-                        <span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9a2 2 0 0 1 2 2v5M5 4a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7M5 4v13M3 19a2 2 0 0 0 2 2h7m6-7v8m-4-4h8"/></svg></span>
-                        <span>Add game</span>
-                        <svg class="archive-action-arrow" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            {% include '_section_nav.html' %}
-            <div class="backup-actions">
-                <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>
-                    <button type="button" data-collection-view="cards" aria-pressed="true" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Cards</button>
-                    <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
-                </div>
-            </div>
-        </div>
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}
         </section>
@@ -135,6 +101,7 @@
 
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-view.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='library-sections.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-filters.js') }}" defer></script>
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
     <script src="{{ url_for('static', filename='delete-confirmation.js') }}" defer></script>

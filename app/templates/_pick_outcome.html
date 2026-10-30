@@ -39,7 +39,7 @@
         {% include '_game_collection.html' %}
         <div class="page-actions">
             <a class="button-link" data-pick-again href="{{ url_for('main.pick_game', platform=selected_platform, genre=selected_genre, mode=mode, status=selected_statuses, status_filter=1, pick=1) }}">Pick again</a>
-            <a href="{{ url_for('main.index') }}">Back to collection</a>
+            <a href="{{ library_home_url() if library_section else url_for('main.index') }}">Back to collection</a>
         </div>
         </div>
     {% else %}
@@ -66,7 +66,7 @@
             {% endif %}
             <div class="page-actions">
                 {% if pick_requested or not has_backlog %}<a class="button-link" href="{{ url_for('main.create') }}">Add game</a>{% endif %}
-                <a href="{{ url_for('main.index') }}">Back to collection</a>
+                <a href="{{ library_home_url() if library_section else url_for('main.index') }}">Back to collection</a>
             </div>
         </div>
     {% endif %}
