@@ -7,7 +7,7 @@
     {% for review in profile_reviews %}
     {% call(slot) review_card(review, review.game_title, profile=true) %}
     {% if slot == 'identity' %}
-    <a class="community-review-author" href="{{ url_for('explore.game', catalog_id=review.catalog_id, _anchor='community-reviews') }}">
+    <a class="community-review-author" href="{{ game_url(review.catalog_id, review.game_title, section='community-reviews') }}">
         <span class="community-review-avatar community-review-game" aria-hidden="true">{% if review.cover_url %}<img src="{{ review.cover_url }}" alt="" width="44" height="60" loading="lazy" referrerpolicy="no-referrer">{% else %}{{ review.game_title[:1] }}{% endif %}</span>
         <span class="community-review-identity"><span class="community-review-byline"><strong>{{ review.game_title }}</strong><time datetime="{{ review.updated_at[:10] }}">{{ review.updated_at[:10] }}</time></span></span>
     </a>

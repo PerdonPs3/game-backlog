@@ -32,6 +32,8 @@ def require_owner():
     if request.endpoint in ('wishlist.public', 'wishlist.continue_selection'):
         return
     if not g.user:
+        from app.navigation import remember_login_destination
+        remember_login_destination()
         return redirect(url_for('auth.login'))
     if g.account_session['recovery']:
         return redirect(url_for('auth.password'))
@@ -77,8 +79,9 @@ def continue_selection(catalog_id):
 @wishlist.post('/wishlist/games/<int:catalog_id>/add')
 def add(catalog_id):
     catalog_id_valid(catalog_id)
-    discover_return = None
-    if request.form.get('return_to') == 'discover':
+    from app.navigation import safe_destination
+    discover_return = safe_destination(request.form.get('return_path'))
+    if not discover_return and request.form.get('return_to') == 'discover':
         from app.discovery import selected_filters
         genre, platform, mode, _ = selected_filters(request.form)
         discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode)
@@ -129,6 +132,10 @@ def remove(catalog_id):
     # even when the catalog provider has retired a game or is offline.
     get_db().execute('DELETE FROM wishlist_games WHERE owner_id = ? AND catalog_id = ?', (g.user['id'], catalog_id))
     flash('Removed from your wishlist.', 'wishlist_saved')
+    from app.navigation import safe_destination
+    source = safe_destination(request.form.get('return_path'))
+    if source:
+        return redirect(source, code=303)
     if request.form.get('return_to') == 'game':
         return redirect(url_for('explore.game', catalog_id=catalog_id, _anchor='game-actions'), code=303)
     return redirect(url_for('wishlist.index'), code=303)
@@ -158,13 +165,13 @@ def page_context(owner):
             'page': page, 'has_next': page * PAGE_SIZE < count}
 
 
-@wishlist.get('/wishlist')
+@wishlist.get('/library/wishlist')
 def index():
     profile = get_db().execute('SELECT display_name,username,is_public,share_wishlist FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
     return render_template('wishlist.html', wishlist_owner=True, wishlist_profile=profile, **page_context(g.user['id']))
 
 
-@wishlist.get('/profile/<username>/wishlist')
+@wishlist.get('/players/<username>/wishlist')
 def public(username):
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{2,23}', username):
         abort(404)

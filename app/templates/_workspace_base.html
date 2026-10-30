@@ -13,13 +13,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='rating-picker.css') }}">
     {% block page_styles %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navigation.css') }}">
 </head>
 <body class="{% block body_class %}library-page workspace-page{% endblock %}">
     {% call site_header() %}
-        {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
+        {% block workspace_return %}<a href="{{ navigation_return() }}"><span aria-hidden="true">←</span> {{ navigation_return_label() }}</a>{% endblock %}
     {% endcall %}
     {% block workspace_backdrop %}{% endblock %}
     <main class="workspace-layout {% block layout_class %}{% endblock %}">
+        {% include '_section_nav.html' %}
         {% block workspace_hero %}
         <header class="workspace-hero">
             <div>

@@ -3,7 +3,7 @@
     const preview = document.querySelector('[data-profile-link-preview]');
     if (!username || !preview) return;
     const update = () => {
-        const path = '/profile/' + (username.value.trim().toLowerCase() || 'your_username');
+        const path = '/players/' + (username.value.trim().toLowerCase() || 'your_username');
         preview.textContent = path;
         if (preview.tagName === 'A') preview.setAttribute('href', path);
     };

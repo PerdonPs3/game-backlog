@@ -30,6 +30,8 @@ items below are not a claim that the production account release is still pending
 - [x] Publish [player following](../Player-Following.md) to develop with private requests, opt-in shared lists, blocking, and portrait-gallery artwork (owner authorized publication and development migration 017 on 2026-10-30). Profile reporting remains a separate follow-up.
 - [ ] Review and publish [explainable catalog recommendations](../Catalog-Recommendations.md): implemented locally with genre/platform filters, ratings and wishlist signals, direct wishlist saves, and day/night courtyard artwork. No migration or new provider is required; integration/publication await owner review.
 
+- [ ] Review and publish [navigation consolidation](../Navigation-Flow.md): implemented locally with three primary areas, canonical URLs, private progress on the modern game page, contextual returns, and guarded legacy aliases. No migration is required.
+
 ### 1. Make the collection easier to manage
 
 - [x] Search your own collection by title, alongside the existing status filter.

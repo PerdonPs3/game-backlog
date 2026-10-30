@@ -141,7 +141,7 @@ def test_only_explicit_gameplay_keywords_are_normalized_into_mechanics():
     assert discovery_traits({'keywords': 'metroidvania'})['mechanics'] == ()
 
 
-@pytest.mark.parametrize('state,destination', [('recovery','/account/password'), ('unfinished','/account/profile')])
+@pytest.mark.parametrize('state,destination', [('recovery','/account/password'), ('unfinished','/settings/profile')])
 def test_recovery_and_unfinished_sessions_cannot_request_recommendations(accounts, state, destination):
     catalog = provider(accounts)
     alice = sign_in(accounts, 'alice')

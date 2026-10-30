@@ -19,36 +19,36 @@ def test_browser_remembers_login_and_logout_revokes_copied_cookie(accounts):
     with accounts.app_context():
         row = get_db().execute('SELECT valid_until FROM account_sessions WHERE id_hash = ?', (fingerprint(opaque),)).fetchone()
         assert row[0] > time() + SESSION_SECONDS - 60
-    submit(client, '/account/logout', {}, source='/account/profile/edit')
+    submit(client, '/account/logout', {}, source='/settings/profile')
     assert returning_browser.get('/library').location == '/account/login'
 
 
 def test_one_profile_address_has_owner_controls_and_minimal_visitor_projection(accounts):
     owner = sign_in(accounts, 'alice', complete_profile=False)
-    result = submit(owner, '/account/profile/edit', {'display_name': 'Alice', 'username': 'alice_player', 'bio': 'A public bio', 'profile_sharing': 'yes', 'is_public': 'yes', 'share_bio': 'yes', 'share_showcase': 'yes', 'share_photo': 'yes'})
-    assert result.status_code == 303 and result.location == '/profile/alice_player#profile-feedback'
-    assert 'Edit profile' in owner.get('/profile/alice_player').text
+    result = submit(owner, '/settings/profile', {'display_name': 'Alice', 'username': 'alice_player', 'bio': 'A public bio', 'profile_sharing': 'yes', 'is_public': 'yes', 'share_bio': 'yes', 'share_showcase': 'yes', 'share_photo': 'yes'})
+    assert result.status_code == 303 and result.location == '/players/alice_player#profile-feedback'
+    assert 'Edit profile' in owner.get('/players/alice_player').text
     visitor = accounts.test_client()
-    public = visitor.get('/profile/alice_player')
+    public = visitor.get('/players/alice_player')
     assert public.status_code == 200 and 'A public bio' in public.text
     assert 'Edit profile' not in public.text and 'Your private workspace' not in public.text
     assert 'alice@example.test' not in public.text
     other = sign_in(accounts, 'bob')
-    assert 'Edit profile' not in other.get('/profile/alice_player').text
-    assert other.post('/profile/alice_player', data={}).status_code in (400, 405)
+    assert 'Edit profile' not in other.get('/players/alice_player').text
+    assert other.post('/players/alice_player', data={}).status_code in (400, 405)
     submit(owner, '/account/alice_player/profile/edit', {'display_name': 'Alice', 'username': 'alice_player', 'profile_sharing': 'yes', 'is_public': 'no'})
-    assert visitor.get('/profile/alice_player').status_code == 404
-    assert other.get('/profile/alice_player').status_code == 404
-    assert 'Edit profile' in owner.get('/profile/alice_player').text
+    assert visitor.get('/players/alice_player').status_code == 404
+    assert other.get('/players/alice_player').status_code == 404
+    assert 'Edit profile' in owner.get('/players/alice_player').text
 
 
 def test_editor_combines_sharing_and_preserves_existing_private_choices(accounts):
     owner = sign_in(accounts, 'alice', complete_profile=False)
-    page = owner.get('/account/profile/edit').text
+    page = owner.get('/settings/profile').text
     assert 'Privacy &amp; sharing' in page
     for field in ('share_bio', 'share_showcase', 'share_photo'):
         assert f'name="{field}" value="yes" checked' in page
-    submit(owner, '/account/profile/edit', {'display_name': 'Alice', 'username': 'alice_player', 'profile_sharing': 'yes', 'is_public': 'no'})
+    submit(owner, '/settings/profile', {'display_name': 'Alice', 'username': 'alice_player', 'profile_sharing': 'yes', 'is_public': 'no'})
     with accounts.app_context():
         profile = get_db().execute('SELECT is_public, share_bio, share_showcase, share_photo FROM profiles WHERE id = ?', (ALICE,)).fetchone()
         assert not any(profile)
@@ -62,7 +62,7 @@ def test_editor_combines_sharing_and_preserves_existing_private_choices(accounts
         profile = get_db().execute('SELECT display_name, is_public, share_bio FROM profiles WHERE id = ?', (ALICE,)).fetchone()
         assert profile['display_name'] == 'Alice changed' and not profile['is_public'] and not profile['share_bio']
     response = owner.get('/account/alice_player/profile/sharing')
-    assert response.location == '/account/alice_player/profile/edit#profile-privacy'
+    assert response.location == '/settings/profile#profile-privacy'
 
 
 def test_quick_add_recovers_from_stale_csrf_without_saving_and_refreshes_tokens(accounts):
@@ -72,11 +72,11 @@ def test_quick_add_recovers_from_stale_csrf_without_saving_and_refreshes_tokens(
     token = owner.get('/account/form-token')
     assert token.status_code == 200 and token.json['csrf_token']
     assert token.headers['Cache-Control'] == 'private, no-store'
-    invalid = owner.post('/games/new', data={'return_to_catalog': 'yes', 'igdb_id': '123', 'csrf_token': 'stale'})
-    assert invalid.status_code == 303 and invalid.location == '/explore/games/123#library-actions'
+    invalid = owner.post('/library/add', data={'return_to_catalog': 'yes', 'igdb_id': '123', 'csrf_token': 'stale'})
+    assert invalid.status_code == 303 and invalid.location == '/games/123/game#library-actions'
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
-    result = owner.post('/games/new', data={'csrf_token': owner.get('/account/form-token').json['csrf_token'], 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog', 'return_to_catalog': 'yes'})
+    result = owner.post('/library/add', data={'csrf_token': owner.get('/account/form-token').json['csrf_token'], 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog', 'return_to_catalog': 'yes'})
     assert result.status_code == 303
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games WHERE owner_id = ?', (ALICE,)).fetchone()[0] == 1
@@ -86,16 +86,16 @@ def test_https_quick_add_keeps_same_origin_referer_and_rejects_foreign_origin(ac
     import re
     fake_catalog(accounts)
     owner = sign_in(accounts, 'alice')
-    page = owner.get('/explore/games/123', base_url='https://localhost')
+    page = owner.get('/games/123/portal-2', base_url='https://localhost', follow_redirects=True)
     token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
     # Emulate a browser following the response policy, rather than hand-waving
     # the HTTPS-only Referer requirement away in the test environment.
     headers = {'Referer': 'https://localhost/explore/games/123'} if page.headers['Referrer-Policy'] == 'same-origin' else {}
     data = {'csrf_token': token, 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog', 'return_to_catalog': 'yes'}
-    saved = owner.post('/games/new', data=data, headers=headers, base_url='https://localhost')
+    saved = owner.post('/library/add', data=data, headers=headers, base_url='https://localhost')
     assert saved.status_code == 303
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games WHERE owner_id = ?', (ALICE,)).fetchone()[0] == 1
-    owner.post('/games/new', data={**data, 'platform': 'PS3'}, headers={'Referer': 'https://evil.example/'}, base_url='https://localhost')
+    owner.post('/library/add', data={**data, 'platform': 'PS3'}, headers={'Referer': 'https://evil.example/'}, base_url='https://localhost')
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games WHERE owner_id = ?', (ALICE,)).fetchone()[0] == 1

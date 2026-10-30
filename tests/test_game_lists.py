@@ -14,7 +14,7 @@ def saved_lists(app):
 
 
 def make_list(post_form, name="Game night"):
-    response = post_form("/lists", {"name": name})
+    response = post_form("/library/lists", {"name": name})
     assert response.status_code == 302
     return response.headers["Location"]
 
@@ -31,7 +31,7 @@ def test_create_rename_and_many_to_many_membership(app, client, post_form, seed_
     assert lists[0]["name"] == "With friends"
     assert members == [(lists[0]["id"], first), (lists[0]["id"], second), (lists[1]["id"], first)]
     assert stored_games() == before
-    assert b"With friends" in client.get("/lists").data
+    assert b"With friends" in client.get("/library/lists").data
 
 
 def test_list_filters_combine_with_search_status_and_json(app, client, post_form, seed_game):
@@ -69,14 +69,14 @@ def test_game_deletion_cleans_links_only(app, post_form, seed_game):
     entry = seed_game()
     edit = make_list(post_form)
     post_form(edit, {"name": "Game night", "games": [str(entry)]})
-    post_form(f"/games/{entry}/delete", {})
+    post_form(f"/library/entries/{entry}/delete", {})
     lists, members = saved_lists(app)
     assert len(lists) == 1 and members == []
 
 
 @pytest.mark.parametrize("name", ["", "   ", "x" * 81, "bad\nname"])
 def test_invalid_names_do_not_create_lists(app, post_form, name):
-    assert post_form("/lists", {"name": name}).status_code == 200
+    assert post_form("/library/lists", {"name": name}).status_code == 200
     assert saved_lists(app)[0] == []
 
 
@@ -84,7 +84,7 @@ def test_duplicate_names_and_failed_edits_are_atomic(app, post_form, seed_game):
     entry = seed_game()
     edit = make_list(post_form)
     make_list(post_form, "Other")
-    assert b"already exists" in post_form("/lists", {"name": " game NIGHT "}).data
+    assert b"already exists" in post_form("/library/lists", {"name": " game NIGHT "}).data
     post_form(edit, {"name": "Game night", "games": [str(entry)]})
     before = saved_lists(app)
     assert b"already exists" in post_form(edit, {"name": "OTHER"}).data
@@ -96,10 +96,10 @@ def test_duplicate_names_and_failed_edits_are_atomic(app, post_form, seed_game):
 
 
 def test_list_routes_require_csrf_and_missing_list_is_404(client):
-    assert client.post("/lists", data={"name": "No CSRF"}).status_code == 400
-    assert client.post("/lists/1/edit", data={"name": "No CSRF"}).status_code == 400
-    assert client.post("/lists/1/delete").status_code == 400
-    assert client.get("/lists/999/edit").status_code == 404
+    assert client.post("/library/lists", data={"name": "No CSRF"}).status_code == 400
+    assert client.post("/library/lists/1/edit", data={"name": "No CSRF"}).status_code == 400
+    assert client.post("/library/lists/1/delete").status_code == 400
+    assert client.get("/library/lists/999/edit").status_code == 404
     assert client.get("/library?list=999").status_code == 404
     assert client.get("/library?list=not-an-id").status_code == 400
 
@@ -111,7 +111,7 @@ def test_list_limit_and_foreign_keys(app, post_form):
             assert db.execute("PRAGMA foreign_keys").fetchone()[0] == 1
         db.executemany("INSERT INTO game_lists (name, name_key) VALUES (?, ?)", [(f"List {i}", f"list {i}") for i in range(100)])
         db.commit()
-    assert b"up to 100" in post_form("/lists", {"name": "Too many"}).data
+    assert b"up to 100" in post_form("/library/lists", {"name": "Too many"}).data
     assert len(saved_lists(app)[0]) == 100
 
 
@@ -136,7 +136,7 @@ def test_list_cards_preview_covers_and_invalid_name_keeps_draft_choices(app, cli
         db.commit()
     edit = make_list(post_form)
     post_form(edit, {"name": "Game night", "games": [str(entry)]})
-    assert b"t_cover_big/co_example.jpg" in client.get("/lists").data
+    assert b"t_cover_big/co_example.jpg" in client.get("/library/lists").data
     page = post_form(edit, {"name": "", "games": [str(entry)], "view": "selected"})
     assert b"without control characters" in page.data
     assert f'value="{entry}" checked'.encode() in page.data
@@ -144,7 +144,7 @@ def test_list_cards_preview_covers_and_invalid_name_keeps_draft_choices(app, cli
 
 def test_names_are_escaped_and_lists_can_be_empty(app, client, post_form):
     make_list(post_form, "<script>list</script>")
-    html = client.get("/lists").get_data(as_text=True)
+    html = client.get("/library/lists").get_data(as_text=True)
     assert "<script>list</script>" not in html
     assert "&lt;script&gt;" in html
     list_id = saved_lists(app)[0][0]["id"]
@@ -156,7 +156,7 @@ def test_backup_lists_roundtrip_merges_without_erasing_memberships(app, client, 
     second = seed_game(title="Other game")
     edit = make_list(post_form)
     post_form(edit, {"name": "Game night", "games": [str(first)]})
-    exported = client.get("/backups/export").json
+    exported = client.get("/settings/data/export").json
     assert exported["lists"] == [{"name": "Game night", "games": [0]}]
     before = stored_games()
     post_form(edit, {"name": "Game night", "games": [str(second)]})

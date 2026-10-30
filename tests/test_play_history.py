@@ -9,7 +9,7 @@ from app.routes import collection_statistics
 
 @pytest.mark.parametrize("status", ["On hold", "Dropped"])
 def test_new_status_is_saved_filtered_and_counted(app, client, post_form, game_data, stored_games, status):
-    assert post_form("/games/new", {**game_data, "status": status}).status_code == 302
+    assert post_form("/library/add", {**game_data, "status": status}).status_code == 302
     assert stored_games()[0]["status"] == status
     assert b"Portal 2" in client.get("/library", query_string={"status": status}).data
     assert client.get("/library", query_string={"status": status}, headers={"Accept": "application/json"}).json["count"] == 1
@@ -20,12 +20,12 @@ def test_new_status_is_saved_filtered_and_counted(app, client, post_form, game_d
 
 def test_dates_can_be_created_displayed_edited_and_cleared(client, post_form, game_data, stored_games):
     dates = {"started_on": "2026-01-01", "completed_on": "2026-02-05"}
-    assert post_form("/games/new", {**game_data, **dates, "status": "Completed"}).status_code == 302
+    assert post_form("/library/add", {**game_data, **dates, "status": "Completed"}).status_code == 302
     game = stored_games()[0]
     assert game["started_on"] == dates["started_on"]
     assert game["completed_on"] == dates["completed_on"]
     assert b'<time datetime="2026-02-05">' in client.get("/library").data
-    url = f"/games/{game['id']}/edit"
+    url = f"/library/entries/{game['id']}/edit"
     assert b'value="2026-01-01"' in client.get(url).data
     assert post_form(url, {**game_data, "started_on": "", "completed_on": ""}).status_code == 302
     assert stored_games()[0]["started_on"] is None
@@ -38,16 +38,16 @@ def test_dates_can_be_created_displayed_edited_and_cleared(client, post_form, ga
     {"started_on": "2026-02-01", "completed_on": "2026-01-01"},
 ])
 def test_invalid_dates_preserve_existing_data(post_form, game_data, stored_games, dates):
-    assert post_form("/games/new", {**game_data, **dates}).status_code == 200
+    assert post_form("/library/add", {**game_data, **dates}).status_code == 200
     assert stored_games() == []
-    assert post_form("/games/new", game_data).status_code == 302
+    assert post_form("/library/add", game_data).status_code == 302
     before = stored_games()
-    assert post_form(f"/games/{before[0]['id']}/edit", {**game_data, **dates}).status_code == 200
+    assert post_form(f"/library/entries/{before[0]['id']}/edit", {**game_data, **dates}).status_code == 200
     assert stored_games() == before
 
 
 def test_status_changes_do_not_invent_dates(post_form, game_data, stored_games):
-    assert post_form("/games/new", {**game_data, "status": "Completed"}).status_code == 302
+    assert post_form("/library/add", {**game_data, "status": "Completed"}).status_code == 302
     assert stored_games()[0]["started_on"] is None
     assert stored_games()[0]["completed_on"] is None
 
@@ -80,7 +80,7 @@ def test_random_pick_only_chooses_backlog_and_never_changes_status(client, seed_
     for status in ["Completed", "Playing", "On hold", "Dropped"]:
         seed_game(title=f"Exclude {status}", status=status)
     before = stored_games()
-    page = client.get("/games/pick?pick=1")
+    page = client.get("/library/pick?pick=1")
     assert page.status_code == 200
     assert b"Pending adventure" in page.data
     assert b"Exclude" not in page.data
@@ -88,7 +88,7 @@ def test_random_pick_only_chooses_backlog_and_never_changes_status(client, seed_
 
 
 def test_random_pick_has_help_when_no_backlog(client):
-    page = client.get("/games/pick")
+    page = client.get("/library/pick")
     assert page.status_code == 200
     assert b"No pending games yet" in page.data
 

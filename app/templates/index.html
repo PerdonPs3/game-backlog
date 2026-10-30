@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='library-archive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navigation.css') }}">
 </head>
 <body class="library-page library-archive">
     {% call site_header() %}<a href="{{ url_for('explore.index') }}">Explore games ↗</a>{% endcall %}
@@ -24,6 +25,7 @@
         </div>
     </div>
     <main class="library-layout">
+        {% include '_section_nav.html' %}
         <header class="library-hero">
             <div class="hero-copy">
 
@@ -99,23 +101,10 @@
                         <span>Add game</span>
                         <svg class="archive-action-arrow" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
                     </a>
-                    <a class="secondary-action" href="{{ url_for('main.pick_game') }}"><span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 6.2L21 12l-6.2 2.8L12 21l-2.8-6.2L3 12l6.2-2.8Z"/><path d="m12 8 1.2 2.8L16 12l-2.8 1.2L12 16l-1.2-2.8L8 12l2.8-1.2Z"/></svg></span><span>What should I play?</span></a>
                 </div>
             </div>
 
             <div class="backup-actions">
-                <a class="library-tool library-tool-featured" href="{{ url_for('main.lists') }}">
-                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h2m3 0h5M7 14h2m3 0h5"/></svg>
-                    <span>Your lists</span>
-                </a>
-                <a class="library-tool" href="{{ url_for('main.export_backup') }}">
-                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/></svg>
-                    <span>Export backup</span>
-                </a>
-                <a class="library-tool" href="{{ url_for('main.import_backup') }}">
-                    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4M4 16v4h16v-4"/></svg>
-                    <span>Import backup</span>
-                </a>
                 <div id="collection-view-switch" class="collection-view-switch" role="group" aria-label="Collection view" hidden>
                     <button type="button" data-collection-view="cards" aria-pressed="true" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Cards</button>
                     <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
@@ -139,7 +128,7 @@
             <button id="confirm-delete" type="submit" disabled>Yes, delete game</button>
         </form>
     </dialog>
-    {% include '_game_details_dialog.html' %}
+
     <script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-view.js') }}" defer></script>
     <script src="{{ url_for('static', filename='collection-filters.js') }}" defer></script>

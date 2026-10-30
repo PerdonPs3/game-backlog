@@ -1,0 +1,13 @@
+{% if can_manage and entries %}
+<section class="catalog-personal-progress" id="your-progress" aria-labelledby="your-progress-title">
+    <header><div><h2 id="your-progress-title">Your progress</h2><p>Only you can see these entries and private notes.</p></div><span>{{ entries|length }} {{ 'platform' if entries|length == 1 else 'platforms' }}</span></header>
+    {% from '_review_stars.html' import review_stars %}
+    {% for entry in entries %}<article class="catalog-progress-entry" id="entry-{{ entry.id }}">
+        <div class="catalog-progress-heading"><h3>{{ entry.platform }}</h3><span class="catalog-entry-status" data-status="{{ entry.status }}">{{ entry.status }}</span>{% if entry.rating is not none %}<span class="catalog-entry-rating" role="img" aria-label="Your rating: {{ entry.rating|star_rating }}/5">{{ review_stars(entry.rating) }}<small>{{ entry.rating|star_rating }}/5</small></span>{% endif %}</div>
+        {% if entry.is_favorite or entry.is_goty %}<p class="catalog-progress-stickers">{% if entry.is_favorite %}★ Favorite{% endif %}{% if entry.is_goty %} · ✦ Your GOTY{% endif %}</p>{% endif %}
+        {% if entry.started_on or entry.completed_on %}<p class="catalog-progress-dates">{% if entry.started_on %}Started <time datetime="{{ entry.started_on }}">{{ entry.started_on }}</time>{% endif %}{% if entry.completed_on %} · Completed <time datetime="{{ entry.completed_on }}">{{ entry.completed_on }}</time>{% endif %}</p>{% endif %}
+        <div class="catalog-progress-notes"><h4>Private notes</h4><p>{{ entry.review or 'No private notes yet.' }}</p></div>
+        <div class="catalog-progress-actions"><a href="{{ url_for('main.edit', game_id=entry.id) }}">Edit {{ entry.platform }} entry ↗</a><a href="{{ url_for('main.delete', game_id=entry.id) }}">Remove from library</a></div>
+    </article>{% endfor %}
+</section>
+{% endif %}

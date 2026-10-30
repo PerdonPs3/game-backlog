@@ -20,7 +20,7 @@ def test_platform_only_uses_saved_copy(client, seed_game, stored_games):
     seed_game(title="Console pending", platform="PS3", status="Backlog")
     seed_game(title="PC completed", platform="PC", status="Completed")
     before = stored_games()
-    page = client.get("/games/pick?pick=1&platform=PC")
+    page = client.get("/library/pick?pick=1&platform=PC")
     assert page.status_code == 200
     assert b"PC pending" in page.data
     assert b"Console pending" not in page.data and b"PC completed" not in page.data
@@ -40,7 +40,7 @@ def test_genre_and_platform_intersection(app, client, seed_game, stored_games):
     catalog = app.extensions["igdb_client"]
     catalog.get_game_genres.return_value = {123: ("Puzzle", "Adventure"), 456: ("Shooter",)}
     before = stored_games()
-    page = client.get("/games/pick", query_string={"pick": "1", "platform": "PC", "genre": "Puzzle"})
+    page = client.get("/library/pick", query_string={"pick": "1", "platform": "PC", "genre": "Puzzle"})
     assert page.status_code == 200
     assert b"Puzzle PC" in page.data
     assert b"Puzzle console" not in page.data and b"Shooter PC" not in page.data
@@ -57,7 +57,7 @@ def test_no_matching_combination_is_not_empty_backlog(app, client, seed_game):
     set_catalog_id(app, puzzle, 123)
     set_catalog_id(app, shooter, 456)
     app.extensions["igdb_client"].get_game_genres.return_value = {123: ("Puzzle",), 456: ("Shooter",)}
-    page = client.get("/games/pick?pick=1&platform=PS3&genre=Puzzle")
+    page = client.get("/library/pick?pick=1&platform=PS3&genre=Puzzle")
     assert b"No matches this time" in page.data
     assert b"Your Backlog is clear" not in page.data
     assert b"Puzzle PC" not in page.data and b"Shooter console" not in page.data
@@ -67,11 +67,11 @@ def test_catalog_failure_never_ignores_selected_genre(app, client, seed_game):
     entry = seed_game(title="Saved adventure", status="Backlog")
     set_catalog_id(app, entry, 123)
     app.extensions["igdb_client"].get_game_genres.side_effect = CatalogError("private token detail")
-    page = client.get("/games/pick?pick=1&genre=Puzzle")
+    page = client.get("/library/pick?pick=1&genre=Puzzle")
     assert page.status_code == 200
     assert b"We could not check this genre" in page.data
     assert b"Saved adventure" not in page.data and b"private token" not in page.data
-    assert b"Saved adventure" in client.get("/games/pick?pick=1").data
+    assert b"Saved adventure" in client.get("/library/pick?pick=1").data
 
 
 @pytest.mark.parametrize("query", [
@@ -80,14 +80,14 @@ def test_catalog_failure_never_ignores_selected_genre(app, client, seed_game):
     {"genre": 'Puzzle; where id > 0;'},
 ])
 def test_invalid_preferences_rejected(client, query):
-    assert client.get("/games/pick", query_string=query).status_code == 400
+    assert client.get("/library/pick", query_string=query).status_code == 400
 
 
 def test_manual_backlog_does_not_require_catalog(app, client, seed_game):
     seed_game(title="Legacy game", status="Backlog")
     catalog = Mock()
     app.extensions["igdb_client"] = catalog
-    assert b"Legacy game" in client.get("/games/pick?pick=1").data
+    assert b"Legacy game" in client.get("/library/pick?pick=1").data
     catalog.get_game_genres.assert_not_called()
 
 
@@ -96,7 +96,7 @@ def test_initial_visit_waits_for_explicit_pick(client, seed_game, monkeypatch, s
     before = stored_games()
     random_choice = Mock()
     monkeypatch.setattr("app.routes.choice", random_choice)
-    for url in ["/games/pick", "/games/pick?platform=PC", "/games/pick?pick=0"]:
+    for url in ["/library/pick", "/library/pick?platform=PC", "/library/pick?pick=0"]:
         page = client.get(url)
         assert page.status_code == 200
         assert b"What are you in the mood for?" in page.data
@@ -140,7 +140,7 @@ def test_roulette_only_previews_matching_entries_and_contains_server_winner(app,
     seed_game(title="Excluded completed", status="Completed", platform="PC")
     monkeypatch.setattr("app.routes.choice", lambda rows: rows[-1])
     monkeypatch.setattr("app.routes.sample", lambda rows, count: rows[:count])
-    html = client.get("/games/pick?pick=1&platform=PC").get_data(as_text=True)
+    html = client.get("/library/pick?pick=1&platform=PC").get_data(as_text=True)
     data = json.loads(re.search(r'<script id="roulette-data" type="application/json">(.*?)</script>', html, re.S).group(1))
     assert data["candidate_count"] == 15
     assert len(data["games"]) == 12
@@ -152,8 +152,8 @@ def test_roulette_only_previews_matching_entries_and_contains_server_winner(app,
 
 def test_roulette_json_escapes_html_and_initial_page_does_not_spin(client, seed_game):
     seed_game(title="</script><script>alert(1)</script>", status="Backlog")
-    initial = client.get("/games/pick").get_data(as_text=True)
+    initial = client.get("/library/pick").get_data(as_text=True)
     assert 'id="roulette-data"' not in initial
-    result = client.get("/games/pick?pick=1").get_data(as_text=True)
+    result = client.get("/library/pick?pick=1").get_data(as_text=True)
     assert "</script><script>alert(1)</script>" not in result
     assert r"\u003c/script\u003e" in result

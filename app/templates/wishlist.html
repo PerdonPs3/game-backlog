@@ -23,9 +23,9 @@
 {% if wishes %}<div class="wishlist-grid">
     {% for wish in wishes %}
     <article class="wishlist-card">
-        <a class="wishlist-cover game-card-cover" href="{{ url_for('explore.game', catalog_id=wish.catalog_id) }}" aria-label="View {{ wish.title }}"><span aria-hidden="true">{{ wish.title[:1] }}</span>{% if wish.cover_url %}<img src="{{ wish.cover_url }}" alt="" width="264" height="352" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}</a>
+        <a class="wishlist-cover game-card-cover" href="{{ game_url(wish.catalog_id, wish.title) }}" aria-label="View {{ wish.title }}"><span aria-hidden="true">{{ wish.title[:1] }}</span>{% if wish.cover_url %}<img src="{{ wish.cover_url }}" alt="" width="264" height="352" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}</a>
         {% if wishlist_owner %}<form class="wishlist-remove" method="post" action="{{ url_for('wishlist.remove', catalog_id=wish.catalog_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" aria-label="Remove {{ wish.title }} from wishlist" title="Remove from wishlist"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button></form>{% endif %}
-        <div class="wishlist-card-body"><h3><a href="{{ url_for('explore.game', catalog_id=wish.catalog_id) }}">{{ wish.title }}</a></h3>{% if wishlist_owner %}<a class="wishlist-to-library" href="{{ url_for('explore.add', catalog_id=wish.catalog_id) }}">Add to library <span aria-hidden="true">↗</span></a>{% else %}<a class="wishlist-to-library" href="{{ url_for('explore.game', catalog_id=wish.catalog_id) }}">View game <span aria-hidden="true">↗</span></a>{% endif %}</div>
+        <div class="wishlist-card-body"><h3><a href="{{ game_url(wish.catalog_id, wish.title) }}">{{ wish.title }}</a></h3>{% if wishlist_owner %}<a class="wishlist-to-library" href="{{ url_for('explore.add', catalog_id=wish.catalog_id) }}">Add to library <span aria-hidden="true">↗</span></a>{% else %}<a class="wishlist-to-library" href="{{ game_url(wish.catalog_id, wish.title) }}">View game <span aria-hidden="true">↗</span></a>{% endif %}</div>
     </article>
     {% endfor %}
 </div>

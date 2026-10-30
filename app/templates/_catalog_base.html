@@ -2,5 +2,5 @@
 {% block layout_class %}catalog-workspace{% endblock %}
 {% block body_class %}library-page workspace-page catalog-page{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='public-catalog.css') }}">{% endblock %}
-{% block workspace_return %}<a href="{{ url_for('explore.index') }}">Explore games</a>{% endblock %}
+{% block workspace_return %}<a href="{{ navigation_return(url_for('discovery.index')) }}">{{ navigation_return_label() }}</a>{% endblock %}
 {% block panel_label %}Public game catalog{% endblock %}

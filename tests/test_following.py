@@ -17,7 +17,7 @@ def players(accounts):
 
 
 def change(client, username='bob_player', action='follow', **data):
-    return submit(client, f'/connections/{username}/{action}', data, source='/account/connections')
+    return submit(client, f'/connections/{username}/{action}', data, source='/community/connections')
 
 
 def row(app, statement, params=()):
@@ -36,8 +36,8 @@ def test_public_follow_is_idempotent_and_self_follow_is_rejected(accounts, playe
         assert change(alice).status_code == 303
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 1
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'accepted'
-    assert b'Following @bob_player' in alice.get('/profile/bob_player').data
-    assert b'Unfollow' in alice.get('/profile/bob_player').data
+    assert b'Following @bob_player' in alice.get('/players/bob_player').data
+    assert b'Unfollow' in alice.get('/players/bob_player').data
     assert change(alice, 'alice_player').status_code == 400
     assert change(alice, action='unfollow').status_code == 303
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
@@ -46,18 +46,18 @@ def test_public_follow_is_idempotent_and_self_follow_is_rejected(accounts, playe
 def test_private_request_approval_never_opens_private_profile(accounts, players):
     alice, bob = players
     execute(accounts, 'UPDATE profiles SET is_public = FALSE WHERE id = ?', (BOB,))
-    response = submit(alice, '/account/connections/follow', {'username': '@BOB_PLAYER'}, source='/account/connections')
+    response = submit(alice, '/account/connections/follow', {'username': '@BOB_PLAYER'}, source='/community/connections')
     assert response.status_code == 303
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'pending'
-    assert b'@bob_player' in alice.get('/account/connections?view=sent').data
-    assert b'Approve' in bob.get('/account/connections?view=requests').data
+    assert b'@bob_player' in alice.get('/community/connections?view=sent').data
+    assert b'Approve' in bob.get('/community/connections?view=requests').data
     assert change(alice, action='approve').status_code == 303  # Cannot approve your outgoing request.
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'pending'
     assert change(bob, 'alice_player', 'approve').status_code == 303
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'accepted'
-    assert alice.get('/profile/bob_player').status_code == 404
-    assert b'Private player' in alice.get('/account/connections?view=following').data
-    assert b'@bob_player' in alice.get('/account/connections?view=following').data
+    assert alice.get('/players/bob_player').status_code == 404
+    assert b'Private player' in alice.get('/community/connections?view=following').data
+    assert b'@bob_player' in alice.get('/community/connections?view=following').data
     assert change(bob, 'alice_player', 'remove').status_code == 303
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
 
@@ -90,7 +90,7 @@ def test_sharing_defaults_private_and_public_counts_exclude_private_members(acco
     alice, bob = players
     change(alice)
     anonymous = accounts.test_client()
-    path = '/profile/bob_player/connections/followers'
+    path = '/players/bob_player/followers'
     assert anonymous.get(path).status_code == 404
     assert row(accounts, 'SELECT share_connections FROM profiles WHERE id = ?', (BOB,))[0] is False
     response = submit(bob, '/account/profile/sharing', {'username': 'bob_player', 'is_public': 'yes',
@@ -102,8 +102,8 @@ def test_sharing_defaults_private_and_public_counts_exclude_private_members(acco
         assert secret.encode() not in shared.data
     execute(accounts, 'UPDATE profiles SET is_public = FALSE WHERE id = ?', (ALICE,))
     assert b'@alice_player' not in anonymous.get(path).data
-    assert b'<strong>0</strong> followers' in anonymous.get('/profile/bob_player').data
-    assert b'@alice_player' in bob.get('/account/connections?view=followers').data
+    assert b'<strong>0</strong> followers' in anonymous.get('/players/bob_player').data
+    assert b'@alice_player' in bob.get('/community/connections?view=followers').data
     # Legacy forms preserve sharing; a new opt-out revokes it immediately.
     submit(bob, '/account/profile/sharing', {'username': 'bob_player', 'is_public': 'yes'})
     assert anonymous.get(path).status_code == 200
@@ -115,7 +115,7 @@ def test_privatizing_keeps_accepted_connections_and_does_not_auto_approve(accoun
     alice, bob = players
     change(alice)
     execute(accounts, 'UPDATE profiles SET is_public = FALSE WHERE id = ?', (BOB,))
-    assert alice.get('/profile/bob_player').status_code == 404
+    assert alice.get('/players/bob_player').status_code == 404
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'accepted'
     change(alice, action='unfollow')
     change(alice)
@@ -134,21 +134,21 @@ def test_block_removes_both_directions_and_hides_public_surfaces(accounts, playe
     assert change(alice, action='block').status_code == 303
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
     for viewer, username in ((alice, 'bob_player'), (bob, 'alice_player')):
-        assert viewer.get('/profile/' + username).status_code == 404
-        assert ('@' + username).encode() not in viewer.get('/players?q=' + username).data
+        assert viewer.get('/players/' + username).status_code == 404
+        assert ('@' + username).encode() not in viewer.get('/community/players?q=' + username).data
     for path in ('/players/bob_player', '/players/bob_player/photo', '/players/bob_player/background',
-                 '/profile/bob_player/wishlist', '/profile/bob_player/connections/followers'):
+                 '/players/bob_player/wishlist', '/players/bob_player/followers'):
         assert alice.get(path).status_code == 404
-    assert b'BOB PUBLIC REVIEW' not in alice.get('/explore/games/123').data
-    assert b'BOB PUBLIC REVIEW' in accounts.test_client().get('/explore/games/123').data
-    assert accounts.test_client().get('/profile/bob_player').status_code == 200
+    assert b'BOB PUBLIC REVIEW' not in alice.get('/games/123/portal-2', follow_redirects=True).data
+    assert b'BOB PUBLIC REVIEW' in accounts.test_client().get('/games/123/portal-2', follow_redirects=True).data
+    assert accounts.test_client().get('/players/bob_player').status_code == 200
     change(bob, 'alice_player')
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
     change(bob, 'alice_player', 'block')
     change(alice, action='unblock')
-    assert alice.get('/profile/bob_player').status_code == 404  # The other player's block remains.
+    assert alice.get('/players/bob_player').status_code == 404  # The other player's block remains.
     change(bob, 'alice_player', 'unblock')
-    assert alice.get('/profile/bob_player').status_code == 200
+    assert alice.get('/players/bob_player').status_code == 200
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
 
 
@@ -157,9 +157,9 @@ def test_rename_preserves_relationships_but_alias_cannot_bypass_block(accounts, 
     change(alice)
     execute(accounts, 'UPDATE profiles SET username_changed_at = NULL WHERE id = ?', (BOB,))
     submit(bob, '/account/profile/sharing', {'username': 'bob_renamed', 'is_public': 'yes'})
-    assert b'@bob_renamed' in alice.get('/account/connections?view=following').data
+    assert b'@bob_renamed' in alice.get('/community/connections?view=following').data
     change(alice, 'bob_renamed', 'block')
-    assert alice.get('/profile/bob_player').status_code == 404
+    assert alice.get('/players/bob_player').status_code == 404
     assert alice.get('/players/bob_player').status_code == 404
     change(alice, 'bob_player')
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
@@ -176,10 +176,10 @@ def test_new_follow_attempt_budget_does_not_prevent_blocking_or_cancelling(accou
     assert change(alice, action='block').status_code == 303
 
 
-@pytest.mark.parametrize('path', ['/account/connections', '/connections/bob_player/follow'])
+@pytest.mark.parametrize('path', ['/community/connections', '/connections/bob_player/follow'])
 def test_session_and_csrf_boundaries(accounts, players, path):
     alice, _ = players
-    if path == '/account/connections':
+    if path == '/community/connections':
         assert accounts.test_client().get(path).status_code == 302
     else:
         assert alice.post(path).status_code == 400
@@ -188,14 +188,14 @@ def test_session_and_csrf_boundaries(accounts, players, path):
         from app.auth import fingerprint
         opaque = session['account_session']
     execute(accounts, 'UPDATE account_sessions SET recovery = 1 WHERE id_hash = ?', (fingerprint(opaque),))
-    assert alice.get('/account/connections').location.endswith('/account/password')
+    assert alice.get('/community/connections').location.endswith('/account/password')
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
 
 
 @pytest.mark.parametrize('page', ['0', '-1', '10001', 'invalid'])
 def test_list_pagination_rejects_invalid_bounds(players, page):
     alice, _ = players
-    assert alice.get('/account/connections?page=' + page).status_code == 400
+    assert alice.get('/community/connections?page=' + page).status_code == 400
 
 
 def test_public_pagination_is_bounded_and_private_requests_never_leak(accounts, players):
@@ -210,12 +210,12 @@ def test_public_pagination_is_bounded_and_private_requests_never_leak(accounts, 
             db.execute('UPDATE profiles SET username = ?, is_public = TRUE WHERE id = ?', (username, owner))
             db.execute("INSERT INTO player_follows (follower_id, followed_id, state) VALUES (?, ?, 'accepted')", (owner, BOB))
         db.execute('UPDATE profiles SET share_connections = TRUE WHERE id = ?', (BOB,))
-    path = '/profile/bob_player/connections/followers'
+    path = '/players/bob_player/followers'
     anon = accounts.test_client()
     assert anon.get(path).data.count(b'class="connection-card"') == 20
     assert anon.get(path + '?page=2').data.count(b'class="connection-card"') == 3
     assert anon.get(path + '?page=3').status_code == 404
-    assert anon.get('/profile/bob_player/connections/requests').status_code == 404
+    assert anon.get('/players/bob_player/requests').status_code == 404
     response = anon.get(path)
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert 'Cookie' in response.headers['Vary']
@@ -237,15 +237,15 @@ def test_connection_cards_show_only_published_photos_and_identity(accounts, play
     alice, bob = players
     change(alice)
     execute(accounts, "UPDATE profiles SET avatar_image = ?,share_photo = TRUE,bio = 'UNSHARED BIO',share_bio = FALSE,avatar_color = '#aabbcc' WHERE id = ?", (b'photo-fixture', BOB))
-    page = alice.get('/account/connections?view=following').get_data(as_text=True)
+    page = alice.get('/community/connections?view=following').get_data(as_text=True)
     assert 'src="/players/bob_player/photo"' in page
     assert 'class="connection-avatar"' in page
     assert 'UNSHARED BIO' not in page
     assert '#aabbcc' in page
     execute(accounts, 'UPDATE profiles SET share_photo = FALSE WHERE id = ?', (BOB,))
-    assert '/players/bob_player/photo' not in alice.get('/account/connections?view=following').get_data(as_text=True)
+    assert '/players/bob_player/photo' not in alice.get('/community/connections?view=following').get_data(as_text=True)
     execute(accounts, 'UPDATE profiles SET is_public = FALSE,share_photo = TRUE,share_bio = TRUE WHERE id = ?', (BOB,))
-    private = alice.get('/account/connections?view=following').get_data(as_text=True)
+    private = alice.get('/community/connections?view=following').get_data(as_text=True)
     assert 'Private player' in private
     for hidden in ('/players/bob_player/photo', 'UNSHARED BIO', '#aabbcc'):
         assert hidden not in private
@@ -257,7 +257,7 @@ def test_public_cards_revoke_photos_and_hidden_bio_without_cached_leaks(accounts
     change(alice)
     execute(accounts, 'UPDATE profiles SET share_connections = TRUE WHERE id = ?', (BOB,))
     execute(accounts, "UPDATE profiles SET avatar_image = ?,share_photo = TRUE,bio = '<script>unsafe()</script>',share_bio = TRUE WHERE id = ?", (b'public-photo', ALICE))
-    path = '/profile/bob_player/connections/followers'
+    path = '/players/bob_player/followers'
     anonymous = accounts.test_client()
     page = anonymous.get(path).get_data(as_text=True)
     assert 'src="/players/alice_player/photo"' in page
@@ -268,17 +268,17 @@ def test_public_cards_revoke_photos_and_hidden_bio_without_cached_leaks(accounts
     assert anonymous.get('/players/alice_player/photo').status_code == 404
     execute(accounts, 'UPDATE profiles SET share_photo = TRUE WHERE id = ?', (ALICE,))
     change(bob, 'alice_player', 'block')
-    blocked_page = bob.get('/account/connections?view=blocked').get_data(as_text=True)
+    blocked_page = bob.get('/community/connections?view=blocked').get_data(as_text=True)
     assert '/players/alice_player/photo' not in blocked_page and 'unsafe()' not in blocked_page
 
 
 def test_follow_back_action_keeps_the_selected_list_and_updates_card_state(accounts, players):
     alice, bob = players
     change(bob, 'alice_player')
-    page = alice.get('/account/connections').get_data(as_text=True)
+    page = alice.get('/community/connections').get_data(as_text=True)
     assert 'Follow back @bob_player' in page
     response = change(alice, view='followers', return_to='connections')
-    assert response.location.endswith('/account/connections?view=followers')
+    assert response.location.endswith('/community/connections?view=followers')
     page = alice.get(response.location).get_data(as_text=True)
     assert 'connection-following-label' in page and 'Follow back @bob_player' not in page
     assert 'You are now following @bob_player.' in page

@@ -1,3 +1,4 @@
+<input type="hidden" name="return_path" value="{{ navigation_return() }}">
 {% set editing = game is defined %}
 <section class="entry-section entry-progress" aria-labelledby="entry-progress-heading">
     <h2 id="entry-progress-heading">Library entry</h2>
@@ -27,8 +28,8 @@
     </div>
 </section>
 <section class="entry-section entry-review" aria-labelledby="entry-review-heading">
-    <div class="entry-section-heading"><h2 id="entry-review-heading">Your review</h2><span>Optional</span></div>
-    <label for="review" class="entry-review-label">Review</label>
+    <div class="entry-section-heading"><h2 id="entry-review-heading">Private notes</h2><span>Optional</span></div>
+    <label for="review" class="entry-review-label">Private notes</label>
     <textarea id="review" name="review" rows="4" maxlength="2000" placeholder="What did you think of the game?">{{ request.form.get('review', game.review if editing else '') }}</textarea>
     {% include '_review_publication.html' %}
     {% if editing and has_public_review %}
@@ -47,5 +48,5 @@
 </details>
 <div class="form-actions">
     <button{% if not editing %} id="add-game-button"{% endif %} type="submit"{% if not editing and not selected_game %} disabled{% endif %}>{{ 'Save changes' if editing else 'Add game' }}</button>
-    <a href="{{ url_for('main.index') }}">Cancel</a>
+    <a href="{{ navigation_return() }}">Cancel</a>
 </div>

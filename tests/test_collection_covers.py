@@ -26,7 +26,7 @@ def catalog_cover(app, game_data):
 def test_create_persists_trusted_cover_and_collection_uses_it(
     app, client, post_form, game_data, catalog_cover, stored_games
 ):
-    assert post_form("/games/new", {**game_data, "cover_image_id": "https://evil.example"}).status_code == 302
+    assert post_form("/library/add", {**game_data, "cover_image_id": "https://evil.example"}).status_code == 302
     assert stored_games()[0]["cover_image_id"] == "co_test"
     catalog_cover.reset_mock()
     # Index must not call the API, even if the catalog is offline.
@@ -47,20 +47,20 @@ def test_edit_backfills_cover_for_existing_catalog_game(
         get_db().execute("UPDATE games SET igdb_id = 123 WHERE id = ?", (game_id,))
         get_db().commit()
     assert stored_games()[0]["cover_image_id"] is None
-    assert post_form(f"/games/{game_id}/edit", game_data).status_code == 302
+    assert post_form(f"/library/entries/{game_id}/edit", game_data).status_code == 302
     assert stored_games()[0]["cover_image_id"] == "co_test"
     assert b"t_cover_big/co_test.jpg" in client.get("/library").data
 
 
 def test_invalid_edit_preserves_saved_cover(post_form, game_data, catalog_cover, stored_games):
-    assert post_form("/games/new", game_data).status_code == 302
+    assert post_form("/library/add", game_data).status_code == 302
     game = stored_games()[0]
-    assert post_form(f"/games/{game['id']}/edit", {**game_data, "rating": "99"}).status_code == 200
+    assert post_form(f"/library/entries/{game['id']}/edit", {**game_data, "rating": "99"}).status_code == 200
     assert stored_games()[0] == game
 
 
 def test_missing_catalog_cover_has_placeholder(post_form, game_data, client, stored_games):
-    assert post_form("/games/new", game_data).status_code == 302
+    assert post_form("/library/add", game_data).status_code == 302
     assert stored_games()[0]["cover_image_id"] is None
     page = client.get("/library").get_data(as_text=True)
     assert "No cover available" in page

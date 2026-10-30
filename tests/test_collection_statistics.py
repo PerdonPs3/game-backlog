@@ -74,19 +74,19 @@ def test_platform_entries_count_separately(app, seed_game):
 def test_statistics_reflect_edit_and_delete(app, seed_game, post_form, game_data):
     game_id = seed_game(status="Backlog", rating=9)
     assert stats_for(app)["completed"] == 0
-    response = post_form(f"/games/{game_id}/edit", {**game_data, "status": "Completed", "rating": ""})
+    response = post_form(f"/library/entries/{game_id}/edit", {**game_data, "status": "Completed", "rating": ""})
     assert response.status_code == 302
     stats = stats_for(app)
     assert stats["completed"] == 1
     assert stats["completion_percent"] == 100
     assert stats["rated"] == 0
     assert stats["average"] is None
-    assert post_form(f"/games/{game_id}/delete", {}).status_code == 302
+    assert post_form(f"/library/entries/{game_id}/delete", {}).status_code == 302
     assert stats_for(app)["total"] == 0
 
 
 def test_statistics_reflect_new_catalog_game(app, post_form, game_data):
-    assert post_form("/games/new", game_data).status_code == 302
+    assert post_form("/library/add", game_data).status_code == 302
     stats = stats_for(app)
     assert stats["total"] == 1
     assert stats["playing"] == 1

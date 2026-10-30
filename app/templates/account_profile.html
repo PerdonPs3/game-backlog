@@ -101,7 +101,7 @@
         <input type="hidden" name="profile_sharing" value="yes">
         <input type="hidden" name="profile_activity_controls" value="yes">
         <fieldset class="profile-setup-visibility" id="profile-privacy"><legend>Privacy &amp; sharing</legend>
-            <p class="profile-field-hint">Your profile link: <a href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/profile/{{ profile.username or 'your_username' }}</a></p>
+            <p class="profile-field-hint">Your profile link: <a href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/players/{{ profile.username or 'your_username' }}</a></p>
             <label><input type="radio" name="is_public" value="yes" {% if public_selected %}checked{% endif %}><span>Public <small>Anyone can view the details you share below.</small></span></label>
             <label><input type="radio" name="is_public" value="no" {% if not public_selected %}checked{% endif %}><span>Private <small>Only you can open your profile.</small></span></label>
             <div class="profile-sharing-options profile-editor-sharing">

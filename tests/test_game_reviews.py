@@ -10,7 +10,8 @@ from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
 from tests.test_public_catalog import fake_catalog
 
 
-PATH = '/explore/games/123'
+PATH = '/games/123/portal-2'
+ACTIONS = '/explore/games/123'
 DATA = {'body': 'A memorable journey.', 'rating': '9'}
 
 
@@ -23,12 +24,12 @@ def public_author(app, name):
 def publish(client, data=None):
     review = DATA if data is None else data
     page = client.get(PATH).get_data(as_text=True)
-    match = re.search(r'href="(/games/\d+/edit)"', page)
-    path = match.group(1) if match else '/games/new'
+    match = re.search(r'href="(/library/entries/\d+/edit)(?:[?\"])', page)
+    path = match.group(1) if match else '/library/add'
     payload = {**review, 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC',
                'status': 'Playing', 'review': review.get('body', ''), 'publish_review': 'yes',
                'public_review_spoilers': review.get('has_spoilers', '')}
-    return submit(client, path, payload, source=path if match else '/games/new?igdb_id=123')
+    return submit(client, path, payload, source=path if match else '/library/add?igdb_id=123')
 
 
 def review_id(app):
@@ -45,7 +46,7 @@ def test_publication_is_explicit_and_never_changes_or_copies_private_notes(accou
     assert publish(alice).status_code == 303
     html = accounts.test_client().get(PATH).get_data(as_text=True)
     assert DATA['body'] in html and '4.5/5' in html
-    assert '/profile/alice_player' in html
+    assert '/players/alice_player' in html
     for private in ('SECRET PERSONAL NOTE', ALICE, 'alice@example.test', 'alice-access'):
         assert private not in html
     assert publish(alice, {'body': 'Updated opinion.', 'rating': '7'}).status_code == 303
@@ -70,7 +71,7 @@ def test_invalid_review_keeps_input_and_never_publishes(accounts, changes):
 def test_unknown_catalog_game_does_not_accept_reviews(accounts):
     fake_catalog(accounts)
     alice = public_author(accounts, 'alice')
-    response = submit(alice, '/games/new', {'title': 'Unknown', 'igdb_id': '999', 'platform': 'PC', 'status': 'Playing', 'rating': '9', 'review': 'Not published', 'publish_review': 'yes'}, source='/games/new?igdb_id=123')
+    response = submit(alice, '/library/add', {'title': 'Unknown', 'igdb_id': '999', 'platform': 'PC', 'status': 'Playing', 'rating': '9', 'review': 'Not published', 'publish_review': 'yes'}, source='/library/add?igdb_id=123')
     assert response.status_code == 200 and b'role="alert"' in response.data
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
@@ -85,7 +86,7 @@ def test_reviews_share_profile_reading_behavior_and_escape_html(accounts):
     assert '<details class="community-review-content">' not in html
     assert 'Spoilers</span>' in html and 'Show review' not in html
     assert '<details class="profile-review-spoilers">' in html
-    profile_html = accounts.test_client().get('/profile/alice_player').get_data(as_text=True)
+    profile_html = accounts.test_client().get('/players/alice_player').get_data(as_text=True)
     assert 'class="community-review profile-review-card"' in profile_html
     assert '<details class="profile-review-spoilers">' in profile_html
     assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html
@@ -103,7 +104,7 @@ def test_author_binding_private_profile_visibility_and_owner_only_deletion(accou
     fake_catalog(accounts)
     alice, bob = public_author(accounts, 'alice'), public_author(accounts, 'bob')
     assert publish(alice, {**DATA, 'owner_id': BOB, 'username': 'bob_player'}).status_code == 303
-    assert submit(bob, PATH + '/reviews/delete', {}, source=PATH).status_code == 303
+    assert submit(bob, ACTIONS + '/reviews/delete', {}, source=PATH).status_code == 303
     assert DATA['body'] in accounts.test_client().get(PATH).get_data(as_text=True)
     with accounts.app_context():
         get_db().execute('UPDATE profiles SET is_public = FALSE WHERE id = ?', (ALICE,))
@@ -112,7 +113,7 @@ def test_author_binding_private_profile_visibility_and_owner_only_deletion(accou
     with accounts.app_context():
         get_db().execute('UPDATE profiles SET is_public = TRUE WHERE id = ?', (ALICE,))
     assert DATA['body'] in accounts.test_client().get(PATH).get_data(as_text=True)
-    assert submit(alice, PATH + '/reviews/delete', {}, source=PATH).status_code == 303
+    assert submit(alice, ACTIONS + '/reviews/delete', {}, source=PATH).status_code == 303
     assert DATA['body'] not in accounts.test_client().get(PATH).get_data(as_text=True)
 
 
@@ -122,9 +123,9 @@ def test_guest_recovery_incomplete_and_csrf_cannot_publish(accounts):
     response = publish(guest)
     assert response.location.endswith('/account/login')
     alice = public_author(accounts, 'alice')
-    assert alice.post('/games/new', data=DATA).status_code == 400
+    assert alice.post('/library/add', data=DATA).status_code == 400
     incomplete = sign_in(accounts, 'bob', complete_profile=False)
-    assert '/profile/edit' in publish(incomplete).location
+    assert '/settings/profile' in publish(incomplete).location
     with accounts.app_context():
         get_db().execute('UPDATE account_sessions SET recovery = 1 WHERE user_id = ?', (ALICE,))
     assert publish(alice).location.endswith('/account/password')
@@ -137,7 +138,7 @@ def test_report_hides_for_reporter_only_and_is_idempotent(accounts):
     alice, bob = public_author(accounts, 'alice'), public_author(accounts, 'bob')
     publish(alice)
     rid = review_id(accounts)
-    endpoint = f'{PATH}/reviews/{rid}/report'
+    endpoint = f'{ACTIONS}/reviews/{rid}/report'
     assert submit(alice, endpoint, {'reason': 'spam'}, source=PATH).status_code == 404
     assert submit(bob, endpoint, {'reason': 'invalid'}, source=PATH).status_code == 400
     assert submit(bob, f'/explore/games/124/reviews/{rid}/report', {'reason': 'spam'}, source=PATH).status_code == 404
@@ -162,7 +163,7 @@ def test_write_budget_is_persistent_but_never_prevents_deleting_your_review(acco
             get_db().execute('INSERT INTO public_review_events (owner_id) VALUES (?)', (ALICE,))
     response = publish(alice, {**DATA, 'body': 'Blocked update'})
     assert response.status_code == 200 and b'too many review changes' in response.data
-    assert submit(alice, PATH + '/reviews/delete', {}, source=PATH).status_code == 303
+    assert submit(alice, ACTIONS + '/reviews/delete', {}, source=PATH).status_code == 303
 
 
 def test_moderation_is_operator_only_and_edits_cannot_evade_it(accounts):
@@ -212,7 +213,7 @@ def test_catalog_has_no_review_composer_and_rejects_direct_publication(accounts)
         assert 'Write a review' not in html
         assert 'id="write-review"' not in html
         assert 'community-review-form' not in html
-    assert submit(alice, PATH, DATA, source='/games/new?igdb_id=123').status_code == 405
+    assert submit(alice, PATH, DATA, source='/library/add?igdb_id=123').status_code == 405
 
 
 def test_review_avatar_respects_public_photo_consent(accounts):

@@ -105,6 +105,9 @@ def create_app(test_config=None):
     from app.account_urls import init_app as init_account_urls
     init_account_urls(app)
 
+    from app.navigation import init_app as init_navigation
+    init_navigation(app)
+
     from app.game_fields import STATUSES, star_rating
     app.jinja_env.filters['star_rating'] = star_rating
     from app.countries import country_info

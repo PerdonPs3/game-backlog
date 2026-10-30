@@ -60,7 +60,7 @@ def test_legacy_details_without_catalog(client, seed_game, app, stored_games):
     catalog = Mock()
     app.extensions["igdb_client"] = catalog
     before = stored_games()
-    page = client.get(f"/games/{game_id}")
+    page = client.get(f"/library/entries/{game_id}", follow_redirects=True)
     assert page.status_code == 200
     assert b"My memories" in page.data
     assert b"Not rated yet" in page.data
@@ -78,7 +78,7 @@ def test_catalog_details_fragment_escaped(client, seed_game, app, stored_games):
     }
     app.extensions["igdb_client"].get_game.side_effect = None
     before = stored_games()
-    page = client.get(f"/games/{game_id}", headers={"Accept": "application/json"})
+    page = client.get(f"/library/entries/{game_id}", headers={"Accept": "application/json"})
     html = page.json["html"]
     assert "Puzzle" in html and "2011-04-19" in html
     assert "Favorite" in html and "4.5/5" in html
@@ -98,7 +98,7 @@ def test_catalog_failure_keeps_notes(client, seed_game, app, failure):
     if failure:
         catalog.get_game.side_effect = failure
     app.extensions["igdb_client"] = catalog
-    page = client.get(f"/games/{game_id}")
+    page = client.get(f"/library/entries/{game_id}", follow_redirects=True)
     assert page.status_code == 200
     assert b"Keep my notes" in page.data
     assert b"secret upstream" not in page.data
@@ -107,7 +107,7 @@ def test_catalog_failure_keeps_notes(client, seed_game, app, failure):
 def test_missing_details(client, app):
     catalog = Mock()
     app.extensions["igdb_client"] = catalog
-    assert client.get("/games/999").status_code == 404
+    assert client.get("/library/entries/999").status_code == 404
     catalog.get_game.assert_not_called()
 
 
@@ -123,24 +123,24 @@ def test_profile_invalid_optional_data():
 def test_details_links_survive_live_filter(client, seed_game):
     game_id = seed_game()
     page = client.get("/library")
-    assert b'id="game-details-dialog"' in page.data
-    assert b"game-details.js" in page.data
+    assert b'id="game-details-dialog"' not in page.data
+    assert b"game-details.js" not in page.data
     assert b'id="collection-view-switch"' in page.data
     assert b'data-collection-view="shelf"' in page.data
     assert b"collection-view.js" in page.data
     html = client.get("/library?q=Portal", headers={"Accept": "application/json"}).json["html"]
-    assert f'href="/games/{game_id}"' in html
-    assert html.count("data-game-details") == 2
+    assert f'href="/library/entries/{game_id}?from=' in html
+    assert html.count("data-game-details") == 0
 
 
 @pytest.mark.parametrize("rating,filled", [(1, 1), (10, 10), (None, 0)])
 def test_personal_verdict_design(client, seed_game, rating, filled):
     game_id = seed_game(rating=rating, review="A memory\n" + "x" * 1000)
-    html = client.get(f"/games/{game_id}").get_data(as_text=True)
-    assert "Your review" in html
+    html = client.get(f"/library/entries/{game_id}").get_data(as_text=True)
+    assert "Private notes" in html
     assert 'class="verdict-quote"' in html
     assert html.count('class="is-filled"') == filled
-    assert f'href="/games/{game_id}/edit"' in html
+    assert f'href="/library/entries/{game_id}/edit?from=' in html
     assert "A memory\n" in html
     if rating is not None:
         assert f'aria-label="Your rating: {rating / 2:g}/5"' in html

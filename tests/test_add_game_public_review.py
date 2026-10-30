@@ -14,13 +14,13 @@ DATA = {'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Play
 
 
 def add(client, **changes):
-    return submit(client, '/games/new', {**DATA, **changes}, source='/games/new?igdb_id=123')
+    return submit(client, '/library/add', {**DATA, **changes}, source='/library/add?igdb_id=123')
 
 
 def test_add_game_defaults_to_private_notes(accounts):
     fake_catalog(accounts)
     client = public_author(accounts, 'alice')
-    html = client.get('/games/new?igdb_id=123').get_data(as_text=True)
+    html = client.get('/library/add?igdb_id=123').get_data(as_text=True)
     assert 'name="publish_review" value="yes">' in html
     assert add(client).status_code == 302
     with accounts.app_context():
@@ -33,7 +33,7 @@ def test_opt_in_creates_both_records_and_explicitly_updates_existing_public_revi
     fake_catalog(accounts)
     client = public_author(accounts, 'alice')
     response = add(client, publish_review='yes', public_review_spoilers='yes', owner_id='forged')
-    assert response.status_code == 303 and response.location.endswith('/account/alice_player/library')
+    assert response.status_code == 303 and response.location.endswith('/games/123/portal-2#your-progress')
     assert b'Added to your library and published your review.' in client.get(response.location).data
     assert b'Added to your library and published your review.' not in client.get(response.location).data
     with accounts.app_context():
@@ -98,7 +98,7 @@ def test_publication_failure_rolls_back_the_game_and_rate_budget(accounts, monke
 def test_rate_limit_and_missing_csrf_never_create_partial_records(accounts):
     fake_catalog(accounts)
     client = public_author(accounts, 'alice')
-    assert client.post('/games/new', data={**DATA, 'publish_review': 'yes'}).status_code == 400
+    assert client.post('/library/add', data={**DATA, 'publish_review': 'yes'}).status_code == 400
     with accounts.app_context():
         for _ in range(30):
             get_db().execute('INSERT INTO public_review_events (owner_id) VALUES (?)', (ALICE,))
@@ -109,10 +109,10 @@ def test_rate_limit_and_missing_csrf_never_create_partial_records(accounts):
         assert db.execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 
 
-def test_publishing_from_catalog_add_flow_returns_to_library(accounts):
+def test_publishing_from_catalog_add_flow_returns_to_game(accounts):
     fake_catalog(accounts)
     client = public_author(accounts, 'alice')
     response = add(client, publish_review='yes', return_to_catalog='yes')
     assert response.status_code == 303
-    assert response.location.endswith('/account/alice_player/library')
+    assert response.location.endswith('/games/123/portal-2#your-progress')
     assert b'Added to your library and published your review.' in client.get(response.location).data

@@ -17,7 +17,7 @@ USERNAME_WAIT_SECONDS = 30 * 24 * 60 * 60
 RESERVED_NAMES = {'admin', 'administrator', 'api', 'auth', 'account', 'accounts', 'discover', 'explore', 'help', 'library', 'login', 'logout', 'moderator', 'official', 'players', 'profile', 'register', 'root', 'security', 'settings', 'staff', 'support', 'system', 'vestigium'}
 
 
-@profiles.get('/players')
+@profiles.get('/community/players')
 def search():
     if not current_app.config.get('AUTH_ENABLED'):
         abort(404)
@@ -137,7 +137,7 @@ def sharing():
             save_sharing(db, g.user['id'], request.form)
             g.profile = db.execute('SELECT display_name, username FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
             flash('Sharing settings saved. Your profile is public.' if request.form.get('is_public') == 'yes' else 'Sharing settings saved. Your profile is private.', 'profile_saved')
-            return redirect(url_for('profiles.sharing', _anchor='sharing-feedback'), code=303)
+            return redirect(url_for('auth.profile', _anchor='profile-privacy'), code=303)
         except ValueError as exc:
             error = str(exc)
     item = db.execute('SELECT username, username_changed_at, is_public, share_bio, share_showcase, share_statistics, share_activity FROM profiles WHERE id = ?', (g.user['id'],)).fetchone()
@@ -145,23 +145,21 @@ def sharing():
 
 
 @profiles.get('/players/<username>')
-@profiles.get('/profile/<username>')
 def public_profile(username):
-    if request.path.startswith('/profile/'):
-        if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{2,23}', username):
-            abort(404)
-        username = username.lower()
-        identity = get_db().execute('SELECT p.id, p.username FROM profile_usernames u JOIN profiles p ON p.id = u.owner_id WHERE u.username = ?', (username,)).fetchone()
-        if not identity:
-            abort(404)
-        is_owner = bool(g.user and str(identity['id']) == g.user['id'] and not g.account_session['recovery'])
-        if not is_owner and not get_db().execute('SELECT 1 FROM profiles WHERE id = ? AND is_public = TRUE', (identity['id'],)).fetchone():
-            abort(404)
-        if request.view_args['username'] != identity['username']:
-            return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
-        if is_owner:
-            from app.auth import profile_overview
-            return profile_overview()
+    if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{2,23}', username):
+        abort(404)
+    username = username.lower()
+    identity = get_db().execute('SELECT p.id, p.username FROM profile_usernames u JOIN profiles p ON p.id = u.owner_id WHERE u.username = ?', (username,)).fetchone()
+    if not identity:
+        abort(404)
+    is_owner = bool(g.user and str(identity['id']) == g.user['id'] and not g.account_session['recovery'])
+    if not is_owner and not get_db().execute('SELECT 1 FROM profiles WHERE id = ? AND is_public = TRUE', (identity['id'],)).fetchone():
+        abort(404)
+    if request.path != url_for('profiles.public_profile', username=identity['username']):
+        return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
+    if is_owner:
+        from app.auth import profile_overview
+        return profile_overview()
     if not current_app.config.get('AUTH_ENABLED') or not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username):
         abort(404)
     db = get_db()

@@ -3,8 +3,7 @@
     <div class="workspace-topbar">
         {% include '_appearance_bar.html' %}
         <nav class="workspace-nav" aria-label="Site navigation">
-            <a class="workspace-brand" href="{{ url_for('main.welcome') }}"><span>Vestigium</span></a>
-            {{ caller() }}
+            <a class="workspace-brand" href="{{ url_for('main.index') if account_user else url_for('main.welcome') }}"><span>Vestigium</span></a>
         </nav>
         {% if request.endpoint != 'main.welcome' %}
         <form class="header-search" action="{{ url_for('explore.index') }}" method="get" role="search" aria-label="Search the game catalog">
@@ -14,6 +13,7 @@
         {% endif %}
         <div class="workspace-header-actions">{% include '_account_nav.html' %}</div>
     </div>
+    {% if request.endpoint in ['explore.game','main.create','main.edit','main.delete','main.game_details','main.edit_list','main.delete_list','auth.edit_showcase','main.import_backup','wishlist.public','following.public_list','profiles.public_profile'] %}<div class="workspace-return">{{ caller() }}</div>{% endif %}
 </header>
 {% endmacro %}
 

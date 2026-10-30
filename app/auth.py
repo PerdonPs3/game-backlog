@@ -20,7 +20,7 @@ from app.db import get_db, INTEGRITY_ERRORS
 from app.catalog_journey import clear_auth_keep_selection, take_selection, pending_selection
 
 
-auth = Blueprint("auth", __name__, url_prefix="/account")
+auth = Blueprint("auth", __name__)
 SESSION_SECONDS = 30 * 24 * 60 * 60
 RECOVERY_SECONDS = 30 * 60
 
@@ -162,6 +162,8 @@ def protect_collection():
         return
     if request.blueprint == "main" and request.endpoint != "main.welcome":
         if not g.user:
+            from app.navigation import remember_login_destination
+            remember_login_destination()
             if request.accept_mimetypes.best == "application/json" or request.path.startswith("/catalog/"):
                 return jsonify(error="Please sign in to access your library."), 401
             return redirect(url_for("auth.login"))
@@ -187,7 +189,7 @@ def credentials():
     return {"email": email, "password": password}
 
 
-@auth.route("/login", methods=["GET", "POST"])
+@auth.route("/account/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET" and "code" in request.args:
         return complete_recovery_link()
@@ -207,8 +209,12 @@ def login():
                 if selected_id:
                     if selected.get('intent') == 'wishlist':
                         return redirect(url_for('explore.game', catalog_id=selected_id, _anchor='game-actions'))
-                    return redirect(url_for('main.create', igdb_id=selected_id))
+                    return redirect(url_for('main.create', igdb_id=selected_id, **{'from': selected.get('return_path')}))
             identity = {"username": saved["username"]} if saved["display_name"].strip() and saved["username"] else {}
+            from app.navigation import take_login_destination
+            destination = take_login_destination()
+            if destination and saved['display_name'].strip():
+                return redirect(destination)
             return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile", **identity))
         except ValueError as problem:
             error = str(problem)
@@ -240,7 +246,7 @@ def complete_recovery_link():
         return redirect(url_for("auth.recover"))
 
 
-@auth.route("/register", methods=["GET", "POST"])
+@auth.route("/account/register", methods=["GET", "POST"])
 def register():
     error = message = None
     if request.method == "POST":
@@ -262,7 +268,7 @@ def register():
     return render_template("account_auth.html", mode="register", error=error, message=message)
 
 
-@auth.route("/recover", methods=["GET", "POST"])
+@auth.route("/account/recover", methods=["GET", "POST"])
 def recover():
     error = message = None
     if request.method == "POST":
@@ -283,7 +289,7 @@ def recover():
     return render_template("account_auth.html", mode="recover", error=error, message=message)
 
 
-@auth.route("/verify-recovery", methods=["GET", "POST"])
+@auth.route("/account/verify-recovery", methods=["GET", "POST"])
 def verify_recovery():
     error = None
     if request.method == "POST":
@@ -300,7 +306,7 @@ def verify_recovery():
     return render_template("account_auth.html", mode="verify-recovery", error=error)
 
 
-@auth.route("/password", methods=["GET", "POST"])
+@auth.route("/account/password", methods=["GET", "POST"])
 def password():
     if not g.user or not g.account_session["recovery"]:
         return redirect(url_for("auth.recover"))
@@ -320,7 +326,7 @@ def password():
     return render_template("account_auth.html", mode="password", error=error)
 
 
-@auth.post("/logout")
+@auth.post("/account/logout")
 def logout():
     if g.account_session:
         get_db().execute("DELETE FROM account_sessions WHERE id_hash = ?", (g.account_session["id_hash"],))
@@ -332,7 +338,7 @@ def logout():
     return redirect(url_for("main.welcome"))
 
 
-@auth.get('/form-token')
+@auth.get('/account/form-token')
 def form_token():
     if not g.user:
         return jsonify(error='Please sign in again before adding this game.'), 401
@@ -341,7 +347,7 @@ def form_token():
     return jsonify(csrf_token=generate_csrf())
 
 
-@auth.route("/profile/edit", methods=["GET", "POST"])
+@auth.route("/settings/profile", methods=["GET", "POST"])
 def profile():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -424,7 +430,7 @@ def profile():
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 
-@auth.route("/profile", methods=["GET", "POST"])
+@auth.route("/account/profile", methods=["GET", "POST"])
 def profile_overview():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -445,12 +451,12 @@ def profile_overview():
     db = get_db()
     user_id = g.user["id"]
     item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, username, country_code, admin_badge, background_key FROM profiles WHERE id = ?", (user_id,)).fetchone()
-    playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    playing = db.execute("SELECT id, igdb_id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    completed = db.execute("SELECT id, igdb_id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     return render_template("profile_overview.html", profile=item, badge_state=owner_state(), profile_owner=True, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']), **profile_context(g.profile['username']))
 
 
-@auth.route("/profile/showcase", methods=["GET", "POST"])
+@auth.route("/settings/profile/showcase", methods=["GET", "POST"])
 def edit_showcase():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -468,14 +474,14 @@ def edit_showcase():
         try:
             save_showcase(db, user_id, selected)
             flash("Showcase saved. Your featured games are up to date.", "profile_saved")
-            return redirect(url_for("auth.profile_overview", _anchor="profile-feedback"), code=303)
+            return redirect((url_for("profiles.public_profile", username=g.profile["username"], _anchor="profile-feedback") if g.profile["username"] else url_for("auth.profile_overview", _anchor="profile-feedback")), code=303)
         except ValueError as exc:
             error = str(exc)
     games = db.execute("SELECT id, title, platform, status, cover_image_id FROM games WHERE owner_id = ? ORDER BY is_favorite DESC, LOWER(title), platform, id", (user_id,)).fetchall()
     return render_template("profile_showcase.html", games=game_cards(games), selected=(selected + [""] * 5)[:5], error=error)
 
 
-@auth.get("/profile/photo")
+@auth.get("/account/profile/photo")
 def profile_photo():
     if not g.user:
         abort(401)
