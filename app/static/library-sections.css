@@ -6,16 +6,41 @@
 html[data-library-navigation]:has(body.library-section-page) .workspace-site-header { view-transition-name: library-site-header; }
 html[data-library-navigation]:has(body.library-section-page) .library-hero { view-transition-name: library-title; }
 html[data-library-navigation]:has(body.library-section-page) .library-heading { view-transition-name: library-toolbar; }
+html[data-library-navigation]:has(body.library-section-page) :is(.library-room, .picker-room) { view-transition-name: library-room; }
+html[data-library-navigation]:has(body.library-section-page) main.library-layout { view-transition-name: library-content; }
+html[data-library-navigation]:has(body.library-section-page) .site-footer { view-transition-name: library-footer; }
+html[data-library-navigation] { --room-exit: -105%; --room-enter: 105%; --room-exit-angle: 6deg; --room-enter-angle: -6deg; }
+html[data-library-direction="backward"] { --room-exit: 105%; --room-enter: -105%; --room-exit-angle: -6deg; --room-enter-angle: 6deg; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(root) { animation: none; opacity: 1; }
-html[data-library-navigation]:has(body.library-section-page)::view-transition-new(root) { animation: library-page-in 200ms ease-out both; }
-html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*) { animation-duration: 200ms; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(root) { animation: none; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*) { animation-duration: 700ms; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-room) { z-index: 1; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-room) { animation: castle-room-exit 700ms cubic-bezier(.65, 0, .25, 1) both; mix-blend-mode: normal; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-room) { animation: castle-room-enter 700ms cubic-bezier(.65, 0, .25, 1) both; mix-blend-mode: normal; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-content) { animation: none; z-index: 2; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-content),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-footer) { animation: castle-content-exit 130ms ease-out both; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-content),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-footer) { animation: castle-content-enter 230ms 430ms ease-out both; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-site-header),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-title),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-toolbar) { animation: none; z-index: 3; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-site-header),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-title),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-toolbar) { animation: none; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-site-header),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-title),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-toolbar) { animation: none; }
-@keyframes library-page-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes castle-room-exit {
+    from { transform: perspective(1600px) translateX(0) rotateY(0) scale(1); }
+    to { transform: perspective(1600px) translateX(var(--room-exit)) rotateY(var(--room-exit-angle)) scale(1.08); }
+}
+@keyframes castle-room-enter {
+    from { transform: perspective(1600px) translateX(var(--room-enter)) rotateY(var(--room-enter-angle)) scale(1.08); }
+    to { transform: perspective(1600px) translateX(0) rotateY(0) scale(1); }
+}
+@keyframes castle-content-exit { to { opacity: 0; transform: translateY(6px); } }
+@keyframes castle-content-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
     html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*),
     html[data-library-navigation]:has(body.library-section-page)::view-transition-old(*),

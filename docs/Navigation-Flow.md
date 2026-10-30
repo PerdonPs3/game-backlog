@@ -75,8 +75,11 @@ study. Both have separate day/night WebP artwork under `app/static/images/backgr
 Pick a game keeps the salon. Public wishlists keep their existing public layout.
 
 Private library documents opt into native cross-document view transitions. The
-site header, library title, and toolbar keep their positions while the page
-dissolves in over 200 ms with a four-pixel entrance. Normal links, forms, URL
+site header, library title, and toolbar keep their positions while the illustrated
+rooms travel sideways over 700 ms with subtle perspective. Direction follows the
+tab order, including browser Back/Forward. Content leaves before the camera move
+and returns near arrival. Same-room filtering does not trigger room travel.
+Normal links, forms, URL
 filters, and browser history remain native. Reduced-motion preferences skip the
 animation; browsers without document-transition support navigate normally.
 The separate, slower day/night theme dissolve remains unchanged.
