@@ -29,6 +29,7 @@
             <div class="hero-copy">
 
                 <h1 class="library-wordmark">Your <span>library</span></h1>
+                <span id="collection-count" class="collection-count" role="status" aria-live="polite">{% if search_query or selected_status or selected_list %}{{ games|length }} of {{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% else %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% endif %}</span>
 
             </div>
         </header>
@@ -94,7 +95,6 @@
         <div class="library-heading">
             <div class="library-primary-tools">
                 {% include '_section_nav.html' %}
-                <span id="collection-count" class="collection-count" role="status" aria-live="polite">{% if search_query or selected_status or selected_list %}{{ games|length }} of {{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% else %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% endif %}</span>
                 <div class="hero-actions">
                     <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
                         <span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9a2 2 0 0 1 2 2v5M5 4a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7M5 4v13M3 19a2 2 0 0 0 2 2h7m6-7v8m-4-4h8"/></svg></span>
