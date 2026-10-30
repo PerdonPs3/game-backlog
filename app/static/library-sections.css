@@ -16,6 +16,7 @@ html[data-library-direction="backward"] { --room-exit: 105%; --room-enter: -105%
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(root) { animation: none; opacity: 1; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(root) { animation: none; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*) { animation-duration: 700ms; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(root) { animation: none; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-room) { z-index: 1; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-room) { animation: castle-room-exit 700ms cubic-bezier(.65, 0, .25, 1) both; mix-blend-mode: normal; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-room) { animation: castle-room-enter 700ms cubic-bezier(.65, 0, .25, 1) both; mix-blend-mode: normal; }

@@ -4,8 +4,8 @@
 {% block body_class %}library-page workspace-page picker-salon{% endblock %}
 {% block workspace_backdrop %}
     <div class="entry-map-room picker-room" aria-hidden="true">
-        <img class="picker-room-image picker-room-night" src="{{ url_for('static', filename='images/backgrounds/games-salon-night.webp') }}" width="1672" height="941" alt="" decoding="async" fetchpriority="low">
-        <img class="picker-room-image picker-room-day" src="{{ url_for('static', filename='images/backgrounds/games-salon-day.webp') }}" width="1672" height="941" alt="" decoding="async" fetchpriority="low">
+        <img class="picker-room-image picker-room-night" src="{{ url_for('static', filename='images/backgrounds/games-salon-night.webp') }}" width="1672" height="941" alt="" decoding="sync" fetchpriority="low">
+        <img class="picker-room-image picker-room-day" src="{{ url_for('static', filename='images/backgrounds/games-salon-day.webp') }}" width="1672" height="941" alt="" decoding="sync" fetchpriority="low">
     </div>
     <script src="{{ url_for('static', filename='game-entry-scene.js') }}" defer></script>
 {% endblock %}
