@@ -8,6 +8,7 @@
 {% block workspace_hero %}{{ profile_hero(profile, stats, owner=true) }}{% endblock %}
 {% block panel_label %}Your profile and featured games{% endblock %}
 {% block panel %}
+{% include '_profile_connections.html' %}
 {% if saved_messages %}<p id="profile-feedback" class="profile-feedback is-saved profile-overview-feedback" role="status" tabindex="-1" data-saved="true">✓ {{ saved_messages[0] }}</p>{% endif %}
 {% if pending_catalog_selection %}<p class="profile-catalog-continuation"><span>Your selected game is waiting.</span><a href="{{ url_for('explore.game', catalog_id=pending_catalog_selection.id, _anchor='game-actions') if pending_catalog_selection.intent == 'wishlist' else url_for('explore.add', catalog_id=pending_catalog_selection.id) }}">Continue to your selected game ↗</a></p>{% endif %}
 {% include '_profile_achievements.html' %}

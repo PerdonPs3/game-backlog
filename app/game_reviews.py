@@ -82,7 +82,10 @@ def review_context(catalog_id):
     # No private collection data or account identifiers enter the public projection.
     visible = VISIBLE + (' AND NOT EXISTS (SELECT 1 FROM public_review_reports f '
                          'WHERE f.review_id = r.id AND f.reporter_id = ?)' if normal else '')
-    params = (catalog_id, owner) if normal else (catalog_id,)
+    from app.following import unblocked_sql, viewer_id
+    exclusion, values = unblocked_sql('p', viewer_id())
+    visible += ' AND ' + exclusion
+    params = (catalog_id, *((owner,) if normal else ()), *values)
     summary = db.execute('SELECT COUNT(*), AVG(r.rating) FROM public_game_reviews r '
                          'JOIN profiles p ON p.id = r.owner_id WHERE r.catalog_id = ? AND ' + visible, params).fetchone()
     rows = db.execute('SELECT r.id, r.rating, r.body, r.has_spoilers, r.updated_at, '

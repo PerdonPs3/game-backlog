@@ -349,7 +349,7 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, share_wishlist, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, share_wishlist, share_connections, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
     from app.achievements import owner_state, save_features
     from app.profile_backgrounds import PRESETS, validate_background, save_background
     badge_state = owner_state() if item['display_name'].strip() else {'earned': [], 'featured': []}
@@ -441,12 +441,13 @@ def profile_overview():
     from app.routes import collection_statistics
     from app.game_reviews import profile_review_context
     from app.achievements import owner_state
+    from app.following import profile_context
     db = get_db()
     user_id = g.user["id"]
     item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, username, country_code, admin_badge, background_key FROM profiles WHERE id = ?", (user_id,)).fetchone()
     playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
     completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    return render_template("profile_overview.html", profile=item, badge_state=owner_state(), profile_owner=True, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']))
+    return render_template("profile_overview.html", profile=item, badge_state=owner_state(), profile_owner=True, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']), **profile_context(g.profile['username']))
 
 
 @auth.route("/profile/showcase", methods=["GET", "POST"])

@@ -96,6 +96,9 @@ def create_app(test_config=None):
     from app.community import init_app as init_community
     init_community(app)
 
+    from app.following import init_app as init_following
+    init_following(app)
+
     from app.account_urls import init_app as init_account_urls
     init_account_urls(app)
 

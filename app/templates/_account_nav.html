@@ -2,6 +2,7 @@
 <div class="account-navigation">
     <a href="{{ url_for('profiles.search') }}">Players</a>
     {% if account_user %}
+    <a href="{{ url_for('following.manage') }}">Connections</a>
     <a href="{{ url_for('wishlist.index') }}">Wishlist</a>
     <a href="{{ profile_url() }}">My profile</a>
     <form action="{{ url_for('auth.logout') }}" method="post">

@@ -1,0 +1,78 @@
+{% extends '_profile_base.html' %}
+{% from '_profile_country.html' import country_flag %}
+{% from '_profile_badges.html' import admin_badge %}
+{% block page_title %}{{ title }} · Vestigium{% endblock %}
+{% block body_class %}library-page workspace-page profile-palette-page connections-page{% endblock %}
+{% block layout_class %}profile-workspace profile-overview connections-workspace{% endblock %}
+{% block workspace_backdrop %}
+<div class="connections-gallery" aria-hidden="true">
+    <img class="connections-gallery-image connections-gallery-night" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+    <img class="connections-gallery-image connections-gallery-day" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+</div>
+{% endblock %}
+{% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">← Back to profile</a>{% endblock %}
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if name in ['followers', 'following'] %}<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/>{% if name == 'following' %}<path d="m16 2 2 2 3-3"/>{% endif %}
+{% elif name == 'requests' %}<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-12 2 2 4-5"/>
+{% elif name == 'sent' %}<path d="m3 10 18-7-7 18-3-8-8-3Zm8 3L21 3"/>
+{% elif name == 'blocked' %}<circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/>
+{% elif name == 'more' %}<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>
+{% elif name == 'search' %}<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>
+{% elif name == 'lock' %}<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>
+{% elif name == 'check' %}<path d="m5 12 4 4L19 6"/>
+{% else %}<path d="M12 5v14M5 12h14"/>{% endif %}
+</svg>
+{%- endmacro %}
+{% macro action_form(player, action, label, tone='quiet') %}
+<form class="connection-action-form" method="post" action="{{ url_for('following.change', username=player.username, action=action) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="view" value="{{ kind }}">{% if action == 'follow' %}<input type="hidden" name="return_to" value="connections">{% endif %}<button class="connection-button is-{{ tone }}" type="submit" aria-label="{{ label }} @{{ player.username }}">{{ label }}</button></form>
+{% endmacro %}
+{% block workspace_hero %}
+<header class="connections-hero">
+    <div class="connections-heading"><span class="connections-hero-icon">{{ icon('followers') }}</span><div><h1>{{ 'Your connections' if connection_owner else title }}</h1>{% if not connection_owner %}<a href="{{ url_for('profiles.public_profile', username=username) }}">@{{ username }}</a>{% endif %}</div></div>
+    {% if connection_owner %}<nav class="connections-summary" aria-label="Your connection counts">{% for view in ['followers', 'following', 'requests'] %}<a href="{{ url_for('following.manage', view=view) }}"><strong>{{ totals[view] }}</strong><span>{{ 'Requests' if view == 'requests' else views[view] }}</span></a>{% endfor %}</nav>{% endif %}
+</header>
+{% endblock %}
+{% block panel_label %}{{ title }}{% endblock %}
+{% block panel %}
+{% for message in get_flashed_messages(category_filter=['connections_saved']) %}<p class="connection-feedback" role="status">{{ message }}</p>{% endfor %}
+<div class="connections-shell{% if not connection_owner %} is-public{% endif %}">
+{% if connection_owner %}
+<aside class="connection-sidebar">
+    <nav class="connection-tabs" aria-label="Connection lists">{% for view, label in views.items() %}<a href="{{ url_for('following.manage', view=view) }}" {% if kind == view %}aria-current="page"{% endif %}>{{ icon(view) }}<span>{{ label }}</span><span class="connection-tab-count">{{ totals[view] }}</span></a>{% endfor %}</nav>
+    <div class="connection-sidebar-links"><a href="{{ url_for('profiles.search') }}">{{ icon('search') }}Find players <span aria-hidden="true">↗</span></a><a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">{{ icon('lock') }}Privacy settings</a></div>
+</aside>
+{% endif %}
+<section class="connection-content" aria-labelledby="connection-list-title">
+    <header class="connection-list-heading"><h2 id="connection-list-title">{{ title }} <span>{{ total }}</span></h2>{% if connection_owner %}<a class="connection-discover" href="{{ url_for('profiles.search') }}">Find players <span aria-hidden="true">↗</span></a>{% endif %}</header>
+{% if connection_owner %}
+    <details class="connection-find"><summary>{{ icon('plus') }}Follow by username<span aria-hidden="true">⌄</span></summary><form class="connection-username-form" method="post" action="{{ url_for('following.follow_by_username') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="visually-hidden" for="follow-username">Exact @username</label><div><span aria-hidden="true">@</span><input id="follow-username" name="username" minlength="3" maxlength="25" pattern="@?[A-Za-z][A-Za-z0-9_]{2,23}" title="Use 3–24 letters, numbers, or underscores, starting with a letter." placeholder="player_name" aria-describedby="follow-username-hint" required autocomplete="off" spellcheck="false"><button class="connection-button is-primary" type="submit">Follow player</button></div><small id="follow-username-hint">Private players must approve your request. Following never unlocks a private profile.</small></form></details>
+    {% if kind == 'blocked' %}<p class="connection-note">Unblocking does not restore previous connections. Public content remains accessible when signed out.</p>{% endif %}
+{% else %}<p class="connection-note">Only public players appear in shared lists and counts.</p>{% endif %}
+<ul class="connection-list">
+{% for player in players %}
+<li class="connection-card" style="--connection-avatar-color: {{ player.avatar_color }}">
+    <div class="connection-card-top">
+    {% if connection_owner and kind != 'blocked' %}<details class="connection-options" name="connection-options"><summary aria-label="More actions for @{{ player.username }}">{{ icon('more') }}</summary><div class="connection-menu">{% if kind == 'followers' %}{{ action_form(player, 'remove', 'Remove follower') }}{% endif %}<details class="connection-block"><summary>Block player</summary><p>Remove connections and requests in both directions.</p>{{ action_form(player, 'block', 'Confirm block', 'danger') }}</details></div></details>{% endif %}
+    {% if player.is_public and kind != 'blocked' %}<a class="connection-identity" href="{{ url_for('profiles.public_profile', username=player.username) }}">{% else %}<div class="connection-identity">{% endif %}
+        <span class="connection-avatar" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="17" r="9" fill="currentColor"/><path d="M7 44v-5a17 17 0 0 1 34 0v5Z" fill="currentColor"/></svg>{% if player.has_public_photo %}<img src="{{ url_for('profiles.public_photo', username=player.username) }}" alt="" width="76" height="76" loading="lazy">{% endif %}</span>
+        <span class="connection-player"><strong>{{ 'Blocked player' if kind == 'blocked' else player.display_name }}{% if kind != 'blocked' %}{{ admin_badge(player.admin_badge) }}{% endif %}</strong><span>@{{ player.username }}</span>{% if player.country_code %}{{ country_flag(player.country_code) }}{% endif %}</span>
+    {% if player.is_public and kind != 'blocked' %}</a>{% else %}</div>{% endif %}
+    </div>
+    {% if player.bio %}<p class="connection-bio">{{ player.bio }}</p>{% elif not player.is_public and kind != 'blocked' %}<p class="connection-bio is-private">{{ icon('lock') }}This player keeps their profile private.</p>{% endif %}
+    <footer class="connection-card-footer">
+        <span class="connection-state{% if kind in ['requests','sent'] %} is-pending{% endif %}">{{ icon('sent' if kind == 'sent' else 'lock' if not player.is_public else 'blocked' if kind == 'blocked' else 'check') }}{{ 'Follows you' if kind == 'followers' and connection_owner else 'Follower' if kind == 'followers' else 'Following' if kind == 'following' else 'Wants to follow you' if kind == 'requests' else 'Request pending' if kind == 'sent' else 'Blocked' }}</span>
+    {% if connection_owner %}<div class="connection-actions">
+    {% if kind == 'requests' %}{{ action_form(player, 'decline', 'Decline') }}{{ action_form(player, 'approve', 'Approve', 'primary') }}
+    {% elif kind == 'sent' %}{{ action_form(player, 'cancel', 'Cancel request') }}
+    {% elif kind == 'followers' %}{% if player.follow_state == 'accepted' %}<span class="connection-following-label">Following {{ icon('check') }}</span>{% elif player.follow_state == 'pending' %}<span class="connection-following-label">Requested</span>{% else %}{{ action_form(player, 'follow', 'Follow back' if player.is_public else 'Request to follow', 'primary') }}{% endif %}
+    {% elif kind == 'following' %}{{ action_form(player, 'unfollow', 'Unfollow') }}
+    {% elif kind == 'blocked' %}{{ action_form(player, 'unblock', 'Unblock') }}{% endif %}
+    </div>{% endif %}
+    </footer>
+</li>
+{% else %}<li class="connection-empty"><span class="connection-empty-icon">{{ icon(kind) }}</span><h3>{{ 'No follow requests to review.' if kind == 'requests' else 'No pending requests.' if kind == 'sent' else 'No blocked players.' if kind == 'blocked' else 'Your circle starts here.' }}</h3><p>{{ 'New requests will appear here for you to approve.' if kind == 'requests' else 'Find a player and start a connection.' if kind in ['followers','following'] else 'You are all caught up.' }}</p>{% if connection_owner and kind in ['followers','following'] %}<a class="profile-action profile-action-primary" href="{{ url_for('profiles.search') }}">Find players ↗</a>{% endif %}</li>{% endfor %}
+</ul>
+{% if page > 1 or has_next %}<nav class="profile-review-pages" aria-label="Connection pages">{% if page > 1 %}<a href="{{ url_for('following.manage', view=kind, page=page-1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page-1) }}">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if has_next %}<a href="{{ url_for('following.manage', view=kind, page=page+1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page+1) }}">Next →</a>{% endif %}</nav>{% endif %}
+</section></div>
+{% endblock %}

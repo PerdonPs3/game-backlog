@@ -278,7 +278,8 @@ def test_migration_keeps_profile_visibility_and_libraries_with_public_wishlist_d
             db.execute("UPDATE profiles SET username='existing_player',is_public=TRUE,share_statistics=FALSE WHERE id = ?", (ALICE,))
             db.execute("INSERT INTO games (owner_id,title,platform) VALUES (?,'Private game','PC')", (ALICE,))
     result = application.test_cli_runner().invoke(args=['migrate-db'])
-    assert result.exit_code == 0 and 'Applied 2' in result.output
+    expected = len(list(original.glob('[0-9]*.sql'))) - 14
+    assert result.exit_code == 0 and f'Applied {expected}' in result.output
     with application.app_context():
         db = get_db()
         assert tuple(db.execute('SELECT is_public,share_statistics,share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()) == (True, False, True)
