@@ -83,7 +83,8 @@ test("typing is debounced and combines title and status without reloading inputs
     await pending;
     assert.equal(ui["game-collection"].innerHTML, "<article>Resident</article>");
     assert.equal(ui["title-search"].value, "res");
-    assert.equal(ui["collection-count"].textContent, "1 of 3 games");
+    assert.equal(ui["collection-count"].textContent, "1 / 3");
+    assert.equal(ui["collection-count"].attributes["aria-label"], "1 of 3 games");
     assert.equal(ui["filter-message"].textContent, "");
     assert.equal(ui["filter-reset"].hidden, false);
     assert.equal(ui["game-collection"].attributes["aria-busy"], "false");
@@ -105,7 +106,8 @@ test("older responses never replace the newest search", async () => {
     ui.requests[0].reply("Resident", 2);
     await older;
     assert.equal(ui["game-collection"].innerHTML, "Portal");
-    assert.equal(ui["collection-count"].textContent, "1 of 5 games");
+    assert.equal(ui["collection-count"].textContent, "1 / 5");
+    assert.equal(ui["collection-count"].attributes["aria-label"], "1 of 5 games");
     assert.equal(ui.history.length, 1);
 });
 
@@ -122,7 +124,8 @@ test("clearing filters requests all games", async () => {
     assert.equal(ui["filter-reset"].hidden, true);
     assert.equal(ui["title-search"].value, "");
     assert.equal(ui["status-filter"].value, "");
-    assert.equal(ui["collection-count"].textContent, "3 games");
+    assert.equal(ui["collection-count"].textContent, "3");
+    assert.equal(ui["collection-count"].attributes["aria-label"], "3 games");
 });
 
 test("failed requests preserve current cards and expose a retry", async () => {

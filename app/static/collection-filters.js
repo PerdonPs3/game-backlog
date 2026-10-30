@@ -63,9 +63,11 @@
             window.history.replaceState(null, "", url);
             document.dispatchEvent(new Event("collection:updated"));
             if (counter) {
-                counter.textContent = query || status.value || list?.value
+                const filtered = Boolean(query || status.value || list?.value);
+                counter.textContent = filtered ? `${data.count} / ${data.total}` : String(data.total);
+                counter.setAttribute("aria-label", filtered
                     ? `${data.count} of ${data.total} ${data.total === 1 ? "game" : "games"}`
-                    : `${data.total} ${data.total === 1 ? "game" : "games"}`;
+                    : `${data.total} ${data.total === 1 ? "game" : "games"}`);
                 message.textContent = "";
             } else {
                 message.textContent = `${data.count} ${data.count === 1 ? "game" : "games"} found.`;

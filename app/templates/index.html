@@ -29,7 +29,11 @@
             <div class="hero-copy">
 
                 <h1 class="library-wordmark">Your <span>library</span></h1>
-                <span id="collection-count" class="collection-count" role="status" aria-live="polite">{% if search_query or selected_status or selected_list %}{{ games|length }} of {{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% else %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}{% endif %}</span>
+                {% set filtered_collection = search_query or selected_status or selected_list %}
+                <span class="collection-count" role="status" aria-live="polite">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12h4m-2-2v4m7-1h.01M17 10h.01M6.8 6h10.4a4 4 0 0 1 3.95 3.35l1.1 6.7a3 3 0 0 1-5.1 2.6L15.5 17h-7l-1.65 1.65a3 3 0 0 1-5.1-2.6l1.1-6.7A4 4 0 0 1 6.8 6Z"/></svg>
+                    <span id="collection-count" aria-label="{% if filtered_collection %}{{ games|length }} of {% endif %}{{ collection_total }} {{ 'game' if collection_total == 1 else 'games' }}">{% if filtered_collection %}{{ games|length }} / {% endif %}{{ collection_total }}</span>
+                </span>
 
             </div>
         </header>
