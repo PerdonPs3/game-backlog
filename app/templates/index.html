@@ -94,7 +94,6 @@
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
         <div class="library-heading">
             <div class="library-primary-tools">
-                {% include '_section_nav.html' %}
                 <div class="hero-actions">
                     <a class="button-link hero-add-game" href="{{ url_for('main.create') }}">
                         <span class="archive-action-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9a2 2 0 0 1 2 2v5M5 4a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7M5 4v13M3 19a2 2 0 0 0 2 2h7m6-7v8m-4-4h8"/></svg></span>
@@ -110,6 +109,7 @@
                     <button type="button" data-collection-view="shelf" aria-pressed="false" aria-controls="game-collection"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>Shelf</button>
                 </div>
             </div>
+            {% include '_section_nav.html' %}
         </div>
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}
