@@ -9,6 +9,7 @@
     let active;
     let pending = 0;
     let departing = false;
+    let queuedDestination = null;
     function warmRoom(index) {
         const theme = root.dataset.theme === 'light' ? 'day' : 'night';
         const url = new URL(`images/backgrounds/${artwork[index]}-${theme}.webp`, scriptRoot);
@@ -44,15 +45,27 @@
         }
         const link = tabLink(event);
         if (!link) return;
-        if (active || departing) {
+        if (active) {
             event.preventDefault();
             event.stopImmediatePropagation();
+            if (!departing) {
+                queuedDestination = link.href;
+                warmRoom(roomIndex(link.href));
+            }
+            return;
+        }
+        if (departing) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            await navigate(link.href);
             return;
         }
         if (roomIndex(link.href) === roomIndex(window.location.href) || motion.matches || !('onpageswap' in window)) return;
         event.preventDefault();
+        await navigate(link.href);
+    }, { capture: true });
+    async function navigate(destination) {
         const ticket = ++pending;
-        const destination = link.href;
         let timeout;
         await Promise.race([
             warmRoom(roomIndex(destination)),
@@ -62,13 +75,14 @@
         if (ticket !== pending) return;
         departing = true;
         window.location.assign(destination);
-    }, { capture: true });
+    }
     function roomIndex(url) {
         if (!url) return -1;
         const destination = new URL(url, window.location.href);
         return destination.origin === window.location.origin ? rooms.indexOf(destination.pathname) : -1;
     }
     function prepare(event) {
+        if (event.type === 'pageswap') queuedDestination = null;
         const transition = event.viewTransition;
         if (!transition) return;
         transition.ready?.catch(() => {});
@@ -82,11 +96,19 @@
         active = transition;
         root.dataset.libraryNavigation = 'true';
         root.dataset.libraryDirection = to > from ? 'forward' : 'backward';
-        transition.finished.catch(() => {}).finally(() => {
+        transition.finished.catch(() => {}).finally(async () => {
             if (active !== transition) return;
             delete root.dataset.libraryNavigation;
             delete root.dataset.libraryDirection;
+            if (event.type === 'pagereveal') {
+                // Paint the real destination before another snapshot can start.
+                await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+            }
+            if (active !== transition) return;
             active = null;
+            const destination = queuedDestination;
+            queuedDestination = null;
+            if (destination && destination !== window.location.href && !departing) await navigate(destination);
         });
     }
     window.addEventListener('pageswap', prepare);

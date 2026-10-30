@@ -76,9 +76,11 @@ Pick a game keeps the salon. Public wishlists keep their existing public layout.
 
 Private library documents opt into native cross-document view transitions. The
 site header, library title, and toolbar keep their positions while the illustrated
-rooms travel sideways over 700 ms with subtle perspective. Direction follows the
+rooms travel sideways over 700 ms in adjacent, opaque viewport-sized layers. Direction follows the
 tab order, including browser Back/Forward. Content leaves before the camera move
-and returns near arrival. Same-room filtering does not trigger room travel.
+and returns only after the room finishes moving. Outgoing content is hidden
+instead of ghosting over a moving scene; arriving content fades in over 120 ms
+after the 700 ms room pan. Same-room filtering does not trigger room travel.
 Normal links, forms, URL
 filters, and browser history remain native. Reduced-motion preferences skip the
 animation; browsers without document-transition support navigate normally.
@@ -89,6 +91,10 @@ leaving (with a 1.2-second maximum wait). Pointer/focus intent and idle time war
 only the selected theme's artwork, never private page responses; idle warming
 respects Save-Data. Rapid clicks while loading choose the latest destination,
 and tab/theme clicks during active travel cannot start a competing transition.
+Tab clicks during arrival retain only the latest requested destination. The next
+trip starts after the current transition finishes and the real page has painted
+twice. Room images move exactly one viewport without perspective scaling, so
+their edges meet without overlapping or revealing a gap.
 An image failure or timeout falls back to normal navigation without waiting
 indefinitely. Arrival does not cancel an already captured outgoing transition
 based on the new image element's initial loading flag.

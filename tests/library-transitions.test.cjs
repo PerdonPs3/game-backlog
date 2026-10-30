@@ -5,11 +5,12 @@ const { join } = require('node:path');
 const { runInNewContext } = require('node:vm');
 const source = readFileSync(join(__dirname, '../app/static/library-transitions.js'), 'utf8');
 
-function setup({ reduced = false, activation, decode = () => Promise.resolve() } = {}) {
+function setup({ reduced = false, activation, decode = () => Promise.resolve(), href = 'http://localhost/library', manualFrames = false } = {}) {
     const events = {};
     const dataset = {};
     const destinations = [];
     const images = [];
+    const frames = [];
     const motion = { matches: reduced, addEventListener: (name, fn) => events.motion = fn };
     runInNewContext(source, {
         URL,
@@ -24,14 +25,15 @@ function setup({ reduced = false, activation, decode = () => Promise.resolve() }
             addEventListener: (name, fn) => events[name] = fn,
         },
         window: {
-            location: { href: 'http://localhost/library', origin: 'http://localhost', assign: url => destinations.push(url) },
+            location: { href, origin: 'http://localhost', assign: url => destinations.push(url) },
+            requestAnimationFrame: callback => manualFrames ? frames.push(callback) : setImmediate(callback),
             onpageswap: null,
             navigation: { activation },
             matchMedia: () => motion,
             addEventListener: (name, fn) => events[name] = fn,
         },
     });
-    return { events, dataset, destinations, images };
+    return { events, dataset, destinations, images, paint: () => frames.shift()?.() };
 }
 function route(from, to) {
     return { from: { url: from }, entry: { url: to } };
@@ -107,7 +109,7 @@ test('navigation waits for decoded artwork and preserves the full filtered desti
     assert.equal(ui.images[0].src, 'http://localhost/static/images/backgrounds/wishlist-observatory-night.webp');
 });
 
-test('rapid clicks during loading select the latest destination and never navigate twice', async () => {
+test('rapid clicks during artwork loading select the latest destination', async () => {
     const releases = [];
     const ui = setup({ decode: () => new Promise(resolve => releases.push(resolve)) });
     const first = ui.events.click(click('http://localhost/library/wishlist'));
@@ -115,19 +117,47 @@ test('rapid clicks during loading select the latest destination and never naviga
     releases.forEach(resolve => resolve());
     await Promise.all([first, second]);
     assert.deepEqual(ui.destinations, ['http://localhost/library/lists']);
-    await ui.events.click(click('http://localhost/library/pick'));
-    assert.equal(ui.destinations.length, 1);
 });
 
-test('active travel cannot be interrupted by another tab click', async () => {
+test('a click before the departure snapshot replaces the pending native destination', async () => {
     const ui = setup();
+    await ui.events.click(click('http://localhost/library/pick'));
+    await ui.events.click(click('http://localhost/library/wishlist'));
+    assert.deepEqual(ui.destinations, ['http://localhost/library/pick', 'http://localhost/library/wishlist']);
+});
+
+test('rapid clicks during arrival keep only the last destination and wait for two real paints', async () => {
+    const ui = setup({ activation: route('/library', '/library/wishlist'), href: 'http://localhost/library/wishlist', manualFrames: true });
     const animation = transition();
-    ui.events.pageswap({ type: 'pageswap', activation: route('/library', '/library/lists'), viewTransition: animation });
+    ui.events.pagereveal({ type: 'pagereveal', viewTransition: animation });
+    await ui.events.click(click('http://localhost/library/lists'));
     const event = click('http://localhost/library/pick');
     await ui.events.click(event);
     assert.equal(event.prevented, true);
     assert.deepEqual(ui.destinations, []);
     animation.finish();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(ui.destinations, []);
+    ui.paint();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(ui.destinations, []);
+    ui.paint();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(ui.destinations, ['http://localhost/library/pick']);
+});
+
+test('choosing the current room during arrival cancels the queued onward trip', async () => {
+    const ui = setup({ activation: route('/library', '/library/wishlist'), href: 'http://localhost/library/wishlist', manualFrames: true });
+    const animation = transition();
+    ui.events.pagereveal({ type: 'pagereveal', viewTransition: animation });
+    await ui.events.click(click('http://localhost/library/lists'));
+    await ui.events.click(click('http://localhost/library/wishlist'));
+    animation.finish();
+    await new Promise(resolve => setImmediate(resolve));
+    ui.paint();
+    ui.paint();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(ui.destinations, []);
 });
 
 test('new tabs and same-room filters retain native link behavior', async () => {
