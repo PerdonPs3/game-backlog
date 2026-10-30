@@ -1,8 +1,10 @@
 # Discover recommendations
 
-Implemented locally on `feature/catalog-recommendations`, based on updated
-`develop`. Owner review and separate integration/publication authorization are
-pending. No database migration or new provider is required.
+Implemented on `feature/catalog-recommendations`, based on updated `develop`, and
+preserved through a `--no-ff` merge into `refactor/navigation-flow`. The owner
+reviewed the local experience and authorized develop integration/publication on
+2026-10-30, subject to final validation. No database migration or new provider is
+required. Production remains separate.
 
 ## What appears
 

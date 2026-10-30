@@ -28,9 +28,9 @@ items below are not a claim that the production account release is still pending
 - [x] Implement a wishlist separate from owned games, public by default with a privacy opt-out and library transfer (develop publication authorized on 2026-10-25; migrations 015–016 applied to hosted development).
 - [x] Extend the library picker with selected statuses and preference signals, inline roulette reveals in both modes, and day/night salon artwork (reviewed; develop publication authorized on 2026-10-27).
 - [x] Publish [player following](../Player-Following.md) to develop with private requests, opt-in shared lists, blocking, and portrait-gallery artwork (owner authorized publication and development migration 017 on 2026-10-30). Profile reporting remains a separate follow-up.
-- [ ] Review and publish [explainable catalog recommendations](../Catalog-Recommendations.md): implemented locally with genre/platform filters, ratings and wishlist signals, direct wishlist saves, and day/night courtyard artwork. No migration or new provider is required; integration/publication await owner review.
+- [x] Review [explainable catalog recommendations](../Catalog-Recommendations.md): genre/platform filters, ratings and wishlist signals, direct wishlist saves, and day/night courtyard artwork. Develop integration/publication was authorized on 2026-10-30, subject to final validation. No migration or new provider is required.
 
-- [ ] Review and publish [navigation consolidation](../Navigation-Flow.md): implemented locally with three primary areas, canonical URLs, private progress on the modern game page, contextual returns, and guarded legacy aliases. No migration is required.
+- [x] Review [navigation consolidation](../Navigation-Flow.md): three primary areas, canonical URLs, private progress on the modern game page, contextual returns, guarded legacy aliases, shared library controls, exclusive rooms, and directional transitions with rapid-click recovery. Develop integration/publication was authorized on 2026-10-30, subject to final validation. No migration is required.
 
 ### 1. Make the collection easier to manage
 

@@ -1,6 +1,6 @@
 # Navigation and canonical destinations
 
-Implemented locally on `refactor/navigation-flow`; integration and publication require owner authorization. No schema migration or additional provider is needed.
+Implemented on `refactor/navigation-flow`; the owner reviewed the local result and authorized develop integration/publication on 2026-10-30, subject to final validation. No schema migration or additional provider is needed. Production remains separate.
 
 ## Primary areas
 
@@ -16,8 +16,9 @@ Settings contains Profile, Privacy, and Data & backups. Contextual return links 
 All games, Wishlist, Lists, and Pick a game share the same `Your library` heading,
 owner-scoped gamepad counter, Add game action, section tabs, and Cards/Shelf control.
 The toolbar stays above the section's search or preferences at the same position.
-The picker retains its illustrated day/night salon; the other private library tabs
-use the archive background. Public wishlists retain their separate public layout.
+The picker retains its illustrated day/night salon. All games uses the archive,
+Wishlist the observatory, and Lists the curator's study, each with day/night art.
+Public wishlists retain their separate public layout.
 
 Validated collection search, status, sort, and personal-list filters travel between
 tabs in local `from` context. Live filtering updates sibling links as well. Return
