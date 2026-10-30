@@ -71,6 +71,7 @@
     function prepare(event) {
         const transition = event.viewTransition;
         if (!transition) return;
+        transition.ready?.catch(() => {});
         const activation = event.type === 'pageswap' ? event.activation : window.navigation?.activation;
         const from = roomIndex(activation?.from?.url);
         const to = roomIndex(activation?.entry?.url);
