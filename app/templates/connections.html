@@ -4,6 +4,12 @@
 {% block page_title %}{{ title }} · Vestigium{% endblock %}
 {% block body_class %}library-page workspace-page profile-palette-page connections-page{% endblock %}
 {% block layout_class %}profile-workspace profile-overview connections-workspace{% endblock %}
+{% block workspace_backdrop %}
+<div class="connections-gallery" aria-hidden="true">
+    <img class="connections-gallery-image connections-gallery-night" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+    <img class="connections-gallery-image connections-gallery-day" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
+</div>
+{% endblock %}
 {% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">← Back to profile</a>{% endblock %}
 {% macro icon(name) -%}
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

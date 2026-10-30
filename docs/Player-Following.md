@@ -73,3 +73,20 @@ The connection-card redesign passed 32 targeted following and community-profile
 regression cases, including photo opt-out/revocation, private and blocked avatar
 exclusion, escaped public bios, and follow-back behavior. Published photos were
 also verified in the browser with responsive light/dark layouts.
+
+## Portrait gallery background
+
+The owner selected the portrait-gallery concept for Connections. The gallery
+belongs to the same illustrated castle as the library and Add game map room:
+framed adventurer portraits, stone arches, navy banners, and a tall central
+window. Dark mode uses moonlight and warm lanterns; light mode uses the aligned
+daylight version. The existing theme switch handles the change, with reduced
+motion support. Neutral translucent surfaces preserve contrast independently of
+the scene, and decorative imagery is excluded from the accessibility tree.
+
+Both optimized WebP assets are 1536 × 1024 pixels, stored under
+`app/static/images/backgrounds/connections-gallery-{day,night}.webp`. The built-in
+ImageGen prompts and provenance are preserved in
+[Connections-Gallery-Artwork-Prompts.json](Connections-Gallery-Artwork-Prompts.json).
+The separate moonlit courtyard concept remains a future design reference; it has
+not been assigned to or implemented on another page.

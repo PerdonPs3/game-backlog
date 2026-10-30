@@ -112,3 +112,56 @@
     .connection-username-form > div { flex-wrap: wrap; } .connection-username-form input { width: calc(100% - 3rem); } .connection-username-form button { width: calc(100% - .5rem); margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .connection-tabs a { transition: none; } }
+
+/* The portrait gallery is the community room of the illustrated archive. */
+body.connections-page {
+    position: relative;
+    isolation: isolate;
+    --gallery-veil: #090b112b;
+    --gallery-card: #181b20f2;
+    --gallery-sidebar: #111317ed;
+    --gallery-hero: #111317bb;
+    --gallery-section-top: #111317b8;
+    --gallery-section-bottom: #11131770;
+}
+html[data-theme="light"] body.connections-page {
+    --gallery-veil: #f4ecdf22;
+    --gallery-card: #fffaf1f5;
+    --gallery-sidebar: #fffaf0f2;
+    --gallery-hero: #fffaf0e0;
+    --gallery-section-top: #fffaf0d6;
+    --gallery-section-bottom: #fffaf0a6;
+}
+.connections-gallery { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.connections-gallery-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.connections-gallery-day { opacity: 0; }
+html[data-theme="light"] .connections-gallery-day { opacity: 1; }
+.connections-gallery::after { content: ''; position: absolute; inset: 0; background: var(--gallery-veil); }
+.connections-page .connections-hero { padding: 1.4rem 1.5rem; border: 1px solid var(--border); border-radius: 18px; background: var(--gallery-hero); box-shadow: 0 10px 30px #0000000d; }
+.connections-page .connection-sidebar { padding: .7rem; border: 1px solid var(--border); border-radius: 15px; background: var(--gallery-sidebar); box-shadow: 0 8px 24px #00000012; }
+.connections-page .connection-tabs a { padding-inline: .65rem; gap: .6rem; }
+.connections-page .connection-sidebar-links { margin-inline: .6rem; padding-bottom: .8rem; }
+.connections-page .connection-content { padding: 1.25rem; border: 1px solid color-mix(in srgb, var(--border) 65%, transparent); border-radius: 18px; background: linear-gradient(180deg, var(--gallery-section-top), var(--gallery-section-bottom)); }
+.connections-page .connection-card { background: radial-gradient(ellipse at 10% 0%, color-mix(in srgb, var(--connection-avatar-color) 11%, transparent), transparent 65%), var(--gallery-card); box-shadow: inset 0 1px 0 #ffffff08, 0 8px 22px #0000001a; }
+.connections-page .connection-find, .connections-page .connection-menu { background: var(--gallery-sidebar); }
+.connections-page .connection-empty { background: var(--gallery-card); }
+.connections-page .connection-feedback { background: var(--gallery-sidebar); }
+.connections-page .workspace-site-header { background: var(--color-canvas); backdrop-filter: none; }
+.connections-page .site-footer { background: var(--gallery-sidebar); }
+html:has(body.connections-page)::view-transition-old(root) { animation: none; opacity: 1; }
+html:has(body.connections-page)::view-transition-new(root) { animation: gallery-time-shift 1800ms cubic-bezier(.4, 0, .2, 1) both; }
+@keyframes gallery-time-shift { from { opacity: 0; } to { opacity: 1; } }
+@supports not (view-transition-name: root) {
+    html[data-theme-ready] .connections-gallery-day { transition: opacity 1800ms cubic-bezier(.4, 0, .2, 1); }
+}
+@media (max-width: 700px) {
+    .connections-gallery-image { object-position: 18% top; }
+    .connections-page .connections-hero { padding: 1.1rem; }
+    .connections-page .connection-sidebar { padding: .4rem; top: auto; border-radius: 12px; }
+    .connections-page .connection-content { padding: 1rem; }
+    .connections-page .connection-tabs { padding-bottom: .4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html:has(body.connections-page)::view-transition-new(root) { animation: none; }
+    html[data-theme-ready] .connections-gallery-day { transition: none; }
+}
