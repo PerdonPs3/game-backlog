@@ -81,10 +81,17 @@ def connection_query(owner, kind, private, *, count=False, page=1):
         return get_db().execute('SELECT COUNT(*) FROM ' + join + ' WHERE ' + condition, tuple(params)).fetchone()[0]
     # Even an owner's management list never reveals a private player's bio, photo,
     # or display name. The current handle is sufficient for relationship controls.
+    public_identity = 'p.is_public' if kind != 'blocked' else 'FALSE'
     return get_db().execute(
-        "SELECT p.username, p.is_public, CASE WHEN p.is_public THEN p.display_name ELSE 'Private player' END AS display_name "
+        f"SELECT p.username, p.is_public, CASE WHEN {public_identity} THEN p.display_name ELSE 'Private player' END AS display_name, "
+        f"CASE WHEN {public_identity} THEN p.avatar_color ELSE '#64748b' END AS avatar_color, "
+        f'({public_identity} AND p.share_photo AND p.avatar_image IS NOT NULL) AS has_public_photo, '
+        f"CASE WHEN {public_identity} AND p.share_bio THEN left(p.bio, 140) ELSE '' END AS bio, "
+        f'CASE WHEN {public_identity} THEN p.country_code ELSE NULL END AS country_code, '
+        f'CASE WHEN {public_identity} THEN p.admin_badge ELSE FALSE END AS admin_badge, '
+        '(SELECT own.state FROM player_follows own WHERE own.follower_id = ? AND own.followed_id = p.id) AS follow_state '
         'FROM ' + join + ' WHERE ' + condition + ' ORDER BY f.created_at DESC, p.username LIMIT ? OFFSET ?',
-        (*params, PAGE_SIZE, (page - 1) * PAGE_SIZE)).fetchall()
+        (viewer_id(), *params, PAGE_SIZE, (page - 1) * PAGE_SIZE)).fetchall()
 
 
 def page_number():
@@ -117,12 +124,13 @@ def manage():
     if kind not in VIEWS:
         abort(400)
     page = page_number()
-    count = connection_query(g.user['id'], kind, True, count=True)
+    totals = {view: connection_query(g.user['id'], view, True, count=True) for view in VIEWS}
+    count = totals[kind]
     if page > max(1, (count + PAGE_SIZE - 1) // PAGE_SIZE):
         abort(404)
     return render_template('connections.html', connection_owner=True, kind=kind, title=VIEWS[kind],
                            players=connection_query(g.user['id'], kind, True, page=page),
-                           total=count, page=page, has_next=page * PAGE_SIZE < count, views=VIEWS)
+                           total=count, page=page, has_next=page * PAGE_SIZE < count, views=VIEWS, totals=totals)
 
 
 @following.get('/profile/<username>/connections/<kind>')
@@ -206,7 +214,9 @@ def change(username, action):
                 'unblock': 'Player unblocked. Previous connections were not restored.'}
     return_to_profile = (request.form.get('return_to') == 'profile' and action not in ('block', 'unblock')
                          and target_row and target_row['is_public'] and not blocked(actor, target['id']))
-    if return_to_profile and action == 'follow':
+    follow_from_card = (request.form.get('return_to') == 'connections' and target_row
+                        and target_row['is_public'] and not blocked(actor, target['id']))
+    if (return_to_profile or follow_from_card) and action == 'follow':
         state = db.execute('SELECT state FROM player_follows WHERE follower_id = ? AND followed_id = ?', (actor, target['id'])).fetchone()
         messages['follow'] = 'You are now following @' + username + '.' if state and state['state'] == 'accepted' else 'Follow request pending approval.'
     flash(messages[action], 'connections_saved')

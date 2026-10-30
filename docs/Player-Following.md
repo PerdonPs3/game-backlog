@@ -33,6 +33,14 @@ Owners see all their connections and requests, with private players represented
 by their current handle and a neutral label, never their display name or photo.
 Hiding your own lists does not remove your public handle from someone else's list.
 
+Connection cards reuse the existing revocable public-photo endpoint and show a
+neutral silhouette when a photo is absent or unshared. Private and blocked
+identities never expose photos, biography, country, or avatar colors. Public
+biographies are included only with their sharing flag, bounded to 140 characters.
+The connection workspace includes count navigation, responsive player cards,
+keyboard-accessible action menus, and a Follow back shortcut using the existing
+CSRF-protected follow operation. Private follow-backs remain approval requests.
+
 Blocking removes accepted and pending connections in both directions atomically.
 While signed in, both sides are excluded from each other's player search,
 connection lists, public profiles (including old aliases), photos, custom
@@ -60,3 +68,8 @@ covers request ownership, privacy revocation, bilateral blocks, username changes
 pagination, CSRF/session boundaries, rate limits, and concurrent follow/block
 writes. Desktop and 390 px mobile layouts were reviewed in light and dark themes.
 Shared development and production databases were not migrated or used for tests.
+
+The connection-card redesign passed 32 targeted following and community-profile
+regression cases, including photo opt-out/revocation, private and blocked avatar
+exclusion, escaped public bios, and follow-back behavior. Published photos were
+also verified in the browser with responsive light/dark layouts.

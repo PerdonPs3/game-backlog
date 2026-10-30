@@ -231,3 +231,54 @@ def test_concurrent_follow_and_block_cannot_leave_a_relationship(accounts, playe
     assert results == [303, 303]
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 0
     assert row(accounts, 'SELECT COUNT(*) FROM player_blocks')[0] == 1
+
+
+def test_connection_cards_show_only_published_photos_and_identity(accounts, players):
+    alice, bob = players
+    change(alice)
+    execute(accounts, "UPDATE profiles SET avatar_image = ?,share_photo = TRUE,bio = 'UNSHARED BIO',share_bio = FALSE,avatar_color = '#aabbcc' WHERE id = ?", (b'photo-fixture', BOB))
+    page = alice.get('/account/connections?view=following').get_data(as_text=True)
+    assert 'src="/players/bob_player/photo"' in page
+    assert 'class="connection-avatar"' in page
+    assert 'UNSHARED BIO' not in page
+    assert '#aabbcc' in page
+    execute(accounts, 'UPDATE profiles SET share_photo = FALSE WHERE id = ?', (BOB,))
+    assert '/players/bob_player/photo' not in alice.get('/account/connections?view=following').get_data(as_text=True)
+    execute(accounts, 'UPDATE profiles SET is_public = FALSE,share_photo = TRUE,share_bio = TRUE WHERE id = ?', (BOB,))
+    private = alice.get('/account/connections?view=following').get_data(as_text=True)
+    assert 'Private player' in private
+    for hidden in ('/players/bob_player/photo', 'UNSHARED BIO', '#aabbcc'):
+        assert hidden not in private
+    assert alice.get('/players/bob_player/photo').status_code == 404
+
+
+def test_public_cards_revoke_photos_and_hidden_bio_without_cached_leaks(accounts, players):
+    alice, bob = players
+    change(alice)
+    execute(accounts, 'UPDATE profiles SET share_connections = TRUE WHERE id = ?', (BOB,))
+    execute(accounts, "UPDATE profiles SET avatar_image = ?,share_photo = TRUE,bio = '<script>unsafe()</script>',share_bio = TRUE WHERE id = ?", (b'public-photo', ALICE))
+    path = '/profile/bob_player/connections/followers'
+    anonymous = accounts.test_client()
+    page = anonymous.get(path).get_data(as_text=True)
+    assert 'src="/players/alice_player/photo"' in page
+    assert '&lt;script&gt;unsafe()&lt;/script&gt;' in page and '<script>unsafe()' not in page
+    execute(accounts, 'UPDATE profiles SET share_photo = FALSE,share_bio = FALSE WHERE id = ?', (ALICE,))
+    page = anonymous.get(path).get_data(as_text=True)
+    assert '/players/alice_player/photo' not in page and 'unsafe()' not in page
+    assert anonymous.get('/players/alice_player/photo').status_code == 404
+    execute(accounts, 'UPDATE profiles SET share_photo = TRUE WHERE id = ?', (ALICE,))
+    change(bob, 'alice_player', 'block')
+    blocked_page = bob.get('/account/connections?view=blocked').get_data(as_text=True)
+    assert '/players/alice_player/photo' not in blocked_page and 'unsafe()' not in blocked_page
+
+
+def test_follow_back_action_keeps_the_selected_list_and_updates_card_state(accounts, players):
+    alice, bob = players
+    change(bob, 'alice_player')
+    page = alice.get('/account/connections').get_data(as_text=True)
+    assert 'Follow back @bob_player' in page
+    response = change(alice, view='followers', return_to='connections')
+    assert response.location.endswith('/account/connections?view=followers')
+    page = alice.get(response.location).get_data(as_text=True)
+    assert 'connection-following-label' in page and 'Follow back @bob_player' not in page
+    assert 'You are now following @bob_player.' in page
