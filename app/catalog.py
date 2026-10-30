@@ -53,6 +53,28 @@ class IGDBClient:
         self._genre_cache = {}
         self._card_cache = {}
         self._discovery_cache = {}
+        self._traits_cache = {}
+
+    def get_game_traits(self, game_ids):
+        """Resolve bounded public recommendation evidence in one cached batch."""
+        ids = sorted({value for value in game_ids if type(value) is int and 0 < value < 2**63})
+        if len(ids) > 90:
+            raise CatalogError("Too many preference games requested.")
+        with self._lock:
+            now = monotonic()
+            missing = [value for value in ids if value not in self._traits_cache or now >= self._traits_cache[value][0]]
+            if missing:
+                if len(self._traits_cache) + len(missing) > 512:
+                    self._traits_cache.clear()
+                    missing = ids
+                raw = self._query_games(
+                    'fields id,name,genres.name,themes.name,player_perspectives.name,game_modes.name,keywords.name; '
+                    f'where id = ({",".join(map(str, missing))}); limit 90;'
+                )
+                found = {game['id']: discovery_traits(game) for game in raw if game['id'] in missing}
+                for value in missing:
+                    self._traits_cache[value] = (monotonic() + 300, found.get(value, discovery_traits({})))
+            return {value: self._traits_cache[value][1] for value in ids}
 
     def get_discovery_games(self, genres=(), platform=None):
         """Cache bounded public candidate pools; never cache personal rankings."""
@@ -74,7 +96,7 @@ class IGDBClient:
             if platform:
                 conditions.append(f'platforms = ({platform})')
             raw = self._query_games(
-                f'fields {GAME_FIELDS},genres.name,total_rating_count,keywords.name; '
+                f'fields {GAME_FIELDS},genres.name,themes.name,player_perspectives.name,game_modes.name,total_rating_count,keywords.name; '
                 f'where {" & ".join(conditions)}; sort total_rating_count desc; limit 200;'
             )
             unique = {}
@@ -289,6 +311,34 @@ GAME_FIELDS = (
     "id,name,first_release_date,cover.image_id,platforms.id,platforms.name,"
     "game_type.type,version_parent,ports.platforms.id,ports.platforms.name"
 )
+
+
+def discovery_traits(game):
+    """Normalize only provider-supplied named traits; never infer from titles."""
+    traits = {}
+    for field in ('genres', 'themes', 'player_perspectives', 'game_modes'):
+        values = game.get(field)
+        if not isinstance(values, list):
+            values = []
+        traits[field] = tuple(sorted({item['name'].strip()[:100] for item in values
+                                     if isinstance(item, dict) and isinstance(item.get('name'), str)
+                                     and item['name'].strip()}, key=str.casefold)[:30])
+    # Only explicit gameplay terms qualify; generic keyword overlap is too noisy.
+    mechanics = {'metroidvania': 'Metroidvania', 'roguelike': 'Roguelike', 'roguelite': 'Roguelite',
+                 'soulslike': 'Soulslike', 'souls-like': 'Soulslike',
+                 'puzzle platformer': 'Puzzle platformer', 'puzzle-platformer': 'Puzzle platformer',
+                 'precision platformer': 'Precision platformer', 'precision platforming': 'Precision platformer',
+                 'survival horror': 'Survival horror', 'psychological horror': 'Psychological horror',
+                 'deckbuilding': 'Deckbuilding', 'deck building': 'Deckbuilding',
+                 'turn-based combat': 'Turn-based combat', 'turn based combat': 'Turn-based combat',
+                 'tower defense': 'Tower defense', 'base building': 'Base building', 'immersive sim': 'Immersive sim'}
+    keywords = game.get('keywords', [])
+    if not isinstance(keywords, list):
+        keywords = []
+    traits['mechanics'] = tuple(sorted({mechanics[item['name'].strip().casefold()] for item in keywords
+                                      if isinstance(item, dict) and isinstance(item.get('name'), str)
+                                      and item['name'].strip().casefold() in mechanics}))
+    return traits
 
 
 def search_sort_key(game, term):

@@ -6,7 +6,7 @@ from math import ceil
 from flask import Blueprint, abort, current_app, g, redirect, render_template, request, url_for
 
 from app.achievements import normal_owner
-from app.catalog import CatalogError, game_profile, get_catalog
+from app.catalog import CatalogError, discovery_traits, game_profile, get_catalog
 from app.db import get_db
 from app.library_picker import preference_games
 from app.ownership import owned
@@ -23,6 +23,8 @@ PLATFORMS = {6: 'PC (Windows)', 48: 'PlayStation 4', 167: 'PlayStation 5',
              49: 'Xbox One', 169: 'Xbox Series X|S', 130: 'Nintendo Switch',
              14: 'Mac', 3: 'Linux', 9: 'PlayStation 3', 12: 'Xbox 360'}
 PAGE_SIZE = 12
+BROAD_GENRES = {'Adventure', 'Indie', 'Arcade'}
+BROAD_THEMES = {'Action', 'Fantasy', 'Science fiction', 'Open world'}
 
 
 def preference_sources(library, wishes):
@@ -46,25 +48,60 @@ def affinities(sources, genre_map):
     return {genre: total / count for genre, (total, count) in totals.items()}
 
 
-def rank_candidates(candidates, sources, genre_map):
-    """Score locally; explanations require actual positive shared-genre evidence."""
+def rank_candidates(candidates, sources, genre_map, trait_map=None):
+    """Require specific gameplay evidence and reject known context conflicts."""
+    trait_map = trait_map or {}
     affinity = affinities(sources, genre_map)
+    theme_affinity = affinities(sources, {key: tuple(set(value['themes']) - BROAD_THEMES)
+                                        for key, value in trait_map.items()})
+    mechanic_affinity = affinities(sources, {key: value['mechanics'] for key, value in trait_map.items()})
     ranked = []
     for candidate in candidates:
-        genres = set(game_profile(candidate)['genres'])
+        traits = discovery_traits(candidate)
+        genres = set(traits['genres']) - BROAD_GENRES
+        themes = set(traits['themes'])
+        specific_themes = themes - BROAD_THEMES
+        mechanics = set(traits['mechanics'])
         score = sum((affinity.get(genre, 0) for genre in genres), Fraction(0)) / max(1, len(genres))
+        score += Fraction(1, 4) * sum((theme_affinity.get(theme, 0) for theme in specific_themes), Fraction(0)) / max(1, len(specific_themes))
+        score += Fraction(1, 2) * sum((mechanic_affinity.get(item, 0) for item in mechanics), Fraction(0)) / max(1, len(mechanics))
         evidence = []
         for source in sources:
-            shared = genres & set(genre_map.get(source['igdb_id'], ()))
+            if source['igdb_id'] == candidate['id']:
+                continue
+            source_traits = trait_map.get(source['igdb_id'], {})
+            source_genres = set(genre_map.get(source['igdb_id'], ())) - BROAD_GENRES
+            source_themes = set(source_traits.get('themes', ()))
+            perspectives = set(traits['player_perspectives'])
+            source_perspectives = set(source_traits.get('player_perspectives', ()))
+            shared_perspectives = perspectives & source_perspectives
+            modes = set(traits['game_modes'])
+            source_modes = set(source_traits.get('game_modes', ()))
+            if ((perspectives and source_perspectives and not shared_perspectives)
+                    or (modes and source_modes and not modes & source_modes)
+                    or (themes and source_themes and ('Horror' in themes) != ('Horror' in source_themes))):
+                continue
+            shared = genres & source_genres
             shared = {genre for genre in shared if affinity.get(genre, 0) > 0}
-            if shared and source['weight'] > 0:
-                similarity = Fraction(len(shared), len(genres | set(genre_map.get(source['igdb_id'], ()))))
-                evidence.append((source, sorted(shared, key=str.casefold), similarity))
+            shared_themes = {theme for theme in specific_themes & source_themes if theme_affinity.get(theme, 0) > 0}
+            source_mechanics = set(source_traits.get('mechanics', ()))
+            shared_mechanics = {item for item in mechanics & source_mechanics if mechanic_affinity.get(item, 0) > 0}
+            mechanic_similarity = Fraction(len(shared_mechanics), max(1, len(mechanics | source_mechanics)))
+            similarity = Fraction(len(shared), max(1, len(genres | source_genres)))
+            gameplay_match = bool(shared and similarity >= Fraction(1, 2))
+            context_match = bool(shared_themes and shared_perspectives and not (genres and source_genres and not shared))
+            if source['weight'] > 0 and (gameplay_match or context_match or shared_mechanics):
+                labels = sorted(shared_mechanics)[:1] + sorted(shared, key=str.casefold)[:2]
+                labels += sorted(shared_perspectives, key=str.casefold)[:1]
+                labels += sorted(shared_themes, key=str.casefold)[:1]
+                evidence.append((source, sorted(shared, key=str.casefold), similarity,
+                                 labels[:3], len(shared_perspectives), mechanic_similarity))
         if score > 0 and evidence:
-            source, shared, similarity = max(evidence, key=lambda item: (item[0]['weight'] * item[2], len(item[1])))
-            score *= 1 + similarity
+            source, shared, similarity, labels, _, mechanic_similarity = max(
+                evidence, key=lambda item: (item[0]['weight'] * (item[2] + Fraction(item[4], 2) + 2 * item[5]), len(item[1])))
+            score *= 1 + similarity + 2 * mechanic_similarity
             ranked.append((score, candidate, {'title': source['title'], 'kind': source['kind'],
-                                             'rating': source['rating'], 'genres': shared[:2]}))
+                                             'rating': source['rating'], 'genres': shared[:2], 'matches': labels}))
     ranked.sort(key=lambda row: (-row[0], -(row[1].get('total_rating_count') or 0), row[1]['id']))
     return [(candidate, reason) for _, candidate, reason in ranked]
 
@@ -105,21 +142,23 @@ def index():
     wished_ids = set()
     if normal_owner():
         wished_ids = {row['catalog_id'] for row in get_db().execute('SELECT catalog_id FROM wishlist_games WHERE owner_id = ?', (g.user['id'],))}
-    error, status, genre_map, rows, personalized = None, 200, {}, [], False
+    error, status, genre_map, trait_map, rows, personalized = None, 200, {}, {}, [], False
     if not public_request_allowed():
         error, status = 'The catalog is busy. Please wait a minute and try again.', 429
     else:
         try:
             provider = get_catalog()
             if sources:
-                genre_map = provider.get_game_genres([source['igdb_id'] for source in sources])
+                trait_map = provider.get_game_traits([source['igdb_id'] for source in sources])
+                genre_map = {key: value['genres'] for key, value in trait_map.items()}
             affinity = affinities(sources, genre_map)
-            interests = [key for key, score in sorted(affinity.items(), key=lambda item: (-item[1], item[0])) if score > 0][:6]
+            interests = [key for key, score in sorted(affinity.items(), key=lambda item: (-item[1], item[0]))
+                         if score > 0 and key not in BROAD_GENRES][:6]
             candidates = provider.get_discovery_games((genre,) if genre else tuple(interests), platform)
             candidates = [game for game in candidates if game['id'] not in owned_ids
                           and (not genre or genre in game_profile(game)['genres'])
                           and (not platform or any(item.get('id') == platform for item in game.get('platforms', []) if isinstance(item, dict)))]
-            ranked = rank_candidates(candidates, sources, genre_map) if sources else []
+            ranked = rank_candidates(candidates, sources, genre_map, trait_map) if sources else []
             personalized = bool(ranked)
             rows = ranked if ranked else [(game, None) for game in candidates]
         except CatalogError:

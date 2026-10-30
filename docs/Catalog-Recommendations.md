@@ -36,16 +36,35 @@ Merely viewing or filtering recommendations never writes either collection.
 - Up to 30 recent wishlist games provide a weaker positive signal. A rated game
   takes precedence over its wishlist signal.
 - Divide each signal among its known genres, then average contributions per
-  genre. Rank candidates by their mean genre affinity with a shared-genre
-  similarity bonus. Negative scores never become personalized recommendations.
+  genre. Adventure, Indie and Arcade never count as specific gameplay evidence
+  or determine the automatic candidate genres. A shared core-genre match must
+  cover at least half the union of the two games' core genres. Alternatively,
+  a shared specific theme plus a matching perspective may qualify, unless the
+  games have disjoint known core genres. Action, Fantasy, Science fiction and
+  Open world alone are not specific theme evidence.
+- Compare provider-supplied perspectives, themes and play modes in a cached
+  batch of at most 90 reference games. Known disjoint perspectives or play modes
+  reject an explanation; horror requires horror on the source too. Missing
+  metadata remains unknown, never inferred from names or descriptions.
+- Explicit gameplay keywords such as Metroidvania, Roguelike, Soulslike and
+  Survival horror are normalized through a small vocabulary. Shared mechanics
+  supply stronger evidence and ranking bonuses; generic keyword overlap does
+  not qualify. These rules apply to all catalog IDs without title exceptions.
+- Rank qualified matches by core-genre affinity, a smaller specific-theme
+  contribution, and shared-core-genre similarity. Negative scores never become
+  personalized recommendations.
 - Explanations identify an actual positively contributing rated/wished source
-  and up to two shared genres. Popularity breaks score ties. Scores are never
+  with specific matching traits. A game never explains itself. Hollow Knight
+  cannot explain Outlast through Adventure/Indie; Ori's side-view platforming
+  can be explained by Hollow Knight rather than Portal 2's first-person play.
+  Popularity breaks score ties. Scores are never
   presented as predicted enjoyment or similarity percentages.
 - Without positive matching evidence, explicitly label the results Popular picks.
   Missing genres and provider failures never invent a preference explanation.
 
 Candidate selection uses up to six positively weighted genres, unless the owner
-explicitly selects a genre. Each query requests at most 200 released, official
+explicitly selects a genre; automatic selection omits the three broad genres.
+Each query requests at most 200 released, official
 catalog entries, ordered by rating-count popularity, then applies owner exclusion
 and ranking locally. This is a bounded selection, not the entire catalog. Pages
 contain 12 games. Existing pack, port, variant and community-content exclusions
@@ -88,3 +107,13 @@ local PostgreSQL and all 162 JavaScript interaction tests. Browser checks used
 the real IGDB catalog with fictional local accounts, including filter updates,
 a wishlist save, light/dark desktop layouts and a 390-pixel mobile layout.
 No shared database was changed or used for these tests.
+
+The owner-reported Hollow Knight/Outlast mismatch exposed overly broad genre
+evidence. Follow-up regressions cover that pair, Ori using Hollow Knight rather
+than Portal 2, specific-mechanic ranking, missing metadata, horror/mode/view
+conflicts, and self-recommendation from a wishlist entry.
+The final follow-up passed 85 discovery/catalog/library-picker regression cases.
+The prior boundary run also passed wishlist and public-catalog cases. Browser
+verification against live public metadata now shows Silksong, Ori and Metroid
+with Metroidvania/platform/side-view evidence from Hollow Knight, without an
+Outlast attribution. Matching remains dependent on provider metadata quality.

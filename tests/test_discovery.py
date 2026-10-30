@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, IGDBClient
+from app.catalog import CatalogError, IGDBClient, discovery_traits
 from app.db import get_db
 from app.discovery import affinities, preference_sources, rank_candidates
 from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
@@ -19,7 +19,7 @@ def game(catalog_id, genre='Puzzle', platform=6):
 def provider(app):
     client = Mock()
     client.get_discovery_games.return_value = [game(20), game(30, 'Shooter')]
-    client.get_game_genres.return_value = {10: ('Puzzle',), 11: ('Shooter',), 12: ('Adventure',)}
+    client.get_game_traits.return_value = {value: discovery_traits(game(value, genre)) for value, genre in ((10, 'Puzzle'), (11, 'Shooter'), (12, 'Adventure'))}
     client.get_game.side_effect = lambda value: game(value)
     app.extensions['igdb_client'] = client
     return client
@@ -59,7 +59,86 @@ def test_specific_genre_matches_rank_above_a_single_broad_overlap():
     specific['genres'] = [{'name': 'Puzzle'}, {'name': 'Adventure'}]
     broad = game(30, 'Adventure')
     ranked = rank_candidates([broad, specific], sources, {10: ('Puzzle', 'Adventure')})
-    assert [row['id'] for row, _ in ranked] == [20, 30]
+    assert [row['id'] for row, _ in ranked] == [20]
+
+
+def described_game(catalog_id, title, genres, themes, perspective, modes=('Single player',)):
+    return {**game(catalog_id), 'name': title,
+            'genres': [{'name': name} for name in genres],
+            'themes': [{'name': name} for name in themes],
+            'player_perspectives': [{'name': perspective}] if perspective else [],
+            'game_modes': [{'name': name} for name in modes]}
+
+
+def test_hollow_knight_never_explains_outlast_and_ori_uses_the_correct_reference():
+    # Public provider metadata captured during the owner's reported regression.
+    hollow = described_game(14593, 'Hollow Knight', ('Platform', 'Adventure', 'Indie'), ('Action', 'Fantasy'), 'Side view')
+    portal = described_game(72, 'Portal 2', ('Platform', 'Puzzle', 'Adventure'), ('Action', 'Science fiction', 'Comedy'), 'First person')
+    outlast = described_game(1910, 'Outlast', ('Adventure', 'Indie'), ('Action', 'Horror', 'Survival', 'Stealth', 'Mystery'), 'First person')
+    ori = described_game(7344, 'Ori and the Blind Forest', ('Platform', 'Puzzle', 'Adventure'), ('Action', 'Fantasy', 'Thriller'), 'Side view')
+    celeste = described_game(26226, 'Celeste', ('Platform', 'Adventure', 'Indie'), ('Action', 'Fantasy'), 'Side view')
+    hollow['keywords'] = [{'name': 'metroidvania'}]
+    ori['keywords'] = [{'name': 'metroidvania'}, {'name': 'puzzle platformer'}]
+    sources = preference_sources([{'id': index, 'igdb_id': raw['id'], 'title': raw['name'], 'rating': 10}
+                                  for index, raw in enumerate((hollow, portal), start=1)], [])
+    traits = {raw['id']: discovery_traits(raw) for raw in (hollow, portal)}
+    genres = {key: value['genres'] for key, value in traits.items()}
+    ranked = rank_candidates([outlast, ori, celeste], sources, genres, traits)
+    reasons = {raw['name']: reason for raw, reason in ranked}
+    assert 'Outlast' not in reasons
+    assert reasons['Ori and the Blind Forest']['title'] == 'Hollow Knight'
+    assert ranked[0][0]['name'] == 'Ori and the Blind Forest'
+    assert 'Metroidvania' in reasons['Ori and the Blind Forest']['matches']
+    assert reasons['Celeste']['title'] == 'Hollow Knight'
+    assert 'Platform' in reasons['Celeste']['matches'] and 'Side view' in reasons['Celeste']['matches']
+    # Broad labels remain insufficient even if perspective/theme data is missing.
+    assert rank_candidates([game(1910, 'Adventure')], sources, genres) == []
+
+
+def test_horror_can_match_horror_but_known_modes_and_perspectives_must_agree():
+    source = described_game(1, 'Liked horror', ('Adventure','Indie'), ('Horror','Survival'), 'First person')
+    candidate = described_game(2, 'Another horror', ('Adventure','Indie'), ('Horror','Survival'), 'First person')
+    sources = preference_sources([{'id': 1, 'igdb_id': 1, 'title': source['name'], 'rating': 10}], [])
+    traits = {1: discovery_traits(source)}
+    genre_map = {1: traits[1]['genres']}
+    ranked = rank_candidates([candidate], sources, genre_map, traits)
+    assert len(ranked) == 1 and 'Horror' in ranked[0][1]['matches']
+    incompatible_mode = {**candidate, 'game_modes': [{'name':'Multiplayer'}]}
+    incompatible_view = {**candidate, 'player_perspectives': [{'name':'Side view'}]}
+    assert rank_candidates([incompatible_mode, incompatible_view], sources, genre_map, traits) == []
+
+
+def test_gameplay_overlap_does_not_turn_a_non_horror_favorite_into_horror_evidence():
+    source = described_game(1, 'Liked platformer', ('Platform',), ('Action','Fantasy'), 'Side view')
+    candidate = described_game(2, 'Horror platformer', ('Platform',), ('Action','Horror'), 'Side view')
+    sources = preference_sources([{'id': 1,'igdb_id': 1,'title': source['name'],'rating': 10}], [])
+    assert rank_candidates([candidate], sources, {1: ('Platform',)}, {1: discovery_traits(source)}) == []
+
+
+def test_trait_metadata_is_bounded_cached_and_missing_data_stays_unknown(monkeypatch):
+    provider = IGDBClient('fake','fake')
+    query = Mock(return_value=[described_game(1,'Public game',('Platform',),('Fantasy',),'Side view')])
+    monkeypatch.setattr(provider, '_query_games', query)
+    traits = provider.get_game_traits([1,2])
+    assert traits[1]['player_perspectives'] == ('Side view',)
+    assert traits[2] == discovery_traits({})
+    assert provider.get_game_traits([1,2]) == traits and query.call_count == 1
+    assert 'player_perspectives.name' in query.call_args.args[0]
+    with pytest.raises(CatalogError):
+        provider.get_game_traits(range(1,92))
+
+
+def test_a_wishlist_game_cannot_explain_its_own_recommendation():
+    sources = preference_sources([], [{'catalog_id': 20,'title':'Desired puzzle'}])
+    assert rank_candidates([game(20)], sources, {20: ('Puzzle',)}) == []
+    assert rank_candidates([game(30)], sources, {20: ('Puzzle',)})[0][1]['title'] == 'Desired puzzle'
+
+
+def test_only_explicit_gameplay_keywords_are_normalized_into_mechanics():
+    raw = {'keywords': [{'name': 'souls-like'}, {'name': 'Soulslike'},
+                        {'name': 'Metroidvania'}, {'name': 'indie'}, {'name': 'fantasy'}, None]}
+    assert discovery_traits(raw)['mechanics'] == ('Metroidvania', 'Soulslike')
+    assert discovery_traits({'keywords': 'metroidvania'})['mechanics'] == ()
 
 
 @pytest.mark.parametrize('state,destination', [('recovery','/account/password'), ('unfinished','/account/profile')])
@@ -103,17 +182,17 @@ def test_private_signals_and_saved_wishes_never_cross_accounts_or_anonymous_requ
         get_db().execute("INSERT INTO wishlist_games (owner_id,catalog_id,title) VALUES (?,20,'ALICE SECRET WISH')", (ALICE,))
     alice_page = alice.get('/discover').get_data(as_text=True)
     assert 'BOB PRIVATE FAVORITE' not in alice_page and 'On your wishlist' in alice_page
-    assert set(client.get_game_genres.call_args.args[0]) == {10, 20}
+    assert set(client.get_game_traits.call_args.args[0]) == {10, 20}
     client.reset_mock()
     bob_page = bob.get('/discover').get_data(as_text=True)
     assert 'ALICE PRIVATE FAVORITE' not in bob_page and 'ALICE SECRET WISH' not in bob_page
     assert 'On your wishlist' not in bob_page
-    assert client.get_game_genres.call_args.args[0] == [11]
+    assert client.get_game_traits.call_args.args[0] == [11]
     client.reset_mock()
     anon = accounts.test_client().get('/discover')
     assert anon.status_code == 200 and b'Popular picks' in anon.data
     assert b'PRIVATE FAVORITE' not in anon.data and b'SECRET WISH' not in anon.data
-    client.get_game_genres.assert_not_called()
+    client.get_game_traits.assert_not_called()
 
 
 def test_wishlist_signals_are_weak_but_explained(accounts):
@@ -133,7 +212,7 @@ def test_popular_mode_does_not_fetch_preferences_and_filters_intersect(accounts)
     client.get_discovery_games.return_value = [game(20), game(30, 'Shooter'), game(40, 'Puzzle', 9)]
     page = alice.get('/discover?mode=popular&genre=Puzzle&platform=6').get_data(as_text=True)
     assert 'Adventure 20' in page and 'Adventure 30' not in page and 'Adventure 40' not in page
-    client.get_game_genres.assert_not_called()
+    client.get_game_traits.assert_not_called()
     client.get_discovery_games.assert_called_once_with(('Puzzle',), 6)
 
 
