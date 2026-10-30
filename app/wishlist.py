@@ -77,6 +77,11 @@ def continue_selection(catalog_id):
 @wishlist.post('/wishlist/games/<int:catalog_id>/add')
 def add(catalog_id):
     catalog_id_valid(catalog_id)
+    discover_return = None
+    if request.form.get('return_to') == 'discover':
+        from app.discovery import selected_filters
+        genre, platform, mode, _ = selected_filters(request.form)
+        discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode)
     from app.public_catalog import public_request_allowed
     if not public_request_allowed():
         flash('The catalog is busy. Please try saving this game again shortly.', 'wishlist_error')
@@ -112,6 +117,8 @@ def add(catalog_id):
         db.rollback()
         raise
     flash(message, 'wishlist_saved')
+    if discover_return:
+        return redirect(discover_return, code=303)
     return redirect(url_for('explore.game', catalog_id=catalog_id, _anchor='game-actions'), code=303)
 
 

@@ -1,5 +1,6 @@
 {% if accounts_enabled %}
 <div class="account-navigation">
+    <a href="{{ url_for('discovery.index') }}">Discover</a>
     <a href="{{ url_for('profiles.search') }}">Players</a>
     {% if account_user %}
     <a href="{{ url_for('following.manage') }}">Connections</a>

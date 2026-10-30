@@ -27,8 +27,8 @@ items below are not a claim that the production account release is still pending
 - [ ] Validate and publish public profile reviews and public player search.
 - [x] Implement a wishlist separate from owned games, public by default with a privacy opt-out and library transfer (develop publication authorized on 2026-10-25; migrations 015–016 applied to hosted development).
 - [x] Extend the library picker with selected statuses and preference signals, inline roulette reveals in both modes, and day/night salon artwork (reviewed; develop publication authorized on 2026-10-27).
-- [ ] Review and publish [player following](../Player-Following.md): implemented locally with private requests, opt-in shared lists, and blocking; migration 017 and publication require separate authorization. Profile reporting remains a separate follow-up.
-- [ ] Add explainable catalog recommendations before an optional AI chatbot.
+- [x] Publish [player following](../Player-Following.md) to develop with private requests, opt-in shared lists, blocking, and portrait-gallery artwork (owner authorized publication and development migration 017 on 2026-10-30). Profile reporting remains a separate follow-up.
+- [ ] Review and publish [explainable catalog recommendations](../Catalog-Recommendations.md): implemented locally with genre/platform filters, ratings and wishlist signals, direct wishlist saves, and day/night courtyard artwork. No migration or new provider is required; integration/publication await owner review.
 
 ### 1. Make the collection easier to manage
 

@@ -1,9 +1,9 @@
 # Player following
 
-Implemented locally on `feature/player-following`; integration and publication
-are pending owner authorization. Migration `017_player_following.sql` is required.
-It must first be applied and tested on a disposable local PostgreSQL database.
-Do not run it against shared development or production just to preview this work.
+Published to `develop` on 2026-10-30 with explicit owner authorization, preserving
+the task branch and a `--no-ff` merge. Migration `017_player_following.sql` was
+validated on disposable local PostgreSQL before the owner separately authorized
+its application to hosted development. Production remains unchanged.
 
 ## Relationship rules
 
@@ -88,5 +88,5 @@ Both optimized WebP assets are 1536 × 1024 pixels, stored under
 `app/static/images/backgrounds/connections-gallery-{day,night}.webp`. The built-in
 ImageGen prompts and provenance are preserved in
 [Connections-Gallery-Artwork-Prompts.json](Connections-Gallery-Artwork-Prompts.json).
-The separate moonlit courtyard concept remains a future design reference; it has
-not been assigned to or implemented on another page.
+The separate moonlit courtyard concept is being adapted locally for Discover on
+`feature/catalog-recommendations`; see [Catalog recommendations](Catalog-Recommendations.md).
