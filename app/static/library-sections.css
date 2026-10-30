@@ -29,10 +29,10 @@ html[data-library-navigation]:has(body.library-section-page)::view-transition-gr
 html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-toolbar) { animation: none; z-index: 3; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-site-header),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-title),
-html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-toolbar) { animation: none; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-toolbar) { animation: none; opacity: 0; }
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-site-header),
 html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-title),
-html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-toolbar) { animation: none; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-toolbar) { animation: none; opacity: 1; mix-blend-mode: normal; }
 @keyframes castle-room-exit {
     from { transform: perspective(1600px) translateX(0) rotateY(0) scale(1); }
     to { transform: perspective(1600px) translateX(var(--room-exit)) rotateY(var(--room-exit-angle)) scale(1.08); }
