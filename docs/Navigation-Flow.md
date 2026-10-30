@@ -67,4 +67,18 @@ Game links carry a bounded, validated local `from` destination. Edit/Cancel/Save
 
 ## Validation
 
+### Private library rooms and transitions
+
+The owner's Wishlist uses the collector's observatory and Lists uses the curator's
+study. Both have separate day/night WebP artwork under `app/static/images/backgrounds/`
+(`wishlist-observatory-*` and `lists-study-*`). All games keeps the archive and
+Pick a game keeps the salon. Public wishlists keep their existing public layout.
+
+Private library documents opt into native cross-document view transitions. The
+site header, library title, and toolbar keep their positions while the page
+dissolves in over 200 ms with a four-pixel entrance. Normal links, forms, URL
+filters, and browser history remain native. Reduced-motion preferences skip the
+animation; browsers without document-transition support navigate normally.
+The separate, slower day/night theme dissolve remains unchanged.
+
 Regression coverage includes owner/other-player/anonymous game views, ID collisions, old owner aliases, manual entries, catalog outages, unsafe return destinations, filtered navigation, login continuation, and wishlist returns. Browser verification uses a local PostgreSQL preview with fictitious accounts, not hosted development or production data.

@@ -15,7 +15,7 @@
     {% block page_styles %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='navigation.css') }}">
-    {% if library_section %}<link rel="stylesheet" href="{{ url_for('static', filename='library-sections.css') }}">{% endif %}
+    {% if library_section %}<link rel="stylesheet" href="{{ url_for('static', filename='library-sections.css') }}"><script src="{{ url_for('static', filename='library-transitions.js') }}"></script>{% endif %}
 </head>
 <body class="{% block body_class %}library-page workspace-page{% endblock %}{% if library_section %} library-archive library-section-page{% endif %}">
     {% call site_header() %}
