@@ -1,0 +1,5 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Data & backups · Vestigium{% endblock %}
+{% block page_heading %}Data <span>& backups</span>{% endblock %}
+{% block panel_label %}Collection data tools{% endblock %}
+{% block panel %}<h2>Your collection, kept safe.</h2><p>Export your library as a JSON backup, or import entries from an existing Vestigium backup.</p><div class="page-actions"><a class="button-link" href="{{ url_for('main.export_backup') }}">Export backup</a><a class="button-link" href="{{ url_for('main.import_backup', **{'from':url_for('navigation.data')}) }}">Import backup</a></div>{% endblock %}

@@ -1,0 +1,13 @@
+        <header class="library-hero">
+            <div class="hero-copy">
+
+                <h1 class="library-wordmark">Your <span>library</span></h1>
+                {% set filtered_collection = request.endpoint == 'main.index' and (search_query or selected_status or selected_list) %}
+                {% set header_total = collection_total if collection_total is defined else library_total %}
+                <span class="collection-count" role="status" aria-live="polite">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12h4m-2-2v4m7-1h.01M17 10h.01M6.8 6h10.4a4 4 0 0 1 3.95 3.35l1.1 6.7a3 3 0 0 1-5.1 2.6L15.5 17h-7l-1.65 1.65a3 3 0 0 1-5.1-2.6l1.1-6.7A4 4 0 0 1 6.8 6Z"/></svg>
+                    <span id="collection-count" aria-label="{% if filtered_collection %}{{ games|length }} of {% endif %}{{ header_total }} {{ 'game' if header_total == 1 else 'games' }}">{% if filtered_collection %}{{ games|length }} / {% endif %}{{ header_total }}</span>
+                </span>
+
+            </div>
+        </header>

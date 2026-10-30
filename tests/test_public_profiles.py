@@ -35,7 +35,7 @@ def test_private_by_default_and_selective_publication(accounts):
     response = anon.get('/players/alice_player')
     page = response.get_data(as_text=True)
     assert 'Chosen game' in page and 'Alice public bio' in page
-    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/games/', '/account/profile/photo', 'private-photo', '3.5/5', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
+    for private in ('SECRET REVIEW', 'SECRET UNSELECTED', 'BOB SECRET', '/library/entries/', '/account/profile/photo', 'private-photo', '3.5/5', 'Playing', ALICE, BOB, 'alice@example.test', 'alice-access', 'alice-refresh'):
         assert private not in page
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'
@@ -48,7 +48,7 @@ def test_private_by_default_and_selective_publication(accounts):
     submit(alice, PATH, {'username': 'alice_player'})
     assert anon.get('/players/alice_player').status_code == 404
     assert bob.get('/players/alice_player').status_code == 404
-    assert alice.get('/players/alice_player').status_code == 404
+    assert alice.get('/players/alice_player').status_code == 200
 
 
 def test_username_validation_uniqueness_and_owner_binding(accounts):
@@ -71,15 +71,15 @@ def test_username_validation_uniqueness_and_owner_binding(accounts):
             db.execute("UPDATE profiles SET username = NULL, is_public = TRUE WHERE id = ?", (ALICE,))
     assert alice.post(PATH, data={'username': 'one_player'}).status_code == 400
     assert accounts.test_client().post('/players/bob_player').status_code in (400, 405)
-    assert accounts.test_client().get('/players/BOB_PLAYER').status_code == 404
+    assert accounts.test_client().get('/players/BOB_PLAYER').location == '/players/bob_player'
 
 
 def test_sharing_requires_normal_completed_session_and_public_output_escapes_text(accounts):
     anon = accounts.test_client()
     assert anon.get(PATH).location.endswith('/account/login')
     alice = sign_in(accounts, 'alice', complete_profile=False)
-    assert alice.get(PATH).location.endswith('/account/profile/edit')
-    submit(alice, '/account/profile/edit', {'display_name': '<script>alert(1)</script>', 'username':'safe_player', 'bio': '<img src=x onerror=alert(1)>'})
+    assert alice.get(PATH).location.endswith('/settings/profile')
+    submit(alice, '/settings/profile', {'display_name': '<script>alert(1)</script>', 'username':'safe_player', 'bio': '<img src=x onerror=alert(1)>'})
     submit(alice, PATH, {'username': 'safe_player', 'is_public': 'yes', 'share_bio': 'yes'})
     page = anon.get('/players/safe_player').get_data(as_text=True)
     assert '<script>alert(1)</script>' not in page and '<img src=x' not in page
@@ -97,7 +97,7 @@ def test_public_routes_are_unavailable_in_offline_mode(client):
 
 def test_setup_publishes_selected_profile_details_by_default_and_accepts_capitals(accounts):
     alice = sign_in(accounts, 'alice', complete_profile=False)
-    response = submit(alice, '/account/profile/edit', {'display_name':'Alice', 'username':'PerdonPs3', 'bio':'Private until selected'})
+    response = submit(alice, '/settings/profile', {'display_name':'Alice', 'username':'PerdonPs3', 'bio':'Private until selected'})
     assert response.status_code == 303
     anon = accounts.test_client()
     page = anon.get('/players/perdonps3')
@@ -105,20 +105,20 @@ def test_setup_publishes_selected_profile_details_by_default_and_accepts_capital
     assert 'Private until selected' in page.get_data(as_text=True)
     # Editing an established profile does not reset a deliberately private choice.
     submit(alice, PATH, {'username':'PERDONPS3', 'is_public':'no'})
-    submit(alice, '/account/profile/edit', {'display_name':'Renamed Alice', 'is_public':'yes'})
+    submit(alice, '/settings/profile', {'display_name':'Renamed Alice', 'is_public':'yes'})
     assert anon.get('/players/perdonps3').status_code == 404
     assert 'value="no" checked' in alice.get('/account/perdonps3/profile/sharing', follow_redirects=True).get_data(as_text=True)
 
 
 def test_setup_can_be_private_and_taken_username_rolls_back_all_profile_changes(accounts):
     alice, bob = sign_in(accounts, 'alice', complete_profile=False), sign_in(accounts, 'bob', complete_profile=False)
-    assert submit(alice, '/account/profile/edit', {'display_name':'Alice','username':'same_name', 'is_public':'no'}).status_code == 303
-    response = submit(bob, '/account/profile/edit', {'display_name':'Bob','username':'Same_Name','bio':'Must roll back'})
+    assert submit(alice, '/settings/profile', {'display_name':'Alice','username':'same_name', 'is_public':'no'}).status_code == 303
+    response = submit(bob, '/settings/profile', {'display_name':'Bob','username':'Same_Name','bio':'Must roll back'})
     assert response.status_code == 200 and 'already taken' in response.get_data(as_text=True)
     with accounts.app_context():
         row = get_db().execute('SELECT display_name, username, is_public, bio FROM profiles WHERE id = ?', (BOB,)).fetchone()
         assert row['display_name'] == '' and row['username'] is None and not row['is_public'] and row['bio'] == ''
-    assert bob.get('/library').location.endswith('/account/profile/edit')
+    assert bob.get('/library').location.endswith('/settings/profile')
     assert accounts.test_client().get('/players/same_name').status_code == 404
-    assert submit(bob, '/account/profile/edit', {'display_name':'Bob','username':'bob_player','is_public':'no'}).status_code == 303
+    assert submit(bob, '/settings/profile', {'display_name':'Bob','username':'bob_player','is_public':'no'}).status_code == 303
     assert accounts.test_client().get('/players/bob_player').status_code == 404

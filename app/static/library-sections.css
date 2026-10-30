@@ -1,0 +1,71 @@
+/* The same library shell anchors every private section. */
+@view-transition { navigation: auto; }
+html:has(body.library-section-page)::view-transition,
+html:has(body.library-section-page)::view-transition-group(*),
+html:has(body.library-section-page)::view-transition-image-pair(*),
+html:has(body.library-section-page)::view-transition-old(*),
+html:has(body.library-section-page)::view-transition-new(*) { pointer-events: none; }
+.library-private-room .library-room-art { width: 100%; height: 100%; left: 0; transform: none; aspect-ratio: auto; }
+.library-private-room .library-room-image { object-position: center top; }
+/* Every travel snapshot covers the same viewport, including the salon. */
+.library-section-page .picker-room { inset: 0; }
+/* Scope these names to document changes so the existing day/night dissolve stays intact. */
+html[data-library-navigation]:has(body.library-section-page) .workspace-site-header { view-transition-name: library-site-header; }
+html[data-library-navigation]:has(body.library-section-page) .library-hero { view-transition-name: library-title; }
+html[data-library-navigation]:has(body.library-section-page) .library-heading { view-transition-name: library-toolbar; }
+html[data-library-navigation]:has(body.library-section-page) :is(.library-room, .picker-room) { view-transition-name: library-room; }
+html[data-library-navigation]:has(body.library-section-page) main.library-layout { view-transition-name: library-content; }
+html[data-library-navigation]:has(body.library-section-page) .site-footer { view-transition-name: library-footer; }
+html[data-library-navigation] { --room-exit: -100%; --room-enter: 100%; }
+html[data-library-direction="backward"] { --room-exit: 100%; --room-enter: -100%; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(root) { animation: none; opacity: 1; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(root) { animation: none; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*) { animation-duration: 700ms; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(root) { animation: none; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-room) { animation: none; z-index: 1; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-room) { animation: castle-room-exit 700ms cubic-bezier(.65, 0, .25, 1) both; opacity: 1; mix-blend-mode: normal; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-room) { animation: castle-room-enter 700ms cubic-bezier(.65, 0, .25, 1) both; opacity: 1; mix-blend-mode: normal; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-content) { animation: none; z-index: 2; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-content),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-footer) { animation: none; opacity: 0; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-content),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-footer) { animation: castle-content-enter 120ms 700ms ease-out both; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-site-header),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-title),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-group(library-toolbar) { animation: none; z-index: 3; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-site-header),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-title),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-old(library-toolbar) { animation: none; opacity: 0; }
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-site-header),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-title),
+html[data-library-navigation]:has(body.library-section-page)::view-transition-new(library-toolbar) { animation: none; opacity: 1; mix-blend-mode: normal; }
+@keyframes castle-room-exit {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(var(--room-exit), 0, 0); }
+}
+@keyframes castle-room-enter {
+    from { transform: translate3d(var(--room-enter), 0, 0); }
+    to { transform: translate3d(0, 0, 0); }
+}
+@keyframes castle-content-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    html[data-library-navigation]:has(body.library-section-page)::view-transition-group(*),
+    html[data-library-navigation]:has(body.library-section-page)::view-transition-old(*),
+    html[data-library-navigation]:has(body.library-section-page)::view-transition-new(*) { animation: none; }
+}
+.library-section-page main.library-layout { width: min(100% - 2.5rem, 1120px); padding: 0; }
+.library-section-page .library-heading { margin-block: 1.5rem; }
+.library-section-page .library-hero { min-height: 56px; }
+.library-section-page .workspace-body { margin-top: 0; }
+.library-section-page .workspace-panel { background: var(--archive-panel); border-color: var(--border); }
+.library-section-heading { margin-bottom: 1.5rem; }
+.library-section-heading h2 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); color: var(--accent); letter-spacing: -.025em; }
+.library-section-heading p { margin: .6rem 0 0; color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
+.library-section-page .library-layout #filter-message:empty { display: none; }
+.library-section-page .library-layout #collection-filters { margin-top: 0; }
+.library-section-page:not(.picker-salon) .workspace-body { grid-template-columns: minmax(0, 1fr); }
+.library-section-page .library-hero .hero-copy { flex-wrap: wrap; }
+@media(max-width:760px) {
+    .library-section-page main.library-layout { width: calc(100% - 1.5rem); }
+    .library-section-page .library-heading { margin-block: 1.25rem; }
+}

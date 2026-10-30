@@ -1,7 +1,7 @@
 {% if accounts_enabled and not entries %}
 {% if can_manage %}
 <form class="catalog-wishlist-form" method="post" action="{{ url_for('wishlist.remove' if wishlist_saved else 'wishlist.add', catalog_id=game.id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="return_to" value="game">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="return_path" value="{{ navigation_origin() or '' }}"><input type="hidden" name="return_to" value="game">
     <button class="wishlist-toggle{% if wishlist_saved %} is-saved{% endif %}" type="submit" aria-pressed="{{ 'true' if wishlist_saved else 'false' }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>{{ 'Wishlisted' if wishlist_saved else 'Wishlist' }}<span aria-hidden="true">{{ '✓' if wishlist_saved else '+' }}</span></button>
 </form>
 {% else %}<a class="wishlist-toggle" href="{{ url_for('wishlist.continue_selection', catalog_id=game.id) }}">{{ 'Continue to wishlist' if account_user else 'Sign in to wishlist' }} ↗</a>{% endif %}

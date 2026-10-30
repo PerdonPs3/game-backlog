@@ -199,7 +199,7 @@ def test_catalog_endpoint_hides_configuration_errors(client):
 
 
 def test_add_form_has_accessible_catalog_picker(client):
-    response = client.get("/games/new")
+    response = client.get("/library/add")
     assert response.status_code == 200
     page = response.get_data(as_text=True)
     assert 'role="combobox"' in page

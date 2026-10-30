@@ -12,7 +12,7 @@ from tests.test_public_catalog import fake_catalog
 
 def entry_path(app):
     with app.app_context():
-        return f"/games/{get_db().execute('SELECT id FROM games ORDER BY id LIMIT 1').fetchone()[0]}/edit"
+        return f"/library/entries/{get_db().execute('SELECT id FROM games ORDER BY id LIMIT 1').fetchone()[0]}/edit"
 
 
 def test_edit_link_from_catalog_can_publish_an_existing_private_review(accounts):
@@ -20,13 +20,13 @@ def test_edit_link_from_catalog_can_publish_an_existing_private_review(accounts)
     client = public_author(accounts, 'alice')
     assert add(client).status_code == 302
     path = entry_path(accounts)
-    catalog = client.get('/explore/games/123').get_data(as_text=True)
-    assert f'href="{path}"' in catalog
+    catalog = client.get('/games/123/portal-2', follow_redirects=True).get_data(as_text=True)
+    assert f'href="{path}?from=' in catalog
     editor = client.get(path).get_data(as_text=True)
     assert 'name="publish_review" value="yes">' in editor
     assert DATA['review'] in editor
     response = submit(client, path, {**DATA, 'publish_review': 'yes'})
-    assert response.status_code == 303 and response.location.endswith('/account/alice_player/library')
+    assert response.status_code == 303 and response.location.endswith('/games/123/portal-2#your-progress')
     assert b'Saved your changes and published your review.' in client.get(response.location).data
     assert b'Saved your changes and published your review.' not in client.get(response.location).data
     with accounts.app_context():
@@ -85,7 +85,7 @@ def test_other_account_cannot_publish_from_another_players_edit_page(accounts):
     add(alice)
     path = entry_path(accounts)
     assert bob.get(path).status_code == 404
-    assert submit(bob, path, {**DATA, 'publish_review': 'yes'}, source='/games/new').status_code == 404
+    assert submit(bob, path, {**DATA, 'publish_review': 'yes'}, source='/library/add').status_code == 404
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 

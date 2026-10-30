@@ -1,5 +1,5 @@
 {% set compact_search = compact_search|default(false) %}
-<form class="catalog-public-search" data-catalog-url="{{ url_for('explore.suggestions') }}" data-browse-url="{{ url_for('explore.game', catalog_id=0) }}" method="get" action="{{ url_for('explore.index') }}" role="search">
+<form class="catalog-public-search" data-catalog-url="{{ url_for('explore.suggestions') }}" data-origin="{{ navigation_origin() or '' }}" data-browse-url="{{ url_for('explore.game', catalog_id=0) }}" method="get" action="{{ url_for('explore.index') }}" role="search">
     <label for="catalog-query">{{ 'Search games' if compact_search else 'Title' }}</label>
     <div>
         <div class="catalog-input-wrapper">

@@ -1,7 +1,7 @@
-"""Carry only a bounded catalog ID through sign-in, never an arbitrary return URL."""
+"""Carry a bounded catalog selection and validated local context through sign-in."""
 
 from time import time
-from flask import session
+from flask import session, request
 
 
 SELECTION_SECONDS = 30 * 60
@@ -20,6 +20,10 @@ def pending_selection():
 
 def remember_selection(catalog_id, *, intent='library'):
     session['catalog_selection'] = {'id': catalog_id, 'at': int(time())}
+    from app.navigation import safe_destination
+    origin = safe_destination(request.args.get('from'))
+    if origin:
+        session['catalog_selection']['return_path'] = origin
     if intent == 'wishlist':
         session['catalog_selection']['intent'] = 'wishlist'
 
@@ -32,6 +36,10 @@ def take_selection():
 
 def clear_auth_keep_selection():
     selected = pending_selection()
+    from app.navigation import pending_login_destination
+    target = pending_login_destination()
     session.clear()
     if selected:
         session['catalog_selection'] = selected
+    if target:
+        session['navigation_login'] = {'path': target, 'at': int(time())}

@@ -75,7 +75,7 @@ def test_selected_states_define_the_pool_and_repeat_links_preserve_them(client, 
     seed_game(title='Do not replay', status='Completed')
     seed_game(title='Not this backlog', status='Backlog')
     before = stored_games()
-    response = client.get('/games/pick', query_string={'pick': '1', 'mode': 'random', 'status': ['Playing', 'On hold']})
+    response = client.get('/library/pick', query_string={'pick': '1', 'mode': 'random', 'status': ['Playing', 'On hold']})
     assert response.status_code == 200
     assert b'2 matching entries' in response.data
     assert b'Do not replay' not in response.data and b'Not this backlog' not in response.data
@@ -85,15 +85,15 @@ def test_selected_states_define_the_pool_and_repeat_links_preserve_them(client, 
 
 def test_completed_games_require_explicit_selection(client, seed_game):
     seed_game(title='Replay me', status='Completed')
-    assert b'Replay me' not in client.get('/games/pick?pick=1').data
-    assert b'Replay me' in client.get('/games/pick?pick=1&status=Completed').data
+    assert b'Replay me' not in client.get('/library/pick?pick=1').data
+    assert b'Replay me' in client.get('/library/pick?pick=1&status=Completed').data
 
 
 def test_deselecting_every_state_never_silently_uses_backlog(app, client, seed_game):
     seed_game(title='Hidden pending game', status='Backlog')
     provider = Mock()
     app.extensions['igdb_client'] = provider
-    response = client.get('/games/pick?pick=1&status_filter=1&genre=Puzzle')
+    response = client.get('/library/pick?pick=1&status_filter=1&genre=Puzzle')
     assert response.status_code == 200
     assert b'Choose at least one status.' in response.data
     assert b'Hidden pending game' not in response.data
@@ -102,7 +102,7 @@ def test_deselecting_every_state_never_silently_uses_backlog(app, client, seed_g
 
 @pytest.mark.parametrize('query', [{'status': 'Invalid'}, {'mode': 'secret'}, {'status': ['Backlog'] * 6}])
 def test_invalid_modes_and_states_are_rejected(client, query):
-    assert client.get('/games/pick', query_string=query).status_code == 400
+    assert client.get('/library/pick', query_string=query).status_code == 400
 
 
 def recommendation_library(app, seed_game):
@@ -119,7 +119,7 @@ def recommendation_library(app, seed_game):
 def test_personalized_pick_explains_the_evidence_and_keeps_the_library_unchanged(app, client, seed_game, stored_games):
     recommendation_library(app, seed_game)
     before = stored_games()
-    response = client.get('/games/pick?pick=1')
+    response = client.get('/library/pick?pick=1')
     assert b'Recommended for you' in response.data and b'Next puzzle' in response.data
     assert b'Why this pick' in response.data and b'5/5' in response.data
     reel = json.loads(re.search(rb'<script id="roulette-data"[^>]*>(.*?)</script>', response.data, re.S)[1])
@@ -135,7 +135,7 @@ def test_personalized_pick_explains_the_evidence_and_keeps_the_library_unchanged
 def test_random_mode_does_not_apply_ratings_or_fetch_preference_genres(app, client, seed_game, monkeypatch):
     provider = recommendation_library(app, seed_game)
     monkeypatch.setattr('app.routes.choice', lambda rows: rows[-1])
-    response = client.get('/games/pick?pick=1&mode=random')
+    response = client.get('/library/pick?pick=1&mode=random')
     assert b'Other shooter' in response.data and b'Why this pick' not in response.data
     assert b'id="roulette-data"' in response.data
     provider.get_game_genres.assert_called_once_with({100, 200})
@@ -144,11 +144,11 @@ def test_random_mode_does_not_apply_ratings_or_fetch_preference_genres(app, clie
 def test_recommendation_outage_uses_a_disclosed_random_fallback(app, client, seed_game):
     provider = recommendation_library(app, seed_game)
     provider.get_game_genres.side_effect = CatalogError('Sensitive provider failure')
-    response = client.get('/games/pick?pick=1')
+    response = client.get('/library/pick?pick=1')
     assert response.status_code == 200
     assert b'This is a random pick' in response.data and b'Why this pick' not in response.data
     assert b'Sensitive provider failure' not in response.data
-    assert b'We could not check this genre' in client.get('/games/pick?pick=1&genre=Puzzle').data
+    assert b'We could not check this genre' in client.get('/library/pick?pick=1&genre=Puzzle').data
 
 
 def test_other_accounts_never_supply_preference_signals_or_catalog_requests(accounts, libraries):
@@ -161,7 +161,7 @@ def test_other_accounts_never_supply_preference_signals_or_catalog_requests(acco
     provider = Mock()
     provider.get_game_genres.return_value = {100: ('Puzzle',), 200: ('Puzzle',)}
     accounts.extensions['igdb_client'] = provider
-    response = alice.get('/games/pick?pick=1')
+    response = alice.get('/library/pick?pick=1')
     assert response.status_code == 200
     assert b'bob secret game' not in response.data and b'Why this pick' not in response.data
     provider.get_game_genres.assert_called_once_with({100})
@@ -170,7 +170,7 @@ def test_other_accounts_never_supply_preference_signals_or_catalog_requests(acco
 def test_async_random_draw_returns_only_safe_outcome_with_native_fallback(client, seed_game, stored_games):
     seed_game(title='<script>Private adventure</script>', status='Playing')
     before = stored_games()
-    response = client.get('/games/pick?pick=1&mode=random&status=Playing', headers={'Accept': 'application/json'})
+    response = client.get('/library/pick?pick=1&mode=random&status=Playing', headers={'Accept': 'application/json'})
     assert response.status_code == 200
     assert response.is_json
     data = response.get_json()
@@ -182,4 +182,4 @@ def test_async_random_draw_returns_only_safe_outcome_with_native_fallback(client
     assert data['genres'] == []
     assert 'no-store' in response.headers['Cache-Control']
     assert stored_games() == before
-    assert b'adventure-preferences' in client.get('/games/pick').data
+    assert b'adventure-preferences' in client.get('/library/pick').data

@@ -3,7 +3,7 @@
     let pending = null;
     function go(destination) {
         const url = new URL(destination, window.location.origin);
-        if (url.origin !== window.location.origin || !/^\/explore\/games\/[1-9]\d*$/.test(url.pathname)) return false;
+        if (url.origin !== window.location.origin || !/^\/(?:explore\/games\/[1-9]\d*|games\/[1-9]\d*\/[a-z0-9-]+)$/.test(url.pathname)) return false;
         if (pending !== null) return true;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             window.location.assign(url.href);

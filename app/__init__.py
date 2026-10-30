@@ -99,8 +99,14 @@ def create_app(test_config=None):
     from app.following import init_app as init_following
     init_following(app)
 
+    from app.discovery import discovery
+    app.register_blueprint(discovery)
+
     from app.account_urls import init_app as init_account_urls
     init_account_urls(app)
+
+    from app.navigation import init_app as init_navigation
+    init_navigation(app)
 
     from app.game_fields import STATUSES, star_rating
     app.jinja_env.filters['star_rating'] = star_rating

@@ -111,6 +111,8 @@ def require_account():
     if request.endpoint == 'following.public_list':
         return
     if not g.user:
+        from app.navigation import remember_login_destination
+        remember_login_destination()
         return redirect(url_for('auth.login'))
     if g.account_session['recovery']:
         return redirect(url_for('auth.password'))
@@ -118,7 +120,7 @@ def require_account():
         return redirect(url_for('auth.profile'))
 
 
-@following.get('/account/connections')
+@following.get('/community/connections')
 def manage():
     kind = request.args.get('view', 'followers')
     if kind not in VIEWS:
@@ -133,7 +135,7 @@ def manage():
                            total=count, page=page, has_next=page * PAGE_SIZE < count, views=VIEWS, totals=totals)
 
 
-@following.get('/profile/<username>/connections/<kind>')
+@following.get('/players/<username>/<kind>')
 def public_list(username, kind):
     if kind not in ('followers', 'following') or not re.fullmatch(r'[a-z][a-z0-9_]{2,23}', username):
         abort(404)

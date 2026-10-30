@@ -33,18 +33,18 @@ def test_exact_cooldown_boundary_and_aliases_point_directly_to_current_public_na
     assert submit(alice, PATH, {'username':'second_name', 'is_public':'yes'}).status_code == 303
     anon = accounts.test_client()
     old = anon.get('/players/first_name')
-    assert old.status_code == 302 and old.location.endswith('/profile/second_name')
+    assert old.status_code == 302 and old.location.endswith('/players/second_name')
     assert old.headers['Cache-Control'] == 'private, no-store'
     assert 'noindex' in old.headers['X-Robots-Tag']
     clock[0] += WAIT
     assert submit(alice, PATH, {'username':'third_name', 'is_public':'yes'}).status_code == 303
     for name in ('first_name','second_name'):
-        assert anon.get('/players/'+name).location.endswith('/profile/third_name')
+        assert anon.get('/players/'+name).location.endswith('/players/third_name')
     assert '@third_name' in anon.get('/players/first_name', follow_redirects=True).get_data(as_text=True)
     submit(alice, PATH, {'username':'third_name', 'is_public':'no'})
     for name in ('first_name','second_name','third_name'):
         assert anon.get('/players/'+name).status_code == 404
-        assert alice.get('/players/'+name).status_code == 404
+        assert alice.get('/players/'+name, follow_redirects=True).status_code == 200
 
 
 def test_sharing_changes_and_capitalization_do_not_extend_wait(accounts, clock):
@@ -68,18 +68,18 @@ def test_aliases_cannot_be_taken_by_other_accounts_but_owner_can_reuse_them(acco
     submit(alice,PATH,{'username':'old_name','is_public':'yes'})
     clock[0] += WAIT
     submit(alice,PATH,{'username':'new_name','is_public':'yes'})
-    denied=submit(bob,'/account/profile/edit',{'display_name':'Bob','username':'OLD_NAME'})
+    denied=submit(bob,'/settings/profile',{'display_name':'Bob','username':'OLD_NAME'})
     assert 'already taken or reserved' in denied.get_data(as_text=True)
     with accounts.app_context():
         assert get_db().execute('SELECT display_name FROM profiles WHERE id = ?', (BOB,)).fetchone()[0] == ''
-    submit(bob,'/account/profile/edit',{'display_name':'Bob','username':'bob_player'})
+    submit(bob,'/settings/profile',{'display_name':'Bob','username':'bob_player'})
     clock[0] += WAIT
     denied=submit(bob,PATH,{'username':'old_name','is_public':'yes'})
     assert 'already taken or reserved' in denied.get_data(as_text=True)
     assert submit(alice,PATH,{'username':'old_name','is_public':'yes'}).status_code == 303
     anon=accounts.test_client()
     assert anon.get('/players/old_name').status_code == 200
-    assert anon.get('/players/new_name').location.endswith('/profile/old_name')
+    assert anon.get('/players/new_name').location.endswith('/players/old_name')
 
 
 def test_concurrent_claims_have_one_winner_without_partial_profile_updates(accounts, clock):

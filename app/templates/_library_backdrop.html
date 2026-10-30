@@ -1,0 +1,8 @@
+    {% set room = 'wishlist-observatory' if request.endpoint == 'wishlist.index' else 'lists-study' if request.endpoint == 'main.lists' else 'library' %}
+    <div class="library-room{% if room != 'library' %} library-private-room{% endif %}" aria-hidden="true">
+        <div class="library-room-art">
+            <img class="library-room-image library-room-night" src="{{ url_for('static', filename='images/backgrounds/' + room + '-night.webp') }}" width="1536" height="1024" alt="" decoding="sync" fetchpriority="low">
+            <img class="library-room-image library-room-day" src="{{ url_for('static', filename='images/backgrounds/' + room + '-day.webp') }}" width="1536" height="1024" alt="" decoding="sync" fetchpriority="low">
+            {% if room == 'library' %}<svg class="library-room-seal" viewBox="55 40 330 365" focusable="false"><use href="#brand-symbol" /></svg>{% endif %}
+        </div>
+    </div>

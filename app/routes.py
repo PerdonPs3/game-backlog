@@ -150,7 +150,7 @@ def index():
     return response
 
 
-@main.route("/lists", methods=["GET", "POST"])
+@main.route("/library/lists", methods=["GET", "POST"])
 def lists():
     db = get_db()
     error = None
@@ -175,7 +175,7 @@ def lists():
     return render_template("lists.html", lists=list_cards(db), error=error)
 
 
-@main.route("/lists/<int:list_id>/edit", methods=["GET", "POST"])
+@main.route("/library/lists/<int:list_id>/edit", methods=["GET", "POST"])
 def edit_list(list_id):
     db = get_db()
     item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
@@ -217,7 +217,7 @@ def edit_list(list_id):
     return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
 
 
-@main.route("/lists/<int:list_id>/delete", methods=["GET", "POST"])
+@main.route("/library/lists/<int:list_id>/delete", methods=["GET", "POST"])
 def delete_list(list_id):
     db = get_db()
     item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
@@ -231,12 +231,16 @@ def delete_list(list_id):
     return render_template("delete_list.html", item=item)
 
 
-@main.get("/games/<int:game_id>")
+@main.get("/library/entries/<int:game_id>")
 def game_details(game_id):
     row = get_db().execute(f"SELECT * FROM games WHERE id = ? AND {owned()}", (game_id,)).fetchone()
     if row is None:
         abort(404)
     game = {**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
+    if game['igdb_id'] is not None and request.accept_mimetypes.best != 'application/json':
+        from app.navigation import game_url
+        return redirect(game_url(game['igdb_id'], game['title'],
+                                 origin=request.args.get('from'), section='your-progress'), code=302)
     profile = {"release": None, "genres": [], "summary": None}
     notice = "This entry is not linked to the catalog." if game["igdb_id"] is None else None
     if game["igdb_id"] is not None:
@@ -275,7 +279,7 @@ def catalog_search():
     return jsonify(games=[game_suggestion(game) for game in games])
 
 
-@main.get("/games/pick")
+@main.get("/library/pick")
 def pick_game():
     pick_requested = request.args.get("pick") == "1"
     selected_platform = request.args.get("platform", "")
@@ -344,7 +348,7 @@ def pick_game():
     return response
 
 
-@main.get("/backups/export")
+@main.get("/settings/data/export")
 def export_backup():
     db = get_db()
     # Keep games and membership indices in the same read snapshot.
@@ -363,7 +367,7 @@ def export_backup():
     return response
 
 
-@main.route("/backups/import", methods=["GET", "POST"])
+@main.route("/settings/data/import", methods=["GET", "POST"])
 def import_backup():
     error = None
     result = None
@@ -412,15 +416,15 @@ def import_backup():
     return render_template("import_backup.html", error=error, result=result)
 
 
-@main.route("/games/new", methods=["GET", "POST"])
+@main.route("/library/add", methods=["GET", "POST"])
 def create():
     error = None
     selected_game = None
     duplicate_game_id = None
     review_publication_available = can_publish_public_review()
 
-    if request.method == 'GET' and 'igdb_id' in request.args:
-        raw_id = request.args['igdb_id']
+    if request.method == 'GET' and ('game' in request.args or 'igdb_id' in request.args):
+        raw_id = request.args.get('game', request.args.get('igdb_id'))
         if not raw_id.isascii() or not raw_id.isdigit() or len(raw_id) > 19 or not 0 < int(raw_id) < 2**63:
             abort(400)
         try:
@@ -512,11 +516,11 @@ def create():
             if error is None:
                 if publish_requested:
                     flash('Added to your library and published your review.', 'catalog_saved')
-                    return redirect(url_for('main.index'), code=303)
+                from app.navigation import navigation_return, game_url
                 if request.form.get('return_to_catalog') == 'yes':
                     flash('Added to your library.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
-                return redirect(url_for("main.index"))
+                    return redirect(game_url(selected_game['id'], selected_game['name'], origin=request.args.get('from'), section='your-progress'), code=303)
+                return redirect(navigation_return(game_url(selected_game['id'], selected_game['name'], origin=False, section='your-progress')), code=303 if publish_requested else 302)
 
     return render_template("create.html", error=error, selected_game=selected_game,
                            duplicate_game_id=duplicate_game_id,
@@ -524,7 +528,7 @@ def create():
                            from_wishlist=bool(selected_game and wish_state(selected_game["id"])))
 
 
-@main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])
+@main.route("/library/entries/<int:game_id>/edit", methods=["GET", "POST"])
 def edit(game_id):
     db = get_db()
     game = db.execute(
@@ -535,6 +539,10 @@ def edit(game_id):
 
     if game is None:
         abort(404)
+
+    from app.navigation import game_url
+    g.navigation_default = (game_url(game['igdb_id'], game['title'], origin=False, section='your-progress')
+                            if game['igdb_id'] else url_for('main.index'))
 
     review_publication_available = game['igdb_id'] is not None and can_publish_public_review()
     public_review_spoilers_default = False
@@ -641,8 +649,8 @@ def edit(game_id):
             if error is None:
                 if publish_requested:
                     flash('Saved your changes and published your review.', 'catalog_saved')
-                    return redirect(url_for('main.index'), code=303)
-                return redirect(url_for("main.index"))
+                from app.navigation import navigation_return
+                return redirect(navigation_return(), code=303 if publish_requested else 302)
 
     return render_template("edit.html", game=game, entry_cover=collection_cover_url(game['cover_image_id']), error=error,
                            available_platforms=available_platforms,
@@ -663,7 +671,7 @@ def catalog_game_details(catalog_id):
     return jsonify(game=game_suggestion(game))
 
 
-@main.route("/games/<int:game_id>/delete", methods=["GET", "POST"])
+@main.route("/library/entries/<int:game_id>/delete", methods=["GET", "POST"])
 def delete(game_id):
     db = get_db()
     game = db.execute(
@@ -682,6 +690,7 @@ def delete(game_id):
         )
         db.commit()
 
-        return redirect(url_for("main.index"))
+        from app.navigation import navigation_return
+        return redirect(navigation_return())
 
     return render_template("delete.html", game=game)

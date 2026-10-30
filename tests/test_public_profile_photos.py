@@ -8,7 +8,7 @@ from app.db import get_db
 from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
 
 
-EDIT = '/account/profile/edit'
+EDIT = '/settings/profile'
 SHARING = '/account/profile/sharing'
 
 

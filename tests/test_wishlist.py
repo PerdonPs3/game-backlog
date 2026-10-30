@@ -14,7 +14,7 @@ from tests.test_public_catalog import fake_catalog
 
 
 def save(client, catalog_id=123, **extra):
-    return submit(client, f'/wishlist/games/{catalog_id}/add', extra, source='/wishlist')
+    return submit(client, f'/wishlist/games/{catalog_id}/add', extra, source='/library/wishlist')
 
 
 def saved(app, owner=ALICE):
@@ -34,7 +34,7 @@ def test_save_is_public_by_default_idempotent_and_never_creates_an_owned_game_or
     assert tuple(saved(accounts)[0]) == (123, 'Portal 2', 'co1rs4')
     assert save(alice).status_code == 303 and len(saved(accounts)) == 1
     assert len(saved(accounts, BOB)) == 0
-    assert 'Wishlisted' in alice.get('/explore/games/123').get_data(as_text=True)
+    assert 'Wishlisted' in alice.get('/games/123/portal-2', follow_redirects=True).get_data(as_text=True)
     with accounts.app_context():
         db = get_db()
         assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
@@ -49,14 +49,14 @@ def test_csrf_and_session_ownership_apply_to_every_mutation(accounts):
     alice, bob = sign_in(accounts, 'alice'), sign_in(accounts, 'bob')
     save(alice)
     assert alice.post('/wishlist/games/123/remove').status_code == 400
-    assert submit(bob, '/wishlist/games/123/remove', {'owner_id': ALICE}, source='/wishlist').status_code == 303
+    assert submit(bob, '/wishlist/games/123/remove', {'owner_id': ALICE}, source='/library/wishlist').status_code == 303
     assert len(saved(accounts)) == 1
-    assert submit(alice, '/wishlist/games/123/remove', {}, source='/wishlist').status_code == 303
+    assert submit(alice, '/wishlist/games/123/remove', {}, source='/library/wishlist').status_code == 303
     assert not saved(accounts)
-    assert accounts.test_client().get('/wishlist').status_code == 302
+    assert accounts.test_client().get('/library/wishlist').status_code == 302
     with accounts.app_context():
         get_db().execute('UPDATE account_sessions SET recovery = 1 WHERE user_id = ?', (BOB,))
-    assert bob.get('/wishlist').location.endswith('/account/password')
+    assert bob.get('/library/wishlist').location.endswith('/account/password')
 
 
 def test_transfer_uses_full_add_flow_and_keeps_wish_on_validation_or_save_failure(accounts, monkeypatch):
@@ -64,20 +64,20 @@ def test_transfer_uses_full_add_flow_and_keeps_wish_on_validation_or_save_failur
     alice = sign_in(accounts, 'alice')
     save(alice)
     add = {'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog'}
-    assert 'Saving this game moves it to your library.' in alice.get('/games/new?igdb_id=123').get_data(as_text=True)
+    assert 'Saving this game moves it to your library.' in alice.get('/library/add?igdb_id=123').get_data(as_text=True)
     assert alice.get('/explore/games/123/add').status_code == 302
     assert saved(accounts)
-    assert submit(alice, '/games/new', {**add, 'rating': '11'}, source='/games/new?igdb_id=123').status_code == 200
+    assert submit(alice, '/library/add', {**add, 'rating': '11'}, source='/library/add?igdb_id=123').status_code == 200
     assert saved(accounts)
     def fail_award():
         raise psycopg.DatabaseError('Simulated local rollback')
     with monkeypatch.context() as patch:
         patch.setattr('app.routes.award_current', fail_award)
-        assert submit(alice, '/games/new', add, source='/games/new?igdb_id=123').status_code == 200
+        assert submit(alice, '/library/add', add, source='/library/add?igdb_id=123').status_code == 200
     assert saved(accounts)
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
-    assert submit(alice, '/games/new', add, source='/games/new?igdb_id=123').status_code == 302
+    assert submit(alice, '/library/add', add, source='/library/add?igdb_id=123').status_code == 302
     assert not saved(accounts)
     assert save(alice).status_code == 303 and not saved(accounts)
     with accounts.app_context():
@@ -90,14 +90,14 @@ def test_concurrent_library_and_wishlist_saves_leave_only_the_owned_game(account
     fake_catalog(accounts)
     adding, wishing = sign_in(accounts, 'alice'), sign_in(accounts, 'alice')
     tokens = []
-    for client, path in ((adding, '/games/new?igdb_id=123'), (wishing, '/wishlist')):
+    for client, path in ((adding, '/library/add?igdb_id=123'), (wishing, '/library/wishlist')):
         parser = CSRFTokenParser()
         parser.feed(client.get(path, follow_redirects=True).get_data(as_text=True))
         tokens.append(parser.token)
     barrier = Barrier(2)
     def add_game():
         barrier.wait(timeout=10)
-        return adding.post('/games/new', data={'csrf_token': tokens[0], 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog'}).status_code
+        return adding.post('/library/add', data={'csrf_token': tokens[0], 'title': 'Portal 2', 'igdb_id': '123', 'platform': 'PC', 'status': 'Backlog'}).status_code
     def add_wish():
         barrier.wait(timeout=10)
         return wishing.post('/wishlist/games/123/add', data={'csrf_token': tokens[1]}).status_code
@@ -127,9 +127,9 @@ def test_public_wishlist_respects_private_option_and_profile_visibility(accounts
     save(alice)
     visitor = accounts.test_client()
     publish(alice, share='no')
-    path = '/profile/alice_player/wishlist'
+    path = '/players/alice_player/wishlist'
     assert visitor.get(path).status_code == 404
-    assert 'profile-wishlist-link' not in visitor.get('/profile/alice_player').get_data(as_text=True)
+    assert 'profile-wishlist-link' not in visitor.get('/players/alice_player').get_data(as_text=True)
     publish(alice)
     response = visitor.get(path)
     html = response.get_data(as_text=True)
@@ -139,7 +139,7 @@ def test_public_wishlist_respects_private_option_and_profile_visibility(accounts
         assert private not in html
     assert 'no-store' in response.headers['Cache-Control']
     assert response.headers['X-Robots-Tag'] == 'noindex, nofollow'
-    assert 'profile-wishlist-link' in visitor.get('/profile/alice_player').get_data(as_text=True)
+    assert 'profile-wishlist-link' in visitor.get('/players/alice_player').get_data(as_text=True)
     assert alice.get(path).status_code == 302
     submit(alice, '/account/profile/sharing', {'username': 'alice_player', 'share_wishlist': 'yes'})
     assert visitor.get(path).status_code == 404
@@ -148,10 +148,10 @@ def test_public_wishlist_respects_private_option_and_profile_visibility(accounts
 def test_editor_can_toggle_sharing_and_legacy_forms_preserve_wishlist_privacy(accounts):
     alice = sign_in(accounts, 'alice')
     publish(alice)
-    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice'}).status_code == 303
+    assert submit(alice, '/settings/profile', {'display_name': 'Alice'}).status_code == 303
     with accounts.app_context():
         assert get_db().execute('SELECT share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()[0]
-    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_controls': 'yes'}).status_code == 303
+    assert submit(alice, '/settings/profile', {'display_name': 'Alice', 'wishlist_controls': 'yes'}).status_code == 303
     with accounts.app_context():
         assert not get_db().execute('SELECT share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()[0]
 
@@ -160,20 +160,20 @@ def test_public_default_and_explicit_private_checkbox_persist_without_publishing
     alice = sign_in(accounts, 'alice')
     submit(alice, '/account/profile/sharing', {'username': 'alice_player', 'is_public': 'yes'})
     visitor = accounts.test_client()
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 200
-    html = alice.get('/account/profile/edit', follow_redirects=True).get_data(as_text=True)
+    assert visitor.get('/players/alice_player/wishlist').status_code == 200
+    html = alice.get('/settings/profile', follow_redirects=True).get_data(as_text=True)
     import re
     checkbox = re.search(r'<input[^>]*name="private_wishlist"[^>]*>', html).group(0)
     assert 'checked' not in checkbox
-    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes', 'private_wishlist': 'yes'}).status_code == 303
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
-    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice'}).status_code == 303
+    assert submit(alice, '/settings/profile', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes', 'private_wishlist': 'yes'}).status_code == 303
+    assert visitor.get('/players/alice_player/wishlist').status_code == 404
+    assert submit(alice, '/settings/profile', {'display_name': 'Alice'}).status_code == 303
     assert 'Applied 0' in accounts.test_cli_runner().invoke(args=['migrate-db']).output
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
-    assert submit(alice, '/account/profile/edit', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes'}).status_code == 303
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 200
+    assert visitor.get('/players/alice_player/wishlist').status_code == 404
+    assert submit(alice, '/settings/profile', {'display_name': 'Alice', 'wishlist_privacy_controls': 'yes'}).status_code == 303
+    assert visitor.get('/players/alice_player/wishlist').status_code == 200
     submit(alice, '/account/profile/sharing', {'username': 'alice_player'})
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
+    assert visitor.get('/players/alice_player/wishlist').status_code == 404
     with accounts.app_context():
         assert tuple(get_db().execute('SELECT is_public,share_wishlist FROM profiles WHERE id = ?', (ALICE,)).fetchone()) == (False, True)
 
@@ -185,7 +185,7 @@ def test_sign_in_returns_to_selected_game_without_silently_saving_a_wish(account
     response = visitor.get('/wishlist/games/123/continue?next=https://external.example')
     assert response.location.endswith('/account/login')
     result = submit(visitor, '/account/login', {'email': 'alice@example.test', 'password': 'test-password'})
-    assert result.location.endswith('/explore/games/123#game-actions')
+    assert result.location.endswith('/games/123/game#game-actions')
     assert not saved(accounts)
     assert save(visitor).status_code == 303 and len(saved(accounts)) == 1
 
@@ -195,10 +195,10 @@ def test_setup_keeps_the_wishlist_intent_without_publishing_anything(accounts):
     visitor = accounts.test_client()
     visitor.get('/wishlist/games/123/continue')
     result = submit(visitor, '/account/login', {'email': 'alice@example.test', 'password': 'test-password'})
-    assert result.location.endswith('/account/profile/edit')
-    assert submit(visitor, '/account/profile/edit', {'display_name': 'Alice', 'username': 'new_player'}).status_code == 303
-    html = visitor.get('/profile/new_player').get_data(as_text=True)
-    assert '/explore/games/123#game-actions' in html
+    assert result.location.endswith('/settings/profile')
+    assert submit(visitor, '/settings/profile', {'display_name': 'Alice', 'username': 'new_player'}).status_code == 303
+    html = visitor.get('/players/new_player').get_data(as_text=True)
+    assert '/games/123/game#game-actions' in html
     assert not saved(accounts)
 
 
@@ -206,15 +206,16 @@ def test_canonical_account_and_old_public_aliases_cannot_bypass_privacy(accounts
     alice, bob = sign_in(accounts, 'alice'), sign_in(accounts, 'bob')
     publish(alice)
     publish(bob, 'bob_player')
-    assert alice.get('/wishlist').location.endswith('/account/alice_player/wishlist')
+    assert alice.get('/library/wishlist').status_code == 200
+    assert alice.get('/account/alice_player/wishlist').location == '/library/wishlist'
     assert bob.get('/account/alice_player/wishlist').status_code == 404
     with accounts.app_context():
         get_db().execute('UPDATE profiles SET username_changed_at = NULL WHERE id = ?', (ALICE,))
     publish(alice, 'renamed_player')
     visitor = accounts.test_client()
-    assert visitor.get('/profile/alice_player/wishlist').location.endswith('/profile/renamed_player/wishlist')
+    assert visitor.get('/players/alice_player/wishlist').location.endswith('/players/renamed_player/wishlist')
     publish(alice, 'renamed_player', 'no')
-    assert visitor.get('/profile/alice_player/wishlist').status_code == 404
+    assert visitor.get('/players/alice_player/wishlist').status_code == 404
 
 
 def test_saved_titles_survive_provider_outages_and_can_still_be_removed(accounts):
@@ -222,9 +223,9 @@ def test_saved_titles_survive_provider_outages_and_can_still_be_removed(accounts
     alice = sign_in(accounts, 'alice')
     save(alice)
     catalog.get_game.side_effect = CatalogError('Offline')
-    assert 'Portal 2' in alice.get('/wishlist', follow_redirects=True).get_data(as_text=True)
+    assert 'Portal 2' in alice.get('/library/wishlist', follow_redirects=True).get_data(as_text=True)
     assert save(alice).status_code == 303 and len(saved(accounts)) == 1
-    assert submit(alice, '/wishlist/games/123/remove', {}, source='/wishlist').status_code == 303
+    assert submit(alice, '/wishlist/games/123/remove', {}, source='/library/wishlist').status_code == 303
     assert not saved(accounts)
 
 
@@ -243,14 +244,14 @@ def test_bounded_pagination_search_escaping_and_capacity(accounts):
         db = get_db()
         for index in range(25):
             db.execute('INSERT INTO wishlist_games (owner_id,catalog_id,title) VALUES (?,?,?)', (ALICE, 1000 + index, '<b>Wish</b> ' + str(index)))
-    html = alice.get('/wishlist', follow_redirects=True).get_data(as_text=True)
+    html = alice.get('/library/wishlist', follow_redirects=True).get_data(as_text=True)
     assert html.count('class="wishlist-card"') == 24
     assert '&lt;b&gt;Wish&lt;/b&gt;' in html and '<b>Wish</b>' not in html
-    assert alice.get('/wishlist?page=2', follow_redirects=True).get_data(as_text=True).count('class="wishlist-card"') == 1
-    assert alice.get('/wishlist?page=3', follow_redirects=True).status_code == 404
-    assert b'No matching wishes.' in alice.get('/wishlist?q=%25', follow_redirects=True).data
-    assert alice.get('/wishlist?q=' + 'x' * 201, follow_redirects=True).status_code == 400
-    assert alice.get('/wishlist?page=invalid', follow_redirects=True).status_code == 400
+    assert alice.get('/library/wishlist?page=2', follow_redirects=True).get_data(as_text=True).count('class="wishlist-card"') == 1
+    assert alice.get('/library/wishlist?page=3', follow_redirects=True).status_code == 404
+    assert b'No matching wishes.' in alice.get('/library/wishlist?q=%25', follow_redirects=True).data
+    assert alice.get('/library/wishlist?q=' + 'x' * 201, follow_redirects=True).status_code == 400
+    assert alice.get('/library/wishlist?page=invalid', follow_redirects=True).status_code == 400
     accounts.config['PUBLIC_CATALOG_REQUEST_LIMIT'] = 0
     assert save(alice).status_code == 303 and len(saved(accounts)) == 25
     accounts.config['PUBLIC_CATALOG_REQUEST_LIMIT'] = 60

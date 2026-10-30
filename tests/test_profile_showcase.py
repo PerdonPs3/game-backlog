@@ -28,12 +28,12 @@ def test_profile_overview_and_showcase_editor_have_distinct_private_routes(accou
     page = alice.get("/account/profile").get_data(as_text=True)
     assert "Showcase" in page and "Playing now" in page and "Recent completions" in page
     assert "Build your showcase" in page and 'name="display_name"' not in page
-    assert '/account/profile/edit' in page
-    editor = alice.get("/account/profile/showcase").get_data(as_text=True)
+    assert '/settings/profile' in page
+    editor = alice.get("/settings/profile/showcase").get_data(as_text=True)
     assert editor.count('name="games"') == 5
     assert "Bob private title" not in editor and "Unowned private title" not in editor
     ids = [own[4], own[0], own[2]]
-    result = submit(alice, "/account/profile/showcase", {"games": [str(value) for value in ids]})
+    result = submit(alice, "/settings/profile/showcase", {"games": [str(value) for value in ids]})
     assert result.status_code == 303 and result.location.endswith("/account/profile#profile-feedback")
     page = alice.get(result.location).get_data(as_text=True)
     assert "Showcase saved" in page
@@ -45,25 +45,25 @@ def test_profile_overview_and_showcase_editor_have_distinct_private_routes(accou
 
 def test_invalid_showcase_never_replaces_previous_games(accounts, players):
     alice, _, own, foreign, legacy = players
-    assert submit(alice, "/account/profile/showcase", {"games": [str(own[0])]}).status_code == 303
+    assert submit(alice, "/settings/profile/showcase", {"games": [str(own[0])]}).status_code == 303
     for values in ([str(value) for value in own], [str(own[0]), str(own[0])], [str(own[0]), '0' + str(own[0])], [str(foreign)], [str(legacy)], ['-1'], ['1; DROP TABLE games'], ['9' * 30], ['does-not-exist']):
-        response = submit(alice, "/account/profile/showcase", {"games": values})
+        response = submit(alice, "/settings/profile/showcase", {"games": values})
         assert response.status_code == 200 and 'role="alert"' in response.get_data(as_text=True)
         assert stored(accounts) == [(1, own[0])]
-    assert alice.post("/account/profile/showcase", data={"games": str(own[1])}).status_code == 400
+    assert alice.post("/settings/profile/showcase", data={"games": str(own[1])}).status_code == 400
 
 
 def test_reordering_clearing_and_game_deletion_keep_the_showcase_consistent(accounts, players):
     alice, _, own, _, _ = players
-    submit(alice, "/account/profile/showcase", {"games": [str(own[1]), '', str(own[0]), '', '']})
+    submit(alice, "/settings/profile/showcase", {"games": [str(own[1]), '', str(own[0]), '', '']})
     assert stored(accounts) == [(1, own[1]), (2, own[0])]
-    submit(alice, "/account/profile/showcase", {"games": [str(own[0]), str(own[1])]})
+    submit(alice, "/settings/profile/showcase", {"games": [str(own[0]), str(own[1])]})
     assert stored(accounts) == [(1, own[0]), (2, own[1])]
     with accounts.app_context():
         get_db().execute("DELETE FROM games WHERE id = ? AND owner_id = ?", (own[0], ALICE))
     assert stored(accounts) == [(2, own[1])]
     assert alice.get("/account/profile").status_code == 200
-    submit(alice, "/account/profile/showcase", {"games": ['', '', '', '', '']})
+    submit(alice, "/settings/profile/showcase", {"games": ['', '', '', '', '']})
     assert stored(accounts) == []
 
 
@@ -95,26 +95,26 @@ def test_activity_only_uses_current_accounts_entries_and_recorded_completion_dat
 
 def test_anonymous_setup_recovery_and_empty_library_behaviors(accounts):
     client = accounts.test_client()
-    for path in ("/account/profile", "/account/profile/edit", "/account/profile/showcase"):
+    for path in ("/account/profile", "/settings/profile", "/settings/profile/showcase"):
         assert client.get(path).location.endswith('/account/login')
     client = sign_in(accounts, 'alice', complete_profile=False)
-    assert client.get('/account/profile').location.endswith('/account/profile/edit')
-    assert client.get('/account/profile/showcase').location.endswith('/account/profile/edit')
-    result = submit(client, '/account/profile/edit', {'display_name':'Alice', 'username':'alice_player'})
-    assert result.location.endswith('/profile/alice_player#profile-feedback')
+    assert client.get('/account/profile').location.endswith('/settings/profile')
+    assert client.get('/settings/profile/showcase').location.endswith('/settings/profile')
+    result = submit(client, '/settings/profile', {'display_name':'Alice', 'username':'alice_player'})
+    assert result.location.endswith('/players/alice_player#profile-feedback')
     page = client.get(result.location).get_data(as_text=True)
     assert 'Add your first game' in page and '<dd>0<small>%</small></dd>' in page
-    assert 'Your showcase starts with a game' in client.get('/account/alice_player/profile/showcase').get_data(as_text=True)
-    submit(client, '/account/logout', {}, source='/account/profile/edit')
+    assert 'Your showcase starts with a game' in client.get('/settings/profile/showcase').get_data(as_text=True)
+    submit(client, '/account/logout', {}, source='/settings/profile')
     result = submit(client, '/account/verify-recovery', {'email':'alice@example.test','code':'123456'})
     assert result.location.endswith('/account/password')
-    for path in ('/account/profile', '/account/profile/showcase', '/account/profile/edit'):
+    for path in ('/account/profile', '/settings/profile/showcase', '/settings/profile'):
         assert client.get(path).location.endswith('/account/password')
 
 
 def test_legacy_profile_post_still_saves_without_exposing_another_account(accounts, players):
     alice, bob, _, _, _ = players
-    result = submit(alice, '/account/profile', {'display_name':'Updated Alice'}, source='/account/profile/edit')
+    result = submit(alice, '/account/profile', {'display_name':'Updated Alice'}, source='/settings/profile')
     assert result.status_code == 303
     assert 'Updated Alice' in alice.get('/account/profile').get_data(as_text=True)
     assert 'Updated Alice' not in bob.get('/account/profile').get_data(as_text=True)

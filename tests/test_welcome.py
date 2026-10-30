@@ -12,12 +12,12 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert page.status_code == 200
     html = page.get_data(as_text=True)
     assert "VESTIGIUM" in html and "Every game" in html
-    assert 'href="/explore"' in html
+    assert 'href="/discover/browse"' in html
     assert 'href="https://github.com/PerdonPs3/game-backlog"' in html
     assert 'class="welcome-primary"' not in html
     assert 'class="welcome-backdrop" aria-hidden="true"' in html
     assert "t_cover_big/co4jni.jpg" in html
-    assert 'action="/explore"' in html and 'data-catalog-url="/explore/suggestions"' in html
+    assert 'action="/discover/browse"' in html and 'data-catalog-url="/explore/suggestions"' in html
     assert 'href="#your-library"' in html and 'id="how-it-works"' in html
     assert 'class="workspace-site-header"' in html
     assert 'Illustrative demo' in html
@@ -49,7 +49,7 @@ def test_old_filter_links_redirect_safely(client, seed_game):
     assert client.get("/", headers={"Accept": "application/json"}, follow_redirects=True).json["count"] == 1
 
 
-@pytest.mark.parametrize("path", ["/games/new", "/backups/import", "/lists", "/games/pick"])
+@pytest.mark.parametrize("path", ["/library/add", "/settings/data/import", "/library/lists", "/library/pick"])
 def test_workspace_has_vestigium_brand_and_home_link(client, path):
     html = client.get(path).get_data(as_text=True)
     assert 'class="workspace-brand" href="/"' in html

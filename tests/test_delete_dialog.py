@@ -8,7 +8,7 @@ def test_collection_contains_modal_and_delete_links(client, seed_game, stored_ga
     assert '<dialog id="delete-game-dialog"' in page
     assert 'aria-labelledby="delete-dialog-title"' in page
     assert 'data-delete-game data-game-title="Game &#34;with quotes&#34;"' in page
-    assert f'href="/games/{game_id}/delete"' in page
+    assert f'href="/library/entries/{game_id}/delete?from=' in page
     assert "delete-confirmation.js" in page
     assert stored_games() == before
 
@@ -19,7 +19,7 @@ def test_modal_token_can_confirm_only_the_selected_game(client, seed_game, store
     parser = CSRFTokenParser()
     parser.feed(client.get("/library").get_data(as_text=True))
     assert parser.token
-    response = client.post(f"/games/{target}/delete", data={"csrf_token": parser.token})
+    response = client.post(f"/library/entries/{target}/delete", data={"csrf_token": parser.token})
     assert response.status_code == 302
     assert [game["id"] for game in stored_games()] == [keep]
 

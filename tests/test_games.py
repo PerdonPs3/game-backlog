@@ -8,9 +8,9 @@ def test_empty_collection(client):
 
 
 def test_create_game_persists(app, post_form, game_data, stored_games):
-    response = post_form("/games/new", game_data)
+    response = post_form("/library/add", game_data)
     assert response.status_code == 302
-    assert response.headers["Location"] == "/library"
+    assert response.headers["Location"] == "/games/123/portal-2#your-progress"
     game = stored_games()[0]
     assert game["title"] == "Portal 2"
     assert game["rating"] == 9
@@ -24,7 +24,7 @@ def test_create_game_persists(app, post_form, game_data, stored_games):
 def test_create_without_rating_or_review(post_form, game_data, stored_games):
     data = {key: value for key, value in game_data.items()
             if key not in ("rating", "review")}
-    assert post_form("/games/new", data).status_code == 302
+    assert post_form("/library/add", data).status_code == 302
     assert stored_games()[0]["rating"] is None
     assert stored_games()[0]["review"] == ""
 
@@ -47,7 +47,7 @@ INVALID_FIELDS = [
 def test_invalid_creation_does_not_save(
     post_form, game_data, stored_games, field, value, message
 ):
-    response = post_form("/games/new", {**game_data, field: value})
+    response = post_form("/library/add", {**game_data, field: value})
     assert response.status_code == 200
     assert message in response.get_data(as_text=True)
     assert stored_games() == []
@@ -59,10 +59,10 @@ def test_edit_updates_only_selected_game(
     game_id = seed_game()
     seed_game(title="Another game")
     other_before = stored_games()[1]
-    page = client.get(f"/games/{game_id}/edit")
+    page = client.get(f"/library/entries/{game_id}/edit")
     assert b'value="9"' in page.data
     assert b"A great puzzle game." in page.data
-    response = post_form(f"/games/{game_id}/edit", {
+    response = post_form(f"/library/entries/{game_id}/edit", {
         **game_data, "title": "Updated title", "platform": "PS3",
         "status": "Completed", "rating": "7", "review": "Updated review",
     })
@@ -81,7 +81,7 @@ def test_edit_can_clear_rating_and_review(
     post_form, game_data, seed_game, stored_games, rating, review
 ):
     game_id = seed_game()
-    response = post_form(f"/games/{game_id}/edit", {
+    response = post_form(f"/library/entries/{game_id}/edit", {
         **game_data, "rating": rating, "review": review,
     })
     assert response.status_code == 302
@@ -95,7 +95,7 @@ def test_invalid_edit_preserves_saved_game(
 ):
     game_id = seed_game()
     before = stored_games()
-    response = post_form(f"/games/{game_id}/edit", {**game_data, field: value})
+    response = post_form(f"/library/entries/{game_id}/edit", {**game_data, field: value})
     assert response.status_code == 200
     assert message in response.get_data(as_text=True)
     assert stored_games() == before
@@ -118,17 +118,17 @@ def test_delete_requires_confirmation_and_preserves_other_games(
     game_id = seed_game()
     seed_game(title="Keep this game")
     before = stored_games()
-    assert client.get(f"/games/{game_id}/delete").status_code == 200
+    assert client.get(f"/library/entries/{game_id}/delete").status_code == 200
     assert stored_games() == before
     assert client.get("/library").status_code == 200
     assert stored_games() == before
-    assert post_form(f"/games/{game_id}/delete", {}).status_code == 302
+    assert post_form(f"/library/entries/{game_id}/delete", {}).status_code == 302
     assert stored_games() == [before[1]]
 
 
 @pytest.mark.parametrize("action", ["edit", "delete"])
 def test_missing_game_returns_404(client, action):
-    assert client.get(f"/games/999/{action}").status_code == 404
+    assert client.get(f"/library/entries/999/{action}").status_code == 404
 
 
 def test_posts_without_csrf_token_are_rejected(
@@ -136,14 +136,14 @@ def test_posts_without_csrf_token_are_rejected(
 ):
     game_id = seed_game()
     before = stored_games()
-    for url in ("/games/new", f"/games/{game_id}/edit", f"/games/{game_id}/delete"):
+    for url in ("/library/add", f"/library/entries/{game_id}/edit", f"/library/entries/{game_id}/delete"):
         assert client.post(url, data=game_data).status_code == 400
     assert stored_games() == before
 
 
 def test_review_is_escaped_in_html(client, post_form, game_data):
     review = "<script>alert('test')</script>"
-    assert post_form("/games/new", {**game_data, "review": review}).status_code == 302
+    assert post_form("/library/add", {**game_data, "review": review}).status_code == 302
     page = client.get("/library")
     assert b"<script>" not in page.data
     assert b"&lt;script&gt;" in page.data

@@ -4,7 +4,8 @@
 {% macro activity(games, empty_text, public=false) -%}
 {% if games %}<ul class="profile-activity-list">
     {% for game in games %}
-    {% set href = (url_for('explore.game', catalog_id=game.catalog_id) if game.catalog_id else none) if public else url_for('main.game_details', game_id=game.id) %}
+    {% set catalog_id = game.catalog_id if public else game.igdb_id %}
+    {% set href = game_url(catalog_id, game.title) if catalog_id else (none if public else url_for('main.game_details', game_id=game.id, **{'from':navigation_origin()})) %}
     <li>{% if href %}<a class="profile-activity-item" href="{{ href }}">{% else %}<div class="profile-activity-item">{% endif %}{{ cover(game) }}<span class="profile-activity-copy"><strong>{{ game.title }}</strong><small>{{ game.platform }}{% if game.completed_on is defined and game.completed_on %} · {{ game.completed_on }}{% endif %}</small></span>{% if game.rating is not none %}<span class="profile-game-rating">{{ game.rating|star_rating }}<small>/5</small></span>{% endif %}{% if href %}</a>{% else %}</div>{% endif %}</li>
     {% endfor %}
 </ul>{% else %}<p class="profile-empty-note">{{ empty_text }}</p>{% endif %}

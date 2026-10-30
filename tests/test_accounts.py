@@ -84,7 +84,7 @@ def libraries(accounts):
     return alice, bob, ids
 
 
-@pytest.mark.parametrize("path", ["/library", "/lists", "/games/new", "/games/pick", "/games/1", "/games/1/edit", "/games/1/delete", "/backups/import", "/backups/export"])
+@pytest.mark.parametrize("path", ["/library", "/library/lists", "/library/add", "/library/pick", "/library/entries/1", "/library/entries/1/edit", "/library/entries/1/delete", "/settings/data/import", "/settings/data/export"])
 def test_anonymous_collection_access_requires_login(accounts, path):
     response = accounts.test_client().get(path)
     assert response.status_code == 302
@@ -103,38 +103,38 @@ def test_public_landing_and_json_auth_boundary(accounts):
 def test_private_collections_lists_statistics_and_exports(libraries):
     alice, bob, ids = libraries
     for client, name, other in ((alice, "alice", "bob"), (bob, "bob", "alice")):
-        for path in ("/library", "/games/pick?pick=1", "/lists", "/backups/export"):
+        for path in ("/library", "/library/pick?pick=1", "/library/lists", "/settings/data/export"):
             response = client.get(path)
             assert response.status_code == 200
             body = response.get_data(as_text=True)
-            if path != "/lists":
+            if path != "/library/lists":
                 assert name + " secret game" in body
             assert other + " secret game" not in body
             assert "Legacy private game" not in body
             assert response.headers["Cache-Control"] == "private, no-store"
-        backup = client.get("/backups/export").json
+        backup = client.get("/settings/data/export").json
         assert len(backup["games"]) == 1
         assert len(backup["lists"]) == 1
         assert "owner_id" not in json.dumps(backup)
-        assert '<dd>1</dd>' in client.get("/account/profile/edit").get_data(as_text=True)
+        assert '<dd>1</dd>' in client.get("/settings/profile").get_data(as_text=True)
 
 
 def test_tampered_game_and_list_ids_cannot_read_or_write(libraries):
     alice, bob, ids = libraries
     game_id, list_id = ids["bob"]
-    paths = [f"/games/{game_id}", f"/games/{game_id}/edit", f"/games/{game_id}/delete",
-             f"/lists/{list_id}/edit", f"/lists/{list_id}/delete", f"/library?list={list_id}"]
+    paths = [f"/library/entries/{game_id}", f"/library/entries/{game_id}/edit", f"/library/entries/{game_id}/delete",
+             f"/library/lists/{list_id}/edit", f"/library/lists/{list_id}/delete", f"/library?list={list_id}"]
     for path in paths:
         assert alice.get(path).status_code == 404
     for path in paths[1:5]:
-        assert submit(alice, path, {"title": "Hijacked", "name": "Hijacked"}, source="/account/profile/edit").status_code == 404
+        assert submit(alice, path, {"title": "Hijacked", "name": "Hijacked"}, source="/settings/profile").status_code == 404
     assert "bob secret game" in bob.get("/library").get_data(as_text=True)
-    assert "Favorites" in bob.get("/lists").get_data(as_text=True)
+    assert "Favorites" in bob.get("/library/lists").get_data(as_text=True)
 
 
 def test_membership_cannot_reference_other_account(libraries, accounts):
     alice, _, ids = libraries
-    response = submit(alice, f"/lists/{ids['alice'][1]}/edit", {"name": "Favorites", "games": str(ids["bob"][0])})
+    response = submit(alice, f"/library/lists/{ids['alice'][1]}/edit", {"name": "Favorites", "games": str(ids["bob"][0])})
     assert "no longer in your collection" in response.get_data(as_text=True)
     with accounts.app_context():
         db = get_db()
@@ -146,25 +146,25 @@ def test_membership_cannot_reference_other_account(libraries, accounts):
 
 def test_import_deduplication_and_memberships_are_per_account(libraries):
     alice, bob, _ = libraries
-    backup = bob.get("/backups/export").json
-    response = submit(alice, "/backups/import", {"confirm_import": "yes", "backup": (BytesIO(json.dumps(backup).encode()), "backup.json")})
+    backup = bob.get("/settings/data/export").json
+    response = submit(alice, "/settings/data/import", {"confirm_import": "yes", "backup": (BytesIO(json.dumps(backup).encode()), "backup.json")})
     assert response.status_code == 200
-    saved = alice.get("/backups/export").json
+    saved = alice.get("/settings/data/export").json
     assert len(saved["games"]) == 2
     assert len(saved["lists"]) == 1
     assert len(saved["lists"][0]["games"]) == 2
-    assert len(bob.get("/backups/export").json["games"]) == 1
+    assert len(bob.get("/settings/data/export").json["games"]) == 1
 
 
 def test_profile_is_private_validated_and_escaped(libraries):
     alice, bob, _ = libraries
-    response = submit(alice, "/account/profile/edit", {"display_name": "<script>Alice</script>", "bio": "<b>Hello</b>", "avatar": "ghost"})
+    response = submit(alice, "/settings/profile", {"display_name": "<script>Alice</script>", "bio": "<b>Hello</b>", "avatar": "ghost"})
     assert response.status_code == 303
     response = alice.get(response.location)
     assert "Changes saved" in response.get_data(as_text=True)
     assert "&lt;script&gt;Alice&lt;/script&gt;" in response.get_data(as_text=True)
-    assert "Alice" not in bob.get("/account/profile/edit").get_data(as_text=True)
-    response = submit(alice, "/account/profile/edit", {"display_name": "x" * 61, "avatar": "invalid"})
+    assert "Alice" not in bob.get("/settings/profile").get_data(as_text=True)
+    response = submit(alice, "/settings/profile", {"display_name": "x" * 61, "avatar": "invalid"})
     assert "Choose a name" in response.get_data(as_text=True)
 
 
@@ -176,7 +176,7 @@ def test_opaque_session_logout_and_csrf(accounts):
         opaque = cookie["account_session"]
     assert client.post("/account/logout").status_code == 400
     assert client.get("/account/logout").status_code == 405
-    response = submit(client, "/account/logout", {}, source="/account/profile/edit")
+    response = submit(client, "/account/logout", {}, source="/settings/profile")
     assert response.status_code == 302
     assert response.headers["Location"] == "/"
     homepage = client.get(response.headers["Location"])
@@ -233,7 +233,7 @@ def test_password_recovery_cannot_be_used_to_browse_and_revokes_old_sessions(acc
     response = submit(client, "/account/verify-recovery", {"email": "alice@example.test", "code": "123456"})
     assert response.location.endswith("/account/password")
     assert client.get("/library").location.endswith("/account/password")
-    assert client.get("/account/profile/edit").location.endswith("/account/password")
+    assert client.get("/settings/profile").location.endswith("/account/password")
     response = submit(client, "/account/password", {"password": "new-test-password", "confirmation": "new-test-password"})
     assert response.location.endswith("/account/login")
     assert previous.get("/library").status_code == 302
@@ -308,55 +308,55 @@ def test_game_create_update_delete_and_list_limits_use_current_owner(accounts):
     catalog.get_game.return_value = {"id": 123, "name": "Portal 2", "platforms": [{"id": 6, "name": "PC"}]}
     accounts.extensions["igdb_client"] = catalog
     for client in (alice, bob):
-        assert submit(client, "/games/new", game_data).status_code == 302
-        assert "already in your collection" in submit(client, "/games/new", game_data).get_data(as_text=True)
-        assert submit(client, "/lists", {"name": "Shared name"}).status_code == 302
+        assert submit(client, "/library/add", game_data).status_code == 302
+        assert "already in your collection" in submit(client, "/library/add", game_data).get_data(as_text=True)
+        assert submit(client, "/library/lists", {"name": "Shared name"}).status_code == 302
     with accounts.app_context():
         db = get_db()
         alice_id = db.execute("SELECT id FROM games WHERE owner_id = ?", (ALICE,)).fetchone()[0]
         for number in range(99):
             db.execute("INSERT INTO game_lists (name, name_key, owner_id) VALUES (?, ?, ?)", (f"List {number}", f"list {number}", ALICE))
-    assert "up to 100 lists" in submit(alice, "/lists", {"name": "Overflow"}).get_data(as_text=True)
-    assert submit(bob, "/lists", {"name": "Still allowed"}).status_code == 302
-    assert submit(alice, f"/games/{alice_id}/edit", {**game_data, "review": "Alice's new review"}).status_code == 302
+    assert "up to 100 lists" in submit(alice, "/library/lists", {"name": "Overflow"}).get_data(as_text=True)
+    assert submit(bob, "/library/lists", {"name": "Still allowed"}).status_code == 302
+    assert submit(alice, f"/library/entries/{alice_id}/edit", {**game_data, "review": "Alice's new review"}).status_code == 302
     assert "Alice&#39;s new review" not in bob.get("/library").get_data(as_text=True)
-    assert submit(alice, f"/games/{alice_id}/delete", {}).status_code == 302
-    assert len(alice.get("/backups/export").json["games"]) == 0
-    assert len(bob.get("/backups/export").json["games"]) == 1
+    assert submit(alice, f"/library/entries/{alice_id}/delete", {}).status_code == 302
+    assert len(alice.get("/settings/data/export").json["games"]) == 0
+    assert len(bob.get("/settings/data/export").json["games"]) == 1
 
 
 def test_first_login_requires_profile_before_library_and_saved_profile_unlocks_it(accounts):
     client = sign_in(accounts, "alice", complete_profile=False)
-    for path in ("/library", "/lists", "/games/new", "/games/pick", "/backups/export"):
-        assert client.get(path).location.endswith("/account/profile/edit")
+    for path in ("/library", "/library/lists", "/library/add", "/library/pick", "/settings/data/export"):
+        assert client.get(path).location.endswith("/settings/profile")
     response = client.get("/catalog/search?q=Portal", headers={"Accept": "application/json"})
-    assert response.status_code == 409 and response.json["profile_url"] == "/account/profile/edit"
-    page = client.get("/account/profile/edit")
+    assert response.status_code == 409 and response.json["profile_url"] == "/settings/profile"
+    page = client.get("/settings/profile")
     assert "Create your profile" in page.get_data(as_text=True)
     html = page.get_data(as_text=True)
     assert html.index('id="display-name"') < html.index('id="setup-username"') < html.index('id="bio"')
-    result = submit(client, "/account/profile/edit", {"display_name": "New player", "username": "New_Player", "bio": "", "avatar": "rocket"})
+    result = submit(client, "/settings/profile", {"display_name": "New player", "username": "New_Player", "bio": "", "avatar": "rocket"})
     assert result.status_code == 303 and result.location.endswith("#profile-feedback")
     saved = client.get(result.location)
     assert "Your profile is ready" in saved.get_data(as_text=True)
     assert 'data-saved="true"' in saved.get_data(as_text=True)
     assert "Open library" in saved.get_data(as_text=True)
-    assert client.get("/library").location == "/account/new_player/library"
-    assert client.get("/account/new_player/library").status_code == 200
+    assert client.get("/library").status_code == 200
+    assert client.get("/account/new_player/library").location == "/library"
     assert "Your profile is ready" not in client.get("/account/new_player/profile/edit").get_data(as_text=True)
-    submit(client, "/account/logout", {}, source="/account/profile/edit")
+    submit(client, "/account/logout", {}, source="/settings/profile")
     result = submit(client, "/account/login", {"email": "alice@example.test", "password": "test-password"})
     assert result.location.endswith("/library")
 
 
 def test_invalid_setup_preserves_fields_and_does_not_unlock_collection(accounts):
     client = sign_in(accounts, "alice", complete_profile=False)
-    response = submit(client, "/account/profile/edit", {"display_name": "   ", "bio": "A story in progress", "avatar": "ghost"})
+    response = submit(client, "/settings/profile", {"display_name": "   ", "bio": "A story in progress", "avatar": "ghost"})
     body = response.get_data(as_text=True)
     assert response.status_code == 200 and "Choose a name" in body
     assert "A story in progress" in body
     assert 'name="avatar_color" value="#64748b"' in body
-    assert client.get("/library").location.endswith("/account/profile/edit")
+    assert client.get("/library").location.endswith("/settings/profile")
 
 
 def test_confirmed_registration_with_provider_session_goes_to_creator(accounts):
@@ -369,7 +369,7 @@ def test_confirmed_registration_with_provider_session_goes_to_creator(accounts):
     fake.call = confirmed_signup
     client = accounts.test_client()
     response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
-    assert response.location.endswith("/account/profile/edit")
+    assert response.location.endswith("/settings/profile")
     assert "Create your profile" in client.get(response.location).get_data(as_text=True)
 
 
@@ -386,18 +386,18 @@ def test_registration_still_requires_a_provider_confirmed_email(accounts):
     client = accounts.test_client()
     response = submit(client, "/account/register", {"email": "alice@example.test", "password": "test-password", "confirmation": "test-password"})
     assert "Registration could not be completed" in response.get_data(as_text=True)
-    assert client.get("/account/profile/edit").location.endswith("/account/login")
+    assert client.get("/settings/profile").location.endswith("/account/login")
     with accounts.app_context():
         assert get_db().execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 0
 
 
 def test_profile_save_feedback_is_specific_to_current_account_and_not_query_parameters(libraries):
     alice, bob, _ = libraries
-    response = submit(alice, "/account/profile/edit", {"display_name": "Alice", "avatar": "star", "bio": "Saved biography"})
+    response = submit(alice, "/settings/profile", {"display_name": "Alice", "avatar": "star", "bio": "Saved biography"})
     assert response.status_code == 303
     assert 'data-saved="true"' in alice.get(response.location).get_data(as_text=True)
-    assert 'data-saved="true"' not in bob.get("/account/profile/edit?saved=1").get_data(as_text=True)
-    assert 'data-saved="true"' not in alice.get("/account/profile/edit?saved=1").get_data(as_text=True)
+    assert 'data-saved="true"' not in bob.get("/settings/profile?saved=1").get_data(as_text=True)
+    assert 'data-saved="true"' not in alice.get("/settings/profile?saved=1").get_data(as_text=True)
 
 
 def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
@@ -407,9 +407,9 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     image = BytesIO()
     Image.new("RGB", (400, 200), "blue").save(image, format="PNG")
     image.seek(0)
-    result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "avatar_color": "#aa44bb", "photo": (image, "photo.png")})
+    result = submit(alice, "/settings/profile", {"display_name": "Alice", "avatar_color": "#aa44bb", "photo": (image, "photo.png")})
     assert result.status_code == 303
-    assert re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
+    assert re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/settings/profile').get_data(as_text=True))
     photo = alice.get("/account/profile/photo")
     assert photo.status_code == 200 and photo.mimetype == "image/jpeg"
     assert photo.headers["Cache-Control"] == "private, no-store"
@@ -418,25 +418,25 @@ def test_uploaded_photo_is_private_normalized_and_can_be_removed(accounts):
     assert bob.get("/account/profile/photo").status_code == 404
     assert accounts.test_client().get("/account/profile/photo").status_code == 401
     assert alice.get("/account/profile/photo?user_id=" + BOB).data == photo.data
-    invalid = submit(alice, "/account/profile/edit", {"display_name": "Changed", "photo": (BytesIO(b"<svg/>"), "bad.png")})
+    invalid = submit(alice, "/settings/profile", {"display_name": "Changed", "photo": (BytesIO(b"<svg/>"), "bad.png")})
     assert "Choose a valid" in invalid.get_data(as_text=True)
     assert alice.get("/account/profile/photo").data == photo.data
     with accounts.app_context():
         row = get_db().execute("SELECT display_name, avatar_color FROM profiles WHERE id = ?", (ALICE,)).fetchone()
         assert row["display_name"] == "Alice" and row["avatar_color"] == "#aa44bb"
-    result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "remove_photo": "yes", "avatar_color": "#228844"})
+    result = submit(alice, "/settings/profile", {"display_name": "Alice", "remove_photo": "yes", "avatar_color": "#228844"})
     assert result.status_code == 303
     assert alice.get("/account/profile/photo").status_code == 404
-    assert not re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/account/profile/edit').get_data(as_text=True))
-    assert 'name="avatar_color" value="#228844"' in alice.get("/account/profile/edit").get_data(as_text=True)
+    assert not re.search(r'<div[^>]*data-avatar-palette[^>]*\bhidden\b', alice.get('/settings/profile').get_data(as_text=True))
+    assert 'name="avatar_color" value="#228844"' in alice.get("/settings/profile").get_data(as_text=True)
 
 
 def test_photo_requests_keep_csrf_size_and_color_validation(accounts):
     client = sign_in(accounts, "alice")
-    assert client.post("/account/profile/edit", data={"display_name": "Alice"}).status_code == 400
-    invalid = submit(client, "/account/profile/edit", {"display_name": "Alice", "avatar_color": "red; background:url(evil)"})
+    assert client.post("/settings/profile", data={"display_name": "Alice"}).status_code == 400
+    invalid = submit(client, "/settings/profile", {"display_name": "Alice", "avatar_color": "red; background:url(evil)"})
     assert "Choose a valid profile color" in invalid.get_data(as_text=True)
-    oversized = submit(client, "/account/profile/edit", {"display_name": "Alice", "photo": (BytesIO(b"x" * (4 * 1024 * 1024)), "huge.jpg")})
+    oversized = submit(client, "/settings/profile", {"display_name": "Alice", "photo": (BytesIO(b"x" * (4 * 1024 * 1024)), "huge.jpg")})
     assert oversized.status_code == 303
     assert "Your previous profile has been kept" in client.get(oversized.location).get_data(as_text=True)
 
@@ -451,12 +451,12 @@ def test_profile_saves_chosen_crop_and_rejects_invalid_crop_without_replacing_ph
         source.save(stream, format="PNG")
         stream.seek(0)
         return stream, "split.png"
-    result = submit(client, "/account/profile/edit", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":200}'})
+    result = submit(client, "/settings/profile", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":200}'})
     assert result.status_code == 303
     saved = client.get("/account/profile/photo").data
     with Image.open(BytesIO(saved)) as image:
         assert image.getpixel((128,128))[2] > 230
-    result = submit(client, "/account/profile/edit", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":400}'})
+    result = submit(client, "/settings/profile", {"display_name":"Alice", "photo":photo(), "photo_crop":'{"x":200,"y":0,"size":400}'})
     assert "Choose a crop inside" in result.get_data(as_text=True)
     assert client.get("/account/profile/photo").data == saved
 

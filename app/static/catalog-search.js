@@ -121,7 +121,10 @@
             controller?.abort();
             revision += 1;
             closeResults();
-            const url = picker.dataset.browseUrl.replace(/0$/, String(game.id));
+            const destination = game.url || picker.dataset.browseUrl.replace(/0(?=\/[^/]*$|$)/, String(game.id));
+            const target = new URL(destination, window.location.origin);
+            if (picker.dataset.origin) target.searchParams.set('from', picker.dataset.origin);
+            const url = target.href;
             if (!window.VestigiumCatalogNavigation?.go(url)) window.location.assign(url);
             return;
         }

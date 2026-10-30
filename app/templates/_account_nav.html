@@ -1,17 +1,11 @@
-{% if accounts_enabled %}
-<div class="account-navigation">
-    <a href="{{ url_for('profiles.search') }}">Players</a>
+<nav class="account-navigation" aria-label="Main navigation">
+    {% if account_user or not accounts_enabled %}<a href="{{ url_for('main.index') }}" {% if navigation_group == 'library' %}aria-current="page"{% endif %}>Library</a>{% endif %}
+    <a href="{{ url_for('discovery.index') }}" {% if navigation_group == 'discover' %}aria-current="page"{% endif %}>Discover</a>
+    {% if accounts_enabled %}<a href="{{ url_for('profiles.search') }}" {% if navigation_group == 'community' %}aria-current="page"{% endif %}>Community</a>
     {% if account_user %}
-    <a href="{{ url_for('following.manage') }}">Connections</a>
-    <a href="{{ url_for('wishlist.index') }}">Wishlist</a>
-    <a href="{{ profile_url() }}">My profile</a>
-    <form action="{{ url_for('auth.logout') }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit">Sign out</button>
-    </form>
-    {% else %}
-    <a href="{{ url_for('auth.login') }}">Sign in</a>
-    <a class="account-create" href="{{ url_for('auth.register') }}">Create account</a>
-    {% endif %}
-</div>
-{% endif %}
+    <details class="account-menu"><summary aria-label="Your account"><span class="account-menu-avatar" aria-hidden="true">{{ navigation_initial }}</span><span class="account-menu-label">Account</span><svg class="account-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="account-menu-panel">
+        <a href="{{ profile_url() }}">My profile</a><a href="{{ url_for('auth.profile') }}">Settings</a><a href="{{ url_for('navigation.data') }}">Data &amp; backups</a>
+        <form action="{{ url_for('auth.logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit">Sign out</button></form>
+    </div></details>
+    {% else %}<a href="{{ url_for('auth.login') }}">Sign in</a><a class="account-create" href="{{ url_for('auth.register') }}">Create account</a>{% endif %}{% endif %}
+</nav>

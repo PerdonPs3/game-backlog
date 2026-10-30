@@ -274,7 +274,7 @@ test("public suggestions open a game by click or keyboard without resolving priv
         } else {
             ui["catalog-results"].children[0].fire("click");
         }
-        assert.deepEqual(ui.navigations, ["/explore/games/1"]);
+        assert.deepEqual(ui.navigations, ["http://localhost/explore/games/1"]);
         assert.equal(ui.requests.length, 1);
     }
 });
@@ -313,7 +313,7 @@ test('changing the content filter cancels stale suggestions and searches the cho
     ui.requests[1].reply({games: [remake]}); await filteredRequest;
     assert.equal(ui['catalog-results'].children.length, 1);
     await ui['catalog-results'].children[0].fire('click');
-    assert.deepEqual(ui.navigations, ['/explore/games/2']);
+    assert.deepEqual(ui.navigations, ['http://localhost/explore/games/2']);
 });
 
 

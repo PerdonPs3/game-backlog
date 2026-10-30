@@ -12,7 +12,7 @@ def game_cards(rows):
 
 def showcase_games(db, user_id):
     return game_cards(db.execute(
-        "SELECT g.id, g.title, g.platform, g.status, g.rating, g.cover_image_id, s.position "
+        "SELECT g.id, g.igdb_id, g.title, g.platform, g.status, g.rating, g.cover_image_id, s.position "
         "FROM profile_showcase s JOIN games g ON g.id = s.game_id AND g.owner_id = s.owner_id "
         "WHERE s.owner_id = ? ORDER BY s.position", (user_id,)
     ).fetchall())

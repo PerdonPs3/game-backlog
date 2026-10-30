@@ -26,10 +26,12 @@
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>
+        {% if error %}<p class="catalog-message" role="status">{{ error }} Your saved progress is still available.</p>{% endif %}
         {% include '_catalog_media.html' %}
         <div class="catalog-detail-grid">
             <section class="catalog-detail-panel"><h2>About the game</h2><p class="catalog-synopsis">{{ profile.summary or 'A synopsis is not available for this game yet.' }}</p></section>
         </div>
+        {% include '_game_progress.html' %}
     </div>
     <div class="catalog-game-sidebar">
         {% include '_catalog_game_facts.html' %}

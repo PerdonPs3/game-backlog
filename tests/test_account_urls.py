@@ -17,7 +17,7 @@ def named_libraries(accounts, libraries):
 
 
 @pytest.mark.parametrize("suffix,legacy", [
-    ("library", "/library"), ("profile", "/account/profile"),
+    ("library", "/account/{username}/library"), ("profile", "/account/profile"),
     ("profile/edit", "/account/profile/edit"),
     ("profile/showcase", "/account/profile/showcase"),
     ("profile/sharing", "/account/profile/sharing"),
@@ -25,15 +25,15 @@ def named_libraries(accounts, libraries):
 def test_legacy_links_redirect_to_the_owners_account(named_libraries, suffix, legacy):
     alice, bob, _ = named_libraries
     for client, name in ((alice, "alice_player"), (bob, "bob_player")):
-        result = client.get(legacy)
+        result = client.get(legacy.format(username=name))
         assert result.status_code == 302
-        expected = f"/profile/{name}" if suffix == "profile" else f"/account/{name}/profile/edit#profile-privacy" if suffix == "profile/sharing" else f"/account/{name}/{suffix}"
+        expected = f"/players/{name}" if suffix == "profile" else '/settings/profile#profile-privacy' if suffix == 'profile/sharing' else {'library':'/library','profile/edit':'/settings/profile','profile/showcase':'/settings/profile/showcase'}[suffix]
         assert result.location == expected
         assert result.headers["Cache-Control"] == "private, no-store"
         page = client.get(result.location)
         assert page.status_code == 200
-        assert f'/profile/{name}' in page.text
-        assert 'href="/library"' not in page.text
+        assert f'/players/{name}' in page.text
+        assert 'href="/library"' in page.text
         assert 'href="/account/profile"' not in page.text
 
 
@@ -51,8 +51,8 @@ def test_slugs_never_grant_another_accounts_access(named_libraries, suffix):
 def test_library_filters_and_json_keep_the_same_ownership(named_libraries):
     alice, _, _ = named_libraries
     query = "q=alice&status=Backlog&sort=title&_external=https%3A%2F%2Fevil.example&username=bob_player"
-    old = alice.get("/library?" + query)
-    assert old.location == "/account/alice_player/library?" + query
+    old = alice.get("/account/alice_player/library?" + query)
+    assert old.location == "/library?" + query
     page = alice.get(old.location)
     assert page.status_code == 200 and "alice secret game" in page.text
     assert "bob secret game" not in page.text
@@ -71,11 +71,11 @@ def test_old_names_redirect_only_for_the_owner_and_posts_remain_safe(accounts, n
         get_db().execute("UPDATE profiles SET username = 'alice_renamed' WHERE id = ?", (ALICE,))
     for slug in ("alice_player", "ALICE_RENAMED"):
         response = alice.get(f"/account/{slug}/profile")
-        assert response.location == "/profile/alice_renamed"
+        assert response.location == "/players/alice_renamed"
         assert bob.get(f"/account/{slug}/profile").status_code == 404
     result = submit(alice, "/account/alice_player/profile/edit", {"display_name": "Renamed Alice"})
     assert result.status_code == 303
-    assert result.location == "/account/alice_renamed/profile/edit#profile-feedback"
+    assert result.location == "/settings/profile#profile-feedback"
     attack = submit(alice, "/account/bob_player/profile/edit", {"display_name": "Compromised"},
                     source="/account/alice_renamed/profile/edit")
     assert attack.status_code == 404
@@ -87,16 +87,16 @@ def test_old_names_redirect_only_for_the_owner_and_posts_remain_safe(accounts, n
 def test_setup_login_and_sharing_changes_use_the_current_identity(accounts):
     alice = sign_in(accounts, "alice", complete_profile=False)
     result = submit(alice, "/account/profile/edit", {"display_name": "Alice", "username": "alice_player"})
-    assert result.location == "/profile/alice_player#profile-feedback"
+    assert result.location == "/players/alice_player#profile-feedback"
     assert alice.get(result.location).status_code == 200
-    assert alice.get('/account/alice_player/profile/sharing').location == '/account/alice_player/profile/edit#profile-privacy'
+    assert alice.get('/account/alice_player/profile/sharing').location == '/settings/profile#profile-privacy'
     with accounts.app_context():
         get_db().execute("UPDATE profiles SET username_changed_at = NULL WHERE id = ?", (ALICE,))
     result = submit(alice, '/account/alice_player/profile/sharing', {"username": "alice_renamed", "is_public": "yes"})
-    assert result.location == "/account/alice_renamed/profile/sharing#sharing-feedback"
+    assert result.location == "/settings/profile#profile-privacy"
     visitor = accounts.test_client()
     login = submit(visitor, "/account/login", {"email": "alice@example.test", "password": "test-password"})
-    assert login.location == "/account/alice_renamed/library"
+    assert login.location == "/library"
     assert visitor.get('/players/alice_renamed').status_code == 200
 
 
@@ -115,11 +115,11 @@ def test_anonymous_recovery_and_offline_routes_do_not_expose_named_accounts(acco
 def test_switching_accounts_uses_the_new_identity_not_the_previous_session(accounts, named_libraries):
     alice, _, _ = named_libraries
     login = submit(alice, '/account/login', {"email": "bob@example.test", "password": "test-password"})
-    assert login.location == '/account/bob_player/library'
+    assert login.location == '/library'
     assert alice.get(login.location).status_code == 200
     assert alice.get('/account/alice_player/profile').status_code == 404
     with accounts.app_context():
         get_db().execute("UPDATE profiles SET display_name = '', username = NULL, is_public = FALSE WHERE id = ?", (ALICE,))
     login = submit(alice, '/account/login', {"email": "alice@example.test", "password": "test-password"})
-    assert login.location == '/account/profile/edit'
+    assert login.location == '/settings/profile'
     assert alice.get(login.location).status_code == 200

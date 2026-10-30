@@ -30,3 +30,18 @@ test("reduced motion opens directly without a fade or delay",()=>{
     const ui=setup(true);assert.equal(ui.click(),true);assert.equal(ui.classes.size,0);
     assert.equal(ui.timers.length,0);assert.equal(ui.destinations.length,1);
 });
+
+// Public catalog IDs must never be confused with private entry IDs.
+test("canonical game links retain return filters and the private progress anchor",()=>{
+    const ui=setup();
+    const target="/games/72/portal-2?from=%2Flibrary%3Fstatus%3DPlaying#your-progress";
+    assert.equal(ui.go(target),true);ui.timers[0]();
+    assert.equal(ui.destinations[0],"http://localhost"+target);
+});
+test("private entries and write actions keep ordinary browser navigation",()=>{
+    const ui=setup();
+    for(const path of ["/library/entries/72", "/library/entries/72/edit", "/games/72", "/games/72/portal-2/edit"]){
+        assert.equal(ui.go(path),false);
+    }
+    assert.equal(ui.timers.length,0);
+});

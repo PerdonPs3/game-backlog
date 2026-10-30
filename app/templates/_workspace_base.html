@@ -11,16 +11,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='light-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='accounts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='rating-picker.css') }}">
+    {% if library_section %}<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='library-archive.css') }}">{% endif %}
     {% block page_styles %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='site-frame.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navigation.css') }}">
+    {% if library_section %}<link rel="stylesheet" href="{{ url_for('static', filename='library-sections.css') }}"><script src="{{ url_for('static', filename='library-transitions.js') }}"></script>{% endif %}
 </head>
-<body class="{% block body_class %}library-page workspace-page{% endblock %}">
+<body class="{% block body_class %}library-page workspace-page{% endblock %}{% if library_section %} library-archive library-section-page{% endif %}">
     {% call site_header() %}
-        {% block workspace_return %}<a href="{{ url_for('main.index') }}"><span aria-hidden="true">←</span> Back to collection</a>{% endblock %}
+        {% block workspace_return %}<a href="{{ navigation_return() }}"><span aria-hidden="true">←</span> {{ navigation_return_label() }}</a>{% endblock %}
     {% endcall %}
-    {% block workspace_backdrop %}{% endblock %}
-    <main class="workspace-layout {% block layout_class %}{% endblock %}">
+    {% block workspace_backdrop %}{% if library_section %}{% include '_library_backdrop.html' %}{% endif %}{% endblock %}
+    <main class="workspace-layout {% if library_section %}library-layout {% endif %}{% block layout_class %}{% endblock %}">
+        {% if not library_section %}{% include '_section_nav.html' %}{% endif %}
         {% block workspace_hero %}
+        {% if library_section %}{% include '_library_header.html' %}{% include '_library_toolbar.html' %}{% else %}
         <header class="workspace-hero">
             <div>
                 <h1>{% block page_heading %}{% endblock %}</h1>
@@ -30,9 +35,11 @@
                 <svg viewBox="55 40 330 365" xmlns="http://www.w3.org/2000/svg" focusable="false"><use href="#brand-symbol" /></svg>
             </div>
         </header>
+        {% endif %}
         {% endblock %}
         <div class="workspace-body">
             <section class="workspace-panel" aria-label="{% block panel_label %}Game details{% endblock %}">
+                {% if library_section %}<header class="library-section-heading"><h2>{{ self.page_heading() }}</h2>{% set section_description = self.page_description() %}{% if section_description|trim %}<p>{{ section_description }}</p>{% endif %}</header>{% endif %}
                 {% block panel %}{% endblock %}
             </section>
             {% block aside %}{% endblock %}
@@ -41,6 +48,7 @@
     </main>
     {{ site_footer() }}
     <script src="{{ url_for('static', filename='cursor-glow.js') }}" defer></script>
+    {% if library_section %}<script src="{{ url_for('static', filename='collection-view.js') }}" defer></script>{% endif %}
     {% block page_scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='catalog-navigation.js') }}" defer></script>
     <script src="{{ url_for('static', filename='play-dates.js') }}" defer></script>
