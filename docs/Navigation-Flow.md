@@ -95,6 +95,15 @@ Tab clicks during arrival retain only the latest requested destination. The next
 trip starts after the current transition finishes and the real page has painted
 twice. Room images move exactly one viewport without perspective scaling, so
 their edges meet without overlapping or revealing a gap.
+During a native view transition, the browser can retarget pointer clicks from a
+tab to the document's `<html>` element. While travel is active, primary pointer
+clicks on that root are resolved against the stationary toolbar's tab rectangles
+and fed into the same last-request queue. Recovery is restricted to the four
+same-origin library destinations; it excludes other screen areas, hidden tabs,
+keyboard activation, downloads and new-tab targets. It stores no click or filter
+history. Browser regression checks replay the eight-click sequence ending in
+Lists and a twelve-click reverse sequence ending in Wishlist, then verify the
+final active tab and that the transition flag has cleared.
 An image failure or timeout falls back to normal navigation without waiting
 indefinitely. Arrival does not cancel an already captured outgoing transition
 based on the new image element's initial loading flag.

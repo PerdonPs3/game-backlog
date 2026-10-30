@@ -5,9 +5,10 @@ const { join } = require('node:path');
 const { runInNewContext } = require('node:vm');
 const source = readFileSync(join(__dirname, '../app/static/library-transitions.js'), 'utf8');
 
-function setup({ reduced = false, activation, decode = () => Promise.resolve(), href = 'http://localhost/library', manualFrames = false } = {}) {
+function setup({ reduced = false, activation, decode = () => Promise.resolve(), href = 'http://localhost/library', manualFrames = false, tabs = [] } = {}) {
     const events = {};
     const dataset = {};
+    const root = { dataset };
     const destinations = [];
     const images = [];
     const frames = [];
@@ -20,7 +21,8 @@ function setup({ reduced = false, activation, decode = () => Promise.resolve(), 
             decode() { return decode(this.src); }
         },
         document: {
-            documentElement: { dataset },
+            documentElement: root,
+            querySelectorAll: () => tabs,
             currentScript: { src: 'http://localhost/static/library-transitions.js' },
             addEventListener: (name, fn) => events[name] = fn,
         },
@@ -33,7 +35,7 @@ function setup({ reduced = false, activation, decode = () => Promise.resolve(), 
             addEventListener: (name, fn) => events[name] = fn,
         },
     });
-    return { events, dataset, destinations, images, paint: () => frames.shift()?.() };
+    return { events, dataset, root, destinations, images, paint: () => frames.shift()?.() };
 }
 function route(from, to) {
     return { from: { url: from }, entry: { url: to } };
@@ -158,6 +160,42 @@ test('choosing the current room during arrival cancels the queued onward trip', 
     ui.paint();
     await new Promise(resolve => setImmediate(resolve));
     assert.deepEqual(ui.destinations, []);
+});
+
+function tab(href, left, width = 100) {
+    return { href, hasAttribute: () => false, getBoundingClientRect: () => ({ left, right: left + width, top: 190, bottom: 230, width, height: 40 }) };
+}
+
+test('snapshot-retargeted pointer clicks resolve the visible tab and preserve the last request', async () => {
+    const ui = setup({ activation: route('/library', '/library/wishlist'), href: 'http://localhost/library/wishlist', manualFrames: true,
+        tabs: [tab('http://localhost/library/lists', 100), tab('http://localhost/library/pick?from=%2Flibrary%3Fq%3DPortal', 200)] });
+    const animation = transition();
+    ui.events.pagereveal({ type: 'pagereveal', viewTransition: animation });
+    for (const clientX of [150, 250]) {
+        const event = click('', { type: 'click', target: ui.root, detail: 1, clientX, clientY: 210 });
+        await ui.events.click(event);
+        assert.equal(event.prevented, true);
+    }
+    assert.deepEqual(ui.destinations, []);
+    animation.finish();
+    await new Promise(resolve => setImmediate(resolve));
+    ui.paint(); ui.paint();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(ui.destinations, ['http://localhost/library/pick?from=%2Flibrary%3Fq%3DPortal']);
+});
+
+test('retarget recovery excludes non-tab areas, hidden tabs, external links and keyboard clicks', async () => {
+    const ui = setup({ activation: route('/library', '/library/wishlist'), tabs: [
+        tab('http://localhost/library/lists', 100, 0), tab('https://example.com/library/pick', 200), tab('http://localhost/library/pick', 300)] });
+    const animation = transition();
+    ui.events.pagereveal({ type: 'pagereveal', viewTransition: animation });
+    for (const [clientX, clientY, detail] of [[150, 210, 1], [250, 210, 1], [350, 100, 1], [350, 210, 0]]) {
+        const event = click('', { type: 'click', target: ui.root, detail, clientX, clientY });
+        await ui.events.click(event);
+        assert.equal(event.prevented, false);
+    }
+    assert.deepEqual(ui.destinations, []);
+    animation.finish();
 });
 
 test('new tabs and same-room filters retain native link behavior', async () => {

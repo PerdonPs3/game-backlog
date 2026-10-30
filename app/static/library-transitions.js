@@ -24,7 +24,17 @@
     }
     const scriptRoot = new URL('.', document.currentScript.src);
     function tabLink(event) {
-        const link = event.target.closest?.('.section-navigation a');
+        let link = event.target.closest?.('.section-navigation a');
+        // View-transition snapshots retarget pointer clicks to <html>. The
+        // shared toolbar is stationary, so resolve only its visible tab bounds.
+        if (!link && active && event.type === 'click' && event.target === root && event.detail > 0 &&
+            Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
+            link = [...document.querySelectorAll('.library-heading .section-navigation a')].find(candidate => {
+                const box = candidate.getBoundingClientRect();
+                return box.width > 0 && box.height > 0 && event.clientX >= box.left && event.clientX < box.right &&
+                    event.clientY >= box.top && event.clientY < box.bottom;
+            });
+        }
         if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return null;
         return roomIndex(link.href) >= 0 ? link : null;
     }
