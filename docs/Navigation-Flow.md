@@ -11,6 +11,12 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 Settings contains Profile, Privacy, and Data & backups. Contextual return links sit below the header so they remain available on small screens.
 
+The Account menu uses the signed-in owner's private profile photo, falling back
+to their initial when no photo is saved. Viewing another player's profile never
+changes that menu identity or publishes the owner's photo. Profile pages omit
+the redundant header return bar; contextual returns remain on game and editing
+screens. This follow-up is local pending owner review and publication approval.
+
 ## A shared library shell
 
 All games, Wishlist, Lists, and Pick a game share the same `Your library` heading,

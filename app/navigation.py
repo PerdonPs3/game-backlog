@@ -201,6 +201,7 @@ def init_app(app):
                 'navigation_return_label': navigation_return_label,
                 'navigation_origin': navigation_origin, 'navigation_group': group,
                 'library_section': library_section, 'library_total': library_total,
+                'navigation_photo_url': url_for('auth.profile_photo') if normal_owner() and profile['has_photo'] else None,
                 'navigation_initial': ((profile['display_name'] if profile else 'You') or 'You')[:1].upper()}
 
     from flask import render_template, redirect

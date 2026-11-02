@@ -180,3 +180,52 @@ def test_library_tabs_carry_filters_without_accepting_external_or_foreign_origin
         parser = LibraryParser();parser.feed(page.text)
         homes = [attrs['href'] for tag,attrs in parser.tags if tag == 'a' and urlsplit(attrs.get('href','')).path == '/library']
         assert homes and all(home == '/library' for home in homes)
+
+
+def account_menu_avatar(html):
+    import re
+    return re.search(r'<span class="account-menu-avatar"[^>]*>(.*?)</span>', html, re.S)[1]
+
+
+def test_account_avatar_uses_the_signed_in_private_photo_on_other_profiles(accounts):
+    from tests.test_game_reviews import public_author
+    alice = public_author(accounts, 'alice')
+    bob = public_author(accounts, 'bob')
+    with accounts.app_context():
+        db = get_db()
+        db.execute('UPDATE profiles SET avatar_image = ?, share_photo = FALSE WHERE id = ?', (b'ALICE PRIVATE PHOTO', ALICE))
+        db.execute('UPDATE profiles SET avatar_image = ?, share_photo = TRUE WHERE id = ?', (b'BOB PUBLIC PHOTO', BOB))
+    page = alice.get('/players/bob_player')
+    assert page.status_code == 200
+    avatar = account_menu_avatar(page.text)
+    assert 'src="/account/profile/photo"' in avatar
+    assert '/players/bob_player/photo' not in avatar
+    assert alice.get('/account/profile/photo').data == b'ALICE PRIVATE PHOTO'
+    assert bob.get('/account/profile/photo').data == b'BOB PUBLIC PHOTO'
+    assert accounts.test_client().get('/account/profile/photo').status_code == 401
+    assert page.headers['Cache-Control'] == 'private, no-store'
+    # The private photo stays owner-only even though it is visible in their menu.
+    assert accounts.test_client().get('/players/alice_player/photo').status_code == 404
+
+
+def test_account_avatar_falls_back_to_initial_without_a_photo(accounts):
+    alice = sign_in(accounts, 'alice')
+    page = alice.get('/settings/profile')
+    assert page.status_code == 200
+    assert account_menu_avatar(page.text).strip() == 'A'
+    assert '<img' not in account_menu_avatar(page.text)
+
+
+def test_profile_return_bar_is_removed_but_form_returns_remain(accounts):
+    from tests.test_game_reviews import public_author
+    alice = public_author(accounts, 'alice')
+    public_author(accounts, 'bob')
+    for client, path in [(alice, '/players/alice_player'), (alice, '/players/bob_player'),
+                         (accounts.test_client(), '/players/bob_player')]:
+        page = client.get(path)
+        assert page.status_code == 200
+        assert 'class="workspace-return"' not in page.text
+    for path in ['/library/add', '/settings/profile/showcase']:
+        page = alice.get(path)
+        assert page.status_code == 200
+        assert 'class="workspace-return"' in page.text
