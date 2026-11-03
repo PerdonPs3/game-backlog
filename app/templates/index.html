@@ -75,9 +75,9 @@
             </div>
 
             <button id="apply-filters" type="submit">Apply filters</button>
-            <div id="filter-reset" {% if not search_query and not selected_status and not selected_list %}hidden{% endif %}>
-                {% if search_query or selected_status or selected_list %}
-                    <a href="{{ url_for('main.index', sort=selected_sort) if selected_sort != 'newest' else url_for('main.index') }}">Clear filters</a>
+            <div id="filter-reset" {% if not selected_status and not selected_list and selected_sort == 'newest' %}hidden{% endif %}>
+                {% if selected_status or selected_list or selected_sort != 'newest' %}
+                    <a href="{{ url_for('main.index', q=search_query) if search_query else url_for('main.index') }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg><span>Clear filters</span></a>
                 {% endif %}
             </div>
         </form>

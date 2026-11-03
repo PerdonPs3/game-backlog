@@ -1106,6 +1106,9 @@ a:focus-visible {
 }
 
 #filter-reset a {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
     font-size: 0.8rem;
 }
 
