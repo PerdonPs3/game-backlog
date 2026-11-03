@@ -91,6 +91,14 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 .background-options-dialog #profile-background { padding: 0; margin: 0; border: 0; }
 .background-options-dialog #profile-background > legend { display: none; }
 .badge-options { display: grid; gap: .5rem; }
+.badge-category { display: grid; gap: .55rem; --category-color: var(--accent); }
+.badge-category + .badge-category { margin-top: 1rem; }
+.badge-category.category-completion { --category-color: #54b9a4; }
+.badge-category.category-reviews { --category-color: #a48bdb; }
+.badge-category h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .2rem; color: var(--category-color); font-size: .8rem; }
+.badge-category h3 span { color: var(--text-muted); font-size: .65rem; font-weight: 400; }
+html[data-theme="light"] .badge-category.category-completion { --category-color: #216b59; }
+html[data-theme="light"] .badge-category.category-reviews { --category-color: #705199; }
 .badge-options label { display: flex; align-items: center; gap: .65rem; padding: .5rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
 .badge-options .achievement-emblem { width: 56px; height: 56px; flex-basis: 56px; }
 .badge-options label > span:last-child { font-size: .75rem; }

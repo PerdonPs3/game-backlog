@@ -107,7 +107,16 @@
             <dialog class="avatar-crop-dialog badge-selection-dialog" data-badge-dialog aria-labelledby="badge-selection-title">
             <header class="avatar-crop-header"><div><h2 id="badge-selection-title">Choose your badges</h2><p>Select up to three to feature on your profile.</p></div></header>
             <p class="profile-field-hint" data-badge-dialog-count role="status">{{ selected_badges|length }}/3 selected</p>
-            <div class="badge-options">{% for badge in badge_state.earned %}<label><input type="checkbox" name="featured_badges" value="{{ badge.key }}" {% if badge.key in selected_badges %}checked{% endif %}>{{ emblem(badge) }}<span>{{ badge.name }}<small>{{ badge.description }}</small></span></label>{% else %}<p class="profile-field-hint">Add a game to your library to unlock your first badge.</p>{% endfor %}</div>
+            <div class="badge-options">
+                {% for category, title in [('collection', 'Collection'), ('completion', 'Completion'), ('reviews', 'Reviews')] %}
+                {% set category_badges = badge_state.earned|selectattr('category', 'equalto', category)|list %}
+                {% if category_badges %}<section class="badge-category category-{{ category }}" aria-labelledby="badge-category-{{ category }}">
+                    <h3 id="badge-category-{{ category }}">{{ title }} <span>{{ category_badges|length }}</span></h3>
+                    {% for badge in category_badges %}<label><input type="checkbox" name="featured_badges" value="{{ badge.key }}" {% if badge.key in selected_badges %}checked{% endif %}>{{ emblem(badge) }}<span>{{ badge.name }}<small>{{ badge.description }}</small></span></label>{% endfor %}
+                </section>{% endif %}
+                {% endfor %}
+                {% if not badge_state.earned %}<p class="profile-field-hint">Add a game to your library to unlock your first badge.</p>{% endif %}
+            </div>
             <div class="avatar-crop-actions"><span class="profile-field-hint">Save changes to update your profile.</span><button type="button" data-badge-done>Done</button></div>
             </dialog>
             <label><input type="checkbox" name="share_badges" value="yes" {% if (request.form.get('share_badges') == 'yes' if request.form.get('badge_controls') == 'yes' else profile.share_badges) %}checked{% endif %}>Show featured badges on my public profile</label>
