@@ -40,7 +40,7 @@
 {% if connection_owner %}
 <aside class="connection-sidebar">
     <nav class="connection-tabs" aria-label="Connection lists">{% for view, label in views.items() %}<a href="{{ url_for('following.manage', view=view) }}" {% if kind == view %}aria-current="page"{% endif %}>{{ icon(view) }}<span>{{ label }}</span><span class="connection-tab-count">{{ totals[view] }}</span></a>{% endfor %}</nav>
-    <div class="connection-sidebar-links"><a href="{{ url_for('profiles.search') }}">{{ icon('search') }}Find players <span aria-hidden="true">↗</span></a><a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">{{ icon('lock') }}Privacy settings</a></div>
+    <div class="connection-sidebar-links"><a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">{{ icon('lock') }}Privacy settings</a></div>
 </aside>
 {% endif %}
 <section class="connection-content" aria-labelledby="connection-list-title">
@@ -71,7 +71,7 @@
     </div>{% endif %}
     </footer>
 </li>
-{% else %}<li class="connection-empty"><span class="connection-empty-icon">{{ icon(kind) }}</span><h3>{{ 'No follow requests to review.' if kind == 'requests' else 'No pending requests.' if kind == 'sent' else 'No blocked players.' if kind == 'blocked' else 'Your circle starts here.' }}</h3><p>{{ 'New requests will appear here for you to approve.' if kind == 'requests' else 'Find a player and start a connection.' if kind in ['followers','following'] else 'You are all caught up.' }}</p>{% if connection_owner and kind in ['followers','following'] %}<a class="profile-action profile-action-primary" href="{{ url_for('profiles.search') }}">Find players ↗</a>{% endif %}</li>{% endfor %}
+{% else %}<li class="connection-empty"><span class="connection-empty-icon">{{ icon(kind) }}</span><h3>{{ 'No follow requests to review.' if kind == 'requests' else 'No pending requests.' if kind == 'sent' else 'No blocked players.' if kind == 'blocked' else 'Your circle starts here.' }}</h3><p>{{ 'New requests will appear here for you to approve.' if kind == 'requests' else 'Find a player and start a connection.' if kind in ['followers','following'] else 'You are all caught up.' }}</p></li>{% endfor %}
 </ul>
 {% if page > 1 or has_next %}<nav class="profile-review-pages" aria-label="Connection pages">{% if page > 1 %}<a href="{{ url_for('following.manage', view=kind, page=page-1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page-1) }}">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if has_next %}<a href="{{ url_for('following.manage', view=kind, page=page+1) if connection_owner else url_for('following.public_list', username=username, kind=kind, page=page+1) }}">Next →</a>{% endif %}</nav>{% endif %}
 </section></div>

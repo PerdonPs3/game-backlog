@@ -17,6 +17,35 @@ changes that menu identity or publishes the owner's photo. Profile pages omit
 the redundant header return bar; contextual returns remain on game and editing
 screens. This follow-up is local pending owner review and publication approval.
 
+## Flow clarity review — 2026-11-02
+
+Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
+
+- Catalog lookup has one input per lookup screen. Search games and Add game
+  use their existing autocomplete; the duplicate global header search is omitted
+  on those two screens. Other screens retain the header's Search all games.
+- Library and wishlist searches stay scoped to saved entries. Library's input
+  explicitly says Search your library; it does not compete with catalog search.
+- Discover offers For you, Popular picks, and Search games. The hero no longer
+  repeats the catalog-search link, and Search games has its own heading instead
+  of inheriting the recommendations headline.
+- Library section tabs belong to the four library rooms. Add/Edit and other
+  child forms keep their contextual return and Cancel rather than a second row
+  of room navigation above the form.
+- Connections keeps one contextual Find players action in the list heading,
+  alongside the main/section navigation, instead of repeating it in the sidebar
+  and empty state. Exact-username requests remain a separate, useful action.
+- Private notes has one visible section title and a visually hidden form label.
+
+Regression checks cover search → canonical game page → Add game → return,
+and filtered library → Edit → Save/Cancel, together with existing wishlist
+transfer, authenticated/anonymous views, old aliases, blocks, and owner isolation.
+The browser review used fictional local data and live public catalog metadata:
+search → Portal 2 → Edit → Cancel → search retained the original query and
+progress anchor. Search was checked at desktop and 390 px in both themes;
+Add game has one catalog input and no room-tab row. No shared database changes,
+new routes, migrations, or publication are part of this follow-up.
+
 ## A shared library shell
 
 All games, Wishlist, Lists, and Pick a game share the same `Your library` heading,

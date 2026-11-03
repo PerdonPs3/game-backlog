@@ -1,4 +1,4 @@
-{% if navigation_group == 'library' and (account_user or not accounts_enabled) %}
+{% if library_section and (account_user or not accounts_enabled) %}
 <nav class="section-navigation" aria-label="Library sections">
     <a href="{{ library_home_url() if library_section else url_for('main.index') }}" {% if request.endpoint == 'main.index' %}aria-current="page"{% endif %}>All games</a>
     {% if account_user %}<a href="{{ library_section_url('wishlist.index') if library_section else url_for('wishlist.index') }}" {% if request.endpoint == 'wishlist.index' %}aria-current="page"{% endif %}>Wishlist</a>{% endif %}
