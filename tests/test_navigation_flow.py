@@ -216,7 +216,7 @@ def test_account_avatar_falls_back_to_initial_without_a_photo(accounts):
     assert '<img' not in account_menu_avatar(page.text)
 
 
-def test_profile_return_bar_is_removed_but_form_returns_remain(accounts):
+def test_profiles_and_add_game_omit_redundant_return_bar(accounts):
     from tests.test_game_reviews import public_author
     alice = public_author(accounts, 'alice')
     public_author(accounts, 'bob')
@@ -225,10 +225,12 @@ def test_profile_return_bar_is_removed_but_form_returns_remain(accounts):
         page = client.get(path)
         assert page.status_code == 200
         assert 'class="workspace-return"' not in page.text
-    for path in ['/library/add', '/settings/profile/showcase']:
-        page = alice.get(path)
-        assert page.status_code == 200
-        assert 'class="workspace-return"' in page.text
+    page = alice.get('/library/add')
+    assert page.status_code == 200
+    assert 'class="workspace-return"' not in page.text
+    page = alice.get('/settings/profile/showcase')
+    assert page.status_code == 200
+    assert 'class="workspace-return"' in page.text
 
 
 class FlowElements:

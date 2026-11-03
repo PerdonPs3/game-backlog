@@ -29,9 +29,9 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
 - Discover offers For you, Popular picks, and Search games. The hero no longer
   repeats the catalog-search link, and Search games has its own heading instead
   of inheriting the recommendations headline.
-- Library section tabs belong to the four library rooms. Add/Edit and other
-  child forms keep their contextual return and Cancel rather than a second row
-  of room navigation above the form.
+- Library section tabs belong to the four library rooms. Add game uses the main
+  Library link and Cancel without a redundant header return bar. Editing and
+  other child forms retain contextual returns without a second row of room tabs.
 - Connections keeps one contextual Find players action in the list heading,
   alongside the main/section navigation, instead of repeating it in the sidebar
   and empty state. Exact-username requests remain a separate, useful action.
