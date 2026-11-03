@@ -47,7 +47,7 @@
                     <p id="catalog-message" class="catalog-message" role="status">{% if selected_game %}Choose a platform.{% endif %}</p>
                 </div>
 
-                <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+                <a class="entry-catalog-link" href="{{ url_for('explore.index') }}">Explore the full catalog <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></a>
             </section>
             {% include '_game_entry_fields.html' %}
         </form>
