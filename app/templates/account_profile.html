@@ -84,9 +84,18 @@
             <p class="profile-field-hint">Choose a preset or upload your own image. Public profiles can share this background with visitors.</p>
             {% set background_choice = request.form.get('background_key', profile.background_key) %}
             <div class="background-options">{% for key, label in background_presets %}<label class="background-preset background-{{ key }}"><input type="radio" name="background_key" value="{{ key }}" {% if background_choice == key %}checked{% endif %}>{{ label }}</label>{% endfor %}</div>
-            {% if profile.has_background %}<label><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label><img class="background-editor-preview" src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
+            <label data-background-custom{% if not profile.has_background %} hidden{% endif %}><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label>
+            {% if profile.has_background %}<img class="background-editor-preview" data-background-saved src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
             <label for="profile-background-file">Upload background</label><input id="profile-background-file" type="file" name="background" accept="image/jpeg,image/png,image/webp" aria-describedby="background-hint">
-            <p class="profile-field-hint" id="background-hint">Still JPG, PNG, or WebP · Up to 2 MB. Wide images work best; the center is cropped to fit. Uploading selects Custom.</p>
+            <p class="profile-field-hint" id="background-hint">Still JPG, PNG, or WebP · Up to 2 MB. Preview and adjust the crop before saving.</p>
+            <input type="hidden" name="background_crop" value="">
+            <div class="background-crop-editor" data-background-editor hidden>
+                <p class="profile-field-hint" id="background-crop-help">Drag to position your background, or focus the preview and use the arrow keys. The profile layout may crop the edges.</p>
+                <canvas class="background-crop-canvas" data-background-canvas width="800" height="300" tabindex="0" role="img" aria-label="Background crop preview" aria-describedby="background-crop-help"></canvas>
+                <div class="background-crop-tools"><label for="background-zoom">Zoom<input id="background-zoom" data-background-zoom type="range" min="1" max="4" step="0.01" value="1"></label><button type="button" class="secondary-button" data-background-center>Center</button></div>
+                <p class="profile-field-hint">Preview only · Save changes to apply.</p>
+            </div>
+            <p class="profile-field-hint" data-background-status role="status"></p>
             <label><input type="checkbox" name="share_background" value="yes" {% if (request.form.get('share_background') == 'yes' if request.form.get('background_controls') == 'yes' else profile.share_background) %}checked{% endif %}>Show background on my public profile</label>
         </fieldset>
         <fieldset class="profile-customization" id="profile-badges"><legend>Featured badges</legend>
@@ -139,4 +148,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='background-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}

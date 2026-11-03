@@ -12,6 +12,9 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 Settings opens the profile editor, including its privacy controls, without a
 duplicate tab bar. Data & backups is available in the Account menu. Contextual
 return links sit below the header so they remain available on small screens.
+Uploaded profile backgrounds show an adjustable banner preview before saving.
+Dragging, arrow keys, zoom, and centering update the crop; the server validates
+and applies it when Save changes is submitted. Presets discard pending uploads.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never
