@@ -26,6 +26,10 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
   on those two screens. Other screens retain the header's Search all games.
 - Library and wishlist searches stay scoped to saved entries. Library's input
   explicitly says Search your library; it does not compete with catalog search.
+- Wishlist filters saved wishes as the player types, preserving focus and scroll.
+  Search is hidden during live filtering and remains available without JavaScript
+  or after a failed request. New queries reset pagination; stale responses cannot
+  replace newer results. Public wishlists use the same search behavior.
 - Discover offers For you, Popular picks, and Search games. The hero no longer
   repeats the catalog-search link, and Search games has its own heading instead
   of inheriting the recommendations headline.

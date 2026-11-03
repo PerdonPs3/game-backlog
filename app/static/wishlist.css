@@ -15,6 +15,8 @@
 .wishlist-search input { min-width: 0; flex: 1; }
 .wishlist-search button { font-size: .8rem; }
 .wishlist-search a { font-size: .75rem; color: var(--accent); }
+#wishlist-search-status { min-height: 1.2em; margin: 0 0 .5rem; color: var(--text-muted); font-size: .75rem; }
+#wishlist-results { min-width: 0; }
 .wishlist-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.1rem; }
 .wishlist-card { display: flex; flex-direction: column; min-width: 0; position: relative; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--color-field); transition: border-color .2s, transform .2s, box-shadow .2s; }
 .wishlist-card:hover, .wishlist-card:focus-within { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 26px #0002; }
