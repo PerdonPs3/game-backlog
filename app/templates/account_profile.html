@@ -141,8 +141,7 @@
             <p class="privacy-footnote">Your email and full library stay private. Reviews appear only when you publish them.</p>
         </fieldset>
         <footer class="profile-save-bar">
-            <p class="profile-field-hint">Your sharing choices apply when you save.</p>
-            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ profile_url() }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
+            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }}</button>{% if not is_setup %}<a href="{{ profile_url() }}">View profile</a>{% endif %}</div>
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{% endif %}</p>
         </footer>
         <dialog class="avatar-crop-dialog background-options-dialog" data-background-options id="background-options-dialog" aria-labelledby="background-options-title">

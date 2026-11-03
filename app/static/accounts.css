@@ -81,10 +81,13 @@
 .profile-bio-footer { display: flex; justify-content: space-between; gap: .75rem; font-size: .6rem; line-height: 1.5; color: var(--text-muted); margin-top: .4rem; }
 .profile-bio-footer > span:last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .profile-save-bar { padding-top: 1.25rem; border-top: 1px solid var(--profile-line); }
-.profile-save-actions { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
-.profile-save-actions button { margin: 0; padding: .8rem 1.25rem; display: inline-flex; justify-content: center; gap: 1.75rem; align-items: center; font-size: .8rem; }
-.profile-save-actions a { color: var(--text-muted); font-size: .75rem; text-decoration: none; }
-.profile-save-actions a:hover { color: var(--accent); }
+.profile-save-actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.profile-save-actions button { min-height: 44px; min-width: 140px; margin: 0; padding: .75rem 1.1rem; display: inline-flex; justify-content: center; align-items: center; font-size: .8rem; border-radius: 9px; }
+.profile-save-actions a { display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: .75rem 1.1rem; border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-size: .8rem; line-height: normal; text-decoration: none; }
+.profile-save-actions a:hover { color: var(--accent); border-color: var(--accent); }
+.profile-save-actions a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.profile-save-bar .profile-feedback:empty { display: none; }
+@media(max-width:480px) { .profile-save-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-save-actions :is(button, a) { min-width: 0; width: 100%; padding-inline: .6rem; } }
 .profile-save-actions button:disabled { opacity: .7; cursor: wait; }
 .profile-feedback { margin: .9rem 0 0; color: var(--text-muted); font-size: .7rem; line-height: 1.6; scroll-margin-block: 2rem; }
 .profile-feedback.is-saved { padding: .65rem .8rem; border: 1px solid color-mix(in srgb, var(--profile-success) 35%, transparent); border-radius: 9px; color: var(--profile-success); background: color-mix(in srgb, var(--profile-success) 7%, transparent); }
