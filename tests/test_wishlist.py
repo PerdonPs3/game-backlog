@@ -131,6 +131,11 @@ def test_public_wishlist_respects_private_option_and_profile_visibility(accounts
     assert visitor.get(path).status_code == 404
     assert 'profile-wishlist-link' not in visitor.get('/players/alice_player').get_data(as_text=True)
     publish(alice)
+    managed = alice.get('/library/wishlist').get_data(as_text=True)
+    assert 'Public link' not in managed
+    assert '>Privacy</a>' in managed
+    owner_profile = alice.get('/players/alice_player').get_data(as_text=True)
+    assert 'href="/library/wishlist">Wishlist</a>' in owner_profile
     response = visitor.get(path)
     html = response.get_data(as_text=True)
     assert response.status_code == 200 and 'Portal 2' in html
