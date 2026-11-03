@@ -1,6 +1,8 @@
 .workspace-site-header .workspace-nav { flex: 1 1 auto; }
 .account-navigation { display: flex; align-items: center; gap: .4rem; }
 .account-navigation > a { font-size: .82rem; text-decoration: none; color: var(--text-muted); }
+.account-navigation > a:has(.navigation-icon) { display: inline-flex; align-items: center; gap: .4rem; }
+.account-navigation .navigation-icon { width: 17px; height: 17px; flex: 0 0 17px; }
 .account-navigation > a[aria-current] { background: color-mix(in srgb,var(--accent) 10%,transparent); color: var(--accent); }
 .workspace-return { display: flex; gap: .6rem; padding: .55rem 1.5rem; border-top: 1px solid color-mix(in srgb,var(--border) 50%,transparent); font-size: .75rem; }
 .workspace-return a { color: var(--text-muted); text-decoration: none; }
