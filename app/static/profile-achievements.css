@@ -96,6 +96,16 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 .badge-options label > span:last-child { font-size: .75rem; }
 .badge-options label small { display: block; font-size: .6rem; color: var(--text-muted); margin-top: .25rem; }
 .badge-options label:has(input:checked) { background: var(--profile-tint); border-color: var(--accent); }
+.badge-editor-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-block: 1rem; color: var(--text-muted); font-size: .75rem; }
+.badge-editor-heading button { padding: .55rem .7rem; font-size: .75rem; }
+.badge-editor-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+.badge-summary-card { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 0; padding: .8rem .35rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-field); text-align: center; }
+.badge-summary-card .achievement-emblem { width: clamp(42px, 14vw, 62px); height: clamp(42px, 14vw, 62px); flex-basis: auto; }
+.badge-editor-summary > .profile-field-hint { grid-column: 1 / -1; }
+.badge-summary-card > span:last-child { font-size: .7rem; overflow-wrap: anywhere; }
+.badge-selection-dialog { width: min(620px, calc(100vw - 2rem)); }
+.badge-selection-dialog .badge-options { max-height: min(50dvh, 420px); overflow-y: auto; padding: .15rem; }
+.badge-options label:has(input:disabled) { opacity: .5; cursor: default; }
 .profile-customization :is(a, input, summary):focus-visible, .profile-background-action:focus-visible, .achievement-all > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 @media (max-width: 1000px) {
     .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .85fr); padding: 1.5rem; gap: 1.5rem; }

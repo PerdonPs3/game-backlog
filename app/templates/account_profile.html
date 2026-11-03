@@ -100,10 +100,17 @@
         </fieldset>
         <fieldset class="profile-customization" id="profile-badges"><legend>Featured badges</legend>
             <input type="hidden" name="badge_controls" value="yes">
-            <p class="profile-field-hint">Choose up to three earned badges. Milestones remain yours after you remove a game. Public badges reveal the milestones you earned.</p>
+            <p class="profile-field-hint">Show up to three badges on your profile. The rest stay in your collection.</p>
             {% set selected_badges = request.form.getlist('featured_badges') if request.form.get('badge_controls') == 'yes' else badge_state.featured|map(attribute='key')|list %}
+            <div class="badge-editor-heading"><span>{{ badge_state.earned|length }} earned · <span data-badge-selection-count>{{ selected_badges|length }}/3 featured</span></span>{% if badge_state.earned %}<button type="button" class="secondary-button" data-badge-choose>Choose badges</button>{% endif %}</div>
+            <div class="badge-editor-summary" data-badge-summary aria-label="Featured badge preview">{% for badge in badge_state.earned if badge.key in selected_badges %}<div class="badge-summary-card">{{ emblem(badge) }}<span>{{ badge.name }}</span></div>{% else %}<p class="profile-field-hint">{{ 'Choose badges to feature here.' if badge_state.earned else 'Add a game to unlock your first badge.' }}</p>{% endfor %}</div>
+            <dialog class="avatar-crop-dialog badge-selection-dialog" data-badge-dialog aria-labelledby="badge-selection-title">
+            <header class="avatar-crop-header"><div><h2 id="badge-selection-title">Choose your badges</h2><p>Select up to three to feature on your profile.</p></div></header>
+            <p class="profile-field-hint" data-badge-dialog-count role="status">{{ selected_badges|length }}/3 selected</p>
             <div class="badge-options">{% for badge in badge_state.earned %}<label><input type="checkbox" name="featured_badges" value="{{ badge.key }}" {% if badge.key in selected_badges %}checked{% endif %}>{{ emblem(badge) }}<span>{{ badge.name }}<small>{{ badge.description }}</small></span></label>{% else %}<p class="profile-field-hint">Add a game to your library to unlock your first badge.</p>{% endfor %}</div>
-            <label><input type="checkbox" name="share_badges" value="yes" {% if (request.form.get('share_badges') == 'yes' if request.form.get('badge_controls') == 'yes' else profile.share_badges) %}checked{% endif %}>Show earned badges on my public profile</label>
+            <div class="avatar-crop-actions"><span class="profile-field-hint">Save changes to update your profile.</span><button type="button" data-badge-done>Done</button></div>
+            </dialog>
+            <label><input type="checkbox" name="share_badges" value="yes" {% if (request.form.get('share_badges') == 'yes' if request.form.get('badge_controls') == 'yes' else profile.share_badges) %}checked{% endif %}>Show featured badges on my public profile</label>
         </fieldset>
         {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_sharing') == 'yes' %}
         {% set public_selected = request.form.get('is_public') == 'yes' if request.method == 'POST' and (privacy_submitted or 'is_public' in request.form) else (true if is_setup else profile.is_public) %}

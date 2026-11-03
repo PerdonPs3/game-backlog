@@ -25,6 +25,9 @@ Always-visible Edit background and photo-pencil controls live on the player card
 Edit background opens preset, upload, and visibility options in a dialog; choosing
 an upload opens the crop dialog. The profile's Change background anchor opens
 these options directly. All controls remain in the profile form for one save.
+Profiles expose at most three featured badges and summarize the total earned.
+The editor shows the same compact selection; Choose badges opens the earned
+collection in a scrollable dialog and prevents selecting a fourth badge.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never
