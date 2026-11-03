@@ -7,6 +7,4 @@
 </nav>
 {% elif navigation_group == 'community' %}
 <nav class="section-navigation" aria-label="Community sections"><a href="{{ url_for('profiles.search') }}" {% if request.endpoint == 'profiles.search' %}aria-current="page"{% endif %}>Find players</a>{% if account_user %}<a href="{{ url_for('following.manage') }}" {% if request.endpoint == 'following.manage' %}aria-current="page"{% endif %}>Connections</a>{% endif %}</nav>
-{% elif navigation_group == 'settings' %}
-<nav class="section-navigation" aria-label="Settings sections"><a href="{{ url_for('auth.profile') }}" {% if request.endpoint in ['auth.profile','auth.edit_showcase'] %}aria-current="page"{% endif %}>Profile</a><a href="{{ url_for('auth.profile', _anchor='profile-privacy') }}">Privacy</a><a href="{{ url_for('navigation.data') }}" {% if request.endpoint in ['navigation.data','main.import_backup'] %}aria-current="page"{% endif %}>Data &amp; backups</a></nav>
 {% endif %}

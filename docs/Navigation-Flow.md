@@ -9,7 +9,9 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 - **Community**: Find players and Connections.
 - **Account menu**: My profile, Settings, Data & backups, and Sign out.
 
-Settings contains Profile, Privacy, and Data & backups. Contextual return links sit below the header so they remain available on small screens.
+Settings opens the profile editor, including its privacy controls, without a
+duplicate tab bar. Data & backups is available in the Account menu. Contextual
+return links sit below the header so they remain available on small screens.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never

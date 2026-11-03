@@ -22,7 +22,7 @@ def test_library_and_profiles_have_stable_owner_scoped_addresses(accounts):
     seed(accounts,ALICE)
     page = alice.get('/library')
     assert page.status_code == 200
-    assert 'Library</a>' in page.text and 'Community</a>' in page.text
+    assert '<span>Library</span>' in page.text and '<span>Community</span>' in page.text
     assert '/library/wishlist' in page.text and '/library/lists' in page.text
     assert 'data-game-details' not in page.text and 'game-details-dialog' not in page.text
     assert '/games/123/portal-2' in page.text
@@ -211,6 +211,8 @@ def test_account_avatar_uses_the_signed_in_private_photo_on_other_profiles(accou
 def test_account_avatar_falls_back_to_initial_without_a_photo(accounts):
     alice = sign_in(accounts, 'alice')
     page = alice.get('/settings/profile')
+    assert 'aria-label="Settings sections"' not in page.text
+    assert page.text.count('href="/settings/data"') == 1
     assert page.status_code == 200
     assert account_menu_avatar(page.text).strip() == 'A'
     assert '<img' not in account_menu_avatar(page.text)
