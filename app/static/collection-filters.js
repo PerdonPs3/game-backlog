@@ -24,7 +24,7 @@
         controller?.abort();
         const currentRevision = ++revision;
         collection.setAttribute("aria-busy", "true");
-        message.textContent = "Updating your collection...";
+        message.textContent = "";
         timer = setTimeout(() => updateCollection(currentRevision), delay);
     }
 

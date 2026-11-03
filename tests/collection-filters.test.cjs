@@ -115,6 +115,8 @@ test("typing only a title does not expose Clear filters", async () => {
     const ui = setup();
     ui["title-search"].value = "ca";
     ui["title-search"].fire("input");
+    assert.equal(ui["filter-message"].textContent, "");
+    assert.equal(ui["game-collection"].attributes["aria-busy"], "true");
     const pending = ui.run();
     ui.requests[0].reply("Matching games", 2, true, 30);
     await pending;
