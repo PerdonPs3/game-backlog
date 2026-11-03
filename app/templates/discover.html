@@ -6,13 +6,13 @@
 {% block workspace_return %}<a href="{{ url_for('main.index') }}">← Your library</a>{% endblock %}
 {% block workspace_backdrop %}<div class="discover-courtyard" aria-hidden="true"><img src="{{ url_for('static', filename='images/backgrounds/discover-courtyard-night.webp') }}" alt="" width="1536" height="1024" decoding="async"><img class="discover-day" src="{{ url_for('static', filename='images/backgrounds/discover-courtyard-day.webp') }}" alt="" width="1536" height="1024" decoding="async"></div>{% endblock %}
 {% block workspace_hero %}
-<header class="discover-hero"><div><h1>Discover your<br><em>next adventure.</em></h1></div><a class="discover-explore" href="{{ url_for('explore.index') }}">Search the catalog <span aria-hidden="true">↗</span></a></header>
+<header class="discover-hero"><div><h1>{% block discover_heading %}Discover your<br><em>next adventure.</em>{% endblock %}</h1></div></header>
 {% endblock %}
 {% block panel_label %}Game recommendations{% endblock %}
 {% block panel %}
 <section id="discover-content" data-discover>
     <form class="discover-filters" action="{{ url_for('discovery.index') }}" method="get" data-discover-filters>
-        <div class="discover-modes"><label><input type="radio" name="mode" value="for-you" {% if mode == 'for-you' %}checked{% endif %}><span>✧ For you</span></label><label><input type="radio" name="mode" value="popular" {% if mode == 'popular' %}checked{% endif %}><span>Popular picks</span></label><a class="discover-browse-tab" href="{{ url_for('explore.index') }}">Browse &amp; search ↗</a></div>
+        <div class="discover-modes"><label><input type="radio" name="mode" value="for-you" {% if mode == 'for-you' %}checked{% endif %}><span>✧ For you</span></label><label><input type="radio" name="mode" value="popular" {% if mode == 'popular' %}checked{% endif %}><span>Popular picks</span></label><a class="discover-browse-tab" href="{{ url_for('explore.index') }}">Search games ↗</a></div>
         <label class="discover-select">Genre<select name="genre" aria-label="Genre"><option value="">All genres</option>{% for item in genres %}<option value="{{ item }}" {% if genre == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
         <label class="discover-select">Platform<select name="platform" aria-label="Platform"><option value="">All platforms</option>{% for id, name in platforms.items() %}<option value="{{ id }}" {% if platform == id %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
         <button class="discover-apply" type="submit">Find adventures <span aria-hidden="true">→</span></button>

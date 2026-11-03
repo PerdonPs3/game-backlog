@@ -5,15 +5,15 @@
         <nav class="workspace-nav" aria-label="Site navigation">
             <a class="workspace-brand" href="{{ url_for('main.index') if account_user else url_for('main.welcome') }}"><span>Vestigium</span></a>
         </nav>
-        {% if request.endpoint != 'main.welcome' %}
+        {% if request.endpoint not in ['main.welcome', 'explore.index', 'main.create'] %}
         <form class="header-search" action="{{ url_for('explore.index') }}" method="get" role="search" aria-label="Search the game catalog">
-            <input type="search" name="q" placeholder="Search games…" aria-label="Search games" minlength="2" maxlength="200" spellcheck="false" autocapitalize="none" autocorrect="off" required>
+            <input type="search" name="q" placeholder="Search all games…" aria-label="Search all games" minlength="2" maxlength="200" spellcheck="false" autocapitalize="none" autocorrect="off" required>
             <button type="submit" aria-label="Search catalog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
         </form>
         {% endif %}
         <div class="workspace-header-actions">{% include '_account_nav.html' %}</div>
     </div>
-    {% if request.endpoint in ['explore.game','main.create','main.edit','main.delete','main.game_details','main.edit_list','main.delete_list','auth.edit_showcase','main.import_backup','wishlist.public','following.public_list','profiles.public_profile'] %}<div class="workspace-return">{{ caller() }}</div>{% endif %}
+    {% if request.endpoint in ['explore.game','main.edit','main.delete','main.game_details','main.edit_list','main.delete_list','auth.edit_showcase','main.import_backup','wishlist.public','following.public_list'] %}<div class="workspace-return">{{ caller() }}</div>{% endif %}
 </header>
 {% endmacro %}
 

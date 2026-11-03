@@ -34,7 +34,11 @@ def test_secondary_pages_share_design_accessible_heading_and_navigation(client, 
     else:
         assert 'class="hero-emblem" data-hero-logo aria-hidden="true"' in html
     assert "cursor-glow.js" in html
-    assert ("Back to collection" if page == "pick" else "Back to Library") in html
+    if page == 'create':
+        assert 'class="workspace-return"' not in html
+        assert '>Cancel</a>' in html
+    else:
+        assert ("Back to collection" if page == "pick" else "Back to Library") in html
     if page != "pick":
         assert 'name="csrf_token"' in html
 

@@ -402,8 +402,9 @@ def profile():
                 if request.form.get('profile_sharing') == 'yes':
                     from app.public_profiles import update_sharing
                     update_sharing(db, g.user['id'], request.form)
-                    db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
-                               (request.form.get('share_photo') == 'yes', g.user['id']))
+                    if request.form.get('profile_privacy_controls') != 'yes':
+                        db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
+                                   (request.form.get('share_photo') == 'yes', g.user['id']))
                 save_background(db, g.user['id'], background_selection)
                 if request.form.get('profile_sharing') != 'yes':
                     from app.wishlist import save_privacy

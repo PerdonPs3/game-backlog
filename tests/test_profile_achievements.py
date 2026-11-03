@@ -102,11 +102,16 @@ def test_review_milestones_exclude_library_notes_and_moderated_reviews(accounts)
 def test_featured_badges_are_earned_bounded_private_and_legacy_forms_preserve_them(accounts):
     alice = sign_in(accounts, 'alice')
     seed(accounts)
+    initial = alice.get('/settings/profile').get_data(as_text=True)
+    assert '0/3 featured' in initial
+    assert initial.count('aria-label="Add badge"') == 3
     publish_profile(alice)
     payload = {'display_name': 'Alice', 'badge_controls': 'yes', 'featured_badges': ['archivist', 'completionist'], 'share_badges': 'yes'}
     assert submit(alice, '/settings/profile', payload).status_code == 303
     public = accounts.test_client().get('/players/alice_player').get_data(as_text=True)
     assert 'Featured · 2/3' in public and 'achievement-progress' not in public
+    assert public.count('class="achievement-card category-') == 2
+    assert 'class="achievement-gallery"' not in public
     assert 'data-achievement-notice' not in public and 'PRIVATE NOTE' not in public
     for selection in (['legend'], ['newcomer'] * 2, ['newcomer', 'collector', 'archivist', 'finisher']):
         bad = submit(alice, '/settings/profile', {**payload, 'display_name': 'Rejected', 'featured_badges': selection})

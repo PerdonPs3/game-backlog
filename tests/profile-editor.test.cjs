@@ -21,7 +21,7 @@ function setup(saved = false, savedPhoto = null) {
     const name = { value: 'Alice' }, bio = { value: '' }, selected = { value: 'controller' };
     const feedback = { textContent: 'Changes saved.', dataset: saved ? { saved: 'true' } : {},
         classList: { remove(value) { feedback.removedClass = value; } }, focus() { feedback.focused = true; } };
-    const save = { textContent: 'Save changes ↗', disabled: false };
+    const save = { textContent: 'Save changes', disabled: false };
     const avatar = { style: { setProperty(key, value) { iconAttributes[key] = value; } } };
     const previewName = {}, previewBio = {}, counter = {};
     const fields = { '[name="display_name"]': name, '[name="bio"]': bio, '[name="avatar"]:checked': selected,
@@ -64,7 +64,7 @@ test('shows saving and prevents duplicate submission until the browser navigates
     assert.equal(prevented, 1);
     ui.windowEvents.pageshow();
     assert.equal(ui.save.disabled, false);
-    assert.equal(ui.save.textContent, 'Save changes ↗');
+    assert.equal(ui.save.textContent, 'Save changes');
     assert.equal(ui.attributes['aria-busy'], undefined);
     assert.equal(ui.feedback.textContent, 'You have unsaved changes.');
 });

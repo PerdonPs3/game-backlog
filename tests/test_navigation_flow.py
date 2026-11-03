@@ -22,7 +22,7 @@ def test_library_and_profiles_have_stable_owner_scoped_addresses(accounts):
     seed(accounts,ALICE)
     page = alice.get('/library')
     assert page.status_code == 200
-    assert 'Library</a>' in page.text and 'Community</a>' in page.text
+    assert '<span>Library</span>' in page.text and '<span>Community</span>' in page.text
     assert '/library/wishlist' in page.text and '/library/lists' in page.text
     assert 'data-game-details' not in page.text and 'game-details-dialog' not in page.text
     assert '/games/123/portal-2' in page.text
@@ -180,3 +180,144 @@ def test_library_tabs_carry_filters_without_accepting_external_or_foreign_origin
         parser = LibraryParser();parser.feed(page.text)
         homes = [attrs['href'] for tag,attrs in parser.tags if tag == 'a' and urlsplit(attrs.get('href','')).path == '/library']
         assert homes and all(home == '/library' for home in homes)
+
+
+def account_menu_avatar(html):
+    import re
+    return re.search(r'<span class="account-menu-avatar"[^>]*>(.*?)</span>', html, re.S)[1]
+
+
+def test_account_avatar_uses_the_signed_in_private_photo_on_other_profiles(accounts):
+    from tests.test_game_reviews import public_author
+    alice = public_author(accounts, 'alice')
+    bob = public_author(accounts, 'bob')
+    with accounts.app_context():
+        db = get_db()
+        db.execute('UPDATE profiles SET avatar_image = ?, share_photo = FALSE WHERE id = ?', (b'ALICE PRIVATE PHOTO', ALICE))
+        db.execute('UPDATE profiles SET avatar_image = ?, share_photo = TRUE WHERE id = ?', (b'BOB PUBLIC PHOTO', BOB))
+    page = alice.get('/players/bob_player')
+    assert page.status_code == 200
+    avatar = account_menu_avatar(page.text)
+    assert 'src="/account/profile/photo"' in avatar
+    assert '/players/bob_player/photo' not in avatar
+    assert alice.get('/account/profile/photo').data == b'ALICE PRIVATE PHOTO'
+    assert bob.get('/account/profile/photo').data == b'BOB PUBLIC PHOTO'
+    assert accounts.test_client().get('/account/profile/photo').status_code == 401
+    assert page.headers['Cache-Control'] == 'private, no-store'
+    # The private photo stays owner-only even though it is visible in their menu.
+    assert accounts.test_client().get('/players/alice_player/photo').status_code == 404
+
+
+def test_account_avatar_falls_back_to_initial_without_a_photo(accounts):
+    alice = sign_in(accounts, 'alice')
+    page = alice.get('/settings/profile')
+    assert 'aria-label="Settings sections"' not in page.text
+    assert page.text.count('href="/settings/data"') == 1
+    assert page.status_code == 200
+    assert account_menu_avatar(page.text).strip() == 'A'
+    assert '<img' not in account_menu_avatar(page.text)
+
+
+def test_profiles_and_add_game_omit_redundant_return_bar(accounts):
+    from tests.test_game_reviews import public_author
+    alice = public_author(accounts, 'alice')
+    public_author(accounts, 'bob')
+    for client, path in [(alice, '/players/alice_player'), (alice, '/players/bob_player'),
+                         (accounts.test_client(), '/players/bob_player')]:
+        page = client.get(path)
+        assert page.status_code == 200
+        assert 'class="workspace-return"' not in page.text
+    page = alice.get('/library/add')
+    assert page.status_code == 200
+    assert 'class="workspace-return"' not in page.text
+    page = alice.get('/settings/profile/showcase')
+    assert page.status_code == 200
+    assert 'class="workspace-return"' in page.text
+
+
+class FlowElements:
+    def __init__(self, html):
+        from html.parser import HTMLParser
+        self.elements = []
+        target = self.elements
+        class Parser(HTMLParser):
+            def handle_starttag(self, tag, attrs):
+                target.append((tag, dict(attrs)))
+        Parser().feed(html)
+
+    def matching(self, tag, **attrs):
+        return [item for kind, item in self.elements if kind == tag and all(item.get(key) == value for key, value in attrs.items())]
+
+
+def test_catalog_lookup_pages_offer_one_search_without_losing_autocomplete(accounts):
+    fake_catalog(accounts)
+    alice = sign_in(accounts, 'alice')
+    for client in (alice, accounts.test_client()):
+        page = client.get('/discover/browse?q=Portal&content=all')
+        assert page.status_code == 200
+        parsed = FlowElements(page.text)
+        assert len(parsed.matching('input', id='catalog-query', role='combobox')) == 1
+        assert len(parsed.matching('form', role='search')) == 1
+        assert 'selected' in parsed.matching('option', value='all')[0]
+        assert 'Discover your<br>' not in page.text
+        assert 'Search <em>games.</em>' in page.text
+        assert '/games/123/portal-2?' in page.text
+    create = alice.get('/library/add')
+    assert create.status_code == 200
+    parsed = FlowElements(create.text)
+    assert len(parsed.matching('input', id='title', role='combobox')) == 1
+    assert not parsed.matching('form', role='search')
+    assert not parsed.matching('nav', **{'aria-label': 'Library sections'})
+    assert 'data-details-url=' in create.text
+    assert 'class="visually-hidden">Private notes</label>' in create.text
+
+
+def test_library_and_wishlist_search_scopes_are_distinct_from_catalog(accounts):
+    fake_catalog(accounts)
+    alice = sign_in(accounts, 'alice')
+    seed(accounts, ALICE)
+    page = alice.get('/library')
+    parsed = FlowElements(page.text)
+    assert len(parsed.matching('input', **{'aria-label': 'Search all games'})) == 1
+    assert len(parsed.matching('input', id='title-search', placeholder='Search your library…')) == 1
+    assert parsed.matching('form', **{'aria-label': 'Search the game catalog'})[0]['action'] == '/discover/browse'
+    assert parsed.matching('input', id='title-search')[0]['name'] == 'q'
+
+
+def test_connections_has_one_contextual_find_players_action(accounts):
+    from tests.test_game_reviews import public_author
+    alice = public_author(accounts, 'alice')
+    page = alice.get('/community/connections')
+    assert page.status_code == 200
+    parsed = FlowElements(page.text)
+    links = parsed.matching('a', href='/community/players')
+    # Main Community entry, section tab, and one contextual action.
+    assert len(links) == 3
+    assert len([link for link in links if link.get('class') == 'connection-discover']) == 1
+    assert 'Follow by username' in page.text
+    assert 'Privacy settings' in page.text
+
+
+def test_search_to_add_and_edit_retains_the_game_and_return_context(accounts):
+    fake_catalog(accounts)
+    alice = sign_in(accounts, 'alice')
+    origin = '/discover/browse?q=Portal&content=all'
+    game_page = alice.get('/games/123/portal-2', query_string={'from': origin})
+    assert game_page.status_code == 200
+    parsed = FlowElements(game_page.text)
+    more = next(item['href'] for tag, item in parsed.elements if tag == 'a' and item.get('class') == 'catalog-more-options')
+    add = alice.get(more, follow_redirects=True)
+    assert add.status_code == 200
+    fields = FlowElements(add.text)
+    assert fields.matching('input', id='igdb-id')[0]['value'] == '123'
+    return_to_game = fields.matching('input', name='return_path')[0]['value']
+    assert urlsplit(return_to_game).path == '/games/123/portal-2'
+    assert parse_qs(urlsplit(return_to_game).query)['from'] == [origin]
+    result = submit(alice, '/library/add', {'igdb_id': '123', 'title': 'Portal 2', 'platform': 'PC', 'status': 'Playing', 'return_path': return_to_game})
+    assert result.status_code == 302 and result.location == return_to_game
+    with accounts.app_context():
+        entry = get_db().execute('SELECT id FROM games WHERE owner_id = ? AND igdb_id = ?', (ALICE, 123)).fetchone()['id']
+    destination = '/library?q=Portal&status=Playing&sort=title'
+    edit = alice.get(f'/library/entries/{entry}/edit', query_string={'from': destination})
+    assert FlowElements(edit.text).matching('input', name='return_path')[0]['value'] == destination
+    assert not FlowElements(edit.text).matching('nav', **{'aria-label': 'Library sections'})

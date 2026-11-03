@@ -159,6 +159,7 @@ def test_search_matches_partial_title_ignoring_ascii_case(client, seed_game, que
     assert b"Resident Evil 4 Remake" in response.data
     assert b"Resident Evil 2" in response.data
     assert b"Portal 2" not in response.data
+    assert b"Clear filters" not in response.data
 
 
 def test_search_and_status_filter_work_together(client, seed_game, stored_games):

@@ -1,10 +1,12 @@
 {% extends 'discover.html' %}
-{% block page_title %}{{ query + ' · ' if query else '' }}Browse games · Vestigium{% endblock %}
+{% block page_title %}{{ query + ' · ' if query else '' }}Search games · Vestigium{% endblock %}
+{% block panel_label %}Game search results{% endblock %}
 {% block workspace_return %}<a href="{{ url_for('main.welcome') }}">← Home</a>{% endblock %}
 {% block page_heading %}Explore <span>games</span>{% endblock %}
+{% block discover_heading %}Search <em>games.</em>{% endblock %}
 {% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='public-catalog.css') }}">{% endblock %}
 {% block panel %}
-<nav class="section-navigation discovery-browse-nav" aria-label="Discover sections"><a href="{{ url_for('discovery.index') }}">For you</a><a href="{{ url_for('discovery.index', mode='popular') }}">Popular picks</a><a href="{{ url_for('explore.index') }}" aria-current="page">Browse &amp; search</a></nav>
+<nav class="section-navigation discovery-browse-nav" aria-label="Discover sections"><a href="{{ url_for('discovery.index') }}">For you</a><a href="{{ url_for('discovery.index', mode='popular') }}">Popular picks</a><a href="{{ url_for('explore.index') }}" aria-current="page">Search games</a></nav>
 {% include '_public_catalog_search.html' %}
 {% if error %}<div class="catalog-empty" role="alert"><h2>Let's try that again.</h2><p>{{ error }}</p></div>
 {% elif games %}<header class="catalog-results-heading"><h2>Results for “{{ query }}”</h2><p>{{ total }} matches{% if total == 500 %} · Search limit reached; refine your search{% endif %} · Page {{ page }} of {{ pages }}</p></header>

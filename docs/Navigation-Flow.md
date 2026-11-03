@@ -9,7 +9,78 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 - **Community**: Find players and Connections.
 - **Account menu**: My profile, Settings, Data & backups, and Sign out.
 
-Settings contains Profile, Privacy, and Data & backups. Contextual return links sit below the header so they remain available on small screens.
+Settings opens the profile editor, including its privacy controls, without a
+duplicate tab bar. Data & backups is available in the Account menu. Contextual
+return links sit below the header so they remain available on small screens.
+Privacy uses opt-out Hide controls. New profiles start public with no hidden
+sections; existing choices retain their inverse switch states. Private profile
+collapses individual preferences without disabling or clearing them. Background
+and badge visibility live in this section too. Changes apply on Save changes;
+email, full library data, and unpublished notes are never made public by it.
+Legacy positive sharing forms remain compatible. No database migration is needed.
+Uploaded profile backgrounds are resized and optimized locally before upload,
+without rejecting the original file for its size, and show an adjustable banner
+preview before saving. The original file is unchanged.
+The background crop opens in a dialog like the profile-photo editor. Dragging,
+arrow keys, zoom, and centering adjust the preview. Use background confirms the
+selection; Cancel or Escape preserves the earlier selection. Save changes then
+updates the profile. Presets discard pending uploads. The server validates crops.
+The player card previews the selected preset or confirmed custom crop immediately;
+unconfirmed dialog changes do not alter the card.
+Always-visible Edit background and photo-pencil controls live on the player card.
+Edit background opens preset, upload, and visibility options in a dialog; choosing
+an upload opens the crop dialog. The profile's Change background anchor opens
+these options directly. All controls remain in the profile form for one save.
+Profiles expose at most three featured badges and summarize the total earned.
+The editor always shows three clickable slots: selected badges or an Add badge
+plus sign. Clicking any slot opens the earned
+collection; accounts without an explicit selection start with empty slots.
+The collection is a scrollable dialog grouped by Collection, Completion, and Reviews,
+and prevents selecting a fourth badge.
+
+The Account menu uses the signed-in owner's private profile photo, falling back
+to their initial when no photo is saved. Viewing another player's profile never
+changes that menu identity or publishes the owner's photo. Profile pages omit
+the redundant header return bar; contextual returns remain on game and editing
+screens. This follow-up is local pending owner review and publication approval.
+
+## Flow clarity review — 2026-11-02
+
+Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
+
+- Catalog lookup has one input per lookup screen. Search games and Add game
+  use their existing autocomplete; the duplicate global header search is omitted
+  on those two screens. Other screens retain the header's Search all games.
+- Library and wishlist searches stay scoped to saved entries. Library's input
+  explicitly says Search your library; it does not compete with catalog search.
+  Clear filters appears only for status, sort, or personal-list selections and
+  resets those controls while retaining the title query.
+- Wishlist filters saved wishes as the player types, preserving focus and scroll.
+  Search is hidden during live filtering and remains available without JavaScript
+  or after a failed request. New queries reset pagination; stale responses cannot
+  replace newer results. Public wishlists use the same search behavior.
+  The private wishlist has one compact heading with its total and visibility;
+  Privacy is the only heading action. Wishlist access lives on the profile:
+  owners open their managed list and visitors open the shared list when public.
+- Discover offers For you, Popular picks, and Search games. The hero no longer
+  repeats the catalog-search link, and Search games has its own heading instead
+  of inheriting the recommendations headline.
+- Library section tabs belong to the four library rooms. Add game uses the main
+  Library link and Cancel without a redundant header return bar. Editing and
+  other child forms retain contextual returns without a second row of room tabs.
+- Connections keeps one contextual Find players action in the list heading,
+  alongside the main/section navigation, instead of repeating it in the sidebar
+  and empty state. Exact-username requests remain a separate, useful action.
+- Private notes has one visible section title and a visually hidden form label.
+
+Regression checks cover search → canonical game page → Add game → return,
+and filtered library → Edit → Save/Cancel, together with existing wishlist
+transfer, authenticated/anonymous views, old aliases, blocks, and owner isolation.
+The browser review used fictional local data and live public catalog metadata:
+search → Portal 2 → Edit → Cancel → search retained the original query and
+progress anchor. Search was checked at desktop and 390 px in both themes;
+Add game has one catalog input and no room-tab row. No shared database changes,
+new routes, migrations, or publication are part of this follow-up.
 
 ## A shared library shell
 

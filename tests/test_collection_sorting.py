@@ -63,11 +63,12 @@ def test_sort_combines_with_search_status_and_live_responses(client, seed_game, 
     assert stored_games() == before
 
 
-def test_selected_sort_survives_reload_and_clear_filter_link(client, seed_game):
+def test_selected_sort_survives_reload_and_reset_preserves_search(client, seed_game):
     seed_game()
     page = client.get("/library?q=portal&sort=rating").get_data(as_text=True)
     assert '<option value="rating" selected>' in page
-    assert 'href="/library?sort=rating">Clear filters</a>' in page
+    assert 'href="/library?q=portal"><svg' in page
+    assert '<span>Clear filters</span>' in page
 
 
 @pytest.mark.parametrize("sort", ["", "unknown", "rating DESC; DROP TABLE games;--"])

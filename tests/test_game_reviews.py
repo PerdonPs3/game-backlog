@@ -64,6 +64,8 @@ def test_invalid_review_keeps_input_and_never_publishes(accounts, changes):
     response = publish(alice, {**DATA, **changes})
     assert response.status_code == 200
     assert b'role="alert"' in response.data and b'name="publish_review" value="yes" checked' in response.data
+    if changes.get('rating') == '':
+        assert b'Choose a rating to publish your review, or uncheck publishing to save without a rating.' in response.data
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM public_game_reviews').fetchone()[0] == 0
 

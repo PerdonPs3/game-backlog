@@ -1,0 +1,24 @@
+/* The profile editor lives in the library's stained-glass hall. */
+body.profile-hall-page { position: relative; isolation: isolate; }
+.profile-hall-backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(#100e1526, #100e1533), url('images/backgrounds/profile-hall-night.webp') center top / cover no-repeat; }
+.profile-hall-backdrop::after { content: ''; position: absolute; inset: 0; background: linear-gradient(#fff4da0a, #fff4da1a), url('images/backgrounds/profile-hall-day.webp') center top / cover no-repeat; opacity: 0; }
+html[data-theme="light"] .profile-hall-backdrop::after { opacity: 1; }
+html[data-theme-ready] .profile-hall-backdrop::after { transition: opacity 1600ms ease; }
+html[data-theme] .profile-hall-page .profile-workspace { --profile-panel: #17191cde; --profile-field: #101216ed; width: min(100% - 2.5rem, 1120px); margin: 2.75rem auto 2rem; }
+html[data-theme="light"] .profile-hall-page .profile-workspace { --profile-panel: #fffaf0eb; --profile-field: #fffdf8f5; }
+html[data-theme] .profile-hall-page .workspace-hero { display: block; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+html[data-theme] .profile-hall-page .workspace-hero h1 { margin: 0; font-size: clamp(1.8rem, 3.2vw, 2.5rem); line-height: 1.1; color: var(--accent); text-shadow: 0 2px 20px #080a10; }
+html[data-theme="light"] .profile-hall-page .workspace-hero h1 { text-shadow: 0 1px 16px #fff9e9, 0 1px 5px #fff9e9; }
+html[data-theme] .profile-hall-page .workspace-hero h1 span { color: inherit; background: none; -webkit-text-fill-color: currentColor; }
+.profile-hall-page .workspace-hero .hero-emblem { display: none; }
+.profile-hall-page .workspace-body { margin-top: 1.25rem; }
+html[data-theme] .profile-hall-page :is(.player-card, .profile-editor-form) { background: var(--profile-panel); backdrop-filter: blur(10px); box-shadow: 0 12px 35px #0003; }
+.profile-hall-page .player-card { top: 96px; }
+.profile-hall-page .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 95%, transparent); backdrop-filter: blur(12px); }
+.profile-hall-page .site-footer { background: var(--profile-panel, var(--color-canvas)); }
+@media (max-width: 760px) {
+    html[data-theme] .profile-hall-page .profile-workspace { width: calc(100% - 2rem); margin-top: 1.5rem; }
+    .profile-hall-backdrop, .profile-hall-backdrop::after { background-position: 62% top; }
+    .profile-hall-page .player-card { position: static; }
+}
+@media (prefers-reduced-motion: reduce) { html[data-theme-ready] .profile-hall-backdrop::after { transition: none; } }

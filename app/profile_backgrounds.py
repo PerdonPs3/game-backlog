@@ -1,6 +1,8 @@
 """Bounded, metadata-free profile banners with visibility checked per request."""
 
 from io import BytesIO
+import json
+import math
 import warnings
 
 from flask import Blueprint, Response, abort, current_app, g
@@ -14,7 +16,26 @@ backgrounds = Blueprint('backgrounds', __name__)
 PRESETS = (('castle', 'Castle'), ('aurora', 'Aurora'), ('obsidian', 'Obsidian'))
 
 
-def normalize_background(upload):
+def background_crop(raw, width, height):
+    if not raw:
+        return None
+    try:
+        if len(raw) > 512:
+            raise ValueError()
+        crop = json.loads(raw)
+        x, y, w, h = (crop[key] for key in ('x', 'y', 'width', 'height'))
+        if any(type(value) not in (int, float) or not math.isfinite(value) for value in (x, y, w, h)):
+            raise ValueError()
+        if x < 0 or y < 0 or w < 1 or h < 1 or x + w > width + .01 or y + h > height + .01:
+            raise ValueError()
+        if abs(w / h - 1600 / 600) > .01:
+            raise ValueError()
+        return x, y, min(width, x + w), min(height, y + h)
+    except (ValueError, TypeError, KeyError):
+        raise ValueError('Adjust your background crop again before saving.') from None
+
+
+def normalize_background(upload, crop=None):
     data = upload.stream.read(2 * 1024 * 1024 + 1)
     if not data or len(data) > 2 * 1024 * 1024:
         raise ValueError('Choose a background smaller than 2 MB.')
@@ -26,6 +47,9 @@ def normalize_background(upload):
                     raise ValueError('Use a still background with no more than 12 million pixels.')
                 source.load()
                 oriented = ImageOps.exif_transpose(source).convert('RGBA')
+                box = background_crop(crop, oriented.width, oriented.height)
+                if box:
+                    oriented = oriented.crop(box)
                 banner = ImageOps.fit(oriented, (1600, 600), method=Image.Resampling.LANCZOS)
                 clean = Image.new('RGB', banner.size, '#182126')
                 clean.paste(banner, mask=banner.getchannel('A'))
@@ -44,14 +68,15 @@ def validate_background(form, files, profile):
         raise ValueError('Choose an available profile background.')
     upload = files.get('background')
     remove = form.get('remove_background') == 'yes'
-    image = normalize_background(upload) if upload and upload.filename and not remove else None
+    image = normalize_background(upload, form.get('background_crop')) if upload and upload.filename and not remove else None
     if image is not None:
         key = 'custom'
     if remove and key == 'custom':
         key = 'castle'
     if key == 'custom' and image is None and not profile['has_background']:
         raise ValueError('Upload an image before choosing Custom.')
-    return key, image, remove, form.get('share_background') == 'yes'
+    shared = form.get('hide_background') != 'yes' if form.get('profile_privacy_controls') == 'yes' else form.get('share_background') == 'yes'
+    return key, image, remove, shared
 
 
 def save_background(db, owner, selection):

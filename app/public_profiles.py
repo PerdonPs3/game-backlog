@@ -104,6 +104,15 @@ def update_sharing(db, owner, form):
             raise ValueError('You can change your username again on ' + availability['available_at'] + '. You can still update your sharing settings.')
         claim_username(db, owner, username)
         db.execute('UPDATE profiles SET username_changed_at = ? WHERE id = ?', (now, owner))
+    if form.get('profile_privacy_controls') == 'yes':
+        fields = [('is_public', 'private_profile'), ('share_bio', 'hide_bio'),
+                  ('share_showcase', 'hide_showcase'), ('share_photo', 'hide_photo'),
+                  ('share_statistics', 'hide_statistics'), ('share_activity', 'hide_activity'),
+                  ('share_connections', 'hide_connections'), ('share_wishlist', 'private_wishlist')]
+        assignments = ', '.join(field + ' = ?' for field, _ in fields)
+        db.execute('UPDATE profiles SET username = ?, ' + assignments + ' WHERE id = ?',
+                   (username, *(form.get(control) != 'yes' for _, control in fields), owner))
+        return
     db.execute('UPDATE profiles SET username = ?, is_public = ?, share_bio = ?, share_showcase = ? WHERE id = ?',
                (username, form.get('is_public') == 'yes', form.get('share_bio') == 'yes', form.get('share_showcase') == 'yes', owner))
     # Older forms do not carry these controls; preserve their current choices.
