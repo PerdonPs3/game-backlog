@@ -75,10 +75,7 @@ def build_context(rows, selected, counts=None):
     if selected:
         chosen = json.loads(selected)
     else:
-        # Initially feature the highest earned badge in each category.
-        chosen = [next(b['key'] for b in reversed(unlocked) if b['category'] == category)
-                  for category in ('collection', 'completion', 'reviews')
-                  if any(b['category'] == category for b in unlocked)]
+        chosen = []
     featured = [next(b for b in unlocked if b['key'] == key) for key in chosen if key in earned]
     pending = [b for b in unlocked if earned[b['key']]['acknowledged_at'] is None]
     next_badge = next((dict(b, progress=min(counts[b['category']], b['target']))

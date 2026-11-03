@@ -105,9 +105,12 @@ html[data-theme="light"] .badge-category.category-reviews { --category-color: #7
 .badge-options label small { display: block; font-size: .6rem; color: var(--text-muted); margin-top: .25rem; }
 .badge-options label:has(input:checked) { background: var(--profile-tint); border-color: var(--accent); }
 .badge-editor-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-block: 1rem; color: var(--text-muted); font-size: .75rem; }
-.badge-editor-heading button { padding: .55rem .7rem; font-size: .75rem; }
 .badge-editor-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
-.badge-summary-card { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 0; padding: .8rem .35rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-field); text-align: center; }
+.badge-editor-summary .badge-summary-card { display: flex; flex-direction: column; align-items: center; justify-content: center; justify-self: stretch; width: 100%; gap: .5rem; min-width: 0; min-height: 114px; margin: 0; padding: .8rem .35rem; border: 1px solid var(--border); border-radius: 12px; background: var(--profile-field); color: var(--text); font: inherit; text-align: center; cursor: pointer; }
+.badge-editor-summary .badge-summary-card:hover { border-color: var(--accent); background: var(--profile-tint); }
+.badge-summary-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.badge-summary-card.is-empty { border-style: dashed; color: var(--text-muted); }
+.badge-summary-card .badge-slot-plus { display: grid; place-items: center; width: clamp(42px, 14vw, 62px); height: clamp(42px, 14vw, 62px); color: var(--accent); font-size: 2rem; font-weight: 300; line-height: 1; }
 .badge-summary-card .achievement-emblem { width: clamp(42px, 14vw, 62px); height: clamp(42px, 14vw, 62px); flex-basis: auto; }
 .badge-editor-summary > .profile-field-hint { grid-column: 1 / -1; }
 .badge-summary-card > span:last-child { font-size: .7rem; overflow-wrap: anywhere; }

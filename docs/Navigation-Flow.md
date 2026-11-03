@@ -26,8 +26,10 @@ Edit background opens preset, upload, and visibility options in a dialog; choosi
 an upload opens the crop dialog. The profile's Change background anchor opens
 these options directly. All controls remain in the profile form for one save.
 Profiles expose at most three featured badges and summarize the total earned.
-The editor shows the same compact selection; Choose badges opens the earned
-collection in a scrollable dialog grouped by Collection, Completion, and Reviews,
+The editor always shows three clickable slots: selected badges or an Add badge
+plus sign. Clicking any slot opens the earned
+collection; accounts without an explicit selection start with empty slots.
+The collection is a scrollable dialog grouped by Collection, Completion, and Reviews,
 and prevents selecting a fourth badge.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
