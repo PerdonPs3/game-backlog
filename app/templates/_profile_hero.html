@@ -2,7 +2,7 @@
 {% from '_profile_badges.html' import admin_badge %}
 {% from '_profile_metrics.html' import profile_metrics %}
 {% macro profile_hero(profile, stats=none, owner=false) %}
-<header class="profile-overview-hero profile-banner background-{{ profile.background_key }}">
+<header class="profile-overview-hero profile-banner background-{{ profile.background_key }}{% if profile.display_name|length > 36 or profile.bio|length > 220 %} profile-banner-long-identity{% endif %}">
     <div class="profile-banner-art" aria-hidden="true">
         {% if profile.background_key == 'castle' %}<img src="{{ url_for('static', filename='images/backgrounds/castle.webp') }}" alt="" fetchpriority="high">
         {% elif profile.background_key == 'custom' %}<img src="{{ url_for('backgrounds.own_image') if owner else url_for('backgrounds.public_image', username=profile.username) }}" alt="" fetchpriority="high">{% endif %}
