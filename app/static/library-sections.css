@@ -62,7 +62,7 @@ html[data-library-navigation]:has(body.library-section-page)::view-transition-ne
 .library-section-heading h2 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); color: var(--accent); letter-spacing: -.025em; }
 .library-section-heading p { margin: .6rem 0 0; color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
 .library-section-page .library-layout #filter-message:empty { display: none; }
-.library-section-page .library-layout #collection-filters { margin-top: 0; }
+.library-section-page .library-layout #collection-filters { margin-top: 1rem; }
 .library-section-page:not(.picker-salon) .workspace-body { grid-template-columns: minmax(0, 1fr); }
 .library-section-page .library-hero .hero-copy { flex-wrap: wrap; }
 @media(max-width:760px) {
