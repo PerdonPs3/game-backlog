@@ -50,7 +50,9 @@ new routes, migrations, or publication are part of this follow-up.
 
 All games, Wishlist, Lists, and Pick a game share the same `Your library` heading,
 owner-scoped gamepad counter, Add game action, section tabs, and Cards/Shelf control.
-The toolbar stays above the section's search or preferences at the same position.
+On All games, the collection search and filters appear above the toolbar, placing
+the Add game action and view controls directly before the games. Other sections
+keep their toolbar above their search or preferences.
 The picker retains its illustrated day/night salon. All games uses the archive,
 Wishlist the observatory, and Lists the curator's study, each with day/night art.
 Public wishlists retain their separate public layout.
