@@ -39,7 +39,7 @@
         {% endblock %}
         <div class="workspace-body">
             <section class="workspace-panel" aria-label="{% block panel_label %}Game details{% endblock %}">
-                {% if library_section %}<header class="library-section-heading"><h2>{{ self.page_heading() }}</h2>{% set section_description = self.page_description() %}{% if section_description|trim %}<p>{{ section_description }}</p>{% endif %}</header>{% endif %}
+                {% block library_section_heading %}{% if library_section %}<header class="library-section-heading"><h2>{{ self.page_heading() }}</h2>{% set section_description = self.page_description() %}{% if section_description|trim %}<p>{{ section_description }}</p>{% endif %}</header>{% endif %}{% endblock %}
                 {% block panel %}{% endblock %}
             </section>
             {% block aside %}{% endblock %}

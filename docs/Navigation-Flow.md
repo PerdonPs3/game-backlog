@@ -32,6 +32,8 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
   Search is hidden during live filtering and remains available without JavaScript
   or after a failed request. New queries reset pagination; stale responses cannot
   replace newer results. Public wishlists use the same search behavior.
+  The private wishlist has one compact heading with its total and visibility;
+  public-link and privacy actions replace the repeated explanatory copy.
 - Discover offers For you, Popular picks, and Search games. The hero no longer
   repeats the catalog-search link, and Search games has its own heading instead
   of inheriting the recommendations headline.
