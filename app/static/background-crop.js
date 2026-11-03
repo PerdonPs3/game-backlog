@@ -138,7 +138,12 @@
         dialog.close();
     });
     dialog.querySelector('[data-background-cancel]').addEventListener('click', () => dialog.close());
-    dialog.addEventListener('close', () => { cleanup(); restoreFile(); returnFocus.focus(); });
+    dialog.addEventListener('close', () => {
+        cleanup(); restoreFile();
+        const hiddenOptions = returnFocus.closest('[data-background-options]');
+        const target = hiddenOptions && !hiddenOptions.open ? document.querySelector('[data-edit-background]') : returnFocus;
+        target?.focus();
+    });
     canvas.addEventListener('pointerdown', event => {
         if (!staged || event.button !== 0) return;
         event.preventDefault(); canvas.focus();

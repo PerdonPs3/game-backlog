@@ -21,6 +21,10 @@ selection; Cancel or Escape preserves the earlier selection. Save changes then
 updates the profile. Presets discard pending uploads. The server validates crops.
 The player card previews the selected preset or confirmed custom crop immediately;
 unconfirmed dialog changes do not alter the card.
+Always-visible Edit background and photo-pencil controls live on the player card.
+Edit background opens preset, upload, and visibility options in a dialog; choosing
+an upload opens the crop dialog. The profile's Change background anchor opens
+these options directly. All controls remain in the profile form for one save.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never

@@ -148,9 +148,9 @@ body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex
 .avatar-edit-trigger { position: relative; display: block; width: 86px; height: 86px; border-radius: 50%; list-style: none; cursor: pointer; }
 .avatar-edit-trigger::-webkit-details-marker { display: none; }
 .avatar-edit-trigger .player-avatar { position: relative; top: auto; left: auto; margin: 0; }
-.avatar-edit-overlay { position: absolute; inset: 0; border-radius: inherit; display: grid; place-items: center; background: #1e2023; color: #fff; opacity: 0; transition: opacity .15s; pointer-events: none; }
-.avatar-edit-overlay svg { width: 26px; height: 26px; }
-.avatar-edit-trigger:hover .avatar-edit-overlay, .avatar-edit-trigger:focus-visible .avatar-edit-overlay, .avatar-editor[open] .avatar-edit-overlay { opacity: 1; }
+.avatar-edit-overlay { position: absolute; inset: auto 0 0 auto; width: 28px; height: 28px; border: 2px solid var(--profile-panel); border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--color-on-action); opacity: 1; transition: transform .15s; pointer-events: none; box-sizing: border-box; }
+.avatar-edit-overlay svg { width: 14px; height: 14px; }
+.avatar-edit-trigger:hover .avatar-edit-overlay, .avatar-edit-trigger:focus-visible .avatar-edit-overlay { transform: scale(1.08); }
 .avatar-edit-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .avatar-edit-panel { position: absolute; top: calc(100% + .65rem); left: 0; width: min(260px, calc(100vw - 5.5rem)); padding: 1rem; background: var(--profile-panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 35px #0005; }
 .avatar-edit-heading { margin: 0 0 .85rem; font-size: .85rem; font-weight: 700; }
@@ -165,7 +165,6 @@ body.workspace-page { min-height: 100vh; min-height: 100dvh; display: flex; flex
 .avatar-remove-button[hidden] { display: none; }
 .avatar-save-hint { color: var(--text-muted); font-size: .6rem; line-height: 1.5; margin: .9rem 0 0; }
 @media (max-width: 760px) { .avatar-editor { position: absolute; left: 1.25rem; top: 0; } }
-@media (hover: none), (pointer: coarse) { .avatar-edit-overlay { opacity: 1; inset: auto 0 0 auto; width: 28px; height: 28px; border: 2px solid var(--profile-panel); background: var(--profile-cover); } .avatar-edit-overlay svg { width: 15px; height: 15px; } }
 @media (prefers-reduced-motion: reduce) { .avatar-edit-overlay { transition: none; } }
 
 .avatar-palette { margin-top: 1rem; padding-top: .8rem; border-top: 1px solid var(--profile-line); }
