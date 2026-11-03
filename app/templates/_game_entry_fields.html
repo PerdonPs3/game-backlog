@@ -24,11 +24,11 @@
             </select>
         </div>
         {% from '_rating_picker.html' import rating_picker %}
-        {{ rating_picker(request.form.get('rating', game.rating if editing and game.rating is not none else ''), compact=true) }}
+        {{ rating_picker(request.form.get('rating', game.rating if editing and game.rating is not none else ''), compact=true, publication_sensitive=true) }}
     </div>
 </section>
 <section class="entry-section entry-review" aria-labelledby="entry-review-heading">
-    <div class="entry-section-heading"><h2 id="entry-review-heading">Private notes</h2><span>Optional</span></div>
+    <div class="entry-section-heading"><h2 id="entry-review-heading">Private notes</h2><span class="rating-library-optional">Optional</span><span class="rating-publication-required">Required to publish</span></div>
     <label for="review" class="visually-hidden">Private notes</label>
     <textarea id="review" name="review" rows="4" maxlength="2000" placeholder="What did you think of the game?">{{ request.form.get('review', game.review if editing else '') }}</textarea>
     {% include '_review_publication.html' %}

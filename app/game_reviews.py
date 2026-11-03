@@ -116,7 +116,9 @@ def begin_review_write(db, *, publishing=False, in_transaction=False):
 
 
 def validate_public_review(rating, body):
-    if rating is None or not 1 <= rating <= 10:
+    if rating is None:
+        return 'Choose a rating to publish your review, or uncheck publishing to save without a rating.'
+    if not 1 <= rating <= 10:
         return 'Choose a rating from the five-star scale.'
     if not 1 <= len(body) <= 2000 or '\x00' in body:
         return 'Write a review with 1 to 2,000 characters.'
