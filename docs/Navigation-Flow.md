@@ -15,8 +15,10 @@ return links sit below the header so they remain available on small screens.
 Uploaded profile backgrounds are resized and optimized locally before upload,
 without rejecting the original file for its size, and show an adjustable banner
 preview before saving. The original file is unchanged.
-Dragging, arrow keys, zoom, and centering update the crop; the server validates
-and applies it when Save changes is submitted. Presets discard pending uploads.
+The background crop opens in a dialog like the profile-photo editor. Dragging,
+arrow keys, zoom, and centering adjust the preview. Use background confirms the
+selection; Cancel or Escape preserves the earlier selection. Save changes then
+updates the profile. Presets discard pending uploads. The server validates crops.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never

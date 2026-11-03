@@ -26,84 +26,85 @@
     const form = document.querySelector('#profile-form');
     const upload = form?.querySelector('[name="background"]');
     if (!upload) return;
+    const dialog = document.querySelector('[data-background-dialog]');
     const editor = form.querySelector('[data-background-editor]');
-    const canvas = form.querySelector('[data-background-canvas]');
+    const preview = form.querySelector('[data-background-preview]');
+    const adjust = form.querySelector('[data-background-adjust]');
+    const canvas = dialog.querySelector('[data-background-canvas]');
     const context = canvas.getContext('2d');
     if (!context) return;
-    const zoom = form.querySelector('[data-background-zoom]');
+    const zoom = dialog.querySelector('[data-background-zoom]');
+    const apply = dialog.querySelector('[data-background-apply]');
+    const error = dialog.querySelector('[data-background-error]');
+    const loading = dialog.querySelector('[data-background-dialog-status]');
     const crop = form.querySelector('[name="background_crop"]');
     const status = form.querySelector('[data-background-status]');
     const saved = form.querySelector('[data-background-saved]');
     const custom = form.querySelector('[data-background-custom]');
     const customRadio = custom.querySelector('input');
     const remove = form.querySelector('[name="remove_background"]');
-    let image, box, cx, cy, pointer, objectUrl, generation = 0;
+    let committed = null, staged = null, box, cx, cy, pointer, objectUrl, generation = 0;
+    let returnFocus = upload;
 
-    function dispose() {
+    function restoreFile() {
+        const transfer = new DataTransfer();
+        if (committed) transfer.items.add(committed.file);
+        upload.files = transfer.files;
+    }
+    function cleanup() {
         generation++;
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         objectUrl = null;
-        image = box = pointer = null;
-        crop.value = '';
-        editor.hidden = true;
-        upload.setCustomValidity('');
-        if (saved) saved.hidden = false;
-        custom.hidden = !saved;
-        if (!saved && customRadio.checked) form.querySelector('[name="background_key"][value="castle"]').checked = true;
+        staged = pointer = null;
     }
     function draw() {
+        const image = staged.image;
         box = cropBox(image.width, image.height, Number(zoom.value), cx, cy);
-        cx = box.x + box.width / 2;
-        cy = box.y + box.height / 2;
+        cx = box.x + box.width / 2; cy = box.y + box.height / 2;
         context.fillStyle = '#182126';
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(image, box.x, box.y, box.width, box.height, 0, 0, canvas.width, canvas.height);
-        crop.value = JSON.stringify(box);
+    }
+    function show() {
+        error.textContent = ''; loading.textContent = '';
+        apply.disabled = true; zoom.disabled = true; canvas.hidden = true;
+        dialog.showModal();
+    }
+    function ready() {
+        canvas.hidden = false; zoom.disabled = false; apply.disabled = false;
+        draw(); loading.textContent = '';
     }
     function move(dx, dy) {
-        if (!image) return;
+        if (!staged) return;
         cx -= dx * box.width / canvas.getBoundingClientRect().width;
         cy -= dy * box.height / canvas.getBoundingClientRect().height;
         draw();
     }
     upload.addEventListener('change', () => {
-        dispose();
-        status.textContent = '';
         const file = upload.files[0];
+        restoreFile();
         if (!file) return;
+        cleanup(); returnFocus = upload;
+        show();
         const fail = message => {
-            dispose();
-            upload.setCustomValidity(message);
-            status.textContent = message;
+            cleanup(); loading.textContent = ''; error.textContent = message;
+            apply.disabled = true; canvas.hidden = true; zoom.disabled = true;
         };
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return fail('Choose a JPG, PNG, or WebP background.');
         const current = generation;
         const candidate = new Image();
         objectUrl = URL.createObjectURL(file);
-        upload.setCustomValidity('Wait for your background to finish optimizing.');
-        status.textContent = 'Optimizing your background…';
+        loading.textContent = 'Optimizing your background…';
         candidate.onload = async () => {
             if (current !== generation) return;
             try {
                 if (!candidate.naturalWidth || !candidate.naturalHeight) throw new Error('Invalid image');
                 const optimized = await optimizeBackground(candidate);
                 if (current !== generation) return;
-                const transfer = new DataTransfer();
-                transfer.items.add(new File([optimized.blob], 'profile-background.jpg', {type: 'image/jpeg'}));
-                upload.files = transfer.files;
-                image = optimized.canvas;
-                cx = image.width / 2;
-                cy = image.height / 2;
-                zoom.value = '1';
-                editor.hidden = false;
-                if (saved) saved.hidden = true;
-                custom.hidden = false;
-                customRadio.checked = true;
-                if (remove) remove.checked = false;
-                draw();
-                upload.setCustomValidity('');
-                const size = Math.max(1, Math.round(optimized.blob.size / 1024));
-                status.textContent = `Ready · Optimized to ${size} KB. Your original file is unchanged.`;
+                staged = {image: optimized.canvas,
+                    file: new File([optimized.blob], 'profile-background.jpg', {type: 'image/jpeg'})};
+                cx = staged.image.width / 2; cy = staged.image.height / 2; zoom.value = '1';
+                ready();
                 if (objectUrl) URL.revokeObjectURL(objectUrl);
                 objectUrl = null;
             } catch (_) {
@@ -113,10 +114,34 @@
         candidate.onerror = () => { if (current === generation) fail('This image could not be opened. Choose another background.'); };
         candidate.src = objectUrl;
     });
+    adjust.addEventListener('click', () => {
+        if (!committed) return;
+        cleanup(); returnFocus = adjust; show();
+        staged = {image: committed.image, file: committed.file};
+        cx = committed.cx; cy = committed.cy; zoom.value = committed.zoom;
+        ready();
+    });
+    apply.addEventListener('click', () => {
+        if (!staged) return;
+        draw();
+        committed = {...staged, cx, cy, zoom: zoom.value};
+        restoreFile();
+        crop.value = JSON.stringify(box);
+        preview.src = canvas.toDataURL('image/jpeg', .9);
+        editor.hidden = false;
+        if (saved) saved.hidden = true;
+        custom.hidden = false; customRadio.checked = true;
+        if (remove) remove.checked = false;
+        status.textContent = '';
+        form.dispatchEvent(new Event('change', {bubbles: true}));
+        returnFocus = adjust;
+        dialog.close();
+    });
+    dialog.querySelector('[data-background-cancel]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => { cleanup(); restoreFile(); returnFocus.focus(); });
     canvas.addEventListener('pointerdown', event => {
-        if (!image || event.button !== 0) return;
-        event.preventDefault();
-        canvas.focus();
+        if (!staged || event.button !== 0) return;
+        event.preventDefault(); canvas.focus();
         pointer = {id: event.pointerId, x: event.clientX, y: event.clientY};
         canvas.setPointerCapture(event.pointerId);
     });
@@ -131,19 +156,24 @@
         if (!directions[event.key]) return;
         event.preventDefault(); move(...directions[event.key]);
     });
-    zoom.addEventListener('input', () => { if (image) draw(); });
-    form.querySelector('[data-background-center]').addEventListener('click', () => {
-        if (!image) return;
-        cx = image.width / 2; cy = image.height / 2; zoom.value = '1'; draw();
+    zoom.addEventListener('input', () => { if (staged) draw(); });
+    dialog.querySelector('[data-background-center]').addEventListener('click', () => {
+        if (!staged) return;
+        cx = staged.image.width / 2; cy = staged.image.height / 2; zoom.value = '1'; draw();
     });
+    function discard() {
+        cleanup(); committed = null; restoreFile(); crop.value = ''; editor.hidden = true;
+        preview.removeAttribute('src'); status.textContent = '';
+        if (saved) saved.hidden = false;
+        custom.hidden = !saved;
+    }
     for (const preset of form.querySelectorAll('[name="background_key"]')) preset.addEventListener('change', () => {
-        if (!preset.checked || preset.value === 'custom') return;
-        upload.value = ''; dispose(); status.textContent = '';
+        if (preset.checked && preset.value !== 'custom') discard();
     });
     remove?.addEventListener('change', () => {
         if (!remove.checked) return;
-        upload.value = ''; dispose(); status.textContent = '';
+        discard();
         if (customRadio.checked) form.querySelector('[name="background_key"][value="castle"]').checked = true;
     });
-    window.addEventListener('pagehide', () => { if (objectUrl) URL.revokeObjectURL(objectUrl); });
+    window.addEventListener('pagehide', cleanup);
 })();

@@ -90,10 +90,9 @@
             <p class="profile-field-hint" id="background-hint">JPG, PNG, or WebP · Automatically optimized. Preview and adjust the crop before saving.</p>
             <input type="hidden" name="background_crop" value="">
             <div class="background-crop-editor" data-background-editor hidden>
-                <p class="profile-field-hint" id="background-crop-help">Drag to position your background, or focus the preview and use the arrow keys. The profile layout may crop the edges.</p>
-                <canvas class="background-crop-canvas" data-background-canvas width="800" height="300" tabindex="0" role="img" aria-label="Background crop preview" aria-describedby="background-crop-help"></canvas>
-                <div class="background-crop-tools"><label for="background-zoom">Zoom<input id="background-zoom" data-background-zoom type="range" min="1" max="4" step="0.01" value="1"></label><button type="button" class="secondary-button" data-background-center>Center</button></div>
-                <p class="profile-field-hint">Preview only · Save changes to apply.</p>
+                <img class="background-editor-preview" data-background-preview alt="Your selected background crop">
+                <button type="button" class="secondary-button" data-background-adjust>Adjust crop</button>
+                <p class="profile-field-hint">Background selected · Save changes to update your profile.</p>
             </div>
             <p class="profile-field-hint" data-background-status role="status"></p>
             <label><input type="checkbox" name="share_background" value="yes" {% if (request.form.get('share_background') == 'yes' if request.form.get('background_controls') == 'yes' else profile.share_background) %}checked{% endif %}>Show background on my public profile</label>
@@ -133,6 +132,15 @@
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{% endif %}</p>
         </footer>
     </form>
+    <dialog class="avatar-crop-dialog background-crop-dialog" data-background-dialog aria-labelledby="background-crop-title" aria-describedby="background-crop-help">
+        <header class="avatar-crop-header"><div><h2 id="background-crop-title">Adjust your background</h2><p id="background-crop-help">Drag to position your background. You can also focus the preview and use the arrow keys.</p></div></header>
+        <canvas class="background-crop-canvas" data-background-canvas width="800" height="300" tabindex="0" role="img" aria-label="Background crop preview"></canvas>
+        <label class="avatar-crop-zoom" for="background-zoom">Zoom<input id="background-zoom" data-background-zoom type="range" min="1" max="4" step="0.01" value="1"></label>
+        <p class="avatar-crop-keyboard">The profile layout may crop the edges on different screens.</p>
+        <div class="avatar-crop-actions"><button type="button" data-background-center>Center background</button><div><button type="button" data-background-cancel>Cancel</button><button type="button" data-background-apply data-crop-apply>Use background</button></div></div>
+        <p class="profile-field-hint" data-background-dialog-status role="status"></p>
+        <p class="avatar-crop-error" data-background-error role="alert"></p>
+    </dialog>
     <dialog class="avatar-crop-dialog" data-avatar-crop aria-labelledby="avatar-crop-title" aria-describedby="avatar-crop-help">
         <header class="avatar-crop-header"><div><h2 id="avatar-crop-title">Adjust your photo</h2><p id="avatar-crop-help">Drag the photo to position it inside the circle.</p></div><button type="button" class="avatar-crop-replace" data-crop-replace aria-label="Choose another image" title="Choose another image"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 11-8.5 8.5a6 6 0 0 1-8.5-8.5l9-9a4 4 0 0 1 5.7 5.7l-9 9a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button></header>
         <input type="file" data-crop-replacement accept="image/jpeg,image/png,image/webp" hidden>
