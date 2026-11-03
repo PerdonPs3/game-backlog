@@ -22,6 +22,7 @@
     {% include '_library_backdrop.html' %}
     <main class="library-layout">
         {% include '_library_header.html' %}
+        {% include '_library_toolbar.html' %}
         {% for message in get_flashed_messages(category_filter=['catalog_saved']) %}
         <p class="workspace-success library-save-feedback" role="status"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>{{ message }}</p>
         {% endfor %}
@@ -81,7 +82,6 @@
             </div>
         </form>
         <p id="filter-message" class="catalog-message" role="status" aria-live="polite"></p>
-        {% include '_library_toolbar.html' %}
         <section id="game-collection" aria-label="Game collection" aria-busy="false">
             {% include '_game_collection.html' %}
         </section>
