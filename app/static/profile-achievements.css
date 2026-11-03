@@ -117,6 +117,29 @@ html[data-theme="light"] .badge-category.category-reviews { --category-color: #7
 .badge-selection-dialog { width: min(620px, calc(100vw - 2rem)); }
 .badge-selection-dialog .badge-options { max-height: min(50dvh, 420px); overflow-y: auto; padding: .15rem; }
 .badge-options label:has(input:disabled) { opacity: .5; cursor: default; }
+.profile-privacy-panel { min-width: 0; margin: .5rem 0; padding: 1.25rem; border: 1px solid var(--border); border-radius: 14px; scroll-margin-top: 110px; }
+.profile-privacy-panel legend { padding-inline: .4rem; font-size: .9rem; }
+.privacy-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.privacy-heading h3 { margin: 0; color: var(--text); font-size: 1rem; }
+.privacy-heading p { margin: .45rem 0 .8rem; color: var(--text-muted); font-size: .75rem; line-height: 1.6; }
+.privacy-visibility { flex-shrink: 0; white-space: nowrap; padding: .3rem .6rem; border: 1px solid var(--border); border-radius: 999px; color: var(--accent); font-size: .65rem; }
+.privacy-profile-link { display: inline-block; margin-bottom: 1rem; color: var(--accent); font-size: .75rem; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.profile-privacy-panel .privacy-master, .profile-privacy-panel .privacy-option { display: flex; justify-content: space-between; align-items: center; gap: .8rem; margin: 0; padding: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--profile-field); cursor: pointer; }
+.privacy-master strong { display: block; color: var(--text); font-size: .85rem; }
+.privacy-master small { display: block; margin-top: .35rem; color: var(--text-muted); font-size: .7rem; line-height: 1.5; }
+.profile-privacy-panel h4 { margin: 1.35rem 0 .75rem; color: var(--text-muted); font-size: .7rem; font-weight: 500; }
+.privacy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.profile-privacy-panel .privacy-option { padding: .85rem .75rem; min-height: 58px; font-size: .75rem; }
+.profile-privacy-panel :is(.privacy-master, .privacy-option):has(input:checked) { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); background: var(--profile-tint); }
+html[data-theme] .profile-privacy-panel input.privacy-switch { appearance: none; flex: 0 0 36px; position: relative; width: 36px; min-width: 36px; height: 22px; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--text-muted) 20%, var(--profile-field)); cursor: pointer; }
+.profile-privacy-panel input.privacy-switch::before { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-muted); transition: transform .15s; }
+html[data-theme] .profile-privacy-panel input.privacy-switch:checked { background: var(--accent); border-color: var(--accent); }
+.profile-privacy-panel input.privacy-switch:checked::before { background: var(--color-on-action); transform: translateX(14px); }
+.profile-privacy-panel input.privacy-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.privacy-private-note, .privacy-footnote { color: var(--text-muted); font-size: .7rem; line-height: 1.7; margin: 1rem 0 0; }
+.privacy-footnote { padding-top: 1rem; border-top: 1px solid var(--border); }
+@media(max-width:480px) { .privacy-grid { grid-template-columns: minmax(0, 1fr); } }
+@media(prefers-reduced-motion:reduce) { .profile-privacy-panel input.privacy-switch::before { transition: none; } }
 .profile-customization :is(a, input, summary):focus-visible, .profile-background-action:focus-visible, .achievement-all > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 @media (max-width: 1000px) {
     .profile-banner.profile-overview-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .85fr); padding: 1.5rem; gap: 1.5rem; }

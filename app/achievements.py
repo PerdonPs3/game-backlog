@@ -101,8 +101,9 @@ def save_features(db, owner, form):
     earned = {r[0] for r in db.execute('SELECT badge_key FROM profile_achievements WHERE owner_id = ?', (owner,))}
     if len(chosen) > 3 or len(chosen) != len(set(chosen)) or not set(chosen) <= earned:
         raise ValueError('Choose up to three badges you have already earned.')
+    shared = form.get('hide_badges') != 'yes' if form.get('profile_privacy_controls') == 'yes' else form.get('share_badges') == 'yes'
     db.execute('UPDATE profiles SET featured_badges = ?, share_badges = ? WHERE id = ?',
-               (json.dumps(chosen), form.get('share_badges') == 'yes', owner))
+               (json.dumps(chosen), shared, owner))
 
 
 @achievements.post('/account/achievements/acknowledge')

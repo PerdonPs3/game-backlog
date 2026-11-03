@@ -45,9 +45,10 @@ def test_one_profile_address_has_owner_controls_and_minimal_visitor_projection(a
 def test_editor_combines_sharing_and_preserves_existing_private_choices(accounts):
     owner = sign_in(accounts, 'alice', complete_profile=False)
     page = owner.get('/settings/profile').text
-    assert 'Privacy &amp; sharing' in page
-    for field in ('share_bio', 'share_showcase', 'share_photo'):
-        assert f'name="{field}" value="yes" checked' in page
+    assert '<legend>Privacy</legend>' in page
+    for field in ('hide_bio', 'hide_showcase', 'hide_photo'):
+        assert f'name="{field}" value="yes"' in page
+        assert f'name="{field}" value="yes" checked' not in page
     submit(owner, '/settings/profile', {'display_name': 'Alice', 'username': 'alice_player', 'profile_sharing': 'yes', 'is_public': 'no'})
     with accounts.app_context():
         profile = get_db().execute('SELECT is_public, share_bio, share_showcase, share_photo FROM profiles WHERE id = ?', (ALICE,)).fetchone()

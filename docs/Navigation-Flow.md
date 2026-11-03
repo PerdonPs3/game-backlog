@@ -12,6 +12,12 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 Settings opens the profile editor, including its privacy controls, without a
 duplicate tab bar. Data & backups is available in the Account menu. Contextual
 return links sit below the header so they remain available on small screens.
+Privacy uses opt-out Hide controls. New profiles start public with no hidden
+sections; existing choices retain their inverse switch states. Private profile
+collapses individual preferences without disabling or clearing them. Background
+and badge visibility live in this section too. Changes apply on Save changes;
+email, full library data, and unpublished notes are never made public by it.
+Legacy positive sharing forms remain compatible. No database migration is needed.
 Uploaded profile backgrounds are resized and optimized locally before upload,
 without rejecting the original file for its size, and show an adjustable banner
 preview before saving. The original file is unchanged.

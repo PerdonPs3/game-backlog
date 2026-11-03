@@ -96,7 +96,6 @@
                 <p class="profile-field-hint">Background selected · Save changes to update your profile.</p>
             </div>
             <p class="profile-field-hint" data-background-status role="status"></p>
-            <label><input type="checkbox" name="share_background" value="yes" {% if (request.form.get('share_background') == 'yes' if request.form.get('background_controls') == 'yes' else profile.share_background) %}checked{% endif %}>Show background on my public profile</label>
         </fieldset>
         <fieldset class="profile-customization" id="profile-badges"><legend>Featured badges</legend>
             <input type="hidden" name="badge_controls" value="yes">
@@ -120,29 +119,26 @@
             </div>
             <div class="avatar-crop-actions"><span class="profile-field-hint">Save changes to update your profile.</span><button type="button" data-badge-done>Done</button></div>
             </dialog>
-            <label><input type="checkbox" name="share_badges" value="yes" {% if (request.form.get('share_badges') == 'yes' if request.form.get('badge_controls') == 'yes' else profile.share_badges) %}checked{% endif %}>Show featured badges on my public profile</label>
         </fieldset>
-        {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_sharing') == 'yes' %}
-        {% set public_selected = request.form.get('is_public') == 'yes' if request.method == 'POST' and (privacy_submitted or 'is_public' in request.form) else (true if is_setup else profile.is_public) %}
+        {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_privacy_controls') == 'yes' %}
+        {% set private_selected = request.form.get('private_profile') == 'yes' if privacy_submitted else (false if is_setup else not profile.is_public) %}
         <input type="hidden" name="profile_sharing" value="yes">
-        <input type="hidden" name="profile_activity_controls" value="yes">
-        <fieldset class="profile-setup-visibility" id="profile-privacy"><legend>Privacy &amp; sharing</legend>
-            <p class="profile-field-hint">Your profile link: <a href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/players/{{ profile.username or 'your_username' }}</a></p>
-            <label><input type="radio" name="is_public" value="yes" {% if public_selected %}checked{% endif %}><span>Public <small>Anyone can view the details you share below.</small></span></label>
-            <label><input type="radio" name="is_public" value="no" {% if not public_selected %}checked{% endif %}><span>Private <small>Only you can open your profile.</small></span></label>
-            <div class="profile-sharing-options profile-editor-sharing">
-            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase'), ('share_photo', 'Profile photo')] %}
-                <label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if privacy_submitted else (true if is_setup else profile[name])) %}checked{% endif %}><span>{{ title }}</span></label>
-            {% endfor %}
-            {% for name, title in [('share_statistics', 'Gaming statistics'), ('share_activity', 'Playing now & recent completions')] %}
-                {% set activity_submitted = request.method == 'POST' and (request.form.get('profile_activity_controls') == 'yes' or name in request.form) %}
-                <label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if activity_submitted else profile[name]) %}checked{% endif %}><span>{{ title }}</span></label>
-            {% endfor %}
-            <input type="hidden" name="wishlist_privacy_controls" value="yes">
-            <input type="hidden" name="connection_privacy_controls" value="yes">
-            <label><input type="checkbox" name="share_connections" value="yes" {% if (request.form.get('share_connections') == 'yes' if request.form.get('connection_privacy_controls') == 'yes' else profile.share_connections) %}checked{% endif %}><span>Share followers &amp; following <small>Show public players in your lists and counts. Your connections stay hidden while your profile is private. Your public handle may still appear in other players' shared lists.</small></span></label>
-            <label><input type="checkbox" name="private_wishlist" value="yes" {% if (request.form.get('private_wishlist') == 'yes' if request.form.get('wishlist_privacy_controls') == 'yes' else not profile.share_wishlist) %}checked{% endif %}><span>Private wishlist <small>Hide your wishlist from visitors. Public by default when your profile is public.</small></span></label>
-            </div>{% if not is_setup %}<p class="profile-field-hint"><a href="{{ url_for('auth.edit_showcase') }}">Choose your five showcase games →</a></p>{% endif %}<p class="profile-field-hint">Public profiles share statistics and recent activity by default, including game names, platforms, ratings, and completion dates. Uncheck a section to hide it. Your email, full library, and personal notes stay private. Only reviews you explicitly publish appear on your profile and game pages. Public profiles can be found by display name or username.</p>
+        <input type="hidden" name="profile_privacy_controls" value="yes">
+        <fieldset class="profile-privacy-panel" id="profile-privacy"><legend>Privacy</legend>
+            <header class="privacy-heading"><div><h3>Profile visibility</h3><p>Public by default. Turn on a control to hide something.</p></div><span class="privacy-visibility" data-privacy-visibility>{{ 'Private' if private_selected else 'Public' }}</span></header>
+            <a class="privacy-profile-link" href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/players/{{ profile.username or 'your_username' }}</a>
+            <label class="privacy-master"><span><strong>Private profile</strong><small>Only you can open your profile.</small></span><input class="privacy-switch" type="checkbox" role="switch" name="private_profile" value="yes" data-private-profile{% if private_selected %} checked{% endif %}></label>
+            <div data-privacy-sections{% if private_selected %} hidden{% endif %}>
+                <h4>Hide from visitors</h4>
+                <div class="privacy-grid">
+                {% for field, control, title in [('share_bio', 'hide_bio', 'Hide bio'), ('share_photo', 'hide_photo', 'Hide profile photo'), ('share_background', 'hide_background', 'Hide background'), ('share_showcase', 'hide_showcase', 'Hide showcase'), ('share_statistics', 'hide_statistics', 'Hide statistics'), ('share_activity', 'hide_activity', 'Hide recent activity'), ('share_connections', 'hide_connections', 'Hide followers & following'), ('share_wishlist', 'private_wishlist', 'Hide wishlist'), ('share_badges', 'hide_badges', 'Hide badges')] %}
+                    {% set hidden = request.form.get(control) == 'yes' if privacy_submitted else (false if is_setup else not profile[field]) %}
+                    <label class="privacy-option"><span>{{ title }}</span><input class="privacy-switch" type="checkbox" role="switch" name="{{ control }}" value="yes"{% if hidden %} checked{% endif %}></label>
+                {% endfor %}
+                </div>
+            </div>
+            <p class="privacy-private-note" data-privacy-private-note{% if not private_selected %} hidden{% endif %}>Your section preferences are kept for when you make your profile public again.</p>
+            <p class="privacy-footnote">Your email and full library stay private. Reviews appear only when you publish them.</p>
         </fieldset>
         <footer class="profile-save-bar">
             <p class="profile-field-hint">Your sharing choices apply when you save.</p>

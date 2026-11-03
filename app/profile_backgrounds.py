@@ -75,7 +75,8 @@ def validate_background(form, files, profile):
         key = 'castle'
     if key == 'custom' and image is None and not profile['has_background']:
         raise ValueError('Upload an image before choosing Custom.')
-    return key, image, remove, form.get('share_background') == 'yes'
+    shared = form.get('hide_background') != 'yes' if form.get('profile_privacy_controls') == 'yes' else form.get('share_background') == 'yes'
+    return key, image, remove, shared
 
 
 def save_background(db, owner, selection):

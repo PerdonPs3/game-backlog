@@ -41,8 +41,8 @@ def test_public_defaults_include_only_aggregate_and_three_activity_rows(accounts
 def test_sections_can_be_hidden_independently_in_editor_and_choices_survive_old_forms(accounts):
     alice = populate(accounts)
     editor = alice.get('/settings/profile').get_data(as_text=True)
-    for field in ['share_statistics','share_activity']:
-        assert re.search(r'<input[^>]*name="'+field+r'"[^>]*checked', editor)
+    for field in ['hide_statistics','hide_activity']:
+        assert not re.search(r'<input[^>]*name="'+field+r'"[^>]*checked', editor)
     data = {'display_name':'Alice','username':'alice_player','is_public':'yes','profile_sharing':'yes','profile_activity_controls':'yes'}
     assert submit(alice,'/account/alice_player/profile/edit',{**data,'share_statistics':'yes'}).status_code == 303
     anon = accounts.test_client()
@@ -75,11 +75,11 @@ def test_private_profile_revokes_activity_and_legacy_games_never_link_to_private
 
 def test_editor_validation_does_not_save_settings_and_preserves_submitted_checks(accounts):
     alice = public_author(accounts,'alice')
-    response = submit(alice,'/account/alice_player/profile/edit',{'display_name':'','username':'alice_player','is_public':'yes','profile_sharing':'yes','profile_activity_controls':'yes','share_activity':'yes'})
+    response = submit(alice,'/account/alice_player/profile/edit',{'display_name':'','username':'alice_player','profile_sharing':'yes','profile_privacy_controls':'yes','hide_statistics':'yes'})
     html = response.get_data(as_text=True)
     assert response.status_code == 200
-    assert re.search(r'<input[^>]*name="share_activity"[^>]*checked',html)
-    assert not re.search(r'<input[^>]*name="share_statistics"[^>]*checked',html)
+    assert not re.search(r'<input[^>]*name="hide_activity"[^>]*checked',html)
+    assert re.search(r'<input[^>]*name="hide_statistics"[^>]*checked',html)
     with accounts.app_context():
         assert tuple(get_db().execute('SELECT share_statistics,share_activity FROM profiles WHERE id=?',(ALICE,)).fetchone()) == (True,True)
 
