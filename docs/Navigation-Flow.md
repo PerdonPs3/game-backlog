@@ -12,7 +12,9 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 Settings opens the profile editor, including its privacy controls, without a
 duplicate tab bar. Data & backups is available in the Account menu. Contextual
 return links sit below the header so they remain available on small screens.
-Uploaded profile backgrounds show an adjustable banner preview before saving.
+Uploaded profile backgrounds are resized and optimized locally before upload,
+without rejecting the original file for its size, and show an adjustable banner
+preview before saving. The original file is unchanged.
 Dragging, arrow keys, zoom, and centering update the crop; the server validates
 and applies it when Save changes is submitted. Presets discard pending uploads.
 

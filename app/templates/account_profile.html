@@ -87,7 +87,7 @@
             <label data-background-custom{% if not profile.has_background %} hidden{% endif %}><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label>
             {% if profile.has_background %}<img class="background-editor-preview" data-background-saved src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
             <label for="profile-background-file">Upload background</label><input id="profile-background-file" type="file" name="background" accept="image/jpeg,image/png,image/webp" aria-describedby="background-hint">
-            <p class="profile-field-hint" id="background-hint">Still JPG, PNG, or WebP · Up to 2 MB. Preview and adjust the crop before saving.</p>
+            <p class="profile-field-hint" id="background-hint">JPG, PNG, or WebP · Automatically optimized. Preview and adjust the crop before saving.</p>
             <input type="hidden" name="background_crop" value="">
             <div class="background-crop-editor" data-background-editor hidden>
                 <p class="profile-field-hint" id="background-crop-help">Drag to position your background, or focus the preview and use the arrow keys. The profile layout may crop the edges.</p>

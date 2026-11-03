@@ -5,7 +5,24 @@
         const h = w * 3 / 8;
         return {x: clamp(cx - w / 2, 0, width - w), y: clamp(cy - h / 2, 0, height - h), width: w, height: h};
     }
-    if (typeof module !== 'undefined' && module.exports) { module.exports = {cropBox}; return; }
+    async function optimizeBackground(source, createCanvas = () => document.createElement('canvas')) {
+        const canvas = createCanvas();
+        const scale = Math.min(1, 2400 / Math.max(source.naturalWidth, source.naturalHeight));
+        canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(source.naturalHeight * scale));
+        const target = canvas.getContext('2d');
+        if (!target) throw new Error('Canvas unavailable');
+        target.fillStyle = '#182126';
+        target.fillRect(0, 0, canvas.width, canvas.height);
+        target.drawImage(source, 0, 0, canvas.width, canvas.height);
+        for (const quality of [.9, .8, .65, .5, .35]) {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+            if (!blob) throw new Error('Encoding failed');
+            if (blob.size <= 2 * 1024 * 1024) return {canvas, blob};
+        }
+        throw new Error('Optimization failed');
+    }
+    if (typeof module !== 'undefined' && module.exports) { module.exports = {cropBox, optimizeBackground}; return; }
     const form = document.querySelector('#profile-form');
     const upload = form?.querySelector('[name="background"]');
     if (!upload) return;
@@ -35,7 +52,7 @@
         if (!saved && customRadio.checked) form.querySelector('[name="background_key"][value="castle"]').checked = true;
     }
     function draw() {
-        box = cropBox(image.naturalWidth, image.naturalHeight, Number(zoom.value), cx, cy);
+        box = cropBox(image.width, image.height, Number(zoom.value), cx, cy);
         cx = box.x + box.width / 2;
         cy = box.y + box.height / 2;
         context.fillStyle = '#182126';
@@ -59,30 +76,39 @@
             upload.setCustomValidity(message);
             status.textContent = message;
         };
-        if (file.size > 2 * 1024 * 1024) return fail('Choose a background smaller than 2 MB.');
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return fail('Choose a JPG, PNG, or WebP background.');
         const current = generation;
         const candidate = new Image();
         objectUrl = URL.createObjectURL(file);
-        upload.setCustomValidity('Wait for your background preview to load.');
-        status.textContent = 'Opening background…';
-        candidate.onload = () => {
+        upload.setCustomValidity('Wait for your background to finish optimizing.');
+        status.textContent = 'Optimizing your background…';
+        candidate.onload = async () => {
             if (current !== generation) return;
-            if (!candidate.naturalWidth || !candidate.naturalHeight || candidate.naturalWidth * candidate.naturalHeight > 12000000) {
-                return fail('Use a background with no more than 12 million pixels.');
+            try {
+                if (!candidate.naturalWidth || !candidate.naturalHeight) throw new Error('Invalid image');
+                const optimized = await optimizeBackground(candidate);
+                if (current !== generation) return;
+                const transfer = new DataTransfer();
+                transfer.items.add(new File([optimized.blob], 'profile-background.jpg', {type: 'image/jpeg'}));
+                upload.files = transfer.files;
+                image = optimized.canvas;
+                cx = image.width / 2;
+                cy = image.height / 2;
+                zoom.value = '1';
+                editor.hidden = false;
+                if (saved) saved.hidden = true;
+                custom.hidden = false;
+                customRadio.checked = true;
+                if (remove) remove.checked = false;
+                draw();
+                upload.setCustomValidity('');
+                const size = Math.max(1, Math.round(optimized.blob.size / 1024));
+                status.textContent = `Ready · Optimized to ${size} KB. Your original file is unchanged.`;
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            } catch (_) {
+                if (current === generation) fail('This image could not be optimized. Try exporting it as JPG or choosing another image.');
             }
-            image = candidate;
-            cx = image.naturalWidth / 2;
-            cy = image.naturalHeight / 2;
-            zoom.value = '1';
-            editor.hidden = false;
-            if (saved) saved.hidden = true;
-            custom.hidden = false;
-            customRadio.checked = true;
-            if (remove) remove.checked = false;
-            draw();
-            upload.setCustomValidity('');
-            status.textContent = '';
         };
         candidate.onerror = () => { if (current === generation) fail('This image could not be opened. Choose another background.'); };
         candidate.src = objectUrl;
@@ -108,7 +134,7 @@
     zoom.addEventListener('input', () => { if (image) draw(); });
     form.querySelector('[data-background-center]').addEventListener('click', () => {
         if (!image) return;
-        cx = image.naturalWidth / 2; cy = image.naturalHeight / 2; zoom.value = '1'; draw();
+        cx = image.width / 2; cy = image.height / 2; zoom.value = '1'; draw();
     });
     for (const preset of form.querySelectorAll('[name="background_key"]')) preset.addEventListener('change', () => {
         if (!preset.checked || preset.value === 'custom') return;
