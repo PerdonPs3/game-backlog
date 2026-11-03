@@ -5,6 +5,7 @@
 {% set country_code = request.form.get('country_code', profile.country_code or '') %}
 {% set display_name = request.form.get('display_name', profile.display_name) %}
 {% set bio = request.form.get('bio', profile.bio) %}
+{% set background_choice = request.form.get('background_key', profile.background_key) %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
 {% block page_title %}{{ 'Create your profile' if is_setup else 'My profile' }} · Vestigium{% endblock %}
 {% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
@@ -16,7 +17,7 @@
 {% block panel %}
 <div class="profile-editor" data-profile-editor>
     <aside class="player-card" aria-label="Your player card preview">
-        <div class="player-card-cover"><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Editor preview</span></div>
+        <div class="player-card-cover"><div class="player-card-cover-art" data-player-background data-background="{{ background_choice }}" data-castle-url="{{ url_for('static', filename='images/backgrounds/castle.webp') }}"{% if profile.has_background %} data-saved-url="{{ url_for('backgrounds.own_image') }}"{% endif %} aria-hidden="true"><img data-player-background-image alt=""{% if background_choice == 'castle' %} src="{{ url_for('static', filename='images/backgrounds/castle.webp') }}"{% elif background_choice == 'custom' and profile.has_background %} src="{{ url_for('backgrounds.own_image') }}"{% else %} hidden{% endif %}></div><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Editor preview</span></div>
         <div class="player-card-content">
             <details class="avatar-editor" data-avatar-editor>
                 <summary class="avatar-edit-trigger" aria-label="Edit profile picture" title="Edit profile picture">
@@ -82,7 +83,6 @@
         <fieldset class="profile-customization" id="profile-background"><legend>Profile background</legend>
             <input type="hidden" name="background_controls" value="yes">
             <p class="profile-field-hint">Choose a preset or upload your own image. Public profiles can share this background with visitors.</p>
-            {% set background_choice = request.form.get('background_key', profile.background_key) %}
             <div class="background-options">{% for key, label in background_presets %}<label class="background-preset background-{{ key }}"><input type="radio" name="background_key" value="{{ key }}" {% if background_choice == key %}checked{% endif %}>{{ label }}</label>{% endfor %}</div>
             <label data-background-custom{% if not profile.has_background %} hidden{% endif %}><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label>
             {% if profile.has_background %}<img class="background-editor-preview" data-background-saved src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
@@ -156,4 +156,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='background-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='background-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-background-preview.js') }}" defer></script><script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}

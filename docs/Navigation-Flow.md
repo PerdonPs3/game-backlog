@@ -19,6 +19,8 @@ The background crop opens in a dialog like the profile-photo editor. Dragging,
 arrow keys, zoom, and centering adjust the preview. Use background confirms the
 selection; Cancel or Escape preserves the earlier selection. Save changes then
 updates the profile. Presets discard pending uploads. The server validates crops.
+The player card previews the selected preset or confirmed custom crop immediately;
+unconfirmed dialog changes do not alter the card.
 
 The Account menu uses the signed-in owner's private profile photo, falling back
 to their initial when no photo is saved. Viewing another player's profile never
