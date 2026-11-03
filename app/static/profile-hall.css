@@ -14,6 +14,11 @@ html[data-theme] .profile-hall-page .workspace-hero h1 span { color: inherit; ba
 .profile-hall-page .workspace-body { margin-top: 1.25rem; }
 html[data-theme] .profile-hall-page :is(.player-card, .profile-editor-form) { background: var(--profile-panel); backdrop-filter: blur(10px); box-shadow: 0 12px 35px #0003; }
 .profile-hall-page .player-card { top: 96px; }
+@media (min-width: 761px) {
+    .profile-hall-page .profile-editor { grid-template-columns: minmax(0, 1fr) minmax(240px, 310px); }
+    .profile-hall-page .profile-editor-form { grid-column: 1; grid-row: 1; }
+    .profile-hall-page .player-card { grid-column: 2; grid-row: 1; }
+}
 .profile-hall-page .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 95%, transparent); backdrop-filter: blur(12px); }
 .profile-hall-page .site-footer { background: var(--profile-panel, var(--color-canvas)); }
 @media (max-width: 760px) {
