@@ -82,7 +82,7 @@ html[data-theme="light"] .achievement-card { background: linear-gradient(110deg,
 .player-card-cover-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0002, transparent 60%, #0003); }
 .player-card-cover-art[data-background="aurora"] { background: radial-gradient(ellipse at 70% 0%, #478f8b 0%, transparent 55%), radial-gradient(ellipse at 25% 80%, #684b91 0%, transparent 60%), #102e3b; }
 .player-card-cover-art[data-background="obsidian"] { background: radial-gradient(ellipse at 75% 30%, #65513a 0%, transparent 65%), linear-gradient(120deg, #191d25, #303441); }
-.player-background-edit { position: absolute; top: .75rem; right: .75rem; display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .7rem; border: 1px solid #ffffff30; border-radius: 999px; background: #15191dcc; backdrop-filter: blur(10px); box-shadow: 0 2px 10px #0002; color: #fff; font-size: .72rem; font-weight: 500; text-decoration: none; transition: background .15s, border-color .15s; }
+.player-background-edit { position: absolute; bottom: .65rem; right: .65rem; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 1px solid #ffffff30; border-radius: 50%; background: #15191dcc; backdrop-filter: blur(10px); box-shadow: 0 2px 6px #0003; color: #fff; text-decoration: none; transition: background .15s, border-color .15s; }
 .player-background-edit svg { color: #ffd18b; flex-shrink: 0; }
 .player-background-edit:hover { background: #15191df0; border-color: #ffd18b99; }
 .profile-workspace .avatar-edit-trigger .player-avatar { border-width: 3px; }
