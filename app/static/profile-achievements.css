@@ -40,6 +40,11 @@ html[data-theme="light"] .profile-banner-long-identity .profile-banner-art { bac
 .profile-banner .profile-hero-actions { flex-direction: row; flex-wrap: wrap; margin: 0; gap: .5rem; }
 .profile-banner .profile-action { font-size: .7rem; padding: .6rem .75rem; color: #f8eddb; border-color: #e5d3ad55; background: #11171bbd; }
 .profile-banner .profile-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin: 0; }
+.profile-banner .profile-metrics .profile-rating-summary { grid-column: 1 / -1; display: flex; align-items: center; justify-content: flex-end; gap: .6rem; min-height: 0; margin: 0; padding: .4rem .2rem 0; border: 0; background: none; box-shadow: none; }
+.profile-banner .profile-rating-summary dt { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; }
+.profile-rating-summary svg { flex-shrink: 0; color: var(--accent); }
+.profile-banner .profile-rating-summary dd { display: inline-flex; align-items: baseline; gap: .1rem; margin: 0; font-size: 1rem; color: var(--accent); }
+.profile-banner .profile-rating-summary dd small { margin: 0; color: var(--text-muted); font-size: .65rem; }
 .profile-banner .summary-stat { min-height: 118px; padding: 1rem .8rem; }
 .profile-banner .summary-stat dt { font-size: .55rem; gap: .45rem; letter-spacing: .04em; }
 .profile-banner .summary-stat dd { font-size: 2.25rem; }

@@ -18,7 +18,6 @@
     <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><h2 id="completed-title">Recent completions</h2></header>{{ activity(public_completed, 'No dated completions to show yet.', public=true) }}</section>
 </div>
 {% endif %}
-{% if public_stats is not none and public_stats.average is not none %}<p class="profile-overview-note">Average rating <strong>{{ '%.1f'|format(public_stats.average / 2) }}/5</strong></p>{% endif %}
 {% include '_profile_reviews.html' %}
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}
