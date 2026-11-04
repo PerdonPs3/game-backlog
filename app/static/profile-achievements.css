@@ -182,9 +182,9 @@ html[data-theme="light"] .profile-banner-toolbar { border-color: #614a3026; }
 @media (max-width: 650px) { .profile-achievements { scroll-margin-top: 170px; } .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
 
 .profile-visitor-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
-.profile-banner .profile-wishlist-link { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-width: 112px; min-height: 42px; padding: 0 1rem; border: 1px solid #e5d3ad66; border-radius: 9px; background: #11171bc7; color: #ffd18b; font-size: .8rem; font-weight: 600; line-height: 20px; text-decoration: none; transition: background 160ms ease, border-color 160ms ease; }
-.profile-wishlist-link svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; margin: 0; }
-.profile-wishlist-link > span { display: block; line-height: 20px; }
+.profile-banner .profile-wishlist-link { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 0; min-height: 32px; padding: .35rem .6rem; border: 1px solid #e5d3ad66; border-radius: 7px; background: #11171bc7; color: #ffd18b; font-size: .75rem; font-weight: 600; line-height: 16px; text-decoration: none; transition: background 160ms ease, border-color 160ms ease; }
+.profile-wishlist-link svg { display: block; flex: 0 0 16px; width: 16px; height: 16px; margin: 0; }
+.profile-wishlist-link > span { display: block; line-height: 16px; }
 .profile-banner .profile-wishlist-link:hover { border-color: #ffd18b; background: #20242aed; }
 .profile-banner .profile-wishlist-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 html[data-theme="light"] .profile-banner .profile-wishlist-link { color: #80541f; border-color: #bda17b; background: #fffaf0ed; }
