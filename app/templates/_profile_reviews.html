@@ -15,8 +15,8 @@
     {% endcall %}
     {% endfor %}</div>{% endif %}
     {% if profile_reviews_page > 1 or profile_reviews_has_next %}<nav class="profile-review-pages" aria-label="Public review pages">
-        {% if profile_reviews_page > 1 %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page - 1, _anchor='public-reviews')) }}">← Newer reviews</a>{% endif %}
-        <span>Page {{ profile_reviews_page }}</span>
-        {% if profile_reviews_has_next %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page + 1, _anchor='public-reviews')) }}">Older reviews →</a>{% endif %}
+        {% if profile_reviews_page > 1 %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page - 1, _anchor='public-reviews')) }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Newer reviews</a>{% endif %}
+        <span class="profile-review-current-page" aria-current="page">Page {{ profile_reviews_page }}</span>
+        {% if profile_reviews_has_next %}<a href="{{ url_for(request.endpoint, **dict(request.view_args or {}, reviews_page=profile_reviews_page + 1, _anchor='public-reviews')) }}">Older reviews<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>{% endif %}
     </nav>{% endif %}
 </section>

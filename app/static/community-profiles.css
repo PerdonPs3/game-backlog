@@ -1,6 +1,11 @@
 .profile-reviews { margin-top: 1.5rem; scroll-margin-top: 110px; }
-.profile-review-pages { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; font-size: .75rem; }
-.profile-review-pages a { color: var(--accent); }
+.profile-review-pages { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: .75rem; }
+.profile-review-pages a, .profile-review-current-page { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 34px; padding: .4rem .65rem; border: 1px solid var(--border); border-radius: 8px; line-height: 16px; }
+.profile-review-pages a { color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); font-weight: 600; text-decoration: none; }
+.profile-review-pages a:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--color-panel)); }
+.profile-review-pages a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.profile-review-pages svg { display: block; flex-shrink: 0; }
+.profile-review-current-page { color: var(--text-muted); border-color: transparent; font-variant-numeric: tabular-nums; }
 .profile-reviews-empty { color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
 .player-search { display: block; padding: 1.5rem; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); }
 .player-search label { display: block; margin-bottom: .8rem; font-size: .9rem; }
