@@ -20,10 +20,10 @@
 {% macro site_footer() %}
 <footer class="site-footer workspace-footer">
     <div class="site-footer-inner">
-        {% include '_brand_easter_egg.html' %}
-        <div class="site-footer-copy">
-            <p>Every game leaves a mark.</p>
+        <p>Every game leaves a mark.</p>
+        <div class="site-footer-credit-group">
             <span class="site-footer-credit">Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a></span>
+            {% include '_brand_easter_egg.html' %}
         </div>
     </div>
 </footer>
