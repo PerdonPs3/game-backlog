@@ -125,3 +125,16 @@ def test_long_bio_disclosure_preserves_full_text_and_respects_privacy(accounts):
         get_db().execute('UPDATE profiles SET share_bio=FALSE WHERE id=?', (ALICE,))
     hidden = client.get('/players/alice_player').get_data(as_text=True)
     assert 'A long gaming biography.' not in hidden and 'profile-bio-full' not in hidden
+
+
+@pytest.mark.parametrize('paragraph_break', ['\n\n', '\r\n\r\n'])
+def test_bio_preview_does_not_join_later_paragraphs(accounts, paragraph_break):
+    public_author(accounts, 'alice')
+    opening = 'A first paragraph worth showing.'
+    bio = opening + paragraph_break + ('Currently exploring another world with friends. ' * 7)
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET bio=?,share_bio=TRUE WHERE id=?', (bio, ALICE))
+    html = accounts.test_client().get('/players/alice_player').get_data(as_text=True)
+    excerpt = re.search(r'<span class="profile-bio-excerpt">(.*?)</span>', html, re.S)
+    assert excerpt and excerpt.group(1) == opening
+    assert bio in html
