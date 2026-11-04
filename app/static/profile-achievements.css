@@ -181,4 +181,11 @@ html[data-theme] .profile-privacy-panel input.privacy-switch:checked { backgroun
 html[data-theme="light"] .profile-banner-toolbar { border-color: #614a3026; }
 @media (max-width: 650px) { .profile-achievements { scroll-margin-top: 170px; } .achievement-showcase, .achievement-gallery { grid-template-columns: minmax(0, 1fr); } .achievement-card { flex-direction: row; } .achievement-progress { flex-wrap: wrap; } .achievement-progress progress { flex-basis: 30%; } .profile-banner .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-banner .profile-metrics dt { min-height: 0; } .profile-banner.profile-overview-hero { min-height: 0; } .profile-banner .profile-identity { flex-basis: auto; } }
 
-.profile-wishlist-link { color: inherit; text-underline-offset: .25em; }
+.profile-visitor-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+.profile-banner .profile-wishlist-link { display: inline-flex; align-items: center; gap: .55rem; min-height: 40px; padding: .55rem .85rem; border: 1px solid #e5d3ad66; border-radius: 9px; background: #11171bc7; color: #ffd18b; font-size: .75rem; font-weight: 600; line-height: 1.2; text-decoration: none; transition: background 160ms ease, border-color 160ms ease; }
+.profile-wishlist-link svg { flex: 0 0 auto; }
+.profile-banner .profile-wishlist-link:hover { border-color: #ffd18b; background: #20242aed; }
+.profile-banner .profile-wishlist-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+html[data-theme="light"] .profile-banner .profile-wishlist-link { color: #80541f; border-color: #bda17b; background: #fffaf0ed; }
+html[data-theme="light"] .profile-banner .profile-wishlist-link:hover { background: #f4e5cb; border-color: #80541f; }
+@media (prefers-reduced-motion: reduce) { .profile-banner .profile-wishlist-link { transition: none; } }
