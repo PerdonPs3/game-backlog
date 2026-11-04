@@ -55,7 +55,7 @@ def test_workspace_has_vestigium_brand_and_home_link(client, path):
     assert 'class="workspace-brand" href="/"' in html
     assert "Vestigium" in html
     assert 'href="/library"' in html
-    assert "View on GitHub" in html
+    assert 'class="github-profile"' in html
 
 
 def test_homepage_actions_distinguish_visitors_from_signed_in_members(accounts):
