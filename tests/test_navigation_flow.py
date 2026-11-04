@@ -305,6 +305,18 @@ def test_library_and_wishlist_search_scopes_are_distinct_from_catalog(accounts):
     assert parsed.matching('input', id='title-search')[0]['name'] == 'q'
 
 
+def test_discover_has_one_catalog_search_entry_for_visitors_and_members(accounts):
+    fake_catalog(accounts)
+    accounts.extensions['igdb_client'].get_discovery_games.return_value = []
+    alice = sign_in(accounts, 'alice')
+    for client in (alice, accounts.test_client()):
+        page = client.get('/discover')
+        assert page.status_code == 200
+        parsed = FlowElements(page.text)
+        assert not parsed.matching('form', **{'aria-label': 'Search the game catalog'})
+        assert len(parsed.matching('a', href='/discover/browse')) == 1
+
+
 def test_connections_has_one_contextual_find_players_action(accounts):
     from tests.test_game_reviews import public_author
     alice = public_author(accounts, 'alice')
