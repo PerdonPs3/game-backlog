@@ -12,6 +12,8 @@
     <div class="profile-identity">
         <div class="profile-name-row"><h1{% if profile.display_name|length > 30 %} title="{{ profile.display_name }}"{% endif %}>{{ profile.display_name|truncate(30, true, '…', 0) }}</h1>{{ country_flag(profile.country_code) }}{{ admin_badge(profile.admin_badge) }}</div>
         {% if profile.username %}<p class="profile-public-handle">@{{ profile.username }}</p>{% endif %}
+    </div>
+        {% if not owner and profile.share_wishlist %}<div class="profile-visitor-actions"><a class="profile-wishlist-link" href="{{ url_for('wishlist.public', username=profile.username) }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"/><path d="M9 9h6m-3-3v6"/></svg><span>Wishlist</span></a></div>{% endif %}
         {% if profile.bio|length > 220 %}
         <details class="profile-overview-bio profile-bio-expand">
             <summary aria-label="Read full bio">
@@ -21,8 +23,6 @@
             </summary>
         </details>
         {% elif profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
-    </div>
-        {% if not owner and profile.share_wishlist %}<div class="profile-visitor-actions"><a class="profile-wishlist-link" href="{{ url_for('wishlist.public', username=profile.username) }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"/><path d="M9 9h6m-3-3v6"/></svg><span>Wishlist</span></a></div>{% endif %}
     </div>
     {% if stats is not none %}{{ profile_metrics(stats, 'Your gaming progress' if owner else 'Public gaming statistics') }}{% endif %}
     {% if owner %}<div class="profile-banner-toolbar">
