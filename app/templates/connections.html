@@ -5,10 +5,7 @@
 {% block body_class %}library-page workspace-page profile-palette-page connections-page{% endblock %}
 {% block layout_class %}profile-workspace profile-overview connections-workspace{% endblock %}
 {% block workspace_backdrop %}
-<div class="connections-gallery" aria-hidden="true">
-    <img class="connections-gallery-image connections-gallery-night" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-night.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
-    <img class="connections-gallery-image connections-gallery-day" src="{{ url_for('static', filename='images/backgrounds/connections-gallery-day.webp') }}" width="1536" height="1024" alt="" decoding="async" fetchpriority="low">
-</div>
+{% include '_community_gallery.html' %}
 {% endblock %}
 {% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">← Back to profile</a>{% endblock %}
 {% macro icon(name) -%}
@@ -30,7 +27,7 @@
 {% block workspace_hero %}
 <header class="connections-hero">
     <div class="connections-heading"><span class="connections-hero-icon">{{ icon('followers') }}</span><div><h1>{{ 'Your connections' if connection_owner else title }}</h1>{% if not connection_owner %}<a href="{{ url_for('profiles.public_profile', username=username) }}">@{{ username }}</a>{% endif %}</div></div>
-    {% if connection_owner %}<nav class="connections-summary" aria-label="Your connection counts">{% for view in ['followers', 'following', 'requests'] %}<a href="{{ url_for('following.manage', view=view) }}"><strong>{{ totals[view] }}</strong><span>{{ 'Requests' if view == 'requests' else views[view] }}</span></a>{% endfor %}</nav>{% endif %}
+
 </header>
 {% endblock %}
 {% block panel_label %}{{ title }}{% endblock %}
@@ -44,7 +41,7 @@
 </aside>
 {% endif %}
 <section class="connection-content" aria-labelledby="connection-list-title">
-    <header class="connection-list-heading"><h2 id="connection-list-title">{{ title }} <span>{{ total }}</span></h2>{% if connection_owner %}<a class="connection-discover" href="{{ url_for('profiles.search') }}">Find players <span aria-hidden="true">↗</span></a>{% endif %}</header>
+    <header class="connection-list-heading"><h2 id="connection-list-title">{{ title }}{% if not connection_owner %} <span>{{ total }}</span>{% endif %}</h2></header>
 {% if connection_owner %}
     <details class="connection-find"><summary>{{ icon('plus') }}Follow by username<span aria-hidden="true">⌄</span></summary><form class="connection-username-form" method="post" action="{{ url_for('following.follow_by_username') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="visually-hidden" for="follow-username">Exact @username</label><div><span aria-hidden="true">@</span><input id="follow-username" name="username" minlength="3" maxlength="25" pattern="@?[A-Za-z][A-Za-z0-9_]{2,23}" title="Use 3–24 letters, numbers, or underscores, starting with a letter." placeholder="player_name" aria-describedby="follow-username-hint" required autocomplete="off" spellcheck="false"><button class="connection-button is-primary" type="submit">Follow player</button></div><small id="follow-username-hint">Private players must approve your request. Following never unlocks a private profile.</small></form></details>
     {% if kind == 'blocked' %}<p class="connection-note">Unblocking does not restore previous connections. Public content remains accessible when signed out.</p>{% endif %}

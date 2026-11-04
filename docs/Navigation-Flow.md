@@ -76,9 +76,13 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
 - Library section tabs belong to the four library rooms. Add game uses the main
   Library link and Cancel without a redundant header return bar. Editing and
   other child forms retain contextual returns without a second row of room tabs.
-- Connections keeps one contextual Find players action in the list heading,
-  alongside the main/section navigation, instead of repeating it in the sidebar
-  and empty state. Exact-username requests remain a separate, useful action.
+- Connections uses its Community section tab to reach Find players, without
+  another list-heading shortcut. Counts appear once in the list navigation.
+  Exact-username requests remain a separate action for private players.
+- Player lookup omits global catalog search and repeated search instructions.
+  It shares the Connections portrait gallery, with an accessible compact search
+  and public-profile result cards. Query, pagination, and visibility rules remain
+  server-controlled; no directory of private players is exposed.
 - Private notes has one visible section title and a visually hidden form label.
 
 Regression checks cover search → canonical game page → Add game → return,

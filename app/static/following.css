@@ -160,7 +160,10 @@ html[data-theme="light"] body.connections-page {
 .connections-gallery-day { opacity: 0; }
 html[data-theme="light"] .connections-gallery-day { opacity: 1; }
 .connections-gallery::after { content: ''; position: absolute; inset: 0; background: var(--gallery-veil); }
-.connections-page .connections-hero { padding: 1.4rem 1.5rem; border: 1px solid var(--border); border-radius: 18px; background: var(--gallery-hero); box-shadow: 0 10px 30px #0000000d; }
+.connections-page .connections-hero { margin-top: .75rem; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.connections-page .connections-hero h1 { color: var(--accent); font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.connections-page .connections-heading { text-shadow: 0 2px 12px #000b; }
+html[data-theme="light"] .connections-page .connections-heading { text-shadow: 0 1px 0 #fff8ec, 0 0 8px #fff8ec, 0 0 18px #fff8ec; }
 .connections-page .connection-sidebar { padding: .7rem; border: 1px solid var(--border); border-radius: 15px; background: var(--gallery-sidebar); box-shadow: 0 8px 24px #00000012; }
 .connections-page .connection-tabs a { padding-inline: .65rem; gap: .6rem; }
 .connections-page .connection-sidebar-links { margin-inline: .6rem; padding-bottom: .8rem; }
@@ -179,7 +182,7 @@ html:has(body.connections-page)::view-transition-new(root) { animation: gallery-
 }
 @media (max-width: 700px) {
     .connections-gallery-image { object-position: 18% top; }
-    .connections-page .connections-hero { padding: 1.1rem; }
+    .connections-page .connections-hero { padding: 0; }
     .connections-page .connection-sidebar { padding: .4rem; top: auto; border-radius: 12px; }
     .connections-page .connection-content { padding: 1rem; }
     .connections-page .connection-tabs { padding-bottom: .4rem; }

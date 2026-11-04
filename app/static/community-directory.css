@@ -1,0 +1,28 @@
+/* Player lookup belongs to the same gallery as connection management. */
+.player-directory-heading { margin: .75rem 0 1.4rem; }
+.player-directory-heading h1 { margin: 0; color: var(--accent); font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.035em; }
+.player-directory-heading h1 { text-shadow: 0 2px 12px #000b; }
+html[data-theme="light"] .player-directory-heading h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8px #fff8ec, 0 0 18px #fff8ec; }
+.player-directory-page .section-navigation { background: var(--gallery-sidebar); }
+.player-directory-page .workspace-body { margin-top: 0; }
+.player-directory-page .player-search { margin: 0; padding: 1.25rem; background: var(--gallery-sidebar); box-shadow: 0 8px 24px #00000012; }
+.player-directory-page .player-search > div { position: relative; display: flex; flex-direction: row; gap: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--color-field); }
+.player-directory-page .player-search > div:focus-within { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 30%, transparent); outline-offset: 2px; }
+.player-directory-page .player-search input { width: 100%; padding: .9rem 1rem; border: 0; border-radius: 10px; background: transparent; }
+.player-directory-page .player-search input:focus { outline: none; box-shadow: none; }
+.player-directory-page .player-search button { display: grid; place-items: center; flex: 0 0 48px; min-height: 48px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--accent); }
+.player-directory-page .player-search button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.player-directory-page .player-search small { font-size: .72rem; }
+.player-directory-page .player-search-empty { margin-top: 1.25rem; padding: 2.25rem 1.25rem; border: 1px solid var(--border); border-radius: 16px; background: var(--gallery-hero); }
+.player-directory-page .player-search-empty > span { display: inline-grid; place-items: center; width: 60px; height: 60px; border: 1px solid var(--border); border-radius: 50%; background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.player-directory-page .player-search-empty h2 { margin: 1rem 0 .5rem; }
+.player-directory-page .player-search-empty p { margin: 0; line-height: 1.6; }
+.player-directory-page .player-search-count { display: inline-block; margin: 1.4rem 0 0; padding: .4rem .7rem; border-radius: 7px; background: var(--gallery-sidebar); }
+.player-directory-page .player-result { min-height: 106px; background: var(--gallery-card); box-shadow: 0 5px 18px #00000012; }
+.player-directory-page .player-result:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.player-directory-page .profile-search-message { border: 1px solid var(--border); border-radius: 12px; background: var(--gallery-card); }
+@media (max-width: 600px) {
+    .player-directory-heading { margin-block: 1.3rem 1rem; }
+    .player-directory-page .player-search { padding: 1rem; }
+    .player-directory-page .player-result { padding: 1rem; }
+}
