@@ -11,7 +11,13 @@ body.profile-cloister-page { overflow-anchor: none; }
 .profile-banner.profile-overview-hero .profile-identity { grid-column: 2; width: auto; padding-top: 1rem; }
 .profile-banner.profile-overview-hero .profile-name-row h1 { color: var(--text); font-size: clamp(1.4rem, 2.3vw, 2rem); }
 .profile-banner.profile-overview-hero .profile-public-handle { color: var(--text-muted); margin: .35rem 0 .65rem; overflow-wrap: anywhere; }
-.profile-banner.profile-overview-hero .profile-overview-bio { grid-column: 1 / -1; grid-row: 2; max-width: none; margin: 0; color: var(--text-muted); }
+.profile-banner .profile-about { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: .1rem 0 .1rem .85rem; border-left: 2px solid color-mix(in srgb, var(--accent) 60%, var(--border)); }
+.profile-about > h2 { display: flex; align-items: center; gap: .4rem; margin: 0 0 .55rem; color: var(--accent); font-size: .65rem; font-weight: 600; letter-spacing: .1em; line-height: 1.4; text-transform: uppercase; }
+.profile-about > h2 svg { flex-shrink: 0; }
+.profile-banner.profile-overview-hero .profile-overview-bio { max-width: none; margin: 0; color: var(--text-muted); }
+.profile-banner .profile-about .profile-overview-bio { font-size: .85rem; line-height: 1.75; }
+.profile-about .profile-bio-expand:not([open]) .profile-bio-more, .profile-about .profile-bio-expand[open] .profile-bio-less { display: flex; align-items: center; gap: .3rem; width: fit-content; min-height: 28px; margin-top: .6rem; padding: .25rem .45rem; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); border-radius: 6px; background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); color: var(--accent); font-size: .75rem; line-height: 16px; }
+.profile-about :is(.profile-bio-more, .profile-bio-less) svg { display: block; flex-shrink: 0; }
 .profile-banner.profile-overview-hero .profile-visitor-actions { grid-column: 3; grid-row: 1; align-self: start; margin: 1rem 0 0; }
 .profile-banner.profile-overview-hero .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; width: 100%; margin: 0; padding: 1.1rem 1.75rem .9rem; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--accent) 3%, transparent); }
 .profile-banner.profile-overview-hero .summary-stat { min-width: 0; min-height: 86px; padding: 0 1.25rem; border: 0; border-radius: 0; background: none; box-shadow: none; }
@@ -33,10 +39,10 @@ html[data-theme] .profile-banner.profile-overview-hero .summary-stat { backgroun
     .profile-banner.profile-overview-hero .profile-name-row { grid-column: 2; grid-row: 1; padding-top: .7rem; }
     .profile-banner.profile-overview-hero .profile-name-row h1 { font-size: 1.35rem; }
     .profile-banner.profile-overview-hero .profile-public-handle { grid-column: 2; grid-row: 2; margin: 0; font-size: .7rem; }
-    .profile-banner.profile-overview-hero .profile-overview-bio, .profile-banner.profile-overview-hero .profile-visitor-actions { grid-column: 1 / -1; margin: .25rem 0 0; }
+    .profile-banner.profile-overview-hero .profile-about, .profile-banner.profile-overview-hero .profile-visitor-actions { grid-column: 1 / -1; margin: .25rem 0 0; }
     .profile-banner.profile-overview-hero .profile-visitor-actions { grid-row: 3; }
-    .profile-banner.profile-overview-hero .profile-overview-bio { grid-row: 3; }
-    .profile-banner.profile-overview-hero .profile-banner-summary:has(.profile-visitor-actions) .profile-overview-bio { grid-row: 4; }
+    .profile-banner.profile-overview-hero .profile-about { grid-row: 3; }
+    .profile-banner.profile-overview-hero .profile-banner-summary:has(.profile-visitor-actions) .profile-about { grid-row: 4; }
     .profile-banner.profile-overview-hero .profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 1rem 1.1rem .8rem; }
     .profile-banner.profile-overview-hero .summary-stat { min-height: 80px; padding: 0 1rem; }
     .profile-banner.profile-overview-hero .summary-stat:nth-child(odd) { padding-left: 0; border-left: 0; }

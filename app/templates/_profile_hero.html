@@ -14,16 +14,19 @@
         {% if profile.username %}<p class="profile-public-handle">@{{ profile.username }}</p>{% endif %}
     </div>
         {% if not owner and profile.share_wishlist %}<div class="profile-visitor-actions"><a class="profile-wishlist-link" href="{{ url_for('wishlist.public', username=profile.username) }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"/><path d="M9 9h6m-3-3v6"/></svg><span>Wishlist</span></a></div>{% endif %}
+        {% if profile.bio %}<section class="profile-about" aria-labelledby="profile-about-title">
+        <h2 id="profile-about-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 12.2a6 6 0 0 0-8.4-8.4L3 12.5V21h8.5Z"/><path d="M16 8 2 22m7-7h4"/></svg>About</h2>
         {% if profile.bio|length > 220 %}
         {% set opening_paragraph = profile.bio.replace('\r\n', '\n').strip().split('\n\n', 1)[0] %}
         <details class="profile-overview-bio profile-bio-expand">
             <summary aria-label="Read full bio">
                 <span class="profile-bio-excerpt">{{ opening_paragraph.split()|join(' ')|truncate(180, false, '…', 0) }}</span>
                 <span class="profile-bio-full">{{ profile.bio }}</span>
-                <span class="profile-bio-more">Read more</span><span class="profile-bio-less">Show less</span>
+                <span class="profile-bio-more">Read more<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="profile-bio-less">Show less<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></span>
             </summary>
         </details>
         {% elif profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
+        </section>{% endif %}
     </div>
     {% if stats is not none %}{{ profile_metrics(stats, 'Your gaming progress' if owner else 'Public gaming statistics') }}{% endif %}
     {% if owner %}<div class="profile-banner-toolbar">
