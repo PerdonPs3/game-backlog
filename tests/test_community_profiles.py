@@ -94,15 +94,23 @@ def test_spoilers_are_escaped_and_inside_a_closed_disclosure(accounts):
     assert '&lt;script&gt;spoiler()&lt;/script&gt;' in html and '<script>spoiler()' not in html
 
 
-def test_review_pagination_is_bounded_and_preserves_profile_route(accounts):
+@pytest.mark.parametrize('review_count', [11, 31])
+def test_review_pagination_is_bounded_and_preserves_profile_route(accounts, review_count):
     catalog=fake_catalog(accounts);public_author(accounts,'alice')
-    for n in range(11):add_review(accounts,catalog_id=200+n,body=f'REVIEW-{n:02d}')
+    for n in range(review_count):add_review(accounts,catalog_id=200+n,body=f'REVIEW-{n:02d}')
     first=accounts.test_client().get('/players/alice_player').get_data(as_text=True)
     assert first.count('class="community-review profile-review-card"')==10
     assert '/players/alice_player?reviews_page=2#public-reviews' in first
     assert len(catalog.get_game_cards.call_args.args[0])==10
-    second=accounts.test_client().get('/players/alice_player?reviews_page=2').get_data(as_text=True)
-    assert second.count('class="community-review profile-review-card"')==1 and 'REVIEW-00' in second
+    last_page = (review_count + 9) // 10
+    for page_number in range(2, last_page + 1):
+        html = accounts.test_client().get(f'/players/alice_player?reviews_page={page_number}').get_data(as_text=True)
+        assert html.count('class="community-review profile-review-card"') == min(10, review_count - (page_number - 1) * 10)
+        assert f'/players/alice_player?reviews_page={page_number - 1}#public-reviews' in html
+        if page_number < last_page:
+            assert f'/players/alice_player?reviews_page={page_number + 1}#public-reviews' in html
+        else:
+            assert 'REVIEW-00' in html and 'Older reviews' not in html
     for page in ['0','-1','10001','abc']:
         assert accounts.test_client().get('/players/alice_player?reviews_page='+page).status_code==400
 

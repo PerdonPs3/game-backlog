@@ -5,6 +5,34 @@ from tests.test_accounts import accounts, sign_in, submit, ALICE, BOB
 from tests.test_public_catalog import fake_catalog
 
 
+def test_display_name_limit_applies_to_setup_and_edits(accounts):
+    owner = sign_in(accounts, 'alice', complete_profile=False)
+    too_long = submit(owner, '/settings/profile', {'display_name': 'N' * 31, 'username': 'alice_player'})
+    assert too_long.status_code == 200 and b'1 to 30 characters' in too_long.data
+    with accounts.app_context():
+        assert get_db().execute('SELECT display_name FROM profiles WHERE id=?', (ALICE,)).fetchone()[0] == ''
+    name = 'N' * 30
+    assert submit(owner, '/settings/profile', {'display_name': name, 'username': 'alice_player', 'bio': 'Keep my bio'}).status_code == 303
+    invalid = submit(owner, '/settings/profile', {'display_name': 'X' * 31, 'bio': 'Must not save'})
+    assert invalid.status_code == 200
+    with accounts.app_context():
+        assert tuple(get_db().execute('SELECT display_name,bio FROM profiles WHERE id=?', (ALICE,)).fetchone()) == (name, 'Keep my bio')
+    assert submit(owner, '/settings/profile', {'display_name': 'Y' * 30, 'bio': 'Keep my bio'}).status_code == 303
+
+
+def test_existing_long_names_are_preserved_and_abbreviated_on_profiles(accounts):
+    owner = sign_in(accounts, 'alice')
+    assert submit(owner, '/account/profile/sharing', {'username': 'alice_player', 'is_public': 'yes'}).status_code == 303
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET display_name=? WHERE id=?', ('L' * 60, ALICE))
+    editor = owner.get('/settings/profile').get_data(as_text=True)
+    assert 'maxlength="30"' in editor and 'Shorten your existing name before saving changes.' in editor
+    public = owner.get('/players/alice_player').get_data(as_text=True)
+    assert f'title="{"L" * 60}">{"L" * 29}…</h1>' in public
+    with accounts.app_context():
+        assert get_db().execute('SELECT display_name FROM profiles WHERE id=?', (ALICE,)).fetchone()[0] == 'L' * 60
+
+
 def test_browser_remembers_login_and_logout_revokes_copied_cookie(accounts):
     client = sign_in(accounts, 'alice')
     with client.session_transaction() as cookie:

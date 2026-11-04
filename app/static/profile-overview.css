@@ -29,6 +29,8 @@
 .profile-text-link { color: var(--accent); font-size: .75rem; text-decoration: none; text-underline-offset: .3em; }
 .profile-text-link:hover { text-decoration: underline; }
 .profile-showcase-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0; }
+#showcase-title { scroll-margin-top: 110px; }
+@media (max-width: 650px) { #showcase-title { scroll-margin-top: 180px; } }
 .profile-featured-game { display: block; position: relative; color: var(--text); text-decoration: none; min-width: 0; border-radius: 10px; }
 .profile-cover.game-card-cover { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 3 / 4; min-height: 0; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--profile-cover); color: var(--text-muted); text-decoration: none; }
 .profile-cover > span { font-size: 2rem; font-weight: 700; }

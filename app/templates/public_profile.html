@@ -10,7 +10,7 @@
 {% block panel %}
 {% include '_profile_connections.html' %}
 {% include '_profile_achievements.html' %}
-{% if showcase %}<section class="profile-section" aria-labelledby="showcase-title"><header class="profile-section-heading"><div><h2 id="showcase-title">My showcase</h2></div></header><ol class="profile-showcase-grid">{% for game in showcase %}<li>{% if game.catalog_id %}<a class="profile-featured-game" href="{{ game_url(game.catalog_id, game.title) }}">{% else %}<div class="profile-featured-game">{% endif %}{{ cover(game) }}<span class="profile-pick-position" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small>{% if game.catalog_id %}</a>{% else %}</div>{% endif %}</li>{% endfor %}</ol></section>{% else %}<section class="profile-section profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>No showcase shared.</h2></section>{% endif %}
+{% if showcase %}<section class="profile-section" aria-labelledby="showcase-title"><header class="profile-section-heading"><div><h2 id="showcase-title">Showcase</h2></div></header><ol class="profile-showcase-grid">{% for game in showcase %}<li>{% if game.catalog_id %}<a class="profile-featured-game" href="{{ game_url(game.catalog_id, game.title, origin=navigation_origin() ~ '#showcase-title') }}">{% else %}<div class="profile-featured-game">{% endif %}{{ cover(game) }}<span class="profile-pick-position" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small>{% if game.catalog_id %}</a>{% else %}</div>{% endif %}</li>{% endfor %}</ol></section>{% else %}<section class="profile-section profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>No showcase shared.</h2></section>{% endif %}
 
 {% if public_activity_enabled %}
 <div class="profile-activity-grid">
@@ -18,7 +18,6 @@
     <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><h2 id="completed-title">Recent completions</h2></header>{{ activity(public_completed, 'No dated completions to show yet.', public=true) }}</section>
 </div>
 {% endif %}
-{% if public_stats is not none and public_stats.average is not none %}<p class="profile-overview-note">Average rating <strong>{{ '%.1f'|format(public_stats.average / 2) }}/5</strong></p>{% endif %}
 {% include '_profile_reviews.html' %}
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}

@@ -5,5 +5,6 @@
     {{ stat_card('Completed', stats.completed, 'completed') }}
     {{ stat_card('Playing', stats.playing, 'playing') }}
     {{ stat_card('Completion', stats.completion_percent, 'completion', suffix='%') }}
+    {% if stats.average is not none %}<div class="profile-rating-summary"><dt><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3L3 9.6l6.2-.9Z"/></svg>Average rating</dt><dd>{{ '%.1f'|format(stats.average / 2) }}<small>/5</small></dd></div>{% endif %}
 </dl>
 {% endmacro %}

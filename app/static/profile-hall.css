@@ -14,6 +14,23 @@ html[data-theme] .profile-hall-page .workspace-hero h1 span { color: inherit; ba
 .profile-hall-page .workspace-body { margin-top: 1.25rem; }
 html[data-theme] .profile-hall-page :is(.player-card, .profile-editor-form) { background: var(--profile-panel); backdrop-filter: blur(10px); box-shadow: 0 12px 35px #0003; }
 .profile-hall-page .player-card { top: 96px; }
+@media (min-width: 761px) {
+    .profile-hall-page .profile-editor { grid-template-columns: minmax(0, 1fr) minmax(240px, 310px); }
+    .profile-hall-page .profile-editor-form { grid-column: 1; grid-row: 1; }
+    .profile-hall-page .player-card { grid-column: 2; grid-row: 1; overflow: visible; }
+    .profile-hall-page .player-card::after {
+        content: ''; position: absolute; top: calc(100% + 1.5rem); left: 1.5rem; right: 1.5rem; height: 48px; pointer-events: none;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 262 48' fill='none' stroke='%23d7ac68' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 24h76m94 0h76M88 24l5-4 5 4-5 4zM164 24l5-4 5 4-5 4z' opacity='.7'/%3E%3Cpath d='M115 13c6-1 11 1 16 5 5-4 10-6 16-5v23c-6-1-11 1-16 4-5-3-10-5-16-4zM131 18v22m-12-21 7 3m-7 3 7 3m10-6 7-3m-7 9 7-3'/%3E%3Cpath d='m131 3 2 3-2 3-2-3z' opacity='.7'/%3E%3C/svg%3E") center / contain no-repeat;
+        filter: drop-shadow(0 1px 3px #17120db3);
+    }
+    html[data-theme="light"] .profile-hall-page .player-card::after {
+        left: 1rem; right: 1rem; height: 56px; border: 1px solid #80541f55; border-radius: 999px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 262 48' fill='none' stroke='%2380541f' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 24h76m94 0h76M88 24l5-4 5 4-5 4zM164 24l5-4 5 4-5 4z' opacity='.7'/%3E%3Cpath d='M115 13c6-1 11 1 16 5 5-4 10-6 16-5v23c-6-1-11 1-16 4-5-3-10-5-16-4zM131 18v22m-12-21 7 3m-7 3 7 3m10-6 7-3m-7 9 7-3'/%3E%3Cpath d='m131 3 2 3-2 3-2-3z' opacity='.7'/%3E%3C/svg%3E");
+        background-color: #fff8e8ed; background-size: calc(100% - 2rem) 44px;
+        box-shadow: 0 3px 12px #38230e1f, inset 0 1px #fffdf7;
+        filter: none;
+    }
+}
 .profile-hall-page .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 95%, transparent); backdrop-filter: blur(12px); }
 .profile-hall-page .site-footer { background: var(--profile-panel, var(--color-canvas)); }
 @media (max-width: 760px) {

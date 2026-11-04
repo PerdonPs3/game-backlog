@@ -108,3 +108,34 @@ def test_short_reviews_remain_visible_and_blank_line_heavy_text_is_collapsed(acc
     with accounts.app_context():
         get_db().execute('UPDATE public_game_reviews SET body=? WHERE owner_id=?',('one\ntwo\nthree\nfour\nfive',ALICE))
     assert b'<details class="profile-review-expand">' in accounts.test_client().get('/players/alice_player').data
+
+
+def test_long_bio_disclosure_preserves_full_text_and_respects_privacy(accounts):
+    public_author(accounts, 'alice')
+    bio = ('A long gaming biography. ' * 18) + '<script>never()</script>'
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET bio=?,share_bio=TRUE WHERE id=?', (bio, ALICE))
+    client = accounts.test_client()
+    html = client.get('/players/alice_player').get_data(as_text=True)
+    assert '<details class="profile-overview-bio profile-bio-expand">' in html
+    assert '<span class="profile-bio-full">' in html
+    assert bio.replace('<script>never()</script>', '&lt;script&gt;never()&lt;/script&gt;') in html
+    assert '<script>never()' not in html
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET share_bio=FALSE WHERE id=?', (ALICE,))
+    hidden = client.get('/players/alice_player').get_data(as_text=True)
+    assert 'A long gaming biography.' not in hidden and 'profile-bio-full' not in hidden
+
+
+@pytest.mark.parametrize('paragraph_break', ['\n\n', '\r\n\r\n'])
+def test_bio_preview_does_not_join_later_paragraphs(accounts, paragraph_break):
+    public_author(accounts, 'alice')
+    opening = 'A first paragraph worth showing.'
+    bio = opening + paragraph_break + ('Currently exploring another world with friends. ' * 7)
+    with accounts.app_context():
+        get_db().execute('UPDATE profiles SET bio=?,share_bio=TRUE WHERE id=?', (bio, ALICE))
+    html = accounts.test_client().get('/players/alice_player').get_data(as_text=True)
+    excerpt = re.search(r'<span class="profile-bio-excerpt">(.*?)</span>', html, re.S)
+    assert excerpt and excerpt.group(1) == opening
+    assert f'<span class="profile-bio-paragraph">{opening}</span>' in html
+    assert ('Currently exploring another world with friends. ' * 7).strip() in html

@@ -1,6 +1,8 @@
 """Canonical navigation, safe returns and public/private game boundaries."""
 
 from urllib.parse import parse_qs, urlsplit
+from html import unescape
+import re
 
 import pytest
 
@@ -14,6 +16,25 @@ from tests.test_public_catalog import fake_catalog
 def seed(app, owner, platform='PC', catalog_id=123, notes='PRIVATE NOTES'):
     with app.app_context():
         return get_db().execute("INSERT INTO games (owner_id,igdb_id,title,platform,status,rating,review) VALUES (?,?,'Portal 2',?,'Playing',9,?) RETURNING id", (owner,catalog_id,platform,notes)).fetchone()[0]
+
+
+def test_showcase_game_return_keeps_profile_section_for_owner_and_visitor(accounts):
+    fake_catalog(accounts)
+    owner = sign_in(accounts, 'alice')
+    assert submit(owner, '/account/profile/sharing', {'username': 'alice_player', 'is_public': 'yes', 'share_showcase': 'yes'}).status_code == 303
+    game_id = seed(accounts, ALICE)
+    with accounts.app_context():
+        get_db().execute('INSERT INTO profile_showcase (owner_id,position,game_id) VALUES (?,1,?)', (ALICE,game_id))
+    for client in (owner, accounts.test_client()):
+        profile = client.get('/players/alice_player').get_data(as_text=True)
+        match = re.search(r'class="profile-featured-game" href="([^"]+)"', profile)
+        assert match
+        game_path = unescape(match.group(1))
+        assert parse_qs(urlsplit(game_path).query)['from'] == ['/players/alice_player#showcase-title']
+        game = client.get(game_path)
+        assert game.status_code == 200
+        assert 'href="/players/alice_player#showcase-title"' in game.get_data(as_text=True)
+        assert 'Back to profile' in game.get_data(as_text=True)
 
 
 def test_library_and_profiles_have_stable_owner_scoped_addresses(accounts):
@@ -282,6 +303,18 @@ def test_library_and_wishlist_search_scopes_are_distinct_from_catalog(accounts):
     assert len(parsed.matching('input', id='title-search', placeholder='Search your library…')) == 1
     assert parsed.matching('form', **{'aria-label': 'Search the game catalog'})[0]['action'] == '/discover/browse'
     assert parsed.matching('input', id='title-search')[0]['name'] == 'q'
+
+
+def test_discover_has_one_catalog_search_entry_for_visitors_and_members(accounts):
+    fake_catalog(accounts)
+    accounts.extensions['igdb_client'].get_discovery_games.return_value = []
+    alice = sign_in(accounts, 'alice')
+    for client in (alice, accounts.test_client()):
+        page = client.get('/discover')
+        assert page.status_code == 200
+        parsed = FlowElements(page.text)
+        assert not parsed.matching('form', **{'aria-label': 'Search the game catalog'})
+        assert len(parsed.matching('a', href='/discover/browse')) == 1
 
 
 def test_connections_has_one_contextual_find_players_action(accounts):

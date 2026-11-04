@@ -1,4 +1,4 @@
-.profile-connections { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.profile-connections { margin-bottom: 1.5rem; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: 14px; background: var(--profile-panel); box-shadow: 0 4px 18px #00000006; }
 .connection-toolbar, .connection-actions, .connection-counts, .connection-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
 .connection-toolbar { justify-content: space-between; }
 .connection-counts a { color: var(--text-muted); text-decoration: none; font-size: .85rem; }
@@ -8,6 +8,29 @@
 .connection-feedback { padding: 1rem; border-left: 3px solid var(--accent); color: var(--text); background: var(--color-panel); }
 .connection-note, .connection-block p { color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
 .connection-block { max-width: 24rem; }
+.profile-connections .connection-counts { gap: .6rem; }
+.profile-connections .connection-counts a { display: inline-flex; align-items: center; gap: .45rem; min-height: 40px; padding: .5rem .7rem; border: 1px solid var(--border); border-radius: 9px; background: color-mix(in srgb, var(--accent) 4%, transparent); font-size: .75rem; line-height: 1.2; }
+.profile-connections .connection-counts strong { margin: 0; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.profile-connections svg { display: block; flex: 0 0 18px; width: 18px; height: 18px; }
+.profile-connections .connection-counts svg { color: var(--accent); }
+.profile-connections .connection-counts a:hover { border-color: var(--accent); color: var(--text); }
+.profile-connections .connection-actions { gap: .5rem; }
+.profile-connections .connection-actions :is(button, .profile-action), .profile-connections .connection-block > summary { display: inline-flex; justify-content: center; align-items: center; gap: .5rem; min-height: 40px; margin: 0; padding: .55rem .8rem; border-radius: 9px; font-size: .75rem; line-height: 1.2; }
+.profile-connections .connection-block { position: relative; }
+.profile-connections .connection-block > summary { list-style: none; border: 1px solid transparent; color: var(--text-muted); cursor: pointer; }
+.profile-connections .connection-block > summary::-webkit-details-marker { display: none; }
+.profile-connections .connection-block > summary:hover, .profile-connections .connection-block[open] > summary { border-color: var(--border); color: var(--text); background: var(--profile-field); }
+.profile-connections :is(a, button, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.profile-connections .connection-block[open] { z-index: 10; }
+.profile-block-confirmation { position: absolute; top: calc(100% + .6rem); right: 0; width: min(300px, calc(100vw - 4rem)); padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--color-panel); box-shadow: 0 12px 30px #0003; }
+.profile-block-confirmation p { margin: 0 0 .8rem; font-size: .75rem; }
+@media (max-width: 650px) {
+    .profile-connections { padding: .75rem; }
+    .profile-connections :is(.connection-counts, .connection-actions) { width: 100%; }
+    .profile-connections .connection-counts a { flex: 1; justify-content: center; }
+    .profile-connections .connection-actions > :is(form, details) { flex: 1; }
+    .profile-connections .connection-actions :is(button, .profile-action), .profile-connections .connection-block > summary { width: 100%; }
+}
 
 .connections-workspace { max-width: 1280px; }
 .connections-page svg { flex-shrink: 0; }

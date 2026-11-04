@@ -1,0 +1,14 @@
+/* A quiet open cloister gives player profiles their own room in the library. */
+body.profile-cloister-page { position: relative; isolation: isolate; --cloister-panel: #171c23ed; --cloister-inset: #10151bed; }
+html[data-theme="light"] body.profile-cloister-page { --cloister-panel: #fff9eded; --cloister-inset: #fffdf6f2; }
+.profile-cloister-backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(#07132124, #07132138), url('images/backgrounds/profile-cloister-night.webp') center top / cover no-repeat; }
+.profile-cloister-backdrop::after { content: ''; position: absolute; inset: 0; background: linear-gradient(#fff5dc0a, #fff5dc1a), url('images/backgrounds/profile-cloister-day.webp') center top / cover no-repeat; opacity: 0; }
+html[data-theme="light"] .profile-cloister-backdrop::after { opacity: 1; }
+html[data-theme-ready] .profile-cloister-backdrop::after { transition: opacity 1600ms ease; }
+html[data-theme] .profile-cloister-page .profile-workspace { --profile-panel: var(--cloister-panel); }
+.profile-cloister-page :is(.profile-section, .profile-connections) { background: var(--cloister-panel); box-shadow: 0 8px 28px #0002; }
+.profile-cloister-page .community-review { background: var(--cloister-inset); }
+.profile-cloister-page .workspace-site-header { background: color-mix(in srgb, var(--color-canvas) 95%, transparent); backdrop-filter: blur(12px); }
+.profile-cloister-page .site-footer { background: var(--cloister-panel); }
+@media (max-width: 650px) { .profile-cloister-backdrop, .profile-cloister-backdrop::after { background-position: 65% top; } }
+@media (prefers-reduced-motion: reduce) { html[data-theme-ready] .profile-cloister-backdrop::after { transition: none; } }

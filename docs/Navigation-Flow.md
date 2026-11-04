@@ -9,6 +9,14 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 - **Community**: Find players and Connections.
 - **Account menu**: My profile, Settings, Data & backups, and Sign out.
 
+Discover uses a compass icon to distinguish recommendations from direct catalog
+lookup. Its recommendations screen offers one Search games entry and omits the
+global search field, as do Browse and Add game. Other screens retain direct
+catalog lookup; library and wishlist inputs filter only their saved entries.
+All page shells use the shared footer: the tagline on the left, IGDB attribution
+and the small brand mark on the right, wrapping on narrow screens. It does not
+repeat the header's brand name or GitHub link.
+
 Settings opens the profile editor, including its privacy controls, without a
 duplicate tab bar. Data & backups is available in the Account menu. Contextual
 return links sit below the header so they remain available on small screens.

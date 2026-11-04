@@ -5,7 +5,7 @@
         <nav class="workspace-nav" aria-label="Site navigation">
             <a class="workspace-brand" href="{{ url_for('main.index') if account_user else url_for('main.welcome') }}"><span>Vestigium</span></a>
         </nav>
-        {% if request.endpoint not in ['main.welcome', 'explore.index', 'main.create'] %}
+        {% if request.endpoint not in ['main.welcome', 'discovery.index', 'explore.index', 'main.create'] %}
         <form class="header-search" action="{{ url_for('explore.index') }}" method="get" role="search" aria-label="Search the game catalog">
             <input type="search" name="q" placeholder="Search all games…" aria-label="Search all games" minlength="2" maxlength="200" spellcheck="false" autocapitalize="none" autocorrect="off" required>
             <button type="submit" aria-label="Search catalog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
@@ -19,7 +19,12 @@
 
 {% macro site_footer() %}
 <footer class="site-footer workspace-footer">
-    <span>Vestigium · Every game leaves a mark.</span>
-    <div class="site-footer-links"><span>Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a> · <a href="https://github.com/PerdonPs3/game-backlog" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></span>{% include '_brand_easter_egg.html' %}</div>
+    <div class="site-footer-inner">
+        <p>Every game leaves a mark.</p>
+        <div class="site-footer-credit-group">
+            <span class="site-footer-credit">Covers and game data by <a href="https://www.igdb.com/" target="_blank" rel="noopener noreferrer">IGDB</a></span>
+            {% include '_brand_easter_egg.html' %}
+        </div>
+    </div>
 </footer>
 {% endmacro %}
