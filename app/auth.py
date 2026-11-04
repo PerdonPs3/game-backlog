@@ -368,8 +368,8 @@ def profile():
         photo = None
         upload = request.files.get("photo")
         remove_photo = request.form.get("remove_photo") == "yes"
-        if not 1 <= len(name) <= 60 or len(bio) > 500 or avatar not in ("controller", "star", "ghost", "rocket") or any(ord(char) < 32 for char in name):
-            error = "Choose a name with 1 to 60 characters, a bio up to 500 characters, and an available avatar."
+        if not 1 <= len(name) <= 30 or len(bio) > 500 or avatar not in ("controller", "star", "ghost", "rocket") or any(ord(char) < 32 for char in name):
+            error = "Choose a name with 1 to 30 characters, a bio up to 500 characters, and an available avatar."
         elif not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
             error = "Choose a valid profile color."
         else:

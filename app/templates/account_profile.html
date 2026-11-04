@@ -70,8 +70,8 @@
         {% if error %}<p class="profile-error" role="alert">{{ error }} If you selected a new photo, select it again before saving.</p>{% endif %}
         <div class="profile-field">
             <label for="display-name">Display name <span>Required</span></label>
-            <input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ display_name }}" aria-describedby="display-name-hint">
-            <p id="display-name-hint" class="profile-field-hint">You can change your display name anytime.</p>
+            <input id="display-name" name="display_name" autocomplete="nickname" maxlength="30" required value="{{ display_name }}" aria-describedby="display-name-hint">
+            <p id="display-name-hint" class="profile-field-hint">Up to 30 characters. You can change your display name anytime.{% if display_name|length > 30 %} Shorten your existing name before saving changes.{% endif %}</p>
         </div>
         <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" data-reserved-usernames='{{ username_reserved|tojson }}' name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username if username_state.locked else request.form.get('username', profile.username or '') }}" {% if username_state.locked %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores; start with a letter.{% if username_state.locked %} Available again on <time datetime="{{ username_state.available_iso }}">{{ username_state.available_at }}</time>.{% else %} Changes allowed every 30 days.{% endif %}</p></div>
         <div class="profile-field profile-country-field">
