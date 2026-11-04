@@ -1,6 +1,9 @@
 {% from '_profile_country.html' import country_flag %}
 {% from '_profile_badges.html' import admin_badge %}
 {% from '_profile_metrics.html' import profile_metrics %}
+{% macro bio_paragraphs(bio) -%}
+{% for paragraph in bio.replace('\r\n', '\n').split('\n\n') if paragraph.strip() %}<span class="profile-bio-paragraph">{{ paragraph.strip() }}</span>{% endfor %}
+{%- endmacro %}
 {% macro profile_hero(profile, stats=none, owner=false) %}
 <header class="profile-overview-hero profile-banner background-{{ profile.background_key }}{% if profile.display_name|length > 36 or profile.bio|length > 220 %} profile-banner-long-identity{% endif %}">
     <div class="profile-banner-art" aria-hidden="true">
@@ -21,11 +24,11 @@
         <details class="profile-overview-bio profile-bio-expand">
             <summary aria-label="Read full bio">
                 <span class="profile-bio-excerpt">{{ opening_paragraph.split()|join(' ')|truncate(180, false, '…', 0) }}</span>
-                <span class="profile-bio-full">{{ profile.bio }}</span>
+                <span class="profile-bio-full">{{ bio_paragraphs(profile.bio) }}</span>
                 <span class="profile-bio-more">Read more<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="profile-bio-less">Show less<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></span>
             </summary>
         </details>
-        {% elif profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
+        {% elif profile.bio %}<p class="profile-overview-bio">{{ bio_paragraphs(profile.bio) }}</p>{% endif %}
         </section>{% endif %}
     </div>
     {% if stats is not none %}{{ profile_metrics(stats, 'Your gaming progress' if owner else 'Public gaming statistics') }}{% endif %}

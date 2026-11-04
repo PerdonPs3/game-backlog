@@ -11,11 +11,15 @@ body.profile-cloister-page { overflow-anchor: none; }
 .profile-banner.profile-overview-hero .profile-identity { grid-column: 2; width: auto; padding-top: 1rem; }
 .profile-banner.profile-overview-hero .profile-name-row h1 { color: var(--text); font-size: clamp(1.4rem, 2.3vw, 2rem); }
 .profile-banner.profile-overview-hero .profile-public-handle { color: var(--text-muted); margin: .35rem 0 .65rem; overflow-wrap: anywhere; }
-.profile-banner .profile-about { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: .1rem 0 .1rem .85rem; border-left: 2px solid color-mix(in srgb, var(--accent) 60%, var(--border)); }
-.profile-about > h2 { display: flex; align-items: center; gap: .4rem; margin: 0 0 .55rem; color: var(--accent); font-size: .65rem; font-weight: 600; letter-spacing: .1em; line-height: 1.4; text-transform: uppercase; }
+.profile-banner .profile-about { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding: .1rem 0; }
+.profile-about > h2 { display: flex; align-items: center; gap: .45rem; margin: 0 0 .65rem; color: var(--accent); font-size: .7rem; font-weight: 600; letter-spacing: .06em; line-height: 1.4; text-transform: uppercase; }
+.profile-about > h2::after { content: ''; width: 64px; height: 1px; margin-left: .25rem; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 50%, transparent), transparent); }
 .profile-about > h2 svg { flex-shrink: 0; }
 .profile-banner.profile-overview-hero .profile-overview-bio { max-width: none; margin: 0; color: var(--text-muted); }
-.profile-banner .profile-about .profile-overview-bio { font-size: .85rem; line-height: 1.75; }
+.profile-banner .profile-about .profile-overview-bio { font-size: .85rem; line-height: 1.65; white-space: normal; }
+.profile-banner .profile-about .profile-bio-expand .profile-bio-full { white-space: normal; }
+.profile-bio-paragraph { display: block; white-space: pre-line; overflow-wrap: anywhere; }
+.profile-bio-paragraph + .profile-bio-paragraph { margin-top: .7rem; }
 .profile-about .profile-bio-expand:not([open]) .profile-bio-more, .profile-about .profile-bio-expand[open] .profile-bio-less { display: flex; align-items: center; gap: .3rem; width: fit-content; min-height: 28px; margin-top: .6rem; padding: .25rem .45rem; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); border-radius: 6px; background: color-mix(in srgb, var(--accent) 5%, var(--color-panel)); color: var(--accent); font-size: .75rem; line-height: 16px; }
 .profile-about :is(.profile-bio-more, .profile-bio-less) svg { display: block; flex-shrink: 0; }
 .profile-banner.profile-overview-hero .profile-visitor-actions { grid-column: 3; grid-row: 1; align-self: start; margin: 1rem 0 0; }

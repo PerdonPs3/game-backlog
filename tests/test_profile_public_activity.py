@@ -137,4 +137,5 @@ def test_bio_preview_does_not_join_later_paragraphs(accounts, paragraph_break):
     html = accounts.test_client().get('/players/alice_player').get_data(as_text=True)
     excerpt = re.search(r'<span class="profile-bio-excerpt">(.*?)</span>', html, re.S)
     assert excerpt and excerpt.group(1) == opening
-    assert bio in html
+    assert f'<span class="profile-bio-paragraph">{opening}</span>' in html
+    assert ('Currently exploring another world with friends. ' * 7).strip() in html
