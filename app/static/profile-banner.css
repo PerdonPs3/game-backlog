@@ -1,4 +1,5 @@
 /* Keep the personal cover separate from identity and a continuous stat strip. */
+body.profile-cloister-page { overflow-anchor: none; }
 .profile-banner.profile-overview-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; min-height: 0; background: var(--color-panel); }
 .profile-banner.profile-overview-hero::before { display: none; }
 .profile-banner.profile-overview-hero .profile-banner-art { position: relative; grid-column: 1; grid-row: 1; height: 128px; z-index: 0; overflow: hidden; }
@@ -11,7 +12,7 @@
 .profile-banner.profile-overview-hero .profile-name-row h1 { color: var(--text); font-size: clamp(1.4rem, 2.3vw, 2rem); }
 .profile-banner.profile-overview-hero .profile-public-handle { color: var(--text-muted); margin: .35rem 0 .65rem; overflow-wrap: anywhere; }
 .profile-banner.profile-overview-hero .profile-overview-bio { max-width: none; margin: .5rem 0 0; color: var(--text-muted); }
-.profile-banner.profile-overview-hero .profile-visitor-actions { align-self: center; margin: 1rem 0 0; }
+.profile-banner.profile-overview-hero .profile-visitor-actions { align-self: start; margin: 1rem 0 0; }
 .profile-banner.profile-overview-hero .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; width: 100%; margin: 0; padding: 1.1rem 1.75rem .9rem; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--accent) 3%, transparent); }
 .profile-banner.profile-overview-hero .summary-stat { min-width: 0; min-height: 86px; padding: 0 1.25rem; border: 0; border-radius: 0; background: none; box-shadow: none; }
 html[data-theme] .profile-banner.profile-overview-hero .summary-stat { background: none; box-shadow: none; }
