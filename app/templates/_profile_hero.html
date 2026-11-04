@@ -12,7 +12,15 @@
     <div class="profile-identity">
         <div class="profile-name-row"><h1>{{ profile.display_name }}</h1>{{ country_flag(profile.country_code) }}{{ admin_badge(profile.admin_badge) }}</div>
         {% if profile.username %}<p class="profile-public-handle">@{{ profile.username }}</p>{% endif %}
-        {% if profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
+        {% if profile.bio|length > 220 %}
+        <details class="profile-overview-bio profile-bio-expand">
+            <summary aria-label="Read full bio">
+                <span class="profile-bio-excerpt">{{ profile.bio.split()|join(' ')|truncate(180, false, '…', 0) }}</span>
+                <span class="profile-bio-full">{{ profile.bio }}</span>
+                <span class="profile-bio-more">Read more</span><span class="profile-bio-less">Show less</span>
+            </summary>
+        </details>
+        {% elif profile.bio %}<p class="profile-overview-bio">{{ profile.bio }}</p>{% endif %}
         {% if not owner %}<span class="profile-identity-meta">Public profile{% if profile.share_wishlist %} · <a class="profile-wishlist-link" href="{{ url_for('wishlist.public', username=profile.username) }}">Wishlist ↗</a>{% endif %}</span>{% endif %}
     </div>
     </div>
