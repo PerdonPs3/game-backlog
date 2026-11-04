@@ -39,8 +39,7 @@ body.library-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .site-footer.workspace-footer { width: 100%; margin-top: auto; padding: 1.6rem max(1.5rem, env(safe-area-inset-right)); border-top: 1px solid var(--border); background: var(--color-canvas); color: var(--text-muted); font-size: .75rem; text-align: left; }
 .site-footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem 2rem; width: 100%; max-width: 1120px; margin-inline: auto; }
 .site-footer-identity { display: flex; align-items: center; gap: .8rem; }
-.site-footer-identity strong { color: var(--accent); font-size: .95rem; font-weight: 700; }
-.site-footer-identity p { margin: .2rem 0 0; font-size: .75rem; line-height: 1.5; }
+.site-footer-identity p { margin: 0; font-size: .75rem; line-height: 1.5; }
 .site-footer a { color: var(--accent); text-decoration: none; text-underline-offset: .25em; }
 .site-footer a:hover { text-decoration: underline; }
 .site-footer a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 3px; }
