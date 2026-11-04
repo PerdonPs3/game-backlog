@@ -25,6 +25,8 @@ html[data-theme="light"] .profile-bio-expand :is(.profile-bio-more, .profile-bio
 .profile-banner-toolbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding-top: 1rem; border-top: 1px solid #ffffff26; }
 .profile-banner-art { position: absolute; inset: 0; z-index: -2; background: #18232c; }
 .profile-banner-art img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.profile-banner-long-identity .profile-banner-art img { height: auto; aspect-ratio: 8 / 3; min-height: 260px; max-height: 405px; mask-image: linear-gradient(#000 60%, transparent); }
+html[data-theme="light"] .profile-banner-long-identity .profile-banner-art { background: #e5d9c3; }
 .profile-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #0b111ae6, #0c111770 50%, #0b111a4d), linear-gradient(0deg, #101418f0, transparent 80%); }
 .background-aurora .profile-banner-art, .background-preset.background-aurora { background: radial-gradient(ellipse at 70% 0%, #478f8b 0%, transparent 55%), radial-gradient(ellipse at 25% 80%, #684b91 0%, transparent 60%), #102e3b; }
 .background-obsidian .profile-banner-art, .background-preset.background-obsidian { background: radial-gradient(ellipse at 75% 30%, #65513a 0%, transparent 65%), linear-gradient(120deg, #191d25, #303441); }
