@@ -83,6 +83,10 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
   It shares the Connections portrait gallery, with an accessible compact search
   and public-profile result cards. Query, pagination, and visibility rules remain
   server-controlled; no directory of private players is exposed.
+  Before a query, the directory shows public players by account creation time,
+  newest first, with a stable username tie-breaker and 20 cards per page. It uses
+  the same bilateral block exclusion, public-photo rules, and rate limit as
+  lookup. Searching retains exact-username priority and name relevance ordering.
 - Private notes has one visible section title and a visually hidden form label.
 
 Regression checks cover search → canonical game page → Add game → return,

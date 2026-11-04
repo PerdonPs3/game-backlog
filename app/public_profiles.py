@@ -31,19 +31,26 @@ def search():
         abort(400)
     players, count, error = [], 0, None
     status = 200
-    if term:
-        if len(term.lstrip('@')) < 2:
-            error, status = 'Enter at least two characters.', 400
-        elif not current_app.extensions.setdefault('public_player_budget', CatalogBudget()).allow(current_app.config.get('PUBLIC_PLAYER_REQUEST_LIMIT', 60)):
-            error, status = 'Player search is busy. Please try again shortly.', 429
-        else:
-            db = get_db()
-            term = term.lstrip('@')
-            from app.following import unblocked_sql, viewer_id
-            exclusion, values = unblocked_sql('profiles', viewer_id())
-            condition = "is_public = TRUE AND username IS NOT NULL AND length(trim(display_name)) > 0 AND (strpos(lower(display_name), lower(?)) > 0 OR strpos(username, lower(?)) > 0) AND " + exclusion
-            count = db.execute('SELECT COUNT(*) FROM profiles WHERE ' + condition, (term, term, *values)).fetchone()[0]
-            players = db.execute('SELECT display_name, username, avatar_color, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE ' + condition + ' ORDER BY CASE WHEN username = lower(?) THEN 0 ELSE 1 END, lower(display_name), username LIMIT 20 OFFSET ?', (term, term, *values, term, (page - 1) * 20)).fetchall()
+    if term and len(term.lstrip('@')) < 2:
+        error, status = 'Enter at least two characters.', 400
+    elif not current_app.extensions.setdefault('public_player_budget', CatalogBudget()).allow(current_app.config.get('PUBLIC_PLAYER_REQUEST_LIMIT', 60)):
+        error, status = 'Player search is busy. Please try again shortly.', 429
+    else:
+        db = get_db()
+        term = term.lstrip('@')
+        from app.following import unblocked_sql, viewer_id
+        exclusion, values = unblocked_sql('profiles', viewer_id())
+        condition = "is_public = TRUE AND username IS NOT NULL AND length(trim(display_name)) > 0 AND " + exclusion
+        params = list(values)
+        order = 'created_at DESC, username'
+        order_params = []
+        if term:
+            condition += ' AND (strpos(lower(display_name), lower(?)) > 0 OR strpos(username, lower(?)) > 0)'
+            params.extend((term, term))
+            order = 'CASE WHEN username = lower(?) THEN 0 ELSE 1 END, lower(display_name), username'
+            order_params.append(term)
+        count = db.execute('SELECT COUNT(*) FROM profiles WHERE ' + condition, params).fetchone()[0]
+        players = db.execute('SELECT display_name, username, avatar_color, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE ' + condition + ' ORDER BY ' + order + ' LIMIT 20 OFFSET ?', (*params, *order_params, (page - 1) * 20)).fetchall()
     response = current_app.make_response((render_template('players.html', players=players, query=term, total=count, page=page, has_next=page * 20 < count, error=error), status))
     if status == 429:
         response.headers['Retry-After'] = '60'
