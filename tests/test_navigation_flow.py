@@ -322,6 +322,7 @@ def test_connections_uses_section_navigation_to_find_players(accounts):
     alice = public_author(accounts, 'alice')
     page = alice.get('/community/connections')
     assert page.status_code == 200
+    assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
     parsed = FlowElements(page.text)
     links = parsed.matching('a', href='/community/players')
     # Main Community entry and section tab; no third shortcut in the list.
@@ -335,6 +336,7 @@ def test_community_lookup_has_one_search_for_visitors_and_members(accounts):
     for client in (alice, accounts.test_client()):
         page = client.get('/community/players?q=Alexandria')
         assert page.status_code == 200
+        assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
         parsed = FlowElements(page.text)
         assert len(parsed.matching('form', role='search')) == 1
         field = parsed.matching('input', id='player-query')[0]
