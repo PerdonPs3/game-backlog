@@ -36,7 +36,7 @@ def test_public_follow_is_idempotent_and_self_follow_is_rejected(accounts, playe
         assert change(alice).status_code == 303
     assert row(accounts, 'SELECT COUNT(*) FROM player_follows')[0] == 1
     assert row(accounts, 'SELECT state FROM player_follows')[0] == 'accepted'
-    assert b'Following @bob_player' in alice.get('/players/bob_player').data
+    assert b'Following @bob_player' not in alice.get('/players/bob_player').data
     assert b'Unfollow' in alice.get('/players/bob_player').data
     assert change(alice, 'alice_player').status_code == 400
     assert change(alice, action='unfollow').status_code == 303

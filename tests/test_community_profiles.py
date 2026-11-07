@@ -59,6 +59,21 @@ def test_public_and_owner_profiles_share_only_published_reviews(accounts):
     assert catalog.get_game_cards.call_args.args[0]==[123]
 
 
+def test_empty_visitor_profile_omits_sections_but_owner_keeps_setup_prompts(accounts):
+    owner = public_author(accounts, 'alice')
+    for client in (accounts.test_client(), sign_in(accounts, 'bob')):
+        page = client.get('/players/alice_player')
+        assert page.status_code == 200
+        for marker in ('id="badges-title"', 'id="showcase-title"', 'id="playing-title"',
+                       'id="completed-title"', 'id="public-reviews"', 'Public gaming statistics',
+                       'No showcase shared.', 'No badges featured yet.', 'No public reviews to show yet.'):
+            assert marker not in page.text
+    own_page = owner.get('/players/alice_player')
+    assert 'Build your showcase' in own_page.text or 'Add your first game' in own_page.text
+    assert 'id="playing-title"' in own_page.text
+    assert 'id="public-reviews"' in own_page.text
+
+
 def test_privacy_moderation_unpublication_and_catalog_failure(accounts):
     catalog=fake_catalog(accounts)
     alice=public_author(accounts,'alice')

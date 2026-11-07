@@ -4,6 +4,11 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 ## Primary areas
 
+Visitor profiles render only populated public sections: featured badges,
+showcase, activity lists, and published reviews. Zero-game statistics are omitted.
+Owner profiles retain their setup prompts. When connection counts are unshared,
+follow/block actions use a compact strip without a duplicate Following message.
+
 Display names accept 1–20 characters in profile setup and editing. Existing
 longer names remain stored, but profile headings and community cards abbreviate
 them with an ellipsis and retain the full name in a tooltip. Connection-card

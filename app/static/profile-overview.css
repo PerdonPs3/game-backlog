@@ -48,6 +48,7 @@
 .profile-showcase-empty h3, .profile-showcase-empty h2 { margin: 1rem 0 .5rem; font-size: 1.25rem; }
 .profile-showcase-empty p { max-width: 390px; margin: .5rem auto 1.25rem; color: var(--text-muted); font-size: .8rem; line-height: 1.7; }
 .profile-activity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.25rem; margin-top: 1.25rem; }
+.profile-activity-grid:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
 .profile-activity-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 12px #10b98144; }
 .profile-activity-list { list-style: none; padding: 0; margin: 0; }
 .profile-activity-list li + li { border-top: 1px solid var(--profile-line); }

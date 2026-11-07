@@ -1,6 +1,11 @@
 .profile-connections { margin-bottom: 1.5rem; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: 14px; background: var(--profile-panel); box-shadow: 0 4px 18px #00000006; }
 .connection-toolbar, .connection-actions, .connection-counts, .connection-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
 .connection-toolbar { justify-content: space-between; }
+.profile-connections.is-actions-only { width: fit-content; max-width: 100%; margin-left: auto; padding: .5rem .65rem; }
+.profile-connections.is-actions-only .connection-actions { width: auto; }
+.profile-connections.is-actions-only .connection-actions > :is(form, details) { flex: 0 0 auto; }
+.profile-connections.is-actions-only .connection-actions :is(button, summary) { white-space: nowrap; }
+.profile-request-state { color: var(--text-muted); font-size: .75rem; }
 .connection-counts a { color: var(--text-muted); text-decoration: none; font-size: .85rem; }
 .connection-counts strong { color: var(--text); font-size: 1.2rem; margin-right: .3rem; }
 .connection-actions form { margin: 0; }

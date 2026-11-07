@@ -5,19 +5,19 @@
 {% from '_profile_badges.html' import admin_badge %}
 {% block page_title %}{{ profile.display_name }} (@{{ profile.username }}) · Vestigium{% endblock %}
 {% block workspace_return %}<a href="{{ url_for('main.welcome') }}">Discover Vestigium ↗</a>{% endblock %}
-{% block workspace_hero %}{{ profile_hero(profile, public_stats, owner=false) }}{% endblock %}
+{% block workspace_hero %}{{ profile_hero(profile, public_stats if public_stats and public_stats.total else none, owner=false) }}{% endblock %}
 {% block panel_label %}Public player profile{% endblock %}
 {% block panel %}
 {% include '_profile_connections.html' %}
 {% include '_profile_achievements.html' %}
-{% if showcase %}<section class="profile-section" aria-labelledby="showcase-title"><header class="profile-section-heading"><div><h2 id="showcase-title">Showcase</h2></div></header><ol class="profile-showcase-grid">{% for game in showcase %}<li>{% if game.catalog_id %}<a class="profile-featured-game" href="{{ game_url(game.catalog_id, game.title, origin=navigation_origin() ~ '#showcase-title') }}">{% else %}<div class="profile-featured-game">{% endif %}{{ cover(game) }}<span class="profile-pick-position" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small>{% if game.catalog_id %}</a>{% else %}</div>{% endif %}</li>{% endfor %}</ol></section>{% else %}<section class="profile-section profile-showcase-empty"><span class="profile-empty-star" aria-hidden="true">✦</span><h2>No showcase shared.</h2></section>{% endif %}
+{% if showcase %}<section class="profile-section" aria-labelledby="showcase-title"><header class="profile-section-heading"><div><h2 id="showcase-title">Showcase</h2></div></header><ol class="profile-showcase-grid">{% for game in showcase %}<li>{% if game.catalog_id %}<a class="profile-featured-game" href="{{ game_url(game.catalog_id, game.title, origin=navigation_origin() ~ '#showcase-title') }}">{% else %}<div class="profile-featured-game">{% endif %}{{ cover(game) }}<span class="profile-pick-position" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span><strong>{{ game.title }}</strong><small>{{ game.platform }}</small>{% if game.catalog_id %}</a>{% else %}</div>{% endif %}</li>{% endfor %}</ol></section>{% endif %}
 
-{% if public_activity_enabled %}
+{% if public_activity_enabled and (public_playing or public_completed) %}
 <div class="profile-activity-grid">
-    <section class="profile-section" aria-labelledby="playing-title"><header class="profile-section-heading"><h2 id="playing-title">Playing now</h2><span class="profile-activity-dot" aria-hidden="true"></span></header>{{ activity(public_playing, 'No games currently playing.', public=true) }}</section>
-    <section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><h2 id="completed-title">Recent completions</h2></header>{{ activity(public_completed, 'No dated completions to show yet.', public=true) }}</section>
+    {% if public_playing %}<section class="profile-section" aria-labelledby="playing-title"><header class="profile-section-heading"><h2 id="playing-title">Playing now</h2><span class="profile-activity-dot" aria-hidden="true"></span></header>{{ activity(public_playing, '', public=true) }}</section>{% endif %}
+    {% if public_completed %}<section class="profile-section" aria-labelledby="completed-title"><header class="profile-section-heading"><h2 id="completed-title">Recent completions</h2></header>{{ activity(public_completed, '', public=true) }}</section>{% endif %}
 </div>
 {% endif %}
-{% include '_profile_reviews.html' %}
+{% if profile_review_count %}{% include '_profile_reviews.html' %}{% endif %}
 {% endblock %}
 {% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script>{% endblock %}
