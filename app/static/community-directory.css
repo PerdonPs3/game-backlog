@@ -17,7 +17,8 @@ html[data-theme="light"] .player-directory-heading h1 { text-shadow: 0 1px 0 #ff
 .player-directory-page .player-search-empty > span { display: inline-grid; place-items: center; width: 60px; height: 60px; border: 1px solid var(--border); border-radius: 50%; background: color-mix(in srgb, var(--accent) 7%, transparent); }
 .player-directory-page .player-search-empty h2 { margin: 1rem 0 .5rem; }
 .player-directory-page .player-search-empty p { margin: 0; line-height: 1.6; }
-.player-directory-page .player-search-count { display: inline-block; margin: 1.4rem 0 0; padding: .4rem .7rem; border-radius: 7px; background: var(--gallery-sidebar); }
+.player-directory-page .player-search-count { margin: 1.4rem 0 .75rem; padding: 0; color: var(--accent); font-size: .75rem; font-weight: 600; text-shadow: 0 1px 6px #000b; }
+html[data-theme="light"] .player-directory-page .player-search-count { text-shadow: 0 1px 0 #fff8ec, 0 0 8px #fff8ec; }
 .player-directory-page .player-result { min-height: 106px; background: var(--gallery-card); box-shadow: 0 5px 18px #00000012; }
 .player-directory-page .player-result:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .player-directory-page .profile-search-message { border: 1px solid var(--border); border-radius: 12px; background: var(--gallery-card); }
