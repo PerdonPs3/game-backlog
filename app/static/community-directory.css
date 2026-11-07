@@ -7,7 +7,7 @@ html[data-theme="light"] .player-directory-heading h1 { text-shadow: 0 1px 0 #ff
 .player-directory-page .workspace-body { margin-top: 0; }
 .player-directory-page .player-search { margin: 0; padding: 1.25rem; background: var(--gallery-sidebar); box-shadow: 0 8px 24px #00000012; }
 .player-directory-page .player-search > div { position: relative; display: flex; flex-direction: row; gap: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--color-field); }
-.player-directory-page .player-search > div:focus-within { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 30%, transparent); outline-offset: 2px; }
+.player-directory-page .player-search > div:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: none; }
 .player-directory-page .player-search input { width: 100%; padding: .9rem 1rem; border: 0; border-radius: 10px; background: transparent; }
 .player-directory-page .player-search input:focus { outline: none; box-shadow: none; }
 .player-directory-page .player-search button { display: grid; place-items: center; flex: 0 0 48px; min-height: 48px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--accent); }

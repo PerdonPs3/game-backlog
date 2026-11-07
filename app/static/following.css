@@ -73,10 +73,15 @@
 .connection-find > summary::-webkit-details-marker, .connection-options > summary::-webkit-details-marker { display: none; }
 .connection-find > summary > svg { width: 17px; height: 17px; color: var(--accent); }
 .connection-find > summary > span { margin-left: auto; }
+.connection-find-chevron svg { display: block; transition: transform .18s ease; }
+.connection-find[open] .connection-find-chevron svg { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .connection-find-chevron svg { transition: none; } }
 .connection-username-form { padding: 0 1rem 1rem; margin: 0; }
 .connection-username-form > div { display: flex; align-items: center; gap: .5rem; padding-left: .8rem; background: var(--color-field); border: 1px solid var(--border); border-radius: 9px; }
 .connection-username-form > div > span { color: var(--text-muted); }
 .connection-username-form input { min-width: 0; flex: 1; width: auto; border: 0; background: transparent; padding: .8rem .2rem; }
+.connection-username-form > div:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: none; }
+.connection-username-form input:focus { outline: none; box-shadow: none; }
 .connection-username-form > small { display: block; color: var(--text-muted); font-size: .7rem; line-height: 1.7; margin-top: .7rem; }
 .connection-username-form button { margin: .3rem; }
 .connection-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
