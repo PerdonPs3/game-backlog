@@ -84,7 +84,7 @@
 .connection-card-top { position: relative; }
 .connection-identity { display: flex; align-items: center; gap: .9rem; min-width: 0; padding-right: 1.25rem; color: var(--text); text-decoration: none; }
 .connection-avatar { position: relative; flex: 0 0 66px; width: 66px; height: 66px; display: grid; place-items: center; border: 3px solid var(--color-panel); outline: 1px solid color-mix(in srgb, var(--connection-avatar-color) 45%, var(--border)); border-radius: 50%; overflow: hidden; background: var(--connection-avatar-color); color: #fff; box-shadow: 0 3px 12px #00000012; }
-.connection-avatar > svg { width: 46px; height: 46px; opacity: .85; align-self: end; }
+.connection-avatar > svg { display: block; width: 40px; height: 40px; opacity: .9; align-self: center; justify-self: center; }
 .connection-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .connection-player { display: flex; flex-direction: column; gap: .35rem; min-width: 0; overflow-wrap: anywhere; }
 .connection-player > strong { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; font-size: .94rem; line-height: 1.4; letter-spacing: -.015em; }
