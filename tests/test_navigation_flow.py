@@ -317,18 +317,32 @@ def test_discover_has_one_catalog_search_entry_for_visitors_and_members(accounts
         assert len(parsed.matching('a', href='/discover/browse')) == 1
 
 
-def test_connections_has_one_contextual_find_players_action(accounts):
+def test_connections_uses_section_navigation_to_find_players(accounts):
     from tests.test_game_reviews import public_author
     alice = public_author(accounts, 'alice')
     page = alice.get('/community/connections')
     assert page.status_code == 200
+    assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
     parsed = FlowElements(page.text)
     links = parsed.matching('a', href='/community/players')
-    # Main Community entry, section tab, and one contextual action.
-    assert len(links) == 3
-    assert len([link for link in links if link.get('class') == 'connection-discover']) == 1
+    # Main Community entry and section tab; no third shortcut in the list.
+    assert len(links) == 2
     assert 'Follow by username' in page.text
     assert 'Privacy settings' in page.text
+
+
+def test_community_lookup_has_one_search_for_visitors_and_members(accounts):
+    alice = sign_in(accounts, 'alice')
+    for client in (alice, accounts.test_client()):
+        page = client.get('/community/players?q=Alexandria')
+        assert page.status_code == 200
+        if client is alice:
+            assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
+        parsed = FlowElements(page.text)
+        assert len(parsed.matching('form', role='search')) == 1
+        field = parsed.matching('input', id='player-query')[0]
+        assert field['value'] == 'Alexandria'
+        assert len(parsed.matching('label', **{'for': 'player-query'})) == 1
 
 
 def test_search_to_add_and_edit_retains_the_game_and_return_context(accounts):

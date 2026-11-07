@@ -1,5 +1,5 @@
 {% from '_achievement_emblem.html' import emblem %}
-{% if badge_state is not none %}
+{% if badge_state is not none and (profile_owner or badge_state.featured) %}
 <section class="profile-section profile-achievements" id="badges" aria-labelledby="badges-title">
     <header class="profile-section-heading"><div class="badge-heading"><h2 id="badges-title">Badges</h2><span>Featured · {{ badge_state.featured|length }}/3 · {{ badge_state.earned|length }} earned</span></div>{% if profile_owner %}<a class="profile-text-link" href="{{ url_for('auth.profile', _anchor='profile-badges') }}">Customize ↗</a>{% endif %}</header>
     {% if badge_state.featured %}<div class="achievement-showcase">

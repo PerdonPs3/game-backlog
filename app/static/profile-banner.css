@@ -35,7 +35,12 @@ html[data-theme] .profile-banner.profile-overview-hero .summary-stat { backgroun
 .profile-banner.profile-overview-hero .summary-stat:first-child dd { color: var(--accent); }
 .profile-banner.profile-overview-hero .profile-rating-summary { margin-top: .75rem; padding-top: .7rem; border-top: 1px solid var(--border); border-radius: 0; }
 .profile-banner.profile-overview-hero .profile-banner-toolbar { margin: 0; padding: 1rem 1.75rem; border-top: 1px solid var(--border); }
+.profile-banner-social { padding: .75rem 1.75rem; border-top: 1px solid var(--border); }
+.profile-banner-social .profile-connections { width: 100%; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.profile-banner-social .profile-connections.is-actions-only .connection-toolbar { justify-content: flex-end; }
+.profile-banner-social .profile-block-confirmation { top: auto; bottom: calc(100% + .6rem); }
 @media (max-width: 650px) {
+    .profile-banner-social { padding: .75rem 1.1rem; }
     .profile-banner.profile-overview-hero .profile-banner-art { height: 112px; }
     .profile-banner.profile-overview-hero .profile-banner-summary, .profile-banner.profile-overview-hero .profile-banner-summary:has(.profile-visitor-actions) { grid-template-columns: 80px minmax(0, 1fr); gap: .65rem .9rem; padding: 0 1.1rem 1.1rem; }
     .profile-banner.profile-overview-hero .profile-portrait { grid-row: 1 / 3; width: 80px; height: 80px; margin-top: -26px; }

@@ -59,6 +59,21 @@ def test_public_and_owner_profiles_share_only_published_reviews(accounts):
     assert catalog.get_game_cards.call_args.args[0]==[123]
 
 
+def test_empty_visitor_profile_omits_sections_but_owner_keeps_setup_prompts(accounts):
+    owner = public_author(accounts, 'alice')
+    for client in (accounts.test_client(), sign_in(accounts, 'bob')):
+        page = client.get('/players/alice_player')
+        assert page.status_code == 200
+        for marker in ('id="badges-title"', 'id="showcase-title"', 'id="playing-title"',
+                       'id="completed-title"', 'id="public-reviews"', 'Public gaming statistics',
+                       'No showcase shared.', 'No badges featured yet.', 'No public reviews to show yet.'):
+            assert marker not in page.text
+    own_page = owner.get('/players/alice_player')
+    assert 'Build your showcase' in own_page.text or 'Add your first game' in own_page.text
+    assert 'id="playing-title"' in own_page.text
+    assert 'id="public-reviews"' in own_page.text
+
+
 def test_privacy_moderation_unpublication_and_catalog_failure(accounts):
     catalog=fake_catalog(accounts)
     alice=public_author(accounts,'alice')
@@ -120,7 +135,7 @@ def test_player_search_is_public_only_and_never_searches_email_or_aliases(accoun
     with accounts.app_context():
         get_db().execute("UPDATE profiles SET bio='SECRET BIO',share_bio=FALSE WHERE id=?",(ALICE,))
     anon=accounts.test_client()
-    assert b'alice_player' not in anon.get('/community/players').data
+    assert b'/players/alice_player' in anon.get('/community/players').data
     response=anon.get('/community/players?q=@ALICE')
     html=response.get_data(as_text=True)
     assert response.status_code==200 and '/players/alice_player' in html
@@ -160,6 +175,48 @@ def test_search_pagination_and_html_escaping(accounts):
     assert first.count('class="player-result"')==20 and 'page=2' in first and '&lt;Player' in first
     second=accounts.test_client().get('/community/players?q=Player&page=2').get_data(as_text=True)
     assert second.count('class="player-result"')==2
+
+
+def test_directory_lists_newest_public_players_first_with_pagination(accounts):
+    with accounts.app_context():
+        db = get_db()
+        for n in range(23):
+            owner = str(uuid4())
+            db.execute("INSERT INTO profiles (id,display_name,created_at) VALUES (?,?,?)",
+                       (owner, f'New player {n:02d}', f'2026-01-{n+1:02d} 12:00:00'))
+            db.execute('INSERT INTO profile_usernames (username,owner_id) VALUES (?,?)', (f'new_player_{n:02d}', owner))
+            db.execute('UPDATE profiles SET username=?,is_public=TRUE WHERE id=?', (f'new_player_{n:02d}', owner))
+        db.execute("UPDATE profiles SET is_public=FALSE WHERE username='new_player_22'")
+    anonymous = accounts.test_client()
+    first = anonymous.get('/community/players')
+    assert first.status_code == 200
+    assert first.text.count('class="player-result"') == 20
+    assert first.text.index('/players/new_player_21') < first.text.index('/players/new_player_20')
+    assert '/players/new_player_22' not in first.text
+    assert '/players/new_player_00' not in first.text
+    assert 'Newest players' in first.text and 'page=2' in first.text
+    second = anonymous.get('/community/players?page=2')
+    assert second.text.count('class="player-result"') == 2
+    assert '/players/new_player_00' in second.text
+    assert first.headers['Cache-Control'] == 'private, no-store'
+
+
+@pytest.mark.parametrize('blocker,blocked', [(ALICE, BOB), (BOB, ALICE)])
+def test_directory_respects_blocks_in_both_directions(accounts, blocker, blocked):
+    alice = public_author(accounts, 'alice')
+    public_author(accounts, 'bob')
+    with accounts.app_context():
+        get_db().execute('INSERT INTO player_blocks (blocker_id,blocked_id) VALUES (?,?)', (blocker, blocked))
+    assert '/players/bob_player' not in alice.get('/community/players').text
+    assert '/players/bob_player' in accounts.test_client().get('/community/players').text
+
+
+def test_directory_uses_the_existing_public_lookup_rate_limit(accounts):
+    accounts.config['PUBLIC_PLAYER_REQUEST_LIMIT'] = 1
+    anonymous = accounts.test_client()
+    assert anonymous.get('/community/players').status_code == 200
+    limited = anonymous.get('/community/players')
+    assert limited.status_code == 429 and limited.headers['Retry-After'] == '60'
 
 
 def test_public_metadata_is_batched_cached_and_bounded():

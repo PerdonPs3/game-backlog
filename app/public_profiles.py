@@ -31,19 +31,26 @@ def search():
         abort(400)
     players, count, error = [], 0, None
     status = 200
-    if term:
-        if len(term.lstrip('@')) < 2:
-            error, status = 'Enter at least two characters.', 400
-        elif not current_app.extensions.setdefault('public_player_budget', CatalogBudget()).allow(current_app.config.get('PUBLIC_PLAYER_REQUEST_LIMIT', 60)):
-            error, status = 'Player search is busy. Please try again shortly.', 429
-        else:
-            db = get_db()
-            term = term.lstrip('@')
-            from app.following import unblocked_sql, viewer_id
-            exclusion, values = unblocked_sql('profiles', viewer_id())
-            condition = "is_public = TRUE AND username IS NOT NULL AND length(trim(display_name)) > 0 AND (strpos(lower(display_name), lower(?)) > 0 OR strpos(username, lower(?)) > 0) AND " + exclusion
-            count = db.execute('SELECT COUNT(*) FROM profiles WHERE ' + condition, (term, term, *values)).fetchone()[0]
-            players = db.execute('SELECT display_name, username, avatar_color, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE ' + condition + ' ORDER BY CASE WHEN username = lower(?) THEN 0 ELSE 1 END, lower(display_name), username LIMIT 20 OFFSET ?', (term, term, *values, term, (page - 1) * 20)).fetchall()
+    if term and len(term.lstrip('@')) < 2:
+        error, status = 'Enter at least two characters.', 400
+    elif not current_app.extensions.setdefault('public_player_budget', CatalogBudget()).allow(current_app.config.get('PUBLIC_PLAYER_REQUEST_LIMIT', 60)):
+        error, status = 'Player search is busy. Please try again shortly.', 429
+    else:
+        db = get_db()
+        term = term.lstrip('@')
+        from app.following import unblocked_sql, viewer_id
+        exclusion, values = unblocked_sql('profiles', viewer_id())
+        condition = "is_public = TRUE AND username IS NOT NULL AND length(trim(display_name)) > 0 AND " + exclusion
+        params = list(values)
+        order = 'created_at DESC, username'
+        order_params = []
+        if term:
+            condition += ' AND (strpos(lower(display_name), lower(?)) > 0 OR strpos(username, lower(?)) > 0)'
+            params.extend((term, term))
+            order = 'CASE WHEN username = lower(?) THEN 0 ELSE 1 END, lower(display_name), username'
+            order_params.append(term)
+        count = db.execute('SELECT COUNT(*) FROM profiles WHERE ' + condition, params).fetchone()[0]
+        players = db.execute('SELECT display_name, username, avatar_color, country_code, admin_badge, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE ' + condition + ' ORDER BY ' + order + ' LIMIT 20 OFFSET ?', (*params, *order_params, (page - 1) * 20)).fetchall()
     response = current_app.make_response((render_template('players.html', players=players, query=term, total=count, page=page, has_next=page * 20 < count, error=error), status))
     if status == 429:
         response.headers['Retry-After'] = '60'
@@ -180,7 +187,7 @@ def public_profile(username):
         # always resolve directly to the current name, never an alias chain.
         return redirect(url_for('profiles.public_profile', username=identity['username']), code=302)
     # Project only explicitly shared fields; never pass the private profile or game row.
-    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, CASE WHEN share_background THEN background_key ELSE \'obsidian\' END AS background_key, share_wishlist, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
+    item = db.execute('SELECT display_name, username, avatar_color, CASE WHEN share_bio THEN bio ELSE \'\' END AS bio, country_code, admin_badge, CASE WHEN share_background THEN background_key ELSE \'obsidian\' END AS background_key, share_wishlist, EXISTS(SELECT 1 FROM wishlist_games w WHERE w.owner_id = profiles.id) AS has_wishlist, (share_photo AND avatar_image IS NOT NULL) AS has_public_photo FROM profiles WHERE username = ? AND is_public = TRUE', (username,)).fetchone()
     if not item:
         abort(404)
     games = db.execute('SELECT g.title, g.platform, g.cover_image_id, g.igdb_id, s.position FROM profiles p JOIN profile_showcase s ON s.owner_id = p.id JOIN games g ON g.id = s.game_id AND g.owner_id = p.id WHERE p.username = ? AND p.is_public = TRUE AND p.share_showcase = TRUE ORDER BY s.position', (username,)).fetchall()

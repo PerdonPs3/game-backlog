@@ -79,10 +79,10 @@ def test_sharing_requires_normal_completed_session_and_public_output_escapes_tex
     assert anon.get(PATH).location.endswith('/account/login')
     alice = sign_in(accounts, 'alice', complete_profile=False)
     assert alice.get(PATH).location.endswith('/settings/profile')
-    submit(alice, '/settings/profile', {'display_name': '<script>alert(1)</script>', 'username':'safe_player', 'bio': '<img src=x onerror=alert(1)>'})
+    submit(alice, '/settings/profile', {'display_name': '<script>1</script>', 'username':'safe_player', 'bio': '<img src=x onerror=alert(1)>'})
     submit(alice, PATH, {'username': 'safe_player', 'is_public': 'yes', 'share_bio': 'yes'})
     page = anon.get('/players/safe_player').get_data(as_text=True)
-    assert '<script>alert(1)</script>' not in page and '<img src=x' not in page
+    assert '<script>1</script>' not in page and '<img src=x' not in page
     assert '&lt;script&gt;' in page and '&lt;img' in page
     submit(alice, '/account/logout', {}, source=PATH)
     submit(alice, '/account/verify-recovery', {'email': 'alice@example.test', 'code': '123456'})

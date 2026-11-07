@@ -150,6 +150,21 @@ def test_public_wishlist_respects_private_option_and_profile_visibility(accounts
     assert visitor.get(path).status_code == 404
 
 
+def test_profile_wishlist_link_requires_shared_games_and_owner_keeps_access(accounts):
+    fake_catalog(accounts)
+    alice = sign_in(accounts, 'alice')
+    publish(alice)
+    visitor = accounts.test_client()
+    path = '/players/alice_player'
+    assert 'profile-wishlist-link' not in visitor.get(path).text
+    assert 'href="/library/wishlist">Wishlist</a>' in alice.get(path).text
+    assert save(alice).status_code == 303
+    assert 'profile-wishlist-link' in visitor.get(path).text
+    assert submit(alice, '/wishlist/games/123/remove', {}, source='/library/wishlist').status_code == 303
+    assert 'profile-wishlist-link' not in visitor.get(path).text
+    assert 'href="/library/wishlist">Wishlist</a>' in alice.get(path).text
+
+
 def test_editor_can_toggle_sharing_and_legacy_forms_preserve_wishlist_privacy(accounts):
     alice = sign_in(accounts, 'alice')
     publish(alice)

@@ -4,6 +4,19 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 ## Primary areas
 
+Visitor profiles render only populated public sections: featured badges,
+showcase, activity lists, and published reviews. Zero-game statistics are omitted.
+Owner profiles retain their setup prompts. When connection counts are unshared,
+follow/block actions use a compact strip without a duplicate Following message.
+Visitor wishlist links require a shared wishlist with at least one saved game;
+owners retain their managed wishlist link even when it is empty.
+
+Display names accept 1–20 characters in profile setup and editing. Existing
+longer names remain stored, but profile headings and community cards abbreviate
+them with an ellipsis and retain the full name in a tooltip. Connection-card
+names stay on one line even with wide characters. Usernames retain their
+independent 3–24 character limit.
+
 - **Library**: All games, Wishlist, Lists, and Pick a game.
 - **Discover**: For you, Popular picks, and Browse & search. The header search opens the same game catalog.
 - **Community**: Find players and Connections.
@@ -76,9 +89,20 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
 - Library section tabs belong to the four library rooms. Add game uses the main
   Library link and Cancel without a redundant header return bar. Editing and
   other child forms retain contextual returns without a second row of room tabs.
-- Connections keeps one contextual Find players action in the list heading,
-  alongside the main/section navigation, instead of repeating it in the sidebar
-  and empty state. Exact-username requests remain a separate, useful action.
+- Connections uses its Community section tab to reach Find players, without
+  another list-heading shortcut. Counts appear once in the list navigation.
+  Exact-username requests remain a separate action for private players.
+  One contextual link sits beside the page title: Connections on player lookup,
+  Find players on connection lists. No active tab repeats the current title;
+  anonymous lookup omits the owner-only Connections link.
+- Player lookup omits global catalog search and repeated search instructions.
+  It shares the Connections portrait gallery, with an accessible compact search
+  and public-profile result cards. Query, pagination, and visibility rules remain
+  server-controlled; no directory of private players is exposed.
+  Before a query, the directory shows public players by account creation time,
+  newest first, with a stable username tie-breaker and 20 cards per page. It uses
+  the same bilateral block exclusion, public-photo rules, and rate limit as
+  lookup. Searching retains exact-username priority and name relevance ordering.
 - Private notes has one visible section title and a visually hidden form label.
 
 Regression checks cover search → canonical game page → Add game → return,

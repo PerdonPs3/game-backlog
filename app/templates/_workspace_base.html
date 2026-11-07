@@ -23,7 +23,7 @@
     {% endcall %}
     {% block workspace_backdrop %}{% if library_section %}{% include '_library_backdrop.html' %}{% endif %}{% endblock %}
     <main class="workspace-layout {% if library_section %}library-layout {% endif %}{% block layout_class %}{% endblock %}">
-        {% if not library_section %}{% include '_section_nav.html' %}{% endif %}
+        {% if not library_section and navigation_group != 'community' %}{% include '_section_nav.html' %}{% endif %}
         {% block workspace_hero %}
         {% if library_section %}{% include '_library_header.html' %}{% include '_library_toolbar.html' %}{% else %}
         <header class="workspace-hero">
