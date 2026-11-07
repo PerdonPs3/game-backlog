@@ -36,5 +36,6 @@
         <div class="profile-hero-actions"><a class="profile-action" href="{{ url_for('auth.profile') }}">Edit profile <span aria-hidden="true">↗</span></a><a class="profile-action" href="{{ url_for('main.index') }}">Open library</a><a class="profile-action" href="{{ url_for('wishlist.index') }}">Wishlist</a></div>
         <a class="profile-background-action" href="{{ url_for('auth.profile', _anchor='profile-background') }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><path d="m3 17 6-6 4 4 3-3 5 5"/></svg>Change background</a>
     </div>{% endif %}
+    {% if caller is defined %}<div class="profile-banner-social">{{ caller() }}</div>{% endif %}
 </header>
 {% endmacro %}
