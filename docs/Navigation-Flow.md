@@ -8,6 +8,8 @@ Visitor profiles render only populated public sections: featured badges,
 showcase, activity lists, and published reviews. Zero-game statistics are omitted.
 Owner profiles retain their setup prompts. When connection counts are unshared,
 follow/block actions use a compact strip without a duplicate Following message.
+Visitor wishlist links require a shared wishlist with at least one saved game;
+owners retain their managed wishlist link even when it is empty.
 
 Display names accept 1–20 characters in profile setup and editing. Existing
 longer names remain stored, but profile headings and community cards abbreviate
