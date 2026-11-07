@@ -28,6 +28,7 @@
 <header class="connections-hero">
     <div class="connections-heading"><span class="connections-hero-icon">{{ icon('followers') }}</span><div><h1>{{ 'Your connections' if connection_owner else title }}</h1>{% if not connection_owner %}<a href="{{ url_for('profiles.public_profile', username=username) }}">@{{ username }}</a>{% endif %}</div></div>
 
+    {% include '_section_nav.html' %}
 </header>
 {% endblock %}
 {% block panel_label %}{{ title }}{% endblock %}

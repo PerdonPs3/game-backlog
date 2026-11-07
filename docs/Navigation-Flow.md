@@ -79,8 +79,9 @@ Local follow-up on `bugfix/account-avatar-profile-return`, pending review:
 - Connections uses its Community section tab to reach Find players, without
   another list-heading shortcut. Counts appear once in the list navigation.
   Exact-username requests remain a separate action for private players.
-  Community section tabs follow the page title on both lookup and connections,
-  keeping the heading first in visual and keyboard reading order.
+  One contextual link sits beside the page title: Connections on player lookup,
+  Find players on connection lists. No active tab repeats the current title;
+  anonymous lookup omits the owner-only Connections link.
 - Player lookup omits global catalog search and repeated search instructions.
   It shares the Connections portrait gallery, with an accessible compact search
   and public-profile result cards. Query, pagination, and visibility rules remain

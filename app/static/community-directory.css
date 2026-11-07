@@ -1,5 +1,5 @@
 /* Player lookup belongs to the same gallery as connection management. */
-.player-directory-heading { margin: .75rem 0 1.4rem; }
+.player-directory-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem 1.5rem; margin: .75rem 0 1.4rem; }
 .player-directory-heading h1 { margin: 0; color: var(--accent); font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.035em; }
 .player-directory-heading h1 { text-shadow: 0 2px 12px #000b; }
 html[data-theme="light"] .player-directory-heading h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8px #fff8ec, 0 0 18px #fff8ec; }

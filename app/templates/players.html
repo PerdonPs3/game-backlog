@@ -5,7 +5,7 @@
 {% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='community-directory.css') }}">{% endblock %}
 {% block page_title %}Find players · Vestigium{% endblock %}
 {% block workspace_return %}<a href="{{ url_for('explore.index') }}">Explore games</a>{% endblock %}
-{% block workspace_hero %}<header class="player-directory-heading"><h1>Find players</h1></header>{% endblock %}
+{% block workspace_hero %}<header class="player-directory-heading"><h1>Find players</h1>{% include '_section_nav.html' %}</header>{% endblock %}
 {% block panel_label %}Find players{% endblock %}
 {% block panel %}
 <form class="player-search" method="get" action="{{ url_for('profiles.search') }}" role="search" aria-label="Search players">

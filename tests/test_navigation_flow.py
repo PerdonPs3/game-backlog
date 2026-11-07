@@ -336,7 +336,8 @@ def test_community_lookup_has_one_search_for_visitors_and_members(accounts):
     for client in (alice, accounts.test_client()):
         page = client.get('/community/players?q=Alexandria')
         assert page.status_code == 200
-        assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
+        if client is alice:
+            assert page.text.index('<h1>') < page.text.index('aria-label="Community sections"')
         parsed = FlowElements(page.text)
         assert len(parsed.matching('form', role='search')) == 1
         field = parsed.matching('input', id='player-query')[0]
