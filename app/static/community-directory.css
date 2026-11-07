@@ -21,6 +21,7 @@ html[data-theme="light"] .player-directory-heading h1 { text-shadow: 0 1px 0 #ff
 html[data-theme="light"] .player-directory-page .player-search-count { text-shadow: 0 1px 0 #fff8ec, 0 0 8px #fff8ec; }
 .player-directory-page .player-result { min-height: 106px; background: var(--gallery-card); box-shadow: 0 5px 18px #00000012; }
 .player-directory-page .player-result:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.player-display-name { display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
 .player-directory-page .profile-search-message { border: 1px solid var(--border); border-radius: 12px; background: var(--gallery-card); }
 @media (max-width: 600px) {
     .player-directory-heading { margin-block: 1.3rem 1rem; }

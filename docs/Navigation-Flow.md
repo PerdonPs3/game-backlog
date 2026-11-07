@@ -4,6 +4,12 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 ## Primary areas
 
+Display names accept 1–20 characters in profile setup and editing. Existing
+longer names remain stored, but profile headings and community cards abbreviate
+them with an ellipsis and retain the full name in a tooltip. Connection-card
+names stay on one line even with wide characters. Usernames retain their
+independent 3–24 character limit.
+
 - **Library**: All games, Wishlist, Lists, and Pick a game.
 - **Discover**: For you, Popular picks, and Browse & search. The header search opens the same game catalog.
 - **Community**: Find players and Connections.

@@ -88,6 +88,7 @@
 .connection-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .connection-player { display: flex; flex-direction: column; gap: .35rem; min-width: 0; overflow-wrap: anywhere; }
 .connection-player > strong { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; font-size: .94rem; line-height: 1.4; letter-spacing: -.015em; }
+.connection-display-name { display: block; min-width: 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .connection-player > span:not(.profile-country) { color: var(--text-muted); font-size: .75rem; }
 .connection-player .profile-country { margin: .15rem 0 0; width: fit-content; }
 .connection-player .profile-country img { width: 19px; height: 14px; }
