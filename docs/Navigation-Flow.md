@@ -8,8 +8,8 @@ Discover recommendations and catalog lookup share a plain Discover heading over
 the courtyard artwork. For you and Popular picks share a compact mode selector;
 Search games is a separate magnifier action. Genre, platform and mode changes
 update recommendations asynchronously on selection, with an Apply filters
-fallback when JavaScript is unavailable. The lookup has one magnifier submit control; Clear search only appears
-with a title query or community-content selection. Generic card filler is omitted;
+fallback when JavaScript is unavailable. The lookup has one magnifier submit control
+and no separate Clear search link. Generic card filler is omitted;
 personalized cards retain their specific recommendation reasons. General
 explanations are reserved for a future Help page rather than an inline disclosure.
 
