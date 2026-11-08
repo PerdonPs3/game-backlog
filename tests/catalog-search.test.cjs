@@ -36,6 +36,7 @@ function setup(browsing = false, withFilter = false, withPreview = false) {
     if (withFilter) {
         elements['[data-catalog-content]'] = new Element();
         elements['[data-catalog-content]'].value = 'official';
+        elements['[data-catalog-sort]'] = new Element();
     }
     if (withPreview) {
         const previewFields = Object.fromEntries(['[data-entry-title]', '[data-entry-year]', '[data-entry-cover]'].map(key => [key, new Element()]));
@@ -51,6 +52,8 @@ function setup(browsing = false, withFilter = false, withPreview = false) {
     if (browsing) picker.dataset = { catalogUrl: "/explore/suggestions", browseUrl: "/explore/games/0" };
     picker.querySelector = (selector) => elements[selector];
     picker.contains = () => true;
+    picker.submissions = 0;
+    picker.requestSubmit = () => picker.submissions++;
     const document = new Element();
     document.querySelector = (selector) => selector === "[data-catalog-url]" ? picker : elements[selector];
     document.createElement = () => new Element();
@@ -79,6 +82,7 @@ function setup(browsing = false, withFilter = false, withPreview = false) {
     return {
         ...Object.fromEntries(Object.entries(elements).map(([key, value]) => [key.slice(1), value])),
         requests, navigations, content: elements['[data-catalog-content]'],
+        sort: elements['[data-catalog-sort]'], submissions: () => picker.submissions,
         preview: elements['[data-entry-preview]'], previewTitle: elements['[data-entry-title]'],
         previewYear: elements['[data-entry-year]'], previewCover: elements['[data-entry-cover]'],
         selectionPanel: elements['[data-entry-catalog]'], changeGame: elements['[data-entry-change]'],
@@ -180,7 +184,7 @@ test("the entry preview follows only the resolved game and clears when searching
     assert.equal(ui.preview.hidden, false);
     assert.equal(ui.previewTitle.textContent, selected.name);
     assert.equal(ui.previewYear.textContent, selected.year);
-    assert.match(ui.previewCover.children[1].src, /\/t_cover_big\//);
+    assert.match(ui.previewCover.children[1].src, /\/t_cover_big_2x\//);
     assert.equal(ui.selectionPanel.hidden, true);
     assert.equal(ui.changeGame.attributes['aria-expanded'], 'false');
     ui.changeGame.fire('click');
@@ -375,4 +379,25 @@ test('recent title previews respect the selected content scope', async () => {
     assert.equal(ui['catalog-results'].hidden, true);
     const pending = ui.flush();
     ui.requests[1].reply({ games: [] }); await pending;
+});
+
+
+test('catalog sort submits the current query automatically but waits for a valid title', () => {
+    const ui = setup(true, true);
+    ui.sort.fire('change');
+    assert.equal(ui.submissions(), 0);
+    ui['catalog-query'].value = 'Portal';
+    ui.sort.fire('change');
+    assert.equal(ui.submissions(), 1);
+});
+
+
+test('retina autocomplete thumbnails become full-resolution Add game previews', async () => {
+    const ui = setup(false, false, true);
+    const selected = {...original, cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_small_2x/example.jpg'};
+    await ui.search([selected]);
+    const pending = ui['catalog-results'].children[0].fire('click');
+    ui.requests.at(-1).reply({game: selected});
+    await pending;
+    assert.match(ui.previewCover.children[1].src, /\/t_cover_big_2x\//);
 });

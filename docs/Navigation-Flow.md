@@ -4,6 +4,19 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 ## Primary areas
 
+Discover recommendations and catalog lookup share a plain Discover heading over
+the courtyard artwork. For you and Popular picks share a compact mode selector;
+Search games is a separate magnifier action. Genre, platform and mode changes
+update recommendations asynchronously on selection, with an Apply filters
+fallback when JavaScript is unavailable. The lookup has one magnifier submit control
+and no separate Clear search link. Generic card filler is omitted;
+personalized cards retain their specific recommendation reasons. General
+explanations are reserved for a future Help page rather than an inline disclosure.
+
+All three Discover views share Most popular (default), Highest rated (at least
+50 catalog ratings), and Newest releases ordering. The selected order is applied
+before pagination and preserved in page links, game return paths, and mode links.
+
 Visitor profiles render only populated public sections: featured badges,
 showcase, activity lists, and published reviews. Zero-game statistics are omitted.
 Owner profiles retain their setup prompts. When connection counts are unshared,

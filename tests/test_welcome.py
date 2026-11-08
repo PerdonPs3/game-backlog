@@ -16,7 +16,7 @@ def test_welcome_is_private_by_default_and_does_not_access_collection(client, mo
     assert 'href="https://github.com/PerdonPs3/game-backlog"' in html
     assert 'class="welcome-primary"' not in html
     assert 'class="welcome-backdrop" aria-hidden="true"' in html
-    assert "t_cover_big/co4jni.jpg" in html
+    assert "t_cover_big_2x/co4jni.jpg" in html
     assert 'action="/discover/browse"' in html and 'data-catalog-url="/explore/suggestions"' in html
     assert 'href="#your-library"' in html and 'id="how-it-works"' in html
     assert 'class="workspace-site-header"' in html

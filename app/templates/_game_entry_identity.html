@@ -1,6 +1,6 @@
 {% set editing = game is defined %}
 {% set entry_name = game.title if editing else (selected_game.name if selected_game else '') %}
-{% set entry_image = entry_cover if editing else (selected_game.cover_url|replace('/t_cover_small/', '/t_cover_big/') if selected_game and selected_game.cover_url else '') %}
+{% set entry_image = entry_cover if editing else (selected_game.cover_url|replace('/t_cover_small/', '/t_cover_big_2x/')|replace('/t_cover_small_2x/', '/t_cover_big_2x/') if selected_game and selected_game.cover_url else '') %}
 <section class="entry-identity" data-entry-preview{% if not entry_name %} hidden{% endif %} aria-label="Selected game">
     <div class="entry-cover" data-entry-cover>
         <span>No cover</span>

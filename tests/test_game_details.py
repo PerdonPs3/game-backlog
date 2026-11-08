@@ -7,9 +7,9 @@ from app.db import get_db
 
 
 @pytest.mark.parametrize('media,expected', [
-    ({'artworks': [{'image_id': 'art_123'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/art_123.jpg'),
-    ({'artworks': [{'image_id': '../invalid'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_screenshot_huge/shot_123.jpg'),
-    ({'artworks': {}, 'screenshots': [None, {'image_id': 'https://example.com/image'}], 'cover': {'image_id': 'co123'}}, 't_cover_big/co123.jpg'),
+    ({'artworks': [{'image_id': 'art_123'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_1080p/art_123.jpg'),
+    ({'artworks': [{'image_id': '../invalid'}], 'screenshots': [{'image_id': 'shot_123'}]}, 't_1080p/shot_123.jpg'),
+    ({'artworks': {}, 'screenshots': [None, {'image_id': 'https://example.com/image'}], 'cover': {'image_id': 'co123'}}, 't_1080p/co123.jpg'),
 ])
 def test_catalog_backdrop_uses_validated_game_images_only(media, expected):
     assert game_profile(media)['backdrop_url'] == 'https://images.igdb.com/igdb/image/upload/' + expected

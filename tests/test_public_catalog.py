@@ -23,6 +23,36 @@ def fake_catalog(app):
     return catalog
 
 
+def test_catalog_search_orders_popularity_before_pagination(app):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [
+        {**GAME, 'id': number, 'name': f'Match {number:03d}',
+         'total_rating_count': number * 10 if number > 1 else None}
+        for number in range(1, 36)
+    ]
+    client = app.test_client()
+    first = client.get('/discover/browse?q=Match+001').get_data(as_text=True)
+    second = client.get('/discover/browse?q=Match+001&page=2').get_data(as_text=True)
+    assert first.index('Match 035') < first.index('Match 034')
+    assert '>Match 005<' not in first and '>Match 005<' in second
+    assert second.index('>Match 005<') < second.index('>Match 001<')
+
+
+@pytest.mark.parametrize('order,first_id', [('popular', 35), ('rating', 1), ('newest', 35)])
+def test_search_sort_selection_survives_pagination(app, order, first_id):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [
+        {**GAME, 'id': number, 'name': f'Match {number:03d}', 'total_rating_count': 100+number,
+         'total_rating': 100-number, 'first_release_date': number*1000} for number in range(1,36)
+    ]
+    response = app.test_client().get('/discover/browse', query_string={'q': 'Match', 'sort': order})
+    html = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert html.index(f'>Match {first_id:03d}<') < html.index(f'>Match {first_id + (1 if order == "rating" else -1):03d}<')
+    assert f'sort={order}' in html and 'page=2' in html
+    assert app.test_client().get('/discover/browse?q=Match&sort=invalid').status_code == 400
+
+
 def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accounts):
     catalog = fake_catalog(accounts)
     catalog.get_game.side_effect = None
@@ -31,7 +61,7 @@ def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accou
     page = accounts.test_client().get('/games/123/portal-2', follow_redirects=True).get_data(as_text=True)
     assert 'data-media-gallery' in page and '&lt;Trailer&gt;' in page
     assert 'https://www.youtube.com/watch?v=KOiuc9UWz1E' in page
-    assert 't_screenshot_huge/shot_123.jpg' in page
+    assert 't_1080p/shot_123.jpg' in page
     assert '<iframe' not in page
     assert page.index('data-media-gallery') < page.index('About the game')
     catalog.get_game.return_value = GAME
@@ -236,13 +266,31 @@ def test_filtered_search_paginates_and_preserves_the_filter(app):
     catalog.search_games.return_value = [{**GAME, 'id': n, 'name': f'Match {n:03d}'} for n in range(1, 66)]
     client = app.test_client()
     first = client.get('/discover/browse?q=zelda&content=all').get_data(as_text=True)
-    assert 'Match 001' in first and 'Match 030' in first and 'Match 031' not in first
+    assert 'Match 001' in first and 'Match 024' in first and 'Match 025' not in first
+    assert first.count('class="catalog-result"') == 24
     assert 'content=all' in first and 'page=2' in first
     second = client.get('/discover/browse?q=zelda&content=all&page=2').get_data(as_text=True)
-    assert 'Match 031' in second and 'Match 060' in second and 'Match 001' not in second
+    assert 'Match 025' in second and 'Match 048' in second and 'Match 049' not in second
+    assert second.count('class="catalog-result"') == 24
+    final = client.get('/discover/browse?q=zelda&content=all&page=3').get_data(as_text=True)
+    assert final.count('class="catalog-result"') == 17
+    assert 'Match 049' in final and 'Match 065' in final
     catalog.search_games.assert_called_with('zelda', include_community=True)
     client.get('/explore/suggestions?q=zelda&content=official')
     catalog.search_games.assert_called_with('zelda', include_community=False, suggestions=True)
+
+
+def test_all_five_hundred_search_results_remain_reachable(app):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [{**GAME, 'id': number, 'name': f'Match {number:03d}'}
+                                        for number in range(1,501)]
+    client = app.test_client()
+    response = client.get('/discover/browse?q=Match&page=21')
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert html.count('class="catalog-result"') == 20
+    assert '>Match 481<' in html and '>Match 500<' in html and '>Match 480<' not in html
+    assert client.get('/discover/browse?q=Match&page=22').status_code == 400
 
 
 @pytest.mark.parametrize('url', ['/discover/browse?q=zelda&content=invalid', '/discover/browse?q=zelda&page=-1', '/discover/browse?q=zelda&page=oops', '/discover/browse?q=zelda&page=999', '/explore/suggestions?q=zelda&content=invalid', '/catalog/search?q=zelda&content=invalid'])

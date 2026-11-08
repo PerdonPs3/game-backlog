@@ -136,7 +136,7 @@ def test_list_cards_preview_covers_and_invalid_name_keeps_draft_choices(app, cli
         db.commit()
     edit = make_list(post_form)
     post_form(edit, {"name": "Game night", "games": [str(entry)]})
-    assert b"t_cover_big/co_example.jpg" in client.get("/library/lists").data
+    assert b"t_cover_big_2x/co_example.jpg" in client.get("/library/lists").data
     page = post_form(edit, {"name": "", "games": [str(entry)], "view": "selected"})
     assert b"without control characters" in page.data
     assert f'value="{entry}" checked'.encode() in page.data

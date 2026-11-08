@@ -6,6 +6,14 @@ reviewed the local experience and authorized develop integration/publication on
 2026-10-30, subject to final validation. No database migration or new provider is
 required. Production remains separate.
 
+The owner reviewed the follow-up on `refactor/discover-browse-flow` and authorized
+its develop integration/publication on 2026-11-08. It unifies Discover navigation,
+automatic filtering and sorting, in-place wishlist saves, Next-only pagination
+scrolling, complete search rows, and shared higher-resolution game images.
+The [display quality audit](Display-Quality-Audit.md) records image presets and
+responsive page sizes. No new migration, provider, or production publication is
+part of this integration.
+
 ## What appears
 
 Discover is available at `/discover` and in the shared navigation. For you ranks
@@ -16,10 +24,18 @@ and unfinished profiles are redirected through the existing account flow.
 
 Genre and platform filters intersect the results. They are explicit selections
 for this visit, preserved in links and history, rather than new stored profile
-preferences. Forms and pagination work without JavaScript. With JavaScript,
+preferences. Without JavaScript, an Apply filters button submits the form. With JavaScript, genre, platform and mode changes apply immediately;
 updates replace the recommendation workspace without a page reload or scroll
 reset; aborted/stale responses cannot replace newer selections. Failures retain
 the previous results and offer retrying.
+
+Successful Next navigation smoothly positions the results panel eight
+pixels below the visible bottom of the sticky site header, keeping its heading
+and first game row together. It does not scroll to the page title or filters. Reduced
+motion uses an immediate jump, and failed requests do not move the viewport.
+Previous updates the games while preserving the current scroll position. The
+same Next-only behavior applies to For you, Popular picks, and Search games;
+search pagination also replaces only the results without reloading the form.
 
 Every catalog-linked game in the owner's library is excluded, regardless of
 platform or status. Legacy entries without catalog IDs cannot be identified
@@ -27,6 +43,13 @@ reliably and do not contribute preference signals. Wishlist games remain visible
 with an On your wishlist label. Saving uses the existing CSRF-protected,
 provider-revalidated wishlist operation and returns to Discover with its filters.
 Merely viewing or filtering recommendations never writes either collection.
+
+Discover wishlist buttons submit the existing CSRF-protected operation in the
+background. Only a verified successful save replaces that card's action with
+On your wishlist; the URL, filters, results, and scroll position stay in place.
+Repeated clicks while saving are ignored. Failures leave a retryable button and
+an inline error. Recent confirmed saves also survive an overlapping filter
+response. Without JavaScript, the existing POST/redirect flow remains available.
 
 ## Ranking and explanations
 
@@ -50,24 +73,33 @@ Merely viewing or filtering recommendations never writes either collection.
   metadata remains unknown, never inferred from names or descriptions.
 - Explicit gameplay keywords such as Metroidvania, Roguelike, Soulslike and
   Survival horror are normalized through a small vocabulary. Shared mechanics
-  supply stronger evidence and ranking bonuses; generic keyword overlap does
+  supply stronger evidence when choosing an explanation; generic keyword overlap does
   not qualify. These rules apply to all catalog IDs without title exceptions.
-- Rank qualified matches by core-genre affinity, a smaller specific-theme
-  contribution, and shared-core-genre similarity. Negative scores never become
-  personalized recommendations.
+- Qualify matches using core-genre affinity and a smaller specific-theme
+  contribution. Negative scores never become personalized recommendations.
 - Explanations identify an actual positively contributing rated/wished source
   with specific matching traits. A game never explains itself. Hollow Knight
   cannot explain Outlast through Adventure/Indie; Ori's side-view platforming
   can be explained by Hollow Knight rather than Portal 2's first-person play.
-  Popularity breaks score ties. Scores are never
-  presented as predicted enjoyment or similarity percentages.
+  Scores are never presented as predicted enjoyment or similarity percentages.
+- For you, Popular picks, and Search games share a Sort by selector: Most popular
+  (default), Highest rated, and Newest releases. Sort the complete bounded pool
+  before pagination. Highest rated requires at least 50 IGDB total ratings and
+  a valid total rating, then uses popularity to break score ties. Newest releases
+  sorts released dates descending, excludes future releases, and puts unknown
+  dates last. Most popular uses descending IGDB total rating count. Catalog ID
+  breaks remaining ties. Rating volume is a popularity signal, not a quality
+  guarantee. Taste matching qualifies and explains For you picks without
+  overriding the selected order. Source-diversity quotas do not reorder picks.
+  Search sorting applies to the full results page; quick title suggestions keep
+  their existing exact-title matching behavior.
 - Without positive matching evidence, explicitly label the results Popular picks.
   Missing genres and provider failures never invent a preference explanation.
 
 Candidate selection uses up to six positively weighted genres, unless the owner
 explicitly selects a genre; automatic selection omits the three broad genres.
 Each query requests at most 200 released, official
-catalog entries, ordered by rating-count popularity, then applies owner exclusion
+catalog entries, queried using the selected order (and rating minimum when applicable), then applies owner exclusion
 and ranking locally. This is a bounded selection, not the entire catalog. Pages
 contain 12 games. Existing pack, port, variant and community-content exclusions
 also run locally. The platform selector currently offers ten common platforms.

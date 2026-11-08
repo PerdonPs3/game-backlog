@@ -6,6 +6,18 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 For the current priority order and release state, see the
 [product plan](../Product-Plan.md#current-priorities--2026-10-25).
 
+## Planned Help center — 2026-11-08
+
+- [ ] Add a dedicated Help page with browsable topics and frequently asked
+  questions covering the library, wishlist, public reviews, profile privacy,
+  Discover recommendations and sorting. Keep explanations in this destination
+  rather than repeating long help blocks throughout the application. The first
+  version uses authored guides and answers without a chatbot or AI provider.
+
+The owner requested removing Discover's inline "How these picks work" section
+now and building this Help destination later. Recommendation rules and provider
+boundaries remain documented in [Catalog recommendations](../Catalog-Recommendations.md).
+
 ## Active priorities — 2026-10-25
 
 Production accounts, profiles, public game reviews, catalog media, and the guided
@@ -14,8 +26,11 @@ with their passwords and data preserved; future changes are not synchronized.
 Registration/recovery email delivery remains the highest operational priority,
 paused while the owner defers provider setup.
 
-Discover improvements are implemented and reviewed locally, awaiting publication
-authorization. Public reviews on player profiles plus public-name/username
+Discover refinements are reviewed and approved for develop integration/publication
+on 2026-11-08. This closes the current Discover pass: shared navigation, automatic
+filters and sorting, background wishlist saves, Next-only result scrolling,
+complete search rows, and higher-resolution game images. Main remains separate.
+Public reviews on player profiles plus public-name/username
 search are implemented and locally validated; the owner authorized their
 develop publication on 2026-10-25. Migration 013 is applied to hosted development. Then prioritize a separate wishlist,
 status-aware library suggestions, following, and preference-based catalog
@@ -23,7 +38,7 @@ recommendations. A conversational AI layer is a later optional increment with
 explicit cost and privacy decisions. Historical unchecked release-validation
 items below are not a claim that the production account release is still pending.
 
-- [ ] Publish the reviewed Discover increment after explicit authorization.
+- [x] Publish the reviewed Discover increment to develop (owner authorized on 2026-11-08; production publication remains separate).
 - [ ] Validate and publish public profile reviews and public player search.
 - [x] Implement a wishlist separate from owned games, public by default with a privacy opt-out and library transfer (develop publication authorized on 2026-10-25; migrations 015–016 applied to hosted development).
 - [x] Extend the library picker with selected statuses and preference signals, inline roulette reveals in both modes, and day/night salon artwork (reviewed; develop publication authorized on 2026-10-27).

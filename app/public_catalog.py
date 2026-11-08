@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
-from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game
+from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game, sorted_catalog, CATALOG_SORTS
 from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
@@ -16,6 +16,9 @@ from app.wishlist import wish_state
 
 
 explore = Blueprint('explore', __name__)
+SEARCH_PAGE_SIZE = 24
+MAX_SEARCH_RESULTS = 500
+MAX_SEARCH_PAGES = (MAX_SEARCH_RESULTS + SEARCH_PAGE_SIZE - 1) // SEARCH_PAGE_SIZE
 
 
 class CatalogBudget:
@@ -54,11 +57,14 @@ def catalog_card(game):
 def index():
     term = request.args.get('q', '').strip()
     content = request.args.get('content', 'official')
+    sort = request.args.get('sort', 'popular')
+    if sort not in CATALOG_SORTS:
+        abort(400)
     try:
         page = int(request.args.get('page', '1'))
     except ValueError:
         abort(400)
-    if content not in ('official', 'all') or not 1 <= page <= 17:
+    if content not in ('official', 'all') or not 1 <= page <= MAX_SEARCH_PAGES:
         abort(400)
     total = 0
     games, error, status = [], None, 200
@@ -69,17 +75,19 @@ def index():
             error, status = 'The catalog is busy. Please wait a minute and try again.', 429
         else:
             try:
-                results = get_catalog().search_games(term, include_community=content == 'all')[:500]
+                options = {'order': sort} if sort != 'popular' else {}
+                results = get_catalog().search_games(term, include_community=content == 'all', **options)[:MAX_SEARCH_RESULTS]
+                results = sorted_catalog(results, sort)
                 total = len(results)
-                if page > max(1, (total + 29) // 30):
+                if page > max(1, (total + SEARCH_PAGE_SIZE - 1) // SEARCH_PAGE_SIZE):
                     abort(404)
-                games = [catalog_card(game) for game in results[(page - 1) * 30:page * 30]
+                games = [catalog_card(game) for game in results[(page - 1) * SEARCH_PAGE_SIZE:page * SEARCH_PAGE_SIZE]
                          if type(game.get('id')) is int and 0 < game['id'] < 2**63]
             except CatalogError:
                 error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
-    return render_template('explore.html', query=term[:200], games=games, error=error,
+    return render_template('explore.html', query=term[:200], games=games, error=error, sort=sort, catalog_sorts=CATALOG_SORTS,
                            content=content, page=page, total=total,
-                           pages=max(1, (total + 29) // 30)), status
+                           pages=max(1, (total + SEARCH_PAGE_SIZE - 1) // SEARCH_PAGE_SIZE)), status
 
 
 @explore.get('/explore/suggestions')

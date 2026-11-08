@@ -2,7 +2,7 @@
 
 import re
 
-from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for, jsonify
 
 from app.achievements import normal_owner
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, get_catalog
@@ -79,19 +79,24 @@ def continue_selection(catalog_id):
 @wishlist.post('/wishlist/games/<int:catalog_id>/add')
 def add(catalog_id):
     catalog_id_valid(catalog_id)
+    asynchronous = request.accept_mimetypes.best == 'application/json'
     from app.navigation import safe_destination
     discover_return = safe_destination(request.form.get('return_path'))
     if not discover_return and request.form.get('return_to') == 'discover':
         from app.discovery import selected_filters
         genre, platform, mode, _ = selected_filters(request.form)
-        discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode)
+        discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode, sort=request.form.get('sort', 'popular'))
     from app.public_catalog import public_request_allowed
     if not public_request_allowed():
+        if asynchronous:
+            return jsonify(error='The catalog is busy. Please try again shortly.'), 429
         flash('The catalog is busy. Please try saving this game again shortly.', 'wishlist_error')
         return redirect(url_for('wishlist.index'), code=303)
     try:
         game = get_catalog().get_game(catalog_id)
     except CatalogError:
+        if asynchronous:
+            return jsonify(error='The catalog is temporarily unavailable. Your wishlist has not changed.'), 503
         flash('The catalog is temporarily unavailable. Your wishlist has not changed.', 'wishlist_error')
         return redirect(url_for('wishlist.index'), code=303)
     if game is None or game.get('id') != catalog_id:
@@ -109,6 +114,8 @@ def add(catalog_id):
             message = 'Already on your wishlist.'
         elif db.execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id = ?', (owner,)).fetchone()[0] >= MAX_WISHES:
             db.rollback()
+            if asynchronous:
+                return jsonify(error=f'Your wishlist can hold up to {MAX_WISHES} games. Remove a game before saving another.'), 409
             flash(f'Your wishlist can hold up to {MAX_WISHES} games. Remove a game before saving another.', 'wishlist_error')
             return redirect(url_for('wishlist.index'), code=303)
         else:
@@ -119,6 +126,10 @@ def add(catalog_id):
     except Exception:
         db.rollback()
         raise
+    if asynchronous:
+        if not wish_state(catalog_id):
+            return jsonify(error=message), 409
+        return jsonify(saved=True, html=render_template('_discover_saved.html'))
     flash(message, 'wishlist_saved')
     if discover_return:
         return redirect(discover_return, code=303)

@@ -4,16 +4,50 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, IGDBClient, discovery_traits
+from app.catalog import CatalogError, IGDBClient, discovery_traits, sorted_catalog
 from app.db import get_db
 from app.discovery import affinities, preference_sources, rank_candidates
-from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
+from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit, CSRFTokenParser
 
 
 def game(catalog_id, genre='Puzzle', platform=6):
     return {'id': catalog_id, 'name': f'Adventure {catalog_id}',
             'genres': [{'name': genre}], 'platforms': [{'id': platform, 'name': 'PC'}],
             'cover': {'image_id': 'co1rs4'}, 'total_rating_count': 20}
+
+
+def test_catalog_orders_handle_rating_confidence_missing_dates_and_ties():
+    pool = [
+        {**game(1), 'total_rating': 100, 'total_rating_count': 1, 'first_release_date': 300},
+        {**game(2), 'total_rating': 85, 'total_rating_count': 500, 'first_release_date': 100},
+        {**game(3), 'total_rating': 90, 'total_rating_count': 50, 'first_release_date': 200},
+        {**game(4), 'total_rating': None, 'total_rating_count': None},
+        {**game(5), 'total_rating': 90, 'total_rating_count': 100, 'first_release_date': 9999999999},
+    ]
+    assert [game['id'] for game in sorted_catalog(pool)] == [2, 5, 3, 1, 4]
+    assert [game['id'] for game in sorted_catalog(pool, 'rating')] == [5, 3, 2]
+    assert [game['id'] for game in sorted_catalog(pool, 'newest')] == [1, 3, 2, 4]
+    with pytest.raises(ValueError):
+        sorted_catalog(pool, 'invalid')
+
+
+@pytest.mark.parametrize('mode', ['for-you', 'popular'])
+@pytest.mark.parametrize('order,first_id', [('popular', 134), ('rating', 100), ('newest', 134)])
+def test_discover_sort_selection_survives_pagination(accounts, mode, order, first_id):
+    catalog = provider(accounts)
+    client = sign_in(accounts, 'alice')
+    add_rating(accounts, ALICE)
+    catalog.get_discovery_games.return_value = [
+        {**game(index), 'total_rating_count': index, 'total_rating': 200-index,
+         'first_release_date': index * 1000} for index in range(100, 135)
+    ]
+    response = client.get('/discover', query_string={'sort': order, 'mode': mode})
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert html.index(f'Adventure {first_id}') < html.index(f'Adventure {first_id + (1 if order == "rating" else -1)}')
+    assert f'sort={order}' in html and 'page=2' in html
+    assert f'value="{order}" selected' in html
+    assert client.get('/discover?sort=invalid').status_code == 400
 
 
 def provider(app):
@@ -29,6 +63,57 @@ def add_rating(app, owner, catalog_id=10, title='Private favorite', rating=10):
     with app.app_context():
         get_db().execute('INSERT INTO games (owner_id, igdb_id, title, platform, rating) VALUES (?, ?, ?, ?, ?)',
                          (owner, catalog_id, title, 'PC', rating))
+
+
+def test_large_rankings_follow_popularity_without_changing_evidence():
+    genres = ('Puzzle', 'Shooter', 'Racing', 'Fighting', 'Music', 'Strategy')
+    sources = preference_sources([
+        {'id': index, 'igdb_id': index, 'title': genre, 'rating': 10}
+        for index, genre in enumerate(genres, 1)
+    ], [])
+    genre_map = {index: (genre,) for index, genre in enumerate(genres, 1)}
+    candidates = [game(index * 100 + offset, genre)
+                  for index, genre in enumerate(genres, 1) for offset in range(10)]
+    for index, candidate in enumerate(candidates):
+        candidate['total_rating_count'] = index * 10
+    ranked = rank_candidates(candidates, sources, genre_map)
+    assert len(ranked) == 60
+    assert len({candidate['id'] for candidate, _ in ranked}) == 60
+    assert [candidate['total_rating_count'] for candidate, _ in ranked] == list(range(590, -1, -10))
+    for candidate, reason in ranked:
+        assert reason['title'] == candidate['genres'][0]['name']
+        assert reason['genres'] == [reason['title']]
+    assert ranked == rank_candidates(list(reversed(candidates)), sources, genre_map)
+    # A narrow taste profile still receives every valid match rather than empty slots.
+    single = rank_candidates(candidates, sources[:1], {sources[0]['igdb_id']: ('Strategy',)})
+    assert len(single) == 10
+
+
+@pytest.mark.parametrize('mode', ['for-you', 'popular'])
+def test_popularity_is_global_before_recommendation_pagination(accounts, mode):
+    catalog = provider(accounts)
+    client = sign_in(accounts, 'alice')
+    add_rating(accounts, ALICE)
+    catalog.get_discovery_games.return_value = [
+        {**game(index), 'total_rating_count': index * 10} for index in range(100, 125)
+    ]
+    first = client.get('/discover', query_string={'mode': mode}).get_data(as_text=True)
+    second = client.get('/discover', query_string={'mode': mode, 'page': 2}).get_data(as_text=True)
+    assert first.index('Adventure 124') < first.index('Adventure 123')
+    assert 'Adventure 112' not in first and 'Adventure 112' in second
+    assert second.index('Adventure 112') < second.index('Adventure 111')
+
+
+def test_popularity_precedes_strength_of_taste_match_and_missing_counts():
+    sources = preference_sources([
+        {'id': 1, 'igdb_id': 1, 'title': 'Puzzle favorite', 'rating': 8},
+        {'id': 2, 'igdb_id': 2, 'title': 'Shooter favorite', 'rating': 10},
+    ], [])
+    candidates = [{**game(100), 'total_rating_count': 1000},
+                  {**game(200, 'Shooter'), 'total_rating_count': 10},
+                  {**game(300), 'total_rating_count': None}]
+    ranked = rank_candidates(candidates, sources, {1: ('Puzzle',), 2: ('Shooter',)})
+    assert [candidate['id'] for candidate, _ in ranked] == [100, 200, 300]
 
 
 def test_rating_signals_deduplicate_copies_and_outweigh_wishes():
@@ -254,6 +339,51 @@ def test_save_from_card_requires_csrf_revalidates_and_returns_to_filtered_discov
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
 
 
+def wish_json_client(app):
+    client = sign_in(app, 'alice')
+    parser = CSRFTokenParser()
+    parser.feed(client.get('/discover').get_data(as_text=True))
+    return client, {'csrf_token': parser.token, 'return_to': 'discover'}
+
+
+def test_async_wishlist_save_is_verified_idempotent_and_owner_scoped(accounts):
+    catalog = provider(accounts)
+    client, data = wish_json_client(accounts)
+    headers = {'Accept': 'application/json'}
+    assert client.post('/wishlist/games/20/add', headers=headers).status_code == 400
+    for _ in range(2):
+        response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+        assert response.status_code == 200 and response.json['saved'] is True
+        assert 'discover-saved' in response.json['html'] and 'On your wishlist' in response.json['html']
+        assert response.headers['Cache-Control'] == 'private, no-store'
+    assert catalog.get_game.call_count == 2
+    with accounts.app_context():
+        db = get_db()
+        assert db.execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id=?', (ALICE,)).fetchone()[0] == 1
+        assert db.execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id=?', (BOB,)).fetchone()[0] == 0
+        assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
+
+
+def test_async_wishlist_failures_never_report_a_saved_game(accounts, monkeypatch):
+    catalog = provider(accounts)
+    client, data = wish_json_client(accounts)
+    headers = {'Accept': 'application/json'}
+    catalog.get_game.side_effect = CatalogError('private upstream details')
+    response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+    assert response.status_code == 503 and 'saved' not in response.json
+    assert 'private upstream' not in response.get_data(as_text=True)
+    catalog.get_game.side_effect = lambda value: game(value)
+    monkeypatch.setattr('app.wishlist.MAX_WISHES', 0)
+    assert client.post('/wishlist/games/20/add', data=data, headers=headers).status_code == 409
+    add_rating(accounts, ALICE, 20)
+    response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+    assert response.status_code == 409 and response.json['error'] == 'This game is already in your library.'
+    accounts.config['PUBLIC_CATALOG_REQUEST_LIMIT'] = 0
+    assert client.post('/wishlist/games/30/add', data=data, headers=headers).status_code == 429
+    with accounts.app_context():
+        assert get_db().execute('SELECT COUNT(*) FROM wishlist_games').fetchone()[0] == 0
+
+
 def test_catalog_candidates_are_bounded_cached_and_filter_only_public_fields(monkeypatch):
     client = IGDBClient('fake', 'fake')
     query = Mock(return_value=[game(20), game(20), {**game(30), 'game_type': {'type': 'Mod'}}])
@@ -263,7 +393,29 @@ def test_catalog_candidates_are_bounded_cached_and_filter_only_public_fields(mon
     assert query.call_count == 1
     text = query.call_args.args[0]
     assert 'genres.name = ("Puzzle")' in text and 'platforms = (6)' in text and 'limit 200' in text
-    assert 'rating' not in text.replace('total_rating_count', '')
+    assert 'rating' not in text.replace('total_rating_count', '').replace('total_rating', '')
     assert 'owner' not in text and 'review' not in text
     with pytest.raises(CatalogError):
         client.get_discovery_games(platform='6; drop')
+
+
+def test_catalog_sort_queries_and_caches_follow_the_selected_order(monkeypatch):
+    client = IGDBClient('fake', 'fake')
+    query = Mock(return_value=[])
+    monkeypatch.setattr(client, '_query_games', query)
+    for order, field in [('popular', 'total_rating_count'), ('rating', 'total_rating'), ('newest', 'first_release_date')]:
+        client.get_discovery_games(order=order)
+        discovery_query = query.call_args.args[0]
+        assert f'sort {field} desc' in discovery_query
+        if order == 'rating':
+            assert 'total_rating_count >= 50' in discovery_query
+        client.search_games('Portal', order=order)
+        search_query = query.call_args.args[0]
+        assert f'sort {field} desc' in search_query
+        if order == 'newest':
+            assert 'first_release_date <=' in search_query
+        calls = query.call_count
+        client.get_discovery_games(order=order)
+        client.search_games('Portal', order=order)
+        assert query.call_count == calls
+    assert query.call_count == 6

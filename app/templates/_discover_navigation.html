@@ -1,0 +1,12 @@
+<nav class="discover-toolbar" aria-label="Discover sections">
+    <div class="discover-modes" role="group" aria-label="Recommendation mode">
+        {% if request.endpoint == 'discovery.index' %}
+        <label><input type="radio" name="mode" value="for-you" {% if mode == 'for-you' %}checked{% endif %}><span>For you</span></label>
+        <label><input type="radio" name="mode" value="popular" {% if mode == 'popular' %}checked{% endif %}><span>Popular picks</span></label>
+        {% else %}
+        <a class="discover-mode-link" href="{{ url_for('discovery.index', sort=sort) }}"><span>For you</span></a>
+        <a class="discover-mode-link" href="{{ url_for('discovery.index', mode='popular', sort=sort) }}"><span>Popular picks</span></a>
+        {% endif %}
+    </div>
+    <a class="discover-search-action" href="{{ url_for('explore.index', sort=sort if sort != 'popular' else none) }}"{% if request.endpoint == 'explore.index' %} aria-current="page"{% endif %}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Search games</a>
+</nav>

@@ -76,15 +76,17 @@ class IGDBClient:
                     self._traits_cache[value] = (monotonic() + 300, found.get(value, discovery_traits({})))
             return {value: self._traits_cache[value][1] for value in ids}
 
-    def get_discovery_games(self, genres=(), platform=None):
+    def get_discovery_games(self, genres=(), platform=None, *, order='popular'):
         """Cache bounded public candidate pools; never cache personal rankings."""
         genres = tuple(sorted(set(genres)))
+        if order not in CATALOG_SORTS:
+            raise CatalogError('Choose a valid catalog order.')
         if len(genres) > 6 or any(not isinstance(value, str) or not 1 <= len(value) <= 80 for value in genres):
             raise CatalogError("Choose valid genres.")
         if platform is not None and (type(platform) is not int or not 0 < platform < 1000000):
             raise CatalogError("Choose a valid platform.")
         with self._lock:
-            key = (genres, platform)
+            key = (genres, platform, order)
             cached = self._discovery_cache.get(key)
             if cached and monotonic() < cached[0]:
                 return cached[1]
@@ -95,9 +97,12 @@ class IGDBClient:
                 conditions.append(f'genres.name = ({",".join(json.dumps(value) for value in genres)})')
             if platform:
                 conditions.append(f'platforms = ({platform})')
+            if order == 'rating':
+                conditions.append(f'total_rating_count >= {MIN_RATING_COUNT} & total_rating != null')
+            sort_field = {'popular': 'total_rating_count', 'rating': 'total_rating', 'newest': 'first_release_date'}[order]
             raw = self._query_games(
-                f'fields {GAME_FIELDS},genres.name,themes.name,player_perspectives.name,game_modes.name,total_rating_count,keywords.name; '
-                f'where {" & ".join(conditions)}; sort total_rating_count desc; limit 200;'
+                f'fields {GAME_FIELDS},genres.name,themes.name,player_perspectives.name,game_modes.name,total_rating_count,total_rating,keywords.name; '
+                f'where {" & ".join(conditions)}; sort {sort_field} desc; limit 200;'
             )
             unique = {}
             for game in raw:
@@ -154,25 +159,27 @@ class IGDBClient:
         self._expires_at = monotonic() + max(0, lifetime - 30)
         return token
 
-    def search_games(self, term, *, include_community=False, suggestions=False):
+    def search_games(self, term, *, include_community=False, suggestions=False, order='popular'):
         """Cache short-lived results and serialize this process's API requests."""
         term = term.strip()
+        if order not in CATALOG_SORTS:
+            raise CatalogError('Choose a valid catalog order.')
         if len(term) > 200:
             raise CatalogError("Search must contain no more than 200 characters.")
         if len(term) < 2:
             return []
         with self._lock:
-            cache_key = (term.casefold(), include_community, suggestions)
+            cache_key = (term.casefold(), include_community, suggestions, order)
             cached = self._search_cache.get(cache_key)
             if cached and monotonic() < cached[0]:
                 return cached[1]
-            games = self._search_games(term, include_community=include_community, suggestions=suggestions)
+            games = self._search_games(term, include_community=include_community, suggestions=suggestions, order=order)
             if len(self._search_cache) >= 64:
                 self._search_cache.clear()
             self._search_cache[cache_key] = (monotonic() + (300 if suggestions else 30), games)
             return games
 
-    def _search_games(self, term, *, include_community=False, suggestions=False):
+    def _search_games(self, term, *, include_community=False, suggestions=False, order='popular'):
         term = term.strip()
         if len(term) > 200:
             raise CatalogError("Search must contain no more than 200 characters.")
@@ -190,11 +197,17 @@ class IGDBClient:
         excluded = ["Bundle", "Pack", "Pack / Addon", "Port", "bundle", "pack", "port"]
         if not include_community:
             excluded.extend(["Mod", "mod", "Fan Game", "fan game"])
+        order_field = {'popular': 'total_rating_count', 'rating': 'total_rating', 'newest': 'first_release_date'}[order]
+        order_conditions = ''
+        if order == 'rating':
+            order_conditions = f' & total_rating_count >= {MIN_RATING_COUNT} & total_rating != null'
+        elif order == 'newest':
+            order_conditions = f' & first_release_date <= {int(datetime.now(timezone.utc).timestamp())}'
         query = (
-            f"fields {GAME_FIELDS},total_rating_count,keywords.name; "
+            f"fields {GAME_FIELDS},total_rating_count,total_rating,keywords.name; "
             f"where ({matches}) & version_parent = null & game_type.type != "
-            f"({','.join(json.dumps(value) for value in excluded)}); "
-            "sort total_rating_count desc; limit 500;"
+            f"({','.join(json.dumps(value) for value in excluded)}){order_conditions}; "
+            f"sort {order_field} desc; limit 500;"
         )
         if suggestions:
             # Autocomplete needs titles and covers, not hundreds of platform records.
@@ -341,6 +354,37 @@ def discovery_traits(game):
     return traits
 
 
+def popularity_sort_key(game):
+    """Use rating volume as catalog popularity; keep missing counts last."""
+    count = game.get('total_rating_count')
+    return (-(count if type(count) is int and count > 0 else 0), game['id'])
+
+
+CATALOG_SORTS = {'popular': 'Most popular', 'rating': 'Highest rated', 'newest': 'Newest releases'}
+MIN_RATING_COUNT = 50
+
+
+def sorted_catalog(games, order='popular'):
+    """Sort a bounded result pool before pagination, with reliable rating evidence."""
+    if order not in CATALOG_SORTS:
+        raise ValueError('Choose a valid catalog order.')
+    if order == 'rating':
+        games = [game for game in games
+                 if type(game.get('total_rating_count')) is int
+                 and game['total_rating_count'] >= MIN_RATING_COUNT
+                 and type(game.get('total_rating')) in (int, float)
+                 and 0 <= game['total_rating'] <= 100]
+        return sorted(games, key=lambda game: (-game['total_rating'], *popularity_sort_key(game)))
+    if order == 'newest':
+        now = int(datetime.now(timezone.utc).timestamp())
+        games = [game for game in games if type(game.get('first_release_date')) is not int
+                 or game['first_release_date'] <= now]
+        return sorted(games, key=lambda game: (
+            -(game['first_release_date'] if type(game.get('first_release_date')) is int
+              and game['first_release_date'] > 0 else 0), *popularity_sort_key(game)))
+    return sorted(games, key=popularity_sort_key)
+
+
 def search_sort_key(game, term):
     """Prefer exact titles and official entries, then rating-count popularity."""
     title = " ".join(game["name"].casefold().split())
@@ -404,9 +448,9 @@ def cover_image_id(game):
 
 
 def collection_cover_url(image_id):
-    """Revalidate stored IDs and keep collection images on the fixed IGDB host."""
+    """Revalidate stored IDs and use double-resolution covers on the fixed IGDB host."""
     if cover_image_id({"cover": {"image_id": image_id}}) is not None:
-        return f"https://images.igdb.com/igdb/image/upload/t_cover_big/{image_id}.jpg"
+        return f"https://images.igdb.com/igdb/image/upload/t_cover_big_2x/{image_id}.jpg"
     return None
 
 
@@ -423,7 +467,7 @@ def game_suggestion(game):
     cover_url = None
     image_id = cover_image_id(game)
     if image_id is not None:
-        cover_url = f"https://images.igdb.com/igdb/image/upload/t_cover_small/{image_id}.jpg"
+        cover_url = f"https://images.igdb.com/igdb/image/upload/t_cover_small_2x/{image_id}.jpg"
 
     platforms = game.get("platforms", [])
     if not isinstance(platforms, list):
@@ -474,7 +518,7 @@ def game_media(game):
             seen.add(image_id)
             items.append({'kind': 'image', 'id': image_id, 'title': f'Screenshot {sum(item["kind"] == "image" for item in items) + 1}',
                           'preview': f'https://images.igdb.com/igdb/image/upload/t_screenshot_med/{image_id}.jpg',
-                          'url': f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'})
+                          'url': f'https://images.igdb.com/igdb/image/upload/t_1080p/{image_id}.jpg'})
             if sum(item['kind'] == 'image' for item in items) == 8:
                 break
     return items
@@ -545,12 +589,14 @@ def game_profile(game):
             for image in images:
                 image_id = cover_image_id({'cover': image})
                 if image_id:
-                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'
+                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_1080p/{image_id}.jpg'
                     break
         if backdrop:
             break
     if not backdrop:
         backdrop = collection_cover_url(cover_image_id(game))
+        if backdrop:
+            backdrop = backdrop.replace('/t_cover_big_2x/', '/t_1080p/')
     return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game), **game_facts(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
