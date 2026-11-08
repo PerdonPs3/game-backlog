@@ -4,6 +4,15 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 
 ## Primary areas
 
+Discover recommendations and catalog lookup share a plain Discover heading over
+the courtyard artwork. For you, Popular picks, and Search games identify the
+current mode below it. Recommendations keep genre/platform filters with an
+explicit Apply filters action, and mode changes retain their existing asynchronous
+updates. The lookup has one magnifier submit control; Clear search only appears
+with a title query or community-content selection. Generic card filler is omitted;
+personalized cards retain their specific recommendation reasons. Explanations
+and provider details remain in the How these picks work disclosure.
+
 Visitor profiles render only populated public sections: featured badges,
 showcase, activity lists, and published reviews. Zero-game statistics are omitted.
 Owner profiles retain their setup prompts. When connection counts are unshared,

@@ -281,7 +281,7 @@ def test_catalog_lookup_pages_offer_one_search_without_losing_autocomplete(accou
         assert len(parsed.matching('form', role='search')) == 1
         assert 'selected' in parsed.matching('option', value='all')[0]
         assert 'Discover your<br>' not in page.text
-        assert 'Search <em>games.</em>' in page.text
+        assert '<h1>Discover</h1>' in page.text
         assert '/games/123/portal-2?' in page.text
     create = alice.get('/library/add')
     assert create.status_code == 200
