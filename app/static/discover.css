@@ -68,11 +68,6 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-feedback { background: var(--discover-panel); padding: 1rem; border-left: 3px solid var(--accent); border-radius: 7px; }
 .discover-pagination { display: flex; justify-content: center; gap: 1.5rem; margin: 2rem 0; align-items: center; font-size: .8rem; }
 .discover-pagination a,.discover-empty a { display: inline-flex; align-items: center; gap: .4rem; min-height: 36px; padding: .4rem .7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--discover-panel); color: var(--accent); text-decoration: none; }
-.discover-privacy { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; color: var(--discover-muted); font-size: .72rem; line-height: 1.7; }
-.discover-privacy details { margin-top: .5rem; max-width: 800px; }
-.discover-privacy summary { display: flex; align-items: center; gap: .5rem; cursor: pointer; color: var(--accent); width: fit-content; list-style: none; }
-.discover-privacy summary::-webkit-details-marker { display: none; }
-.discover-privacy details[open] summary svg { transform: rotate(180deg); }
 .discover-empty { text-align: center; padding: 3rem 1rem; }
 .discover-empty > span { font-size: 3rem; color: var(--accent); }
 .discover-empty p { color: var(--discover-muted); line-height: 1.7; }

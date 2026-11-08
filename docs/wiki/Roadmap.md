@@ -6,6 +6,18 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 For the current priority order and release state, see the
 [product plan](../Product-Plan.md#current-priorities--2026-10-25).
 
+## Planned Help center — 2026-11-08
+
+- [ ] Add a dedicated Help page with browsable topics and frequently asked
+  questions covering the library, wishlist, public reviews, profile privacy,
+  Discover recommendations and sorting. Keep explanations in this destination
+  rather than repeating long help blocks throughout the application. The first
+  version uses authored guides and answers without a chatbot or AI provider.
+
+The owner requested removing Discover's inline "How these picks work" section
+now and building this Help destination later. Recommendation rules and provider
+boundaries remain documented in [Catalog recommendations](../Catalog-Recommendations.md).
+
 ## Active priorities — 2026-10-25
 
 Production accounts, profiles, public game reviews, catalog media, and the guided
