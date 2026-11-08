@@ -79,12 +79,12 @@
                 replacement.querySelector(selector)?.focus({preventScroll: true});
             }
             if (scrollToGames) {
-                const games = replacement.querySelector('.discover-grid');
-                if (games) {
+                const results = replacement.querySelector('.discover-results');
+                if (results) {
                     const header = document.querySelector('.workspace-site-header');
-                    const offset = (header?.getBoundingClientRect().height || 0) + 16;
-                    games.querySelector('a')?.focus({preventScroll: true});
-                    window.scrollTo({top: Math.max(0, window.scrollY + games.getBoundingClientRect().top - offset),
+                    const offset = Math.max(0, header?.getBoundingClientRect().bottom || 0) + 8;
+                    replacement.querySelector('.discover-grid a')?.focus({preventScroll: true});
+                    window.scrollTo({top: Math.max(0, window.scrollY + results.getBoundingClientRect().top - offset),
                         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
                 }
             }

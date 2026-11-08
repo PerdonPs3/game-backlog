@@ -21,8 +21,9 @@ updates replace the recommendation workspace without a page reload or scroll
 reset; aborted/stale responses cannot replace newer selections. Failures retain
 the previous results and offer retrying.
 
-Successful Next/Previous navigation smoothly positions the first game row below
-the sticky site header. It does not scroll to the page title or filters. Reduced
+Successful Next/Previous navigation smoothly positions the results panel eight
+pixels below the visible bottom of the sticky site header, keeping its heading
+and first game row together. It does not scroll to the page title or filters. Reduced
 motion uses an immediate jump, and failed requests do not move the viewport.
 
 Every catalog-linked game in the owner's library is excluded, regardless of

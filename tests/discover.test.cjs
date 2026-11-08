@@ -9,14 +9,14 @@ function setup(reducedMotion = false) {
     let current;
     function root(id) {
         const status = {textContent: ''}, attrs = {};
-        const results = {setAttribute: (key,value) => attrs[key] = value, removeAttribute: key => delete attrs[key]};
+        const results = {getBoundingClientRect: () => ({top: 130}), setAttribute: (key,value) => attrs[key] = value, removeAttribute: key => delete attrs[key]};
         const grid = {getBoundingClientRect: () => ({top: 240}), querySelector: () => ({focus() {}})};
         return {id, status, attrs, replaceWith: value => current = value,
             querySelector: selector => selector === '[data-discover-status]' ? status : selector === '.discover-results' ? results : selector === '.discover-grid' ? grid : null};
     }
     current = root('original');
     const document = {activeElement: null, addEventListener: (name, fn) => handlers[name] = fn,
-        dispatchEvent() {}, querySelector: selector => selector === '[data-discover]' ? current : selector === '.workspace-site-header' ? {getBoundingClientRect: () => ({height: 80})} : current.querySelector(selector)};
+        dispatchEvent() {}, querySelector: selector => selector === '[data-discover]' ? current : selector === '.workspace-site-header' ? {getBoundingClientRect: () => ({height: 140, bottom: 80})} : current.querySelector(selector)};
     class Parser {parseFromString(html) {return {querySelector: () => html === 'invalid' ? null : root(html)};}}
     runInNewContext(readFileSync(join(__dirname,'../app/static/discover.js'),'utf8'), {
         document, DOMParser: Parser, Event: class {}, URL, URLSearchParams, AbortController,
@@ -44,13 +44,13 @@ test('filters replace the results and URL without navigating away',async()=>{
     assert.equal(ui.navigations.length,0);assert.equal(ui.current().status.textContent,'Recommendations updated.');
 });
 
-test('pagination scrolls to the first games below the sticky header only after success',async()=>{
+test('pagination aligns the results panel eight pixels below the visible header after success',async()=>{
     for (const reduced of [false, true]) {
         const ui=setup(reduced); ui.click();
         assert.equal(ui.scrolls.length,0);
         ui.resolve(0); await settle();
         assert.equal(ui.scrolls.length,1);
-        assert.equal(ui.scrolls[0].top,944);
+        assert.equal(ui.scrolls[0].top,842);
         assert.equal(ui.scrolls[0].behavior,reduced?'instant':'smooth');
     }
     const failed=setup(); failed.click(); failed.resolve(0,'error',false); await settle();
