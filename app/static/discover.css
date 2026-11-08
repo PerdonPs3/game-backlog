@@ -29,6 +29,9 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-modes input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
 .discover-select { flex: 1; min-width: 160px; max-width: none; color: var(--discover-muted); font-size: .75rem; margin: 0; }
 .discover-select select { width: 100%; margin: .45rem 0 0; min-height: 43px; padding-block: .55rem; font-size: .85rem; }
+.discover-sort-note { margin: .25rem .5rem 1rem; color: var(--discover-muted); font-size: .75rem; }
+.catalog-search-filters .catalog-sort { flex: 0 1 220px; margin-left: auto; }
+@media (max-width:700px) { .discover-filters > .catalog-sort { flex-basis: 100%; } .catalog-search-filters .catalog-sort { flex: 1 1 100%; margin-left: 0; } }
 .discover-apply { width: auto; margin: 0; padding: .85rem 1rem; font-size: .8rem; white-space: nowrap; }
 .discover-apply span { margin-left: .6rem; }
 .discover-update { margin: .45rem .5rem; min-height: 1.3em; font-size: .8rem; color: var(--accent); }

@@ -84,7 +84,7 @@ def add(catalog_id):
     if not discover_return and request.form.get('return_to') == 'discover':
         from app.discovery import selected_filters
         genre, platform, mode, _ = selected_filters(request.form)
-        discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode)
+        discover_return = url_for('discovery.index', genre=genre, platform=platform or '', mode=mode, sort=request.form.get('sort', 'popular'))
     from app.public_catalog import public_request_allowed
     if not public_request_allowed():
         flash('The catalog is busy. Please try saving this game again shortly.', 'wishlist_error')

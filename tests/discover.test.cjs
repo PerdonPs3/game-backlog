@@ -58,7 +58,7 @@ test('failures keep the last successful results and offer retry',async()=>{
     }
 });
 test('mode, genre and platform changes immediately request updated results',async()=>{
-    for (const name of ['mode','genre','platform']) {
+    for (const name of ['mode','genre','platform','sort']) {
         const ui=setup();ui.change(name);assert.equal(ui.requests.length,1);
         ui.resolve(0,'filtered');await settle();assert.equal(ui.current().id,'filtered');
         assert.equal(ui.navigations.length,0);

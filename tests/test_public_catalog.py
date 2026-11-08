@@ -38,6 +38,21 @@ def test_catalog_search_orders_popularity_before_pagination(app):
     assert second.index('>Match 005<') < second.index('>Match 001<')
 
 
+@pytest.mark.parametrize('order,first_id', [('popular', 35), ('rating', 1), ('newest', 35)])
+def test_search_sort_selection_survives_pagination(app, order, first_id):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [
+        {**GAME, 'id': number, 'name': f'Match {number:03d}', 'total_rating_count': 100+number,
+         'total_rating': 100-number, 'first_release_date': number*1000} for number in range(1,36)
+    ]
+    response = app.test_client().get('/discover/browse', query_string={'q': 'Match', 'sort': order})
+    html = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert html.index(f'>Match {first_id:03d}<') < html.index(f'>Match {first_id + (1 if order == "rating" else -1):03d}<')
+    assert f'sort={order}' in html and 'page=2' in html
+    assert app.test_client().get('/discover/browse?q=Match&sort=invalid').status_code == 400
+
+
 def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accounts):
     catalog = fake_catalog(accounts)
     catalog.get_game.side_effect = None

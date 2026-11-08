@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.catalog import CatalogError, IGDBClient, discovery_traits
+from app.catalog import CatalogError, IGDBClient, discovery_traits, sorted_catalog
 from app.db import get_db
 from app.discovery import affinities, preference_sources, rank_candidates
 from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
@@ -14,6 +14,40 @@ def game(catalog_id, genre='Puzzle', platform=6):
     return {'id': catalog_id, 'name': f'Adventure {catalog_id}',
             'genres': [{'name': genre}], 'platforms': [{'id': platform, 'name': 'PC'}],
             'cover': {'image_id': 'co1rs4'}, 'total_rating_count': 20}
+
+
+def test_catalog_orders_handle_rating_confidence_missing_dates_and_ties():
+    pool = [
+        {**game(1), 'total_rating': 100, 'total_rating_count': 1, 'first_release_date': 300},
+        {**game(2), 'total_rating': 85, 'total_rating_count': 500, 'first_release_date': 100},
+        {**game(3), 'total_rating': 90, 'total_rating_count': 50, 'first_release_date': 200},
+        {**game(4), 'total_rating': None, 'total_rating_count': None},
+        {**game(5), 'total_rating': 90, 'total_rating_count': 100, 'first_release_date': 9999999999},
+    ]
+    assert [game['id'] for game in sorted_catalog(pool)] == [2, 5, 3, 1, 4]
+    assert [game['id'] for game in sorted_catalog(pool, 'rating')] == [5, 3, 2]
+    assert [game['id'] for game in sorted_catalog(pool, 'newest')] == [1, 3, 2, 4]
+    with pytest.raises(ValueError):
+        sorted_catalog(pool, 'invalid')
+
+
+@pytest.mark.parametrize('mode', ['for-you', 'popular'])
+@pytest.mark.parametrize('order,first_id', [('popular', 134), ('rating', 100), ('newest', 134)])
+def test_discover_sort_selection_survives_pagination(accounts, mode, order, first_id):
+    catalog = provider(accounts)
+    client = sign_in(accounts, 'alice')
+    add_rating(accounts, ALICE)
+    catalog.get_discovery_games.return_value = [
+        {**game(index), 'total_rating_count': index, 'total_rating': 200-index,
+         'first_release_date': index * 1000} for index in range(100, 135)
+    ]
+    response = client.get('/discover', query_string={'sort': order, 'mode': mode})
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert html.index(f'Adventure {first_id}') < html.index(f'Adventure {first_id + (1 if order == "rating" else -1)}')
+    assert f'sort={order}' in html and 'page=2' in html
+    assert f'value="{order}" selected' in html
+    assert client.get('/discover?sort=invalid').status_code == 400
 
 
 def provider(app):
@@ -314,7 +348,29 @@ def test_catalog_candidates_are_bounded_cached_and_filter_only_public_fields(mon
     assert query.call_count == 1
     text = query.call_args.args[0]
     assert 'genres.name = ("Puzzle")' in text and 'platforms = (6)' in text and 'limit 200' in text
-    assert 'rating' not in text.replace('total_rating_count', '')
+    assert 'rating' not in text.replace('total_rating_count', '').replace('total_rating', '')
     assert 'owner' not in text and 'review' not in text
     with pytest.raises(CatalogError):
         client.get_discovery_games(platform='6; drop')
+
+
+def test_catalog_sort_queries_and_caches_follow_the_selected_order(monkeypatch):
+    client = IGDBClient('fake', 'fake')
+    query = Mock(return_value=[])
+    monkeypatch.setattr(client, '_query_games', query)
+    for order, field in [('popular', 'total_rating_count'), ('rating', 'total_rating'), ('newest', 'first_release_date')]:
+        client.get_discovery_games(order=order)
+        discovery_query = query.call_args.args[0]
+        assert f'sort {field} desc' in discovery_query
+        if order == 'rating':
+            assert 'total_rating_count >= 50' in discovery_query
+        client.search_games('Portal', order=order)
+        search_query = query.call_args.args[0]
+        assert f'sort {field} desc' in search_query
+        if order == 'newest':
+            assert 'first_release_date <=' in search_query
+        calls = query.call_count
+        client.get_discovery_games(order=order)
+        client.search_games('Portal', order=order)
+        assert query.call_count == calls
+    assert query.call_count == 6

@@ -13,6 +13,10 @@ with a title query or community-content selection. Generic card filler is omitte
 personalized cards retain their specific recommendation reasons. Explanations
 and provider details remain in the How these picks work disclosure.
 
+All three Discover views share Most popular (default), Highest rated (at least
+50 catalog ratings), and Newest releases ordering. The selected order is applied
+before pagination and preserved in page links, game return paths, and mode links.
+
 Visitor profiles render only populated public sections: featured badges,
 showcase, activity lists, and published reviews. Zero-game statistics are omitted.
 Owner profiles retain their setup prompts. When connection counts are unshared,

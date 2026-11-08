@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
-from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game, popularity_sort_key
+from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game, sorted_catalog, CATALOG_SORTS
 from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
@@ -54,6 +54,9 @@ def catalog_card(game):
 def index():
     term = request.args.get('q', '').strip()
     content = request.args.get('content', 'official')
+    sort = request.args.get('sort', 'popular')
+    if sort not in CATALOG_SORTS:
+        abort(400)
     try:
         page = int(request.args.get('page', '1'))
     except ValueError:
@@ -69,8 +72,9 @@ def index():
             error, status = 'The catalog is busy. Please wait a minute and try again.', 429
         else:
             try:
-                results = get_catalog().search_games(term, include_community=content == 'all')[:500]
-                results = sorted(results, key=popularity_sort_key)
+                options = {'order': sort} if sort != 'popular' else {}
+                results = get_catalog().search_games(term, include_community=content == 'all', **options)[:500]
+                results = sorted_catalog(results, sort)
                 total = len(results)
                 if page > max(1, (total + 29) // 30):
                     abort(404)
@@ -78,7 +82,7 @@ def index():
                          if type(game.get('id')) is int and 0 < game['id'] < 2**63]
             except CatalogError:
                 error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
-    return render_template('explore.html', query=term[:200], games=games, error=error,
+    return render_template('explore.html', query=term[:200], games=games, error=error, sort=sort, catalog_sorts=CATALOG_SORTS,
                            content=content, page=page, total=total,
                            pages=max(1, (total + 29) // 30)), status
 

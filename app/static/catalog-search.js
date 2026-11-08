@@ -289,6 +289,9 @@
     }
     input.addEventListener("input", search);
     content?.addEventListener("change", search);
+    picker.querySelector('[data-catalog-sort]')?.addEventListener('change', () => {
+        if (input.value.trim().length >= 2) picker.requestSubmit();
+    });
     input.addEventListener("focus", () => {
         if (!loadingDetails) return search({ immediate: true, reset: false });
     });

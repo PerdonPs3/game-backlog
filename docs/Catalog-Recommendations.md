@@ -59,11 +59,15 @@ Merely viewing or filtering recommendations never writes either collection.
   cannot explain Outlast through Adventure/Indie; Ori's side-view platforming
   can be explained by Hollow Knight rather than Portal 2's first-person play.
   Scores are never presented as predicted enjoyment or similarity percentages.
-- For you, Popular picks, and Search games order their complete result sets by
-  descending IGDB total rating count before pagination, using catalog ID to
-  break ties. Missing counts come last. Rating volume is a popularity signal,
-  not a quality guarantee. Taste matching qualifies and explains For you picks
-  without overriding popularity. Source-diversity quotas no longer reorder picks.
+- For you, Popular picks, and Search games share a Sort by selector: Most popular
+  (default), Highest rated, and Newest releases. Sort the complete bounded pool
+  before pagination. Highest rated requires at least 50 IGDB total ratings and
+  a valid total rating, then uses popularity to break score ties. Newest releases
+  sorts released dates descending, excludes future releases, and puts unknown
+  dates last. Most popular uses descending IGDB total rating count. Catalog ID
+  breaks remaining ties. Rating volume is a popularity signal, not a quality
+  guarantee. Taste matching qualifies and explains For you picks without
+  overriding the selected order. Source-diversity quotas do not reorder picks.
   Search sorting applies to the full results page; quick title suggestions keep
   their existing exact-title matching behavior.
 - Without positive matching evidence, explicitly label the results Popular picks.
@@ -72,7 +76,7 @@ Merely viewing or filtering recommendations never writes either collection.
 Candidate selection uses up to six positively weighted genres, unless the owner
 explicitly selects a genre; automatic selection omits the three broad genres.
 Each query requests at most 200 released, official
-catalog entries, ordered by rating-count popularity, then applies owner exclusion
+catalog entries, queried using the selected order (and rating minimum when applicable), then applies owner exclusion
 and ranking locally. This is a bounded selection, not the entire catalog. Pages
 contain 12 games. Existing pack, port, variant and community-content exclusions
 also run locally. The platform selector currently offers ten common platforms.

@@ -6,7 +6,7 @@ from math import ceil
 from flask import Blueprint, abort, current_app, g, redirect, render_template, request, url_for
 
 from app.achievements import normal_owner
-from app.catalog import CatalogError, discovery_traits, game_profile, get_catalog, popularity_sort_key
+from app.catalog import CatalogError, discovery_traits, game_profile, get_catalog, popularity_sort_key, sorted_catalog, CATALOG_SORTS
 from app.db import get_db
 from app.library_picker import preference_games
 from app.ownership import owned
@@ -107,6 +107,8 @@ def rank_candidates(candidates, sources, genre_map, trait_map=None):
 
 def selected_filters(values):
     genre = values.get('genre', '')
+    if values.get('sort', 'popular') not in CATALOG_SORTS:
+        abort(400)
     raw_platform = values.get('platform', '')
     mode = values.get('mode', 'for-you')
     try:
@@ -128,6 +130,7 @@ def index():
         if not normal_owner():
             return redirect(url_for('auth.profile'))
     genre, platform, mode, page = selected_filters(request.args)
+    sort = request.args.get('sort', 'popular')
     personal = normal_owner() or not current_app.config.get('AUTH_ENABLED')
     sources, library, wishes = [], [], []
     if personal:
@@ -153,7 +156,8 @@ def index():
             affinity = affinities(sources, genre_map)
             interests = [key for key, score in sorted(affinity.items(), key=lambda item: (-item[1], item[0]))
                          if score > 0 and key not in BROAD_GENRES][:6]
-            candidates = provider.get_discovery_games((genre,) if genre else tuple(interests), platform)
+            options = {'order': sort} if sort != 'popular' else {}
+            candidates = provider.get_discovery_games((genre,) if genre else tuple(interests), platform, **options)
             candidates = [game for game in candidates if game['id'] not in owned_ids
                           and (not genre or genre in game_profile(game)['genres'])
                           and (not platform or any(item.get('id') == platform for item in game.get('platforms', []) if isinstance(item, dict)))]
@@ -161,6 +165,8 @@ def index():
             ranked = rank_candidates(candidates, sources, genre_map, trait_map) if sources else []
             personalized = bool(ranked)
             rows = ranked if ranked else [(game, None) for game in candidates]
+            reasons = {game['id']: reason for game, reason in rows}
+            rows = [(game, reasons[game['id']]) for game in sorted_catalog([game for game, _ in rows], sort)]
         except CatalogError:
             error, status = 'Recommendations are temporarily unavailable. Please try again shortly.', 503
     pages = max(1, ceil(len(rows) / PAGE_SIZE))
@@ -169,7 +175,7 @@ def index():
     games = [{**catalog_card(raw), 'genres': game_profile(raw)['genres'][:3],
               'reason': reason, 'wished': raw['id'] in wished_ids}
              for raw, reason in rows[(page - 1) * PAGE_SIZE:page * PAGE_SIZE]]
-    return render_template('discover.html', games=games, genre=genre, platform=platform, mode=mode,
+    return render_template('discover.html', games=games, genre=genre, platform=platform, mode=mode, sort=sort, catalog_sorts=CATALOG_SORTS,
                            genres=GENRES, platforms=PLATFORMS, page=page, pages=pages, total=len(rows),
                            personal=personal, personalized=personalized, error=error,
                            can_save=normal_owner()), status
