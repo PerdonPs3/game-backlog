@@ -6,6 +6,14 @@ reviewed the local experience and authorized develop integration/publication on
 2026-10-30, subject to final validation. No database migration or new provider is
 required. Production remains separate.
 
+The owner reviewed the follow-up on `refactor/discover-browse-flow` and authorized
+its develop integration/publication on 2026-11-08. It unifies Discover navigation,
+automatic filtering and sorting, in-place wishlist saves, Next-only pagination
+scrolling, complete search rows, and shared higher-resolution game images.
+The [display quality audit](Display-Quality-Audit.md) records image presets and
+responsive page sizes. No new migration, provider, or production publication is
+part of this integration.
+
 ## What appears
 
 Discover is available at `/discover` and in the shared navigation. For you ranks
