@@ -101,9 +101,20 @@ def rank_candidates(candidates, sources, genre_map, trait_map=None):
                 evidence, key=lambda item: (item[0]['weight'] * (item[2] + Fraction(item[4], 2) + 2 * item[5]), len(item[1])))
             score *= 1 + similarity + 2 * mechanic_similarity
             ranked.append((score, candidate, {'title': source['title'], 'kind': source['kind'],
-                                             'rating': source['rating'], 'genres': shared[:2], 'matches': labels}))
+                                             'rating': source['rating'], 'genres': shared[:2], 'matches': labels},
+                           source['igdb_id']))
     ranked.sort(key=lambda row: (-row[0], -(row[1].get('total_rating_count') or 0), row[1]['id']))
-    return [(candidate, reason) for _, candidate, reason in ranked]
+    # Keep score order within each reference, but leave room for other tastes on each page.
+    remaining, diversified, counts = list(ranked), [], {}
+    while remaining:
+        if len(diversified) % PAGE_SIZE == 0:
+            counts = {}
+        index = next((index for index, row in enumerate(remaining)
+                      if counts.get(row[3], 0) < 2), 0)
+        _, candidate, reason, source_id = remaining.pop(index)
+        diversified.append((candidate, reason))
+        counts[source_id] = counts.get(source_id, 0) + 1
+    return diversified
 
 
 def selected_filters(values):

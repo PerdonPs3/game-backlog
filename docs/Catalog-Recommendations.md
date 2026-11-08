@@ -61,6 +61,11 @@ Merely viewing or filtering recommendations never writes either collection.
   can be explained by Hollow Knight rather than Portal 2's first-person play.
   Popularity breaks score ties. Scores are never
   presented as predicted enjoyment or similarity percentages.
+- After scoring, each page prefers at most two picks explained by the same
+  reference game while alternatives remain. The highest-ranked eligible match
+  is selected each time; if alternatives run out, the remaining matches fill
+  the page. This spreads different tastes across large result sets without
+  inventing explanations, removing valid games, or leaving empty slots.
 - Without positive matching evidence, explicitly label the results Popular picks.
   Missing genres and provider failures never invent a preference explanation.
 

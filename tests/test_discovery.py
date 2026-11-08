@@ -31,6 +31,30 @@ def add_rating(app, owner, catalog_id=10, title='Private favorite', rating=10):
                          (owner, catalog_id, title, 'PC', rating))
 
 
+def test_large_rankings_mix_reference_games_without_changing_evidence():
+    genres = ('Puzzle', 'Shooter', 'Racing', 'Fighting', 'Music', 'Strategy')
+    sources = preference_sources([
+        {'id': index, 'igdb_id': index, 'title': genre, 'rating': 10}
+        for index, genre in enumerate(genres, 1)
+    ], [])
+    genre_map = {index: (genre,) for index, genre in enumerate(genres, 1)}
+    candidates = [game(index * 100 + offset, genre)
+                  for index, genre in enumerate(genres, 1) for offset in range(10)]
+    ranked = rank_candidates(candidates, sources, genre_map)
+    assert len(ranked) == 60
+    assert len({candidate['id'] for candidate, _ in ranked}) == 60
+    for start in range(0, 60, 12):
+        titles = [reason['title'] for _, reason in ranked[start:start + 12]]
+        assert all(titles.count(genre) == 2 for genre in genres)
+    for candidate, reason in ranked:
+        assert reason['title'] == candidate['genres'][0]['name']
+        assert reason['genres'] == [reason['title']]
+    assert ranked == rank_candidates(list(reversed(candidates)), sources, genre_map)
+    # A narrow taste profile still receives every valid match rather than empty slots.
+    single = rank_candidates(candidates, sources[:1], {sources[0]['igdb_id']: ('Strategy',)})
+    assert len(single) == 10
+
+
 def test_rating_signals_deduplicate_copies_and_outweigh_wishes():
     library = [{'id': 1, 'igdb_id': 10, 'rating': 10, 'title': 'Old'},
                {'id': 2, 'igdb_id': 10, 'rating': 2, 'title': 'New'},
