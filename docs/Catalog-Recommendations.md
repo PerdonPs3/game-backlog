@@ -28,6 +28,13 @@ with an On your wishlist label. Saving uses the existing CSRF-protected,
 provider-revalidated wishlist operation and returns to Discover with its filters.
 Merely viewing or filtering recommendations never writes either collection.
 
+Discover wishlist buttons submit the existing CSRF-protected operation in the
+background. Only a verified successful save replaces that card's action with
+On your wishlist; the URL, filters, results, and scroll position stay in place.
+Repeated clicks while saving are ignored. Failures leave a retryable button and
+an inline error. Recent confirmed saves also survive an overlapping filter
+response. Without JavaScript, the existing POST/redirect flow remains available.
+
 ## Ranking and explanations
 
 - Use the most recent rated platform entry per catalog game, capped at 60

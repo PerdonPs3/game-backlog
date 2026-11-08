@@ -24,10 +24,10 @@ function setup() {
         window: {location: {href:'http://localhost/discover', assign: url => navigations.push(url)}, addEventListener: (name,fn) => handlers[name] = fn},
         fetch: (url, options) => new Promise((resolve,reject) => requests.push({url, options, resolve, reject}))
     });
-    const form = {action:'http://localhost/discover',values:[['genre','Puzzle'],['platform','6'],['mode','for-you']],requestSubmit:()=>handlers.submit({target:{closest:()=>form},preventDefault(){}})};
+    const form = {action:'http://localhost/discover',values:[['genre','Puzzle'],['platform','6'],['mode','for-you']],requestSubmit:()=>handlers.submit({target:{closest:selector=>selector === '[data-discover-wish]' ? null : form},preventDefault(){}})};
     return {handlers,requests,history,navigations, current:()=>current,
-        submit() {handlers.submit({target:{closest:()=>form},preventDefault(){}});},
-        change(name) {handlers.change({target:{name,closest:()=>form}});},
+        submit() {handlers.submit({target:{closest:selector=>selector === '[data-discover-wish]' ? null : form},preventDefault(){}});},
+        change(name) {handlers.change({target:{name,closest:selector=>selector === '[data-discover-wish]' ? null : form}});},
         click(extra={}) {let prevented=false; handlers.click({button:0,...extra,target:{closest:()=>({href:'http://localhost/discover?page=2'})},preventDefault(){prevented=true;}}); return prevented;},
         resolve(index, html='updated', ok=true) {requests[index].resolve({ok,redirected:false,text:async()=>html});}
     };

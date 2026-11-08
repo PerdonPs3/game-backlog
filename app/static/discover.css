@@ -63,6 +63,8 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-wish:hover { background: color-mix(in srgb,var(--accent) 17%,transparent); }
 .discover-saved { display: flex; align-items: center; justify-content: center; gap: .55rem; min-height: 43px; padding: .7rem .55rem; border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--border)); border-radius: 8px; background: color-mix(in srgb,var(--accent) 7%,transparent); color: var(--accent); font-size: .75rem; font-weight: 500; line-height: 1.4; }
 .discover-saved svg { flex: none; }
+.discover-wish:disabled { opacity: .65; cursor: wait; }
+.discover-wish-error { margin: .5rem 0 0; font-size: .72rem; line-height: 1.5; color: var(--discover-muted); }
 .discover-feedback { background: var(--discover-panel); padding: 1rem; border-left: 3px solid var(--accent); border-radius: 7px; }
 .discover-pagination { display: flex; justify-content: center; gap: 1.5rem; margin: 2rem 0; align-items: center; font-size: .8rem; }
 .discover-pagination a,.discover-empty a { display: inline-flex; align-items: center; gap: .4rem; min-height: 36px; padding: .4rem .7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--discover-panel); color: var(--accent); text-decoration: none; }

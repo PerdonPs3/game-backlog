@@ -7,7 +7,7 @@ import pytest
 from app.catalog import CatalogError, IGDBClient, discovery_traits, sorted_catalog
 from app.db import get_db
 from app.discovery import affinities, preference_sources, rank_candidates
-from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit
+from tests.test_accounts import ALICE, BOB, accounts, sign_in, submit, CSRFTokenParser
 
 
 def game(catalog_id, genre='Puzzle', platform=6):
@@ -337,6 +337,51 @@ def test_save_from_card_requires_csrf_revalidates_and_returns_to_filtered_discov
         assert get_db().execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id = ?', (ALICE,)).fetchone()[0] == 1
         assert get_db().execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id = ?', (BOB,)).fetchone()[0] == 0
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
+
+
+def wish_json_client(app):
+    client = sign_in(app, 'alice')
+    parser = CSRFTokenParser()
+    parser.feed(client.get('/discover').get_data(as_text=True))
+    return client, {'csrf_token': parser.token, 'return_to': 'discover'}
+
+
+def test_async_wishlist_save_is_verified_idempotent_and_owner_scoped(accounts):
+    catalog = provider(accounts)
+    client, data = wish_json_client(accounts)
+    headers = {'Accept': 'application/json'}
+    assert client.post('/wishlist/games/20/add', headers=headers).status_code == 400
+    for _ in range(2):
+        response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+        assert response.status_code == 200 and response.json['saved'] is True
+        assert 'discover-saved' in response.json['html'] and 'On your wishlist' in response.json['html']
+        assert response.headers['Cache-Control'] == 'private, no-store'
+    assert catalog.get_game.call_count == 2
+    with accounts.app_context():
+        db = get_db()
+        assert db.execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id=?', (ALICE,)).fetchone()[0] == 1
+        assert db.execute('SELECT COUNT(*) FROM wishlist_games WHERE owner_id=?', (BOB,)).fetchone()[0] == 0
+        assert db.execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
+
+
+def test_async_wishlist_failures_never_report_a_saved_game(accounts, monkeypatch):
+    catalog = provider(accounts)
+    client, data = wish_json_client(accounts)
+    headers = {'Accept': 'application/json'}
+    catalog.get_game.side_effect = CatalogError('private upstream details')
+    response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+    assert response.status_code == 503 and 'saved' not in response.json
+    assert 'private upstream' not in response.get_data(as_text=True)
+    catalog.get_game.side_effect = lambda value: game(value)
+    monkeypatch.setattr('app.wishlist.MAX_WISHES', 0)
+    assert client.post('/wishlist/games/20/add', data=data, headers=headers).status_code == 409
+    add_rating(accounts, ALICE, 20)
+    response = client.post('/wishlist/games/20/add', data=data, headers=headers)
+    assert response.status_code == 409 and response.json['error'] == 'This game is already in your library.'
+    accounts.config['PUBLIC_CATALOG_REQUEST_LIMIT'] = 0
+    assert client.post('/wishlist/games/30/add', data=data, headers=headers).status_code == 429
+    with accounts.app_context():
+        assert get_db().execute('SELECT COUNT(*) FROM wishlist_games').fetchone()[0] == 0
 
 
 def test_catalog_candidates_are_bounded_cached_and_filter_only_public_fields(monkeypatch):
