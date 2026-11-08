@@ -50,22 +50,22 @@ Merely viewing or filtering recommendations never writes either collection.
   metadata remains unknown, never inferred from names or descriptions.
 - Explicit gameplay keywords such as Metroidvania, Roguelike, Soulslike and
   Survival horror are normalized through a small vocabulary. Shared mechanics
-  supply stronger evidence and ranking bonuses; generic keyword overlap does
+  supply stronger evidence when choosing an explanation; generic keyword overlap does
   not qualify. These rules apply to all catalog IDs without title exceptions.
-- Rank qualified matches by core-genre affinity, a smaller specific-theme
-  contribution, and shared-core-genre similarity. Negative scores never become
-  personalized recommendations.
+- Qualify matches using core-genre affinity and a smaller specific-theme
+  contribution. Negative scores never become personalized recommendations.
 - Explanations identify an actual positively contributing rated/wished source
   with specific matching traits. A game never explains itself. Hollow Knight
   cannot explain Outlast through Adventure/Indie; Ori's side-view platforming
   can be explained by Hollow Knight rather than Portal 2's first-person play.
-  Popularity breaks score ties. Scores are never
-  presented as predicted enjoyment or similarity percentages.
-- After scoring, each page prefers at most two picks explained by the same
-  reference game while alternatives remain. The highest-ranked eligible match
-  is selected each time; if alternatives run out, the remaining matches fill
-  the page. This spreads different tastes across large result sets without
-  inventing explanations, removing valid games, or leaving empty slots.
+  Scores are never presented as predicted enjoyment or similarity percentages.
+- For you, Popular picks, and Search games order their complete result sets by
+  descending IGDB total rating count before pagination, using catalog ID to
+  break ties. Missing counts come last. Rating volume is a popularity signal,
+  not a quality guarantee. Taste matching qualifies and explains For you picks
+  without overriding popularity. Source-diversity quotas no longer reorder picks.
+  Search sorting applies to the full results page; quick title suggestions keep
+  their existing exact-title matching behavior.
 - Without positive matching evidence, explicitly label the results Popular picks.
   Missing genres and provider failures never invent a preference explanation.
 

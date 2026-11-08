@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
-from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game
+from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game, popularity_sort_key
 from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
@@ -70,6 +70,7 @@ def index():
         else:
             try:
                 results = get_catalog().search_games(term, include_community=content == 'all')[:500]
+                results = sorted(results, key=popularity_sort_key)
                 total = len(results)
                 if page > max(1, (total + 29) // 30):
                     abort(404)

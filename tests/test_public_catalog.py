@@ -23,6 +23,21 @@ def fake_catalog(app):
     return catalog
 
 
+def test_catalog_search_orders_popularity_before_pagination(app):
+    catalog = fake_catalog(app)
+    catalog.search_games.return_value = [
+        {**GAME, 'id': number, 'name': f'Match {number:03d}',
+         'total_rating_count': number * 10 if number > 1 else None}
+        for number in range(1, 36)
+    ]
+    client = app.test_client()
+    first = client.get('/discover/browse?q=Match+001').get_data(as_text=True)
+    second = client.get('/discover/browse?q=Match+001&page=2').get_data(as_text=True)
+    assert first.index('Match 035') < first.index('Match 034')
+    assert '>Match 005<' not in first and '>Match 005<' in second
+    assert second.index('>Match 005<') < second.index('>Match 001<')
+
+
 def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accounts):
     catalog = fake_catalog(accounts)
     catalog.get_game.side_effect = None

@@ -341,6 +341,12 @@ def discovery_traits(game):
     return traits
 
 
+def popularity_sort_key(game):
+    """Use rating volume as catalog popularity; keep missing counts last."""
+    count = game.get('total_rating_count')
+    return (-(count if type(count) is int and count > 0 else 0), game['id'])
+
+
 def search_sort_key(game, term):
     """Prefer exact titles and official entries, then rating-count popularity."""
     title = " ".join(game["name"].casefold().split())

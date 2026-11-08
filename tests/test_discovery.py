@@ -31,7 +31,7 @@ def add_rating(app, owner, catalog_id=10, title='Private favorite', rating=10):
                          (owner, catalog_id, title, 'PC', rating))
 
 
-def test_large_rankings_mix_reference_games_without_changing_evidence():
+def test_large_rankings_follow_popularity_without_changing_evidence():
     genres = ('Puzzle', 'Shooter', 'Racing', 'Fighting', 'Music', 'Strategy')
     sources = preference_sources([
         {'id': index, 'igdb_id': index, 'title': genre, 'rating': 10}
@@ -40,12 +40,12 @@ def test_large_rankings_mix_reference_games_without_changing_evidence():
     genre_map = {index: (genre,) for index, genre in enumerate(genres, 1)}
     candidates = [game(index * 100 + offset, genre)
                   for index, genre in enumerate(genres, 1) for offset in range(10)]
+    for index, candidate in enumerate(candidates):
+        candidate['total_rating_count'] = index * 10
     ranked = rank_candidates(candidates, sources, genre_map)
     assert len(ranked) == 60
     assert len({candidate['id'] for candidate, _ in ranked}) == 60
-    for start in range(0, 60, 12):
-        titles = [reason['title'] for _, reason in ranked[start:start + 12]]
-        assert all(titles.count(genre) == 2 for genre in genres)
+    assert [candidate['total_rating_count'] for candidate, _ in ranked] == list(range(590, -1, -10))
     for candidate, reason in ranked:
         assert reason['title'] == candidate['genres'][0]['name']
         assert reason['genres'] == [reason['title']]
@@ -53,6 +53,33 @@ def test_large_rankings_mix_reference_games_without_changing_evidence():
     # A narrow taste profile still receives every valid match rather than empty slots.
     single = rank_candidates(candidates, sources[:1], {sources[0]['igdb_id']: ('Strategy',)})
     assert len(single) == 10
+
+
+@pytest.mark.parametrize('mode', ['for-you', 'popular'])
+def test_popularity_is_global_before_recommendation_pagination(accounts, mode):
+    catalog = provider(accounts)
+    client = sign_in(accounts, 'alice')
+    add_rating(accounts, ALICE)
+    catalog.get_discovery_games.return_value = [
+        {**game(index), 'total_rating_count': index * 10} for index in range(100, 125)
+    ]
+    first = client.get('/discover', query_string={'mode': mode}).get_data(as_text=True)
+    second = client.get('/discover', query_string={'mode': mode, 'page': 2}).get_data(as_text=True)
+    assert first.index('Adventure 124') < first.index('Adventure 123')
+    assert 'Adventure 112' not in first and 'Adventure 112' in second
+    assert second.index('Adventure 112') < second.index('Adventure 111')
+
+
+def test_popularity_precedes_strength_of_taste_match_and_missing_counts():
+    sources = preference_sources([
+        {'id': 1, 'igdb_id': 1, 'title': 'Puzzle favorite', 'rating': 8},
+        {'id': 2, 'igdb_id': 2, 'title': 'Shooter favorite', 'rating': 10},
+    ], [])
+    candidates = [{**game(100), 'total_rating_count': 1000},
+                  {**game(200, 'Shooter'), 'total_rating_count': 10},
+                  {**game(300), 'total_rating_count': None}]
+    ranked = rank_candidates(candidates, sources, {1: ('Puzzle',), 2: ('Shooter',)})
+    assert [candidate['id'] for candidate, _ in ranked] == [100, 200, 300]
 
 
 def test_rating_signals_deduplicate_copies_and_outweigh_wishes():
