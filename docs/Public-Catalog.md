@@ -14,7 +14,10 @@ Switching media removes the player and stops playback. External video/image link
 remain available without JavaScript and when a provider blocks embedding.
 
 Visitors can browse `/explore` without an account. Search uses a normal GET form
-with a 2–200 character query and 30 results per page. `/explore/games/<catalog_id>`
+with a 2–200 character query and 24 results per page. This fills complete rows
+at the four-, three-, and two-column breakpoints, except on the final page when
+fewer results remain. Up to 500 matches remain reachable across 21 pages.
+`/explore/games/<catalog_id>`
 is a standalone page that opens directly, survives refresh, and can be shared.
 The ID belongs to IGDB, never to a private collection entry.
 
