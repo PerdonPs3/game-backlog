@@ -46,7 +46,7 @@
             form.removeAttribute('aria-busy');
         }
     }
-    async function update(url, push = true) {
+    async function update(url, push = true, scrollToGames = false) {
         const current = document.querySelector('[data-discover]');
         if (!current) return;
         pending?.abort();
@@ -78,6 +78,16 @@
                 const selector = `[name="${activeName}"]${activeValue === null ? '' : `[value="${activeValue}"]`}`;
                 replacement.querySelector(selector)?.focus({preventScroll: true});
             }
+            if (scrollToGames) {
+                const games = replacement.querySelector('.discover-grid');
+                if (games) {
+                    const header = document.querySelector('.workspace-site-header');
+                    const offset = (header?.getBoundingClientRect().height || 0) + 16;
+                    games.querySelector('a')?.focus({preventScroll: true});
+                    window.scrollTo({top: Math.max(0, window.scrollY + games.getBoundingClientRect().top - offset),
+                        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+                }
+            }
         } catch (error) {
             if (error.name !== 'AbortError' && version === generation) {
                 status.textContent = 'Could not update recommendations. Your previous results are still here. Try again.';
@@ -104,7 +114,7 @@
         const link = event.target.closest('a[data-discover-link]');
         if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        update(link.href);
+        update(link.href, true, Boolean(link.closest('.discover-pagination')));
     });
     window.addEventListener('popstate', () => update(window.location.href, false));
 })();

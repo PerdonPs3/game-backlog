@@ -21,6 +21,10 @@ updates replace the recommendation workspace without a page reload or scroll
 reset; aborted/stale responses cannot replace newer selections. Failures retain
 the previous results and offer retrying.
 
+Successful Next/Previous navigation smoothly positions the first game row below
+the sticky site header. It does not scroll to the page title or filters. Reduced
+motion uses an immediate jump, and failed requests do not move the viewport.
+
 Every catalog-linked game in the owner's library is excluded, regardless of
 platform or status. Legacy entries without catalog IDs cannot be identified
 reliably and do not contribute preference signals. Wishlist games remain visible
