@@ -16,7 +16,7 @@ and unfinished profiles are redirected through the existing account flow.
 
 Genre and platform filters intersect the results. They are explicit selections
 for this visit, preserved in links and history, rather than new stored profile
-preferences. Forms and pagination work without JavaScript. With JavaScript,
+preferences. Without JavaScript, an Apply filters button submits the form. With JavaScript, genre, platform and mode changes apply immediately;
 updates replace the recommendation workspace without a page reload or scroll
 reset; aborted/stale responses cannot replace newer selections. Failures retain
 the previous results and offer retrying.

@@ -18,10 +18,13 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-explore { color: var(--accent); text-decoration: none; font-size: .85rem; padding-bottom: .25rem; white-space: nowrap; }
 .discover-explore span { margin-left: 1.2rem; }
 .discover-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.1rem; padding: 1.2rem; margin: 0; border: 1px solid var(--border); border-radius: 15px; background: var(--discover-panel); }
-.discover-modes { display: flex; flex-basis: 100%; flex-wrap: wrap; align-self: stretch; gap: .3rem; margin-right: auto; align-items: center; }
+.discover-toolbar { display: flex; flex-basis: 100%; align-items: center; justify-content: space-between; gap: 1rem; }
+.discover-modes { display: inline-flex; gap: .2rem; padding: .25rem; align-items: center; border: 1px solid var(--border); border-radius: 10px; background: var(--discover-soft); }
 .discover-modes label { cursor: pointer; margin: 0; position: relative; }
 .discover-modes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.discover-modes span { display: block; padding: .85rem 1rem; white-space: nowrap; color: var(--discover-muted); font-size: .85rem; border: 1px solid transparent; border-radius: 9px; }
+.discover-modes span { display: block; padding: .6rem .9rem; white-space: nowrap; color: var(--discover-muted); font-size: .85rem; border: 1px solid transparent; border-radius: 7px; }
+.discover-search-action { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: .7rem .9rem; border: 1px solid var(--border); border-radius: 9px; color: var(--accent); background: transparent; text-decoration: none; font-size: .82rem; white-space: nowrap; }
+.discover-search-action:hover { background: color-mix(in srgb,var(--accent) 9%,transparent); }
 .discover-modes input:checked + span { color: var(--accent); background: color-mix(in srgb,var(--accent) 12%,transparent); border-color: color-mix(in srgb,var(--accent) 35%,transparent); }
 .discover-modes input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
 .discover-select { flex: 1; min-width: 160px; max-width: none; color: var(--discover-muted); font-size: .75rem; margin: 0; }
@@ -73,7 +76,7 @@ html:has(body.discover-page)::view-transition-old(root) { animation: none; opaci
 html:has(body.discover-page)::view-transition-new(root) { animation: discover-dawn 1600ms ease both; }
 @keyframes discover-dawn { from { opacity: 0; } to { opacity: 1; } }
 @supports not (view-transition-name:root) { html[data-theme-ready] .discover-day { transition: opacity 1600ms ease; } }
-@media (max-width:1100px) { .discover-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .discover-filters { flex-wrap: wrap; } .discover-modes { flex-basis: 100%; } }
+@media (max-width:1100px) { .discover-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .discover-filters { flex-wrap: wrap; } }
 @media (max-width:700px) { .discover-hero { padding: 0; display: block; } .discover-explore { display: inline-block; margin-top: 1.2rem; } .discover-filters { gap: .8rem; padding: .8rem; } .discover-select { min-width: 110px; max-width: none; } .discover-apply { width: 100%; } .discover-results { padding: .9rem; } .discover-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; } .discover-card-copy { padding: .75rem; } .discover-card h3 { font-size: .9rem; } .discover-results-heading > span { display: none; } .discover-courtyard img { object-position: 38% top; } }
 @media (max-width:390px) { .discover-grid { grid-template-columns: minmax(0,1fr); } .discover-cover { aspect-ratio: 264/300; } }
 @media (prefers-reduced-motion:reduce) { html:has(body.discover-page)::view-transition-new(root) { animation: none; } html[data-theme-ready] .discover-day,.discover-cover img { transition: none; } }
@@ -93,3 +96,5 @@ html[data-theme="light"] .discover-hero h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8
 .discover-page .discover-card-copy > :is(form, .discover-saved, .discover-wish):last-child { margin-top: auto; }
 
 .discover-page .catalog-search-filters { margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: .65rem; }
+
+@media (max-width:700px) { .discover-toolbar { flex-wrap: wrap; gap: .65rem; } .discover-modes { flex: 1; } .discover-modes label { flex: 1; text-align: center; } .discover-search-action { flex: 1; } }

@@ -5,10 +5,10 @@ Implemented on `refactor/navigation-flow`; the owner reviewed the local result a
 ## Primary areas
 
 Discover recommendations and catalog lookup share a plain Discover heading over
-the courtyard artwork. For you, Popular picks, and Search games identify the
-current mode below it. Recommendations keep genre/platform filters with an
-explicit Apply filters action, and mode changes retain their existing asynchronous
-updates. The lookup has one magnifier submit control; Clear search only appears
+the courtyard artwork. For you and Popular picks share a compact mode selector;
+Search games is a separate magnifier action. Genre, platform and mode changes
+update recommendations asynchronously on selection, with an Apply filters
+fallback when JavaScript is unavailable. The lookup has one magnifier submit control; Clear search only appears
 with a title query or community-content selection. Generic card filler is omitted;
 personalized cards retain their specific recommendation reasons. Explanations
 and provider details remain in the How these picks work disclosure.

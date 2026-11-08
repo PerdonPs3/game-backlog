@@ -47,12 +47,8 @@
         update(url.href);
     });
     document.addEventListener('change', event => {
-        if (!event.target.closest('[data-discover-filters]')) return;
-        pending?.abort();
-        generation++;
-        document.querySelector('.discover-results')?.removeAttribute('aria-busy');
-        document.querySelector('[data-discover-status]').textContent = 'Apply your filters to update these results.';
-        if (event.target.name === 'mode') event.target.closest('[data-discover-filters]').requestSubmit();
+        const form = event.target.closest('[data-discover-filters]');
+        if (form) form.requestSubmit();
     });
     document.addEventListener('click', event => {
         const link = event.target.closest('a[data-discover-link]');

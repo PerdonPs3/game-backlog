@@ -57,9 +57,12 @@ test('failures keep the last successful results and offer retry',async()=>{
         assert.equal(ui.current().attrs['aria-busy'],undefined);assert.equal(ui.history.length,0);
     }
 });
-test('changing discovery mode immediately requests updated results',async()=>{
-    const ui=setup();ui.change('mode');assert.equal(ui.requests.length,1);
-    ui.resolve(0,'popular');await settle();assert.equal(ui.current().id,'popular');
+test('mode, genre and platform changes immediately request updated results',async()=>{
+    for (const name of ['mode','genre','platform']) {
+        const ui=setup();ui.change(name);assert.equal(ui.requests.length,1);
+        ui.resolve(0,'filtered');await settle();assert.equal(ui.current().id,'filtered');
+        assert.equal(ui.navigations.length,0);
+    }
 });
 test('modified pagination clicks stay native and history navigation does not add entries',async()=>{
     const ui=setup();assert.equal(ui.click({ctrlKey:true}),false);assert.equal(ui.requests.length,0);
