@@ -12,10 +12,7 @@
 {% block panel %}
 <section id="discover-content" data-discover>
     <form class="discover-filters" action="{{ url_for('discovery.index') }}" method="get" data-discover-filters>
-        <div class="discover-toolbar">
-            <div class="discover-modes" role="group" aria-label="Recommendation mode"><label><input type="radio" name="mode" value="for-you" {% if mode == 'for-you' %}checked{% endif %}><span>For you</span></label><label><input type="radio" name="mode" value="popular" {% if mode == 'popular' %}checked{% endif %}><span>Popular picks</span></label></div>
-            <a class="discover-search-action" href="{{ url_for('explore.index', sort=sort if sort != 'popular' else none) }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Search games</a>
-        </div>
+        {% include '_discover_navigation.html' %}
         <label class="discover-select">Genre<select name="genre" aria-label="Genre"><option value="">All genres</option>{% for item in genres %}<option value="{{ item }}" {% if genre == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
         <label class="discover-select">Platform<select name="platform" aria-label="Platform"><option value="">All platforms</option>{% for id, name in platforms.items() %}<option value="{{ id }}" {% if platform == id %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
         {% include '_catalog_sort.html' %}

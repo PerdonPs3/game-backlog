@@ -5,7 +5,7 @@
 {% block page_heading %}Explore <span>games</span>{% endblock %}
 {% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='public-catalog.css') }}">{% endblock %}
 {% block panel %}
-{% set catalog_navigation %}<nav class="section-navigation discovery-browse-nav" aria-label="Discover sections"><a href="{{ url_for('discovery.index', sort=sort) }}">For you</a><a href="{{ url_for('discovery.index', mode='popular', sort=sort) }}">Popular picks</a><a href="{{ url_for('explore.index') }}" aria-current="page">Search games</a></nav>{% endset %}
+{% set catalog_navigation %}{% include '_discover_navigation.html' %}{% endset %}
 {% include '_public_catalog_search.html' %}
 <div data-catalog-pages>
 <p class="visually-hidden" data-catalog-page-status role="status" aria-live="polite"></p>
