@@ -70,7 +70,7 @@
         cover.replaceChildren(placeholder);
         if (selected.cover_url) {
             const image = document.createElement("img");
-            image.src = selected.cover_url.replace("/t_cover_small/", "/t_cover_big/");
+            image.src = selected.cover_url.replace(/\/t_cover_small(?:_2x)?\//, "/t_cover_big_2x/");
             image.alt = "";
             image.referrerPolicy = "no-referrer";
             image.addEventListener("error", () => image.remove());

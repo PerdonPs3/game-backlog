@@ -33,7 +33,7 @@ def test_create_persists_trusted_cover_and_collection_uses_it(
     catalog_cover.get_game.side_effect = catalog.CatalogError("offline")
     for browser in [client, app.test_client()]:
         page = browser.get("/library").get_data(as_text=True)
-        assert 'src="https://images.igdb.com/igdb/image/upload/t_cover_big/co_test.jpg"' in page
+        assert 'src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co_test.jpg"' in page
         assert 'loading="lazy"' in page
         assert "evil.example" not in page
     catalog_cover.get_game.assert_not_called()
@@ -49,7 +49,7 @@ def test_edit_backfills_cover_for_existing_catalog_game(
     assert stored_games()[0]["cover_image_id"] is None
     assert post_form(f"/library/entries/{game_id}/edit", game_data).status_code == 302
     assert stored_games()[0]["cover_image_id"] == "co_test"
-    assert b"t_cover_big/co_test.jpg" in client.get("/library").data
+    assert b"t_cover_big_2x/co_test.jpg" in client.get("/library").data
 
 
 def test_invalid_edit_preserves_saved_cover(post_form, game_data, catalog_cover, stored_games):

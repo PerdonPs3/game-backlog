@@ -57,7 +57,7 @@
                 <div class="tour-bottom"><span>Your library and notes stay private.</span><a href="{{ url_for('explore.index') }}">Try the real thing: explore games ↗</a></div>
             </section>
             <section class="tour-cover-finale" aria-labelledby="finale-title" data-tour-panel>
-                <div class="tour-cover-fan" aria-hidden="true">{% for cover in ['co1rs4', 'cob9dh', 'co4jni', 'cocpbl', 'cob9kr'] %}<img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ cover }}.jpg" alt="" loading="lazy" width="132" height="187" style="--fan-index: {{ loop.index0 }}">{% endfor %}</div>
+                <div class="tour-cover-fan" aria-hidden="true">{% for cover in ['co1rs4', 'cob9dh', 'co4jni', 'cocpbl', 'cob9kr'] %}<img src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/{{ cover }}.jpg" alt="" loading="lazy" width="132" height="187" style="--fan-index: {{ loop.index0 }}">{% endfor %}</div>
                 <div><span class="tour-eyebrow">NEXT UP</span><h2 id="finale-title">What will you play next?</h2><p>Find something new. Or return to an old favorite.</p><a href="{{ url_for('explore.index') }}">Explore games ↗</a></div>
             </section>
             <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>

@@ -163,7 +163,7 @@ def test_suggestion_normalizes_public_metadata():
     })
     assert result == {
         "id": 123, "name": "Resident Evil", "year": 2000,
-        "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_small/example.jpg",
+        "cover_url": "https://images.igdb.com/igdb/image/upload/t_cover_small_2x/example.jpg",
         "platforms": ["PC"],
     }
 

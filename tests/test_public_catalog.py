@@ -61,7 +61,7 @@ def test_media_gallery_has_safe_fallback_links_and_no_initial_video_player(accou
     page = accounts.test_client().get('/games/123/portal-2', follow_redirects=True).get_data(as_text=True)
     assert 'data-media-gallery' in page and '&lt;Trailer&gt;' in page
     assert 'https://www.youtube.com/watch?v=KOiuc9UWz1E' in page
-    assert 't_screenshot_huge/shot_123.jpg' in page
+    assert 't_1080p/shot_123.jpg' in page
     assert '<iframe' not in page
     assert page.index('data-media-gallery') < page.index('About the game')
     catalog.get_game.return_value = GAME

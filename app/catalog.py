@@ -448,9 +448,9 @@ def cover_image_id(game):
 
 
 def collection_cover_url(image_id):
-    """Revalidate stored IDs and keep collection images on the fixed IGDB host."""
+    """Revalidate stored IDs and use double-resolution covers on the fixed IGDB host."""
     if cover_image_id({"cover": {"image_id": image_id}}) is not None:
-        return f"https://images.igdb.com/igdb/image/upload/t_cover_big/{image_id}.jpg"
+        return f"https://images.igdb.com/igdb/image/upload/t_cover_big_2x/{image_id}.jpg"
     return None
 
 
@@ -467,7 +467,7 @@ def game_suggestion(game):
     cover_url = None
     image_id = cover_image_id(game)
     if image_id is not None:
-        cover_url = f"https://images.igdb.com/igdb/image/upload/t_cover_small/{image_id}.jpg"
+        cover_url = f"https://images.igdb.com/igdb/image/upload/t_cover_small_2x/{image_id}.jpg"
 
     platforms = game.get("platforms", [])
     if not isinstance(platforms, list):
@@ -518,7 +518,7 @@ def game_media(game):
             seen.add(image_id)
             items.append({'kind': 'image', 'id': image_id, 'title': f'Screenshot {sum(item["kind"] == "image" for item in items) + 1}',
                           'preview': f'https://images.igdb.com/igdb/image/upload/t_screenshot_med/{image_id}.jpg',
-                          'url': f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'})
+                          'url': f'https://images.igdb.com/igdb/image/upload/t_1080p/{image_id}.jpg'})
             if sum(item['kind'] == 'image' for item in items) == 8:
                 break
     return items
@@ -589,12 +589,14 @@ def game_profile(game):
             for image in images:
                 image_id = cover_image_id({'cover': image})
                 if image_id:
-                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_screenshot_huge/{image_id}.jpg'
+                    backdrop = f'https://images.igdb.com/igdb/image/upload/t_1080p/{image_id}.jpg'
                     break
         if backdrop:
             break
     if not backdrop:
         backdrop = collection_cover_url(cover_image_id(game))
+        if backdrop:
+            backdrop = backdrop.replace('/t_cover_big_2x/', '/t_1080p/')
     return {"release": release, "genres": names, "backdrop_url": backdrop, "media": game_media(game), **game_facts(game),
             "summary": summary[:12000] if isinstance(summary, str) else None}
 
