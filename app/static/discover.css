@@ -30,8 +30,7 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-select { flex: 1; min-width: 160px; max-width: none; color: var(--discover-muted); font-size: .75rem; margin: 0; }
 .discover-select select { width: 100%; margin: .45rem 0 0; min-height: 43px; padding-block: .55rem; font-size: .85rem; }
 .discover-sort-note { margin: .25rem .5rem 1rem; color: var(--discover-muted); font-size: .75rem; }
-.catalog-search-filters .catalog-sort { flex: 0 1 220px; margin-left: auto; }
-@media (max-width:700px) { .discover-filters > .catalog-sort { flex-basis: 100%; } .catalog-search-filters .catalog-sort { flex: 1 1 100%; margin-left: 0; } }
+@media (max-width:700px) { .discover-filters > .catalog-sort { flex-basis: 100%; } }
 .discover-apply { width: auto; margin: 0; padding: .85rem 1rem; font-size: .8rem; white-space: nowrap; }
 .discover-apply span { margin-left: .6rem; }
 .discover-update { margin: .45rem .5rem; min-height: 1.3em; font-size: .8rem; color: var(--accent); }
@@ -97,5 +96,9 @@ html[data-theme="light"] .discover-hero h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8
 .discover-page .discover-card-copy > :is(form, .discover-saved, .discover-wish):last-child { margin-top: auto; }
 
 .discover-page .catalog-search-filters { margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.discover-page .catalog-search-filters > label { display: flex; flex-direction: column; align-items: stretch; gap: .45rem; flex: 1; min-width: 0; margin: 0; color: var(--discover-muted); font-size: .75rem; }
+.discover-page .catalog-search-filters > label select { display: block; width: 100%; margin: 0; min-height: 43px; font-size: .85rem; }
+.discover-page .catalog-search-filters > a { align-self: flex-end; margin: 0 0 .8rem .5rem; }
+@media (max-width:700px) { .discover-page .catalog-search-filters > label { flex-basis: 100%; } .discover-page .catalog-search-filters > a { margin: .15rem 0 0; } }
 
 @media (max-width:700px) { .discover-toolbar { flex-wrap: wrap; gap: .65rem; } .discover-modes { flex: 1; } .discover-modes label { flex: 1; text-align: center; } .discover-search-action { flex: 1; } }
