@@ -29,7 +29,7 @@ function setup(reducedMotion = false) {
     return {handlers,requests,history,navigations,scrolls, current:()=>current,
         submit() {handlers.submit({target:{closest:selector=>selector === '[data-discover-wish]' ? null : form},preventDefault(){}});},
         change(name) {handlers.change({target:{name,closest:selector=>selector === '[data-discover-wish]' ? null : form}});},
-        click(extra={}) {let prevented=false; handlers.click({button:0,...extra,target:{closest:()=>({href:'http://localhost/discover?page=2',closest:()=>({})})},preventDefault(){prevented=true;}}); return prevented;},
+        click(extra={}, direction='next') {let prevented=false; handlers.click({button:0,...extra,target:{closest:()=>({href:'http://localhost/discover?page=2',dataset:{discoverPage:direction}})},preventDefault(){prevented=true;}}); return prevented;},
         resolve(index, html='updated', ok=true) {requests[index].resolve({ok,redirected:false,text:async()=>html});}
     };
 }
@@ -53,6 +53,9 @@ test('pagination aligns the results panel eight pixels below the visible header 
         assert.equal(ui.scrolls[0].top,842);
         assert.equal(ui.scrolls[0].behavior,reduced?'instant':'smooth');
     }
+    const previous=setup(); previous.click({},'previous'); previous.resolve(0); await settle();
+    assert.equal(previous.scrolls[0].top,800);
+    assert.equal(previous.scrolls[0].behavior,'instant');
     const failed=setup(); failed.click(); failed.resolve(0,'error',false); await settle();
     assert.equal(failed.scrolls.length,0);
     const filters=setup(); filters.submit(); filters.resolve(0); await settle();

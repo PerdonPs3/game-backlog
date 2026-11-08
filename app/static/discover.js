@@ -46,7 +46,7 @@
             form.removeAttribute('aria-busy');
         }
     }
-    async function update(url, push = true, scrollToGames = false) {
+    async function update(url, push = true, direction = null) {
         const current = document.querySelector('[data-discover]');
         if (!current) return;
         pending?.abort();
@@ -66,6 +66,7 @@
             if (!replacement) throw new Error('invalid');
             const activeName = document.activeElement?.name;
             const activeValue = document.activeElement?.type === 'radio' ? document.activeElement.value : null;
+            const previousScroll = window.scrollY;
             current.replaceWith(replacement);
             for (const [id, html] of saved) {
                 const form = replacement.querySelector(`[data-discover-wish="${id}"]`);
@@ -78,7 +79,7 @@
                 const selector = `[name="${activeName}"]${activeValue === null ? '' : `[value="${activeValue}"]`}`;
                 replacement.querySelector(selector)?.focus({preventScroll: true});
             }
-            if (scrollToGames) {
+            if (direction === 'next') {
                 const results = replacement.querySelector('.discover-results');
                 if (results) {
                     const header = document.querySelector('.workspace-site-header');
@@ -87,6 +88,8 @@
                     window.scrollTo({top: Math.max(0, window.scrollY + results.getBoundingClientRect().top - offset),
                         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
                 }
+            } else if (direction === 'previous') {
+                window.scrollTo({top: previousScroll, behavior: 'instant'});
             }
         } catch (error) {
             if (error.name !== 'AbortError' && version === generation) {
@@ -114,7 +117,7 @@
         const link = event.target.closest('a[data-discover-link]');
         if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        update(link.href, true, Boolean(link.closest('.discover-pagination')));
+        update(link.href, true, link.dataset.discoverPage || null);
     });
     window.addEventListener('popstate', () => update(window.location.href, false));
 })();

@@ -21,10 +21,13 @@ updates replace the recommendation workspace without a page reload or scroll
 reset; aborted/stale responses cannot replace newer selections. Failures retain
 the previous results and offer retrying.
 
-Successful Next/Previous navigation smoothly positions the results panel eight
+Successful Next navigation smoothly positions the results panel eight
 pixels below the visible bottom of the sticky site header, keeping its heading
 and first game row together. It does not scroll to the page title or filters. Reduced
 motion uses an immediate jump, and failed requests do not move the viewport.
+Previous updates the games while preserving the current scroll position. The
+same Next-only behavior applies to For you, Popular picks, and Search games;
+search pagination also replaces only the results without reloading the form.
 
 Every catalog-linked game in the owner's library is excluded, regardless of
 platform or status. Legacy entries without catalog IDs cannot be identified
