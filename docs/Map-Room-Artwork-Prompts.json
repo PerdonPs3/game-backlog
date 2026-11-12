@@ -1,0 +1,19 @@
+{
+  "tool": "Built-in imagegen",
+  "reference": "User-approved cartography room mockup, 2026-10-26",
+  "encoding": "WebP quality 86, original 1672 x 940 dimensions, no resizing",
+  "assets": [
+    {
+      "file": "app/static/images/backgrounds/map-room-night.webp",
+      "source": "exec-75136374-e1c6-45e5-bb01-35b8d5e44d1b.png",
+      "reference": "exec-f883cf33-fa92-465a-876a-90dbc7986cbd.png",
+      "prompt": "Use case: precise-object-edit and lighting-weather. Create the CLEAN BACKGROUND ART asset for the real website from this approved mockup. Remove ALL interface overlays: the entire top navigation bar, every word and letter, every input, every card, all buttons, the Add a game heading, every dark rectangle and UI border. Reconstruct the complete room and scenery naturally in every previously covered area. Output only the beautifully illustrated explorer's cartography room, no website, no screen, no text or logos. Preserve the reference's composition: warm stone arch architecture, huge parchment world map and dark walnut map desk with brass instruments on LEFT edge, hanging dark teal banners, vaulted arches above, right arched window and balcony framing mountain valley with a medieval lakeside town, parchment rolls and lanterns on RIGHT edge, rug and floor below. Do not introduce bookshelves. Wide landscape 16:9 composition. CHANGE TIME TO NIGHT: clear deep midnight blue sky, visible stars, a modest moon above the mountains outside the RIGHT window, village lights reflecting in the lake, warm amber lantern/candle light inside, deep brown stone and walnut. Refined cinematic hand-painted game environment art with gorgeous architectural detail. Keep center of image comparatively quiet so readable real HTML forms can be placed over it later. No panels, no signs, no writing anywhere. This is a production website background, full-bleed artwork only."
+    },
+    {
+      "file": "app/static/images/backgrounds/map-room-day.webp",
+      "source": "exec-18a44fde-f624-4f80-8558-1fe47288e13a.png",
+      "reference": "exec-75136374-e1c6-45e5-bb01-35b8d5e44d1b.png",
+      "prompt": "Use case: lighting-weather. Edit this exact clean cartography-room background to a bright DAYTIME version for light mode. Preserve precisely the SAME camera, framing, geometry, arches, pillars, map desk, wall map, walnut furniture, rug, banners, vines, lake, mountains and village positions. Only change time of day and illumination: soft clear late-morning sunlight entering the right-hand arches, blue sky with a few pale clouds, NO moon and NO stars, green sunlit mountain valley, sparkling pale blue lake, daytime village without glowing window lights, warm cream limestone, honey walnut and parchment. Lanterns remain in exactly the same places but are unlit; no candle flames. Refined cinematic hand-painted game environment art, cozy and luminous, not washed out. Keep all fine architectural details, no additional objects, no moved furniture. Output same 16:9 full-bleed composition, production artwork only, absolutely no UI, words, logos, overlays, or text."
+    }
+  ]
+}

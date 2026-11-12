@@ -31,8 +31,12 @@ function setup({ saved = null, supported = true, blocked = false, rejectResume =
         requestAnimationFrame(callback) { frames.set(++nextFrame, callback); return nextFrame; },
         cancelAnimationFrame(id) { frames.delete(id); },
         addEventListener(name, callback) { listeners[name] = callback; },
+        removeEventListener(name) { delete listeners[name]; },
     };
-    const document = { hidden: false };
+    const document = { hidden: false,
+        addEventListener(name, callback) { listeners[name] = callback; },
+        removeEventListener(name) { delete listeners[name]; },
+    };
     runInNewContext(readFileSync(join(__dirname, "../app/static/roulette-sound.js"), "utf8"), { window, document });
     const sound = window.createAdventureSound(button);
     return { button, sound, frames, tones, contexts, writes, document, listeners,
@@ -49,6 +53,17 @@ test("sound defaults to muted without creating an audio context", () => {
     assert.equal(ui.button.attributes["aria-label"], "Enable sound");
     assert.equal(ui.button.attributes.title, "Enable sound");
     assert.equal(ui.button.hidden, false);
+});
+
+test('replacing a draw closes its audio context and removes its listeners', async () => {
+    const ui = setup({ saved: 'true' });
+    await Promise.resolve();
+    ui.sound.begin(() => 0);
+    ui.listeners['picker:replace']();
+    assert.equal(ui.contexts[0].state, 'closed');
+    assert.equal(ui.frames.size, 0);
+    assert.equal(ui.listeners.pagehide, undefined);
+    assert.equal(ui.listeners['picker:replace'], undefined);
 });
 
 test("enabled ticks follow tile crossings and the reveal plays a short chime", async () => {

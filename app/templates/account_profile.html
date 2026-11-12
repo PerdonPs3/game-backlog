@@ -1,13 +1,16 @@
 {% extends '_workspace_base.html' %}
 {% from '_profile_country.html' import country_flag %}
 {% from '_profile_badges.html' import admin_badge %}
+{% from '_achievement_emblem.html' import emblem %}
 {% set country_code = request.form.get('country_code', profile.country_code or '') %}
 {% set display_name = request.form.get('display_name', profile.display_name) %}
 {% set bio = request.form.get('bio', profile.bio) %}
+{% set background_choice = request.form.get('background_key', profile.background_key) %}
 {% set saved_messages = get_flashed_messages(category_filter=['profile_saved']) %}
 {% block page_title %}{{ 'Create your profile' if is_setup else 'My profile' }} · Vestigium{% endblock %}
-{% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">{% endblock %}
+{% block body_class %}library-page workspace-page profile-palette-page profile-hall-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='profile-achievements.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='achievements.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='profile-hall.css') }}">{% endblock %}
+{% block workspace_backdrop %}<div class="profile-hall-backdrop" aria-hidden="true"></div>{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
 {% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ profile_url() }}">← Back to profile</a>{% endif %}{% endblock %}
 {% block page_heading %}{{ 'Create' if is_setup else 'Edit' }} <span>profile</span>{% endblock %}
@@ -15,15 +18,16 @@
 {% block panel %}
 <div class="profile-editor" data-profile-editor>
     <aside class="player-card" aria-label="Your player card preview">
-        <div class="player-card-cover"><span class="player-card-label">VESTIGIUM / PLAYER CARD</span><span class="player-private">Editor preview</span></div>
+        <div class="player-card-cover"><div class="player-card-cover-art" data-player-background data-background="{{ background_choice }}" data-castle-url="{{ url_for('static', filename='images/backgrounds/castle.webp') }}"{% if profile.has_background %} data-saved-url="{{ url_for('backgrounds.own_image') }}"{% endif %} aria-hidden="true"><img data-player-background-image alt=""{% if background_choice == 'castle' %} src="{{ url_for('static', filename='images/backgrounds/castle.webp') }}"{% elif background_choice == 'custom' and profile.has_background %} src="{{ url_for('backgrounds.own_image') }}"{% else %} hidden{% endif %}></div><a class="player-background-edit" data-edit-background aria-label="Edit background" title="Edit background" href="#profile-background" aria-haspopup="dialog" aria-controls="background-options-dialog"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 6-6 4 4 3-3 5 5"/></svg></a></div>
         <div class="player-card-content">
             <details class="avatar-editor" data-avatar-editor>
                 <summary class="avatar-edit-trigger" aria-label="Edit profile picture" title="Edit profile picture">
                     <span class="player-avatar" style="--avatar-color: {{ avatar_color }}">
                         <span class="avatar-placeholder" data-avatar-placeholder {% if profile.has_photo %}hidden{% endif %}><svg class="player-avatar-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="17" r="9" fill="currentColor"/><path d="M7 44v-5a17 17 0 0 1 34 0v5Z" fill="currentColor"/></svg></span>
                         <img data-avatar-photo alt="Your profile photo" {% if profile.has_photo %}src="{{ url_for('auth.profile_photo') }}"{% else %}hidden{% endif %}>
-                        <span class="avatar-edit-overlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z"/></svg></span>
+
                     </span>
+                    <span class="avatar-edit-overlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z"/></svg></span>
                 </summary>
                 <div class="avatar-edit-panel" role="group" aria-label="Profile picture options">
                     <p class="avatar-edit-heading">Profile picture</p>
@@ -66,8 +70,8 @@
         {% if error %}<p class="profile-error" role="alert">{{ error }} If you selected a new photo, select it again before saving.</p>{% endif %}
         <div class="profile-field">
             <label for="display-name">Display name <span>Required</span></label>
-            <input id="display-name" name="display_name" autocomplete="nickname" maxlength="60" required value="{{ display_name }}" aria-describedby="display-name-hint">
-            <p id="display-name-hint" class="profile-field-hint">You can change your display name anytime.</p>
+            <input id="display-name" name="display_name" autocomplete="nickname" maxlength="20" required value="{{ display_name }}" aria-describedby="display-name-hint">
+            <p id="display-name-hint" class="profile-field-hint">Up to 20 characters. You can change your display name anytime.{% if display_name|length > 20 %} Shorten your existing name before saving changes.{% endif %}</p>
         </div>
         <div class="profile-field"><label for="setup-username">Username <span>Required</span></label><input id="setup-username" data-reserved-usernames='{{ username_reserved|tojson }}' name="username" required minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" value="{{ profile.username if username_state.locked else request.form.get('username', profile.username or '') }}" {% if username_state.locked %}readonly{% endif %} autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="setup-username-help"><p id="setup-username-help" class="profile-field-hint">3–24 letters, numbers, or underscores; start with a letter.{% if username_state.locked %} Available again on <time datetime="{{ username_state.available_iso }}">{{ username_state.available_at }}</time>.{% else %} Changes allowed every 30 days.{% endif %}</p></div>
         <div class="profile-field profile-country-field">
@@ -78,25 +82,84 @@
             </select>
         </div>
         <div class="profile-field"><label for="bio">About you <span>Optional</span></label><textarea id="bio" name="bio" maxlength="500" rows="3" placeholder="Favorite genres, unforgettable games, or what you're playing next…" aria-describedby="bio-counter">{{ bio }}</textarea><div class="profile-bio-footer"><span id="bio-counter" data-bio-counter>{{ bio|length }} / 500</span></div></div>
-        {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_sharing') == 'yes' %}
-        {% set public_selected = request.form.get('is_public') == 'yes' if request.method == 'POST' and (privacy_submitted or 'is_public' in request.form) else (true if is_setup else profile.is_public) %}
+        <fieldset class="profile-customization" id="profile-background"><legend>Profile background</legend>
+            <input type="hidden" name="background_controls" value="yes">
+            <p class="profile-field-hint">Choose a preset or upload your own image. Public profiles can share this background with visitors.</p>
+            <div class="background-options">{% for key, label in background_presets %}<label class="background-preset background-{{ key }}"><input type="radio" name="background_key" value="{{ key }}" {% if background_choice == key %}checked{% endif %}>{{ label }}</label>{% endfor %}</div>
+            <label data-background-custom{% if not profile.has_background %} hidden{% endif %}><input type="radio" name="background_key" value="custom" {% if background_choice == 'custom' %}checked{% endif %}>Custom background</label>
+            {% if profile.has_background %}<img class="background-editor-preview" data-background-saved src="{{ url_for('backgrounds.own_image') }}" alt="Your custom background"><label><input type="checkbox" name="remove_background" value="yes">Remove uploaded background</label>{% endif %}
+            <label for="profile-background-file">Upload background</label><input id="profile-background-file" type="file" name="background" accept="image/jpeg,image/png,image/webp" aria-describedby="background-hint">
+            <p class="profile-field-hint" id="background-hint">JPG, PNG, or WebP · Automatically optimized. Preview and adjust the crop before saving.</p>
+            <input type="hidden" name="background_crop" value="">
+            <div class="background-crop-editor" data-background-editor hidden>
+                <img class="background-editor-preview" data-background-preview alt="Your selected background crop">
+                <button type="button" class="secondary-button" data-background-adjust>Adjust crop</button>
+                <p class="profile-field-hint">Background selected · Save changes to update your profile.</p>
+            </div>
+            <p class="profile-field-hint" data-background-status role="status"></p>
+        </fieldset>
+        <fieldset class="profile-customization" id="profile-badges"><legend>Featured badges</legend>
+            <input type="hidden" name="badge_controls" value="yes">
+            <p class="profile-field-hint">Show up to three badges on your profile. The rest stay in your collection.</p>
+            {% set selected_badges = request.form.getlist('featured_badges') if request.form.get('badge_controls') == 'yes' else badge_state.featured|map(attribute='key')|list %}
+            <div class="badge-editor-heading"><span>{{ badge_state.earned|length }} earned · <span data-badge-selection-count>{{ selected_badges|length }}/3 featured</span></span></div>
+            {% set preview_badges = badge_state.earned|selectattr('key', 'in', selected_badges)|list %}
+            <div class="badge-editor-summary" data-badge-summary aria-label="Featured badge preview">{% for slot in range(3) %}{% set badge = preview_badges[slot] if slot < preview_badges|length else none %}<button type="button" class="badge-summary-card{% if not badge %} is-empty{% endif %}" aria-label="{{ 'Change badge: ' + badge.name if badge else 'Add badge' }}" aria-haspopup="dialog">{% if badge %}{{ emblem(badge) }}<span>{{ badge.name }}</span>{% else %}<span class="badge-slot-plus" aria-hidden="true">+</span><span>Add badge</span>{% endif %}</button>{% endfor %}</div>
+            <dialog class="avatar-crop-dialog badge-selection-dialog" data-badge-dialog aria-labelledby="badge-selection-title">
+            <header class="avatar-crop-header"><div><h2 id="badge-selection-title">Choose your badges</h2><p>Select up to three to feature on your profile.</p></div></header>
+            <p class="profile-field-hint" data-badge-dialog-count role="status">{{ selected_badges|length }}/3 selected</p>
+            <div class="badge-options">
+                {% for category, title in [('collection', 'Collection'), ('completion', 'Completion'), ('reviews', 'Reviews')] %}
+                {% set category_badges = badge_state.earned|selectattr('category', 'equalto', category)|list %}
+                {% if category_badges %}<section class="badge-category category-{{ category }}" aria-labelledby="badge-category-{{ category }}">
+                    <h3 id="badge-category-{{ category }}">{{ title }} <span>{{ category_badges|length }}</span></h3>
+                    {% for badge in category_badges %}<label><input type="checkbox" name="featured_badges" value="{{ badge.key }}" {% if badge.key in selected_badges %}checked{% endif %}>{{ emblem(badge) }}<span>{{ badge.name }}<small>{{ badge.description }}</small></span></label>{% endfor %}
+                </section>{% endif %}
+                {% endfor %}
+                {% if not badge_state.earned %}<p class="profile-field-hint">Add a game to your library to unlock your first badge.</p>{% endif %}
+            </div>
+            <div class="avatar-crop-actions"><span class="profile-field-hint">Save changes to update your profile.</span><button type="button" data-badge-done>Done</button></div>
+            </dialog>
+        </fieldset>
+        {% set privacy_submitted = request.method == 'POST' and request.form.get('profile_privacy_controls') == 'yes' %}
+        {% set private_selected = request.form.get('private_profile') == 'yes' if privacy_submitted else (false if is_setup else not profile.is_public) %}
         <input type="hidden" name="profile_sharing" value="yes">
-        <fieldset class="profile-setup-visibility" id="profile-privacy"><legend>Privacy &amp; sharing</legend>
-            <p class="profile-field-hint">Your profile link: <a href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/profile/{{ profile.username or 'your_username' }}</a></p>
-            <label><input type="radio" name="is_public" value="yes" {% if public_selected %}checked{% endif %}><span>Public <small>Anyone can view the details you share below.</small></span></label>
-            <label><input type="radio" name="is_public" value="no" {% if not public_selected %}checked{% endif %}><span>Private <small>Only you can open your profile.</small></span></label>
-            <div class="profile-sharing-options profile-editor-sharing">
-            {% for name, title in [('share_bio', 'About you'), ('share_showcase', 'Five-game showcase'), ('share_photo', 'Profile photo')] %}
-                <label><input type="checkbox" name="{{ name }}" value="yes" {% if (request.form.get(name) == 'yes' if privacy_submitted else (true if is_setup else profile[name])) %}checked{% endif %}><span>{{ title }}</span></label>
-            {% endfor %}
-            </div>{% if not is_setup %}<p class="profile-field-hint"><a href="{{ url_for('auth.edit_showcase') }}">Choose your five showcase games →</a></p>{% endif %}<p class="profile-field-hint">Your email, library, ratings, and reviews stay private.</p>
+        <input type="hidden" name="profile_privacy_controls" value="yes">
+        <fieldset class="profile-privacy-panel" id="profile-privacy"><legend>Privacy</legend>
+            <header class="privacy-heading"><div><h3>Profile visibility</h3><p>Public by default. Turn on a control to hide something.</p></div><span class="privacy-visibility" data-privacy-visibility>{{ 'Private' if private_selected else 'Public' }}</span></header>
+            <a class="privacy-profile-link" href="{{ url_for('profiles.public_profile', username=profile.username) if profile.username else '#' }}" data-profile-link-preview>/players/{{ profile.username or 'your_username' }}</a>
+            <label class="privacy-master"><span><strong>Private profile</strong><small>Only you can open your profile.</small></span><input class="privacy-switch" type="checkbox" role="switch" name="private_profile" value="yes" data-private-profile{% if private_selected %} checked{% endif %}></label>
+            <div data-privacy-sections{% if private_selected %} hidden{% endif %}>
+                <h4>Hide from visitors</h4>
+                <div class="privacy-grid">
+                {% for field, control, title in [('share_bio', 'hide_bio', 'Hide bio'), ('share_photo', 'hide_photo', 'Hide profile photo'), ('share_background', 'hide_background', 'Hide background'), ('share_showcase', 'hide_showcase', 'Hide showcase'), ('share_statistics', 'hide_statistics', 'Hide statistics'), ('share_activity', 'hide_activity', 'Hide recent activity'), ('share_connections', 'hide_connections', 'Hide followers & following'), ('share_wishlist', 'private_wishlist', 'Hide wishlist'), ('share_badges', 'hide_badges', 'Hide badges')] %}
+                    {% set hidden = request.form.get(control) == 'yes' if privacy_submitted else (false if is_setup else not profile[field]) %}
+                    <label class="privacy-option"><span>{{ title }}</span><input class="privacy-switch" type="checkbox" role="switch" name="{{ control }}" value="yes"{% if hidden %} checked{% endif %}></label>
+                {% endfor %}
+                </div>
+            </div>
+            <p class="privacy-private-note" data-privacy-private-note{% if not private_selected %} hidden{% endif %}>Your section preferences are kept for when you make your profile public again.</p>
+            <p class="privacy-footnote">Your email and full library stay private. Reviews appear only when you publish them.</p>
         </fieldset>
         <footer class="profile-save-bar">
-            <p class="profile-field-hint">Your sharing choices apply when you save.</p>
-            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }} <span aria-hidden="true">↗</span></button>{% if not is_setup %}<a href="{{ profile_url() }}">View profile <span aria-hidden="true">→</span></a>{% endif %}</div>
+            <div class="profile-save-actions"><button type="submit" data-save-profile>{{ 'Create profile' if is_setup else 'Save changes' }}</button>{% if not is_setup %}<a href="{{ profile_url() }}">View profile</a>{% endif %}</div>
             <p id="profile-feedback" class="profile-feedback {% if saved_messages %}is-saved{% endif %}" role="status" aria-live="polite" tabindex="-1" data-profile-feedback {% if saved_messages %}data-saved="true"{% endif %}>{% if saved_messages %}<span aria-hidden="true">✓</span> {{ saved_messages[0] }}{% else %}{% endif %}</p>
         </footer>
+        <dialog class="avatar-crop-dialog background-options-dialog" data-background-options id="background-options-dialog" aria-labelledby="background-options-title">
+            <header class="avatar-crop-header"><div><h2 id="background-options-title">Edit background</h2></div></header>
+            <div data-background-options-body></div>
+            <div class="avatar-crop-actions"><span class="profile-field-hint">Save changes to update your profile.</span><button type="button" data-background-options-close>Done</button></div>
+        </dialog>
     </form>
+    <dialog class="avatar-crop-dialog background-crop-dialog" data-background-dialog aria-labelledby="background-crop-title" aria-describedby="background-crop-help">
+        <header class="avatar-crop-header"><div><h2 id="background-crop-title">Adjust your background</h2><p id="background-crop-help">Drag to position your background. You can also focus the preview and use the arrow keys.</p></div></header>
+        <canvas class="background-crop-canvas" data-background-canvas width="800" height="300" tabindex="0" role="img" aria-label="Background crop preview"></canvas>
+        <label class="avatar-crop-zoom" for="background-zoom">Zoom<input id="background-zoom" data-background-zoom type="range" min="1" max="4" step="0.01" value="1"></label>
+        <p class="avatar-crop-keyboard">The profile layout may crop the edges on different screens.</p>
+        <div class="avatar-crop-actions"><button type="button" data-background-center>Center background</button><div><button type="button" data-background-cancel>Cancel</button><button type="button" data-background-apply data-crop-apply>Use background</button></div></div>
+        <p class="profile-field-hint" data-background-dialog-status role="status"></p>
+        <p class="avatar-crop-error" data-background-error role="alert"></p>
+    </dialog>
     <dialog class="avatar-crop-dialog" data-avatar-crop aria-labelledby="avatar-crop-title" aria-describedby="avatar-crop-help">
         <header class="avatar-crop-header"><div><h2 id="avatar-crop-title">Adjust your photo</h2><p id="avatar-crop-help">Drag the photo to position it inside the circle.</p></div><button type="button" class="avatar-crop-replace" data-crop-replace aria-label="Choose another image" title="Choose another image"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 11-8.5 8.5a6 6 0 0 1-8.5-8.5l9-9a4 4 0 0 1 5.7 5.7l-9 9a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button></header>
         <input type="file" data-crop-replacement accept="image/jpeg,image/png,image/webp" hidden>
@@ -112,4 +175,4 @@
     </dialog>
 </div>
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='profile-background-options.js') }}" defer></script><script src="{{ url_for('static', filename='background-crop.js') }}" defer></script><script src="{{ url_for('static', filename='profile-background-preview.js') }}" defer></script><script src="{{ url_for('static', filename='profile-customization.js') }}" defer></script><script src="{{ url_for('static', filename='profile-username.js') }}" defer></script><script src="{{ url_for('static', filename='avatar-crop.js', v='3') }}" defer></script><script src="{{ url_for('static', filename='profile-editor.js', v='2') }}" defer></script><script src="{{ url_for('static', filename='profile-country.js') }}" defer></script><script src="{{ url_for('static', filename='profile-sharing.js') }}" defer></script>{% endblock %}

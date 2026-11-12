@@ -4,8 +4,8 @@ import pytest
 @pytest.mark.parametrize("page", ["index", "create", "edit", "delete"])
 def test_pages_include_decorative_logo_and_illumination(client, seed_game, page):
     game_id = seed_game()
-    urls = {"index": "/library", "create": "/games/new",
-            "edit": f"/games/{game_id}/edit", "delete": f"/games/{game_id}/delete"}
+    urls = {"index": "/library", "create": "/library/add",
+            "edit": f"/library/entries/{game_id}/edit", "delete": f"/library/entries/{game_id}/delete"}
     response = client.get(urls[page])
     assert response.status_code == 200
     html = response.get_data(as_text=True)

@@ -7,9 +7,9 @@
     <p class="confirmation-title">Are you sure you want to delete “<strong>{{ game['title'] }}</strong>”?</p>
     <p class="form-note">This action cannot be undone. Its rating, review, and recorded dates will also be removed.</p>
     <form method="post" class="workspace-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_path" value="{{ navigation_return() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-actions">
-            <a href="{{ url_for('main.index') }}">Cancel</a>
+            <a href="{{ navigation_return() }}">Cancel</a>
             <button type="submit">Yes, delete game</button>
         </div>
     </form>

@@ -20,7 +20,7 @@ from app.db import get_db, INTEGRITY_ERRORS
 from app.catalog_journey import clear_auth_keep_selection, take_selection, pending_selection
 
 
-auth = Blueprint("auth", __name__, url_prefix="/account")
+auth = Blueprint("auth", __name__)
 SESSION_SECONDS = 30 * 24 * 60 * 60
 RECOVERY_SECONDS = 30 * 60
 
@@ -162,6 +162,8 @@ def protect_collection():
         return
     if request.blueprint == "main" and request.endpoint != "main.welcome":
         if not g.user:
+            from app.navigation import remember_login_destination
+            remember_login_destination()
             if request.accept_mimetypes.best == "application/json" or request.path.startswith("/catalog/"):
                 return jsonify(error="Please sign in to access your library."), 401
             return redirect(url_for("auth.login"))
@@ -187,7 +189,7 @@ def credentials():
     return {"email": email, "password": password}
 
 
-@auth.route("/login", methods=["GET", "POST"])
+@auth.route("/account/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET" and "code" in request.args:
         return complete_recovery_link()
@@ -202,10 +204,17 @@ def login():
             g.user, g.profile = user, saved
             g.account_session = {"recovery": False}
             if saved['display_name'].strip():
+                selected = pending_selection()
                 selected_id = take_selection()
                 if selected_id:
-                    return redirect(url_for('main.create', igdb_id=selected_id))
+                    if selected.get('intent') == 'wishlist':
+                        return redirect(url_for('explore.game', catalog_id=selected_id, _anchor='game-actions'))
+                    return redirect(url_for('main.create', igdb_id=selected_id, **{'from': selected.get('return_path')}))
             identity = {"username": saved["username"]} if saved["display_name"].strip() and saved["username"] else {}
+            from app.navigation import take_login_destination
+            destination = take_login_destination()
+            if destination and saved['display_name'].strip():
+                return redirect(destination)
             return redirect(url_for("main.index" if saved["display_name"].strip() else "auth.profile", **identity))
         except ValueError as problem:
             error = str(problem)
@@ -237,7 +246,7 @@ def complete_recovery_link():
         return redirect(url_for("auth.recover"))
 
 
-@auth.route("/register", methods=["GET", "POST"])
+@auth.route("/account/register", methods=["GET", "POST"])
 def register():
     error = message = None
     if request.method == "POST":
@@ -259,7 +268,7 @@ def register():
     return render_template("account_auth.html", mode="register", error=error, message=message)
 
 
-@auth.route("/recover", methods=["GET", "POST"])
+@auth.route("/account/recover", methods=["GET", "POST"])
 def recover():
     error = message = None
     if request.method == "POST":
@@ -280,7 +289,7 @@ def recover():
     return render_template("account_auth.html", mode="recover", error=error, message=message)
 
 
-@auth.route("/verify-recovery", methods=["GET", "POST"])
+@auth.route("/account/verify-recovery", methods=["GET", "POST"])
 def verify_recovery():
     error = None
     if request.method == "POST":
@@ -297,7 +306,7 @@ def verify_recovery():
     return render_template("account_auth.html", mode="verify-recovery", error=error)
 
 
-@auth.route("/password", methods=["GET", "POST"])
+@auth.route("/account/password", methods=["GET", "POST"])
 def password():
     if not g.user or not g.account_session["recovery"]:
         return redirect(url_for("auth.recover"))
@@ -317,7 +326,7 @@ def password():
     return render_template("account_auth.html", mode="password", error=error)
 
 
-@auth.post("/logout")
+@auth.post("/account/logout")
 def logout():
     if g.account_session:
         get_db().execute("DELETE FROM account_sessions WHERE id_hash = ?", (g.account_session["id_hash"],))
@@ -329,7 +338,7 @@ def logout():
     return redirect(url_for("main.welcome"))
 
 
-@auth.get('/form-token')
+@auth.get('/account/form-token')
 def form_token():
     if not g.user:
         return jsonify(error='Please sign in again before adding this game.'), 401
@@ -338,7 +347,7 @@ def form_token():
     return jsonify(csrf_token=generate_csrf())
 
 
-@auth.route("/profile/edit", methods=["GET", "POST"])
+@auth.route("/settings/profile", methods=["GET", "POST"])
 def profile():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -346,7 +355,11 @@ def profile():
         return redirect(url_for("auth.password"))
     db = get_db()
     error = None
-    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, country_code, admin_badge FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    item = db.execute("SELECT display_name, bio, avatar, avatar_color, avatar_image IS NOT NULL AS has_photo, username, username_changed_at, is_public, share_bio, share_showcase, share_photo, share_statistics, share_activity, share_wishlist, share_connections, country_code, admin_badge, background_key, background_image IS NOT NULL AS has_background, share_background, share_badges, featured_badges FROM profiles WHERE id = ?", (g.user["id"],)).fetchone()
+    from app.achievements import owner_state, save_features
+    from app.profile_backgrounds import PRESETS, validate_background, save_background
+    badge_state = owner_state() if item['display_name'].strip() else {'earned': [], 'featured': []}
+    background_selection = None
     is_setup = not item["display_name"].strip()
     if request.method == "POST":
         name, bio = request.form.get("display_name", "").strip(), request.form.get("bio", "").strip()
@@ -355,13 +368,14 @@ def profile():
         photo = None
         upload = request.files.get("photo")
         remove_photo = request.form.get("remove_photo") == "yes"
-        if not 1 <= len(name) <= 60 or len(bio) > 500 or avatar not in ("controller", "star", "ghost", "rocket") or any(ord(char) < 32 for char in name):
-            error = "Choose a name with 1 to 60 characters, a bio up to 500 characters, and an available avatar."
+        if not 1 <= len(name) <= 20 or len(bio) > 500 or avatar not in ("controller", "star", "ghost", "rocket") or any(ord(char) < 32 for char in name):
+            error = "Choose a name with 1 to 20 characters, a bio up to 500 characters, and an available avatar."
         elif not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
             error = "Choose a valid profile color."
         else:
             try:
                 from app.countries import clean_country
+                background_selection = validate_background(request.form, request.files, item)
                 country = clean_country(request.form.get('country_code', item['country_code'] or ''))
                 if is_setup:
                     from app.public_profiles import clean_username
@@ -388,8 +402,14 @@ def profile():
                 if request.form.get('profile_sharing') == 'yes':
                     from app.public_profiles import update_sharing
                     update_sharing(db, g.user['id'], request.form)
-                    db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
-                               (request.form.get('share_photo') == 'yes', g.user['id']))
+                    if request.form.get('profile_privacy_controls') != 'yes':
+                        db.execute('UPDATE profiles SET share_photo = avatar_image IS NOT NULL AND ? WHERE id = ?',
+                                   (request.form.get('share_photo') == 'yes', g.user['id']))
+                save_background(db, g.user['id'], background_selection)
+                if request.form.get('profile_sharing') != 'yes':
+                    from app.wishlist import save_privacy
+                    save_privacy(db, g.user['id'], request.form)
+                save_features(db, g.user['id'], request.form)
                 db.commit()
             except ValueError as exc:
                 db.rollback()
@@ -407,11 +427,11 @@ def profile():
     from app.routes import collection_statistics
     from app.public_profiles import RESERVED_NAMES, username_availability, username_clock
     from app.countries import COUNTRIES
-    return render_template("account_profile.html", profile=item, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES), username_state=username_availability(item, username_clock(db)),
+    return render_template("account_profile.html", profile=item, background_presets=PRESETS, badge_state=badge_state, countries=COUNTRIES, stats=collection_statistics(db), error=error, is_setup=is_setup, username_reserved=sorted(RESERVED_NAMES), username_state=username_availability(item, username_clock(db)),
                            avatar_color=color if request.method == "POST" and re.fullmatch(r"#[0-9a-fA-F]{6}", color) else item["avatar_color"])
 
 
-@auth.route("/profile", methods=["GET", "POST"])
+@auth.route("/account/profile", methods=["GET", "POST"])
 def profile_overview():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -426,15 +446,18 @@ def profile_overview():
         return redirect(url_for('profiles.public_profile', username=g.profile['username']), code=302)
     from app.profile_showcase import game_cards, showcase_games
     from app.routes import collection_statistics
+    from app.game_reviews import profile_review_context
+    from app.achievements import owner_state
+    from app.following import profile_context
     db = get_db()
     user_id = g.user["id"]
-    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, country_code, admin_badge FROM profiles WHERE id = ?", (user_id,)).fetchone()
-    playing = db.execute("SELECT id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    completed = db.execute("SELECT id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
-    return render_template("profile_overview.html", profile=item, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed))
+    item = db.execute("SELECT display_name, bio, avatar_color, avatar_image IS NOT NULL AS has_photo, created_at, username, country_code, admin_badge, background_key FROM profiles WHERE id = ?", (user_id,)).fetchone()
+    playing = db.execute("SELECT id, igdb_id, title, platform, status, rating, cover_image_id FROM games WHERE owner_id = ? AND status = 'Playing' ORDER BY started_on DESC NULLS LAST, created_at DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    completed = db.execute("SELECT id, igdb_id, title, platform, status, rating, cover_image_id, completed_on FROM games WHERE owner_id = ? AND status = 'Completed' AND completed_on IS NOT NULL ORDER BY completed_on DESC, id DESC LIMIT 3", (user_id,)).fetchall()
+    return render_template("profile_overview.html", profile=item, badge_state=owner_state(), profile_owner=True, stats=collection_statistics(db), showcase=showcase_games(db, user_id), playing=game_cards(playing), completed=game_cards(completed), **profile_review_context(g.profile['username']), **profile_context(g.profile['username']))
 
 
-@auth.route("/profile/showcase", methods=["GET", "POST"])
+@auth.route("/settings/profile/showcase", methods=["GET", "POST"])
 def edit_showcase():
     if not g.user:
         return redirect(url_for("auth.login"))
@@ -452,14 +475,14 @@ def edit_showcase():
         try:
             save_showcase(db, user_id, selected)
             flash("Showcase saved. Your featured games are up to date.", "profile_saved")
-            return redirect(url_for("auth.profile_overview", _anchor="profile-feedback"), code=303)
+            return redirect((url_for("profiles.public_profile", username=g.profile["username"], _anchor="profile-feedback") if g.profile["username"] else url_for("auth.profile_overview", _anchor="profile-feedback")), code=303)
         except ValueError as exc:
             error = str(exc)
     games = db.execute("SELECT id, title, platform, status, cover_image_id FROM games WHERE owner_id = ? ORDER BY is_favorite DESC, LOWER(title), platform, id", (user_id,)).fetchall()
     return render_template("profile_showcase.html", games=game_cards(games), selected=(selected + [""] * 5)[:5], error=error)
 
 
-@auth.get("/profile/photo")
+@auth.get("/account/profile/photo")
 def profile_photo():
     if not g.user:
         abort(401)
@@ -522,7 +545,7 @@ def init_app(app):
     @app.errorhandler(413)
     def upload_too_large(error):
         if request.endpoint == "auth.profile":
-            flash("Choose a photo smaller than 2 MB. Your previous profile has been kept.", "profile_error")
+            flash("Keep each photo or background under 2 MB. Your previous profile has been kept.", "profile_error")
             return redirect(url_for("auth.profile"), code=303)
         return error
 

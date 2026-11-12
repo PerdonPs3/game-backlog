@@ -1,7 +1,7 @@
 {% for game in games %}
-    {% set detail_url = url_for('explore.game', catalog_id=game.igdb_id) if game.igdb_id else url_for('main.game_details', game_id=game.id) %}
+    {% set detail_url = game_url(game.igdb_id, game.title) if game.igdb_id else url_for('main.game_details', game_id=game.id, **{'from':navigation_origin()}) %}
     <article class="game-card">
-        <a class="game-card-cover" href="{{ detail_url }}" {% if not game.igdb_id %}data-game-details{% endif %} aria-label="View details for {{ game.title }}">
+        <a class="game-card-cover" href="{{ detail_url }}" aria-label="View details for {{ game.title }}">
             <span>No cover available</span>
             {% if game['cover_url'] %}
                 <img src="{{ game['cover_url'] }}" alt="" width="264" height="374"
@@ -10,7 +10,7 @@
         </a>
         <div class="game-card-details">
             <div class="game-card-heading">
-            <h2><a class="game-title-link" href="{{ detail_url }}" {% if not game.igdb_id %}data-game-details{% endif %}>{{ game.title }}</a></h2>
+            <h2><a class="game-title-link" href="{{ detail_url }}">{{ game.title }}</a></h2>
             {% if game['is_favorite'] or game['is_goty'] %}
                 <div class="game-stickers" aria-label="Personal game distinctions">
                     {% if game['is_favorite'] %}<span class="game-sticker sticker-favorite"><span aria-hidden="true">★</span> Favorite</span>{% endif %}
@@ -56,7 +56,7 @@
             {% endif %}
 
             <div class="game-actions">
-                {% if game.igdb_id %}<a href="{{ url_for('main.game_details', game_id=game.id) }}" data-game-details>My entry</a>{% endif %}
+                {% if game.igdb_id %}<a href="{{ game_url(game.igdb_id, game.title, section='your-progress') }}">Your progress</a>{% endif %}
                 <a href="{{ url_for('main.edit', game_id=game['id']) }}">Edit game</a>
                 <a class="danger-link" href="{{ url_for('main.delete', game_id=game['id']) }}"
                    data-delete-game data-game-title="{{ game.title }}">Delete game</a>

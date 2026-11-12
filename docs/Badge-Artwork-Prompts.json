@@ -1,0 +1,61 @@
+{
+  "tool": "Built-in imagegen",
+  "use_case": "background-extraction",
+  "reference": "Approved Vestigium milestone collection mockup, 2026-10-25",
+  "assets": [
+    {
+      "key": "newcomer",
+      "file": "app/static/images/achievements/newcomer.webp",
+      "source": "exec-a78bead3-3e4c-447f-8b20-fd7975af499e.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the NEWCOMER, TOP LEFT panel. Keep its exact design: ONE richly bound brown closed book with gold embossed cover and ribbon bookmark, black enamel, amber top gemstone, simple gold shield and small laurel sprigs. Image 2 is an already isolated badge from the SAME family, provided ONLY as a guide for square canvas, padding, border polish, lighting and visual scale; do NOT copy its five-book centerpiece. Preserve Image 1's designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem, straight-on, square canvas, occupying approximately 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield, dark enamel inside stays opaque. Clean antialiased edges, no black rectangular background or ground shadow. No text whatsoever, no redesign, no simplification into outline icons, no cropped tips. The result must match the approved mockup and be readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "collector",
+      "file": "app/static/images/achievements/collector.webp",
+      "source": "exec-51ebd9ed-8869-4a68-9d9b-45d4dc0ce257.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the COLLECTOR, TOP CENTER panel. Keep its exact design: THREE red, blue and green leather books stacked, amber gemstone, polished gold shield, black enamel and two small gold laurel sprigs. Image 2 is an already isolated badge from the SAME family, provided ONLY as a guide for square canvas, padding, border polish, lighting and visual scale; do NOT copy its five-book centerpiece. Preserve Image 1's designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem, straight-on, square canvas, occupying approximately 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield, dark enamel inside stays opaque. Clean antialiased edges, no black rectangular background or ground shadow. No text whatsoever, no redesign, no simplification into outline icons, no cropped tips. The result must match the approved mockup and be readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "archivist",
+      "file": "app/static/images/achievements/archivist.webp",
+      "source": "exec-43b50893-b951-40c5-867b-61515d54fe23.png",
+      "prompt": "Edit the reference image to isolate ONLY the ARCHIVIST achievement emblem, located in the TOP RIGHT panel. This is a precise asset extraction from the approved design. Preserve the exact ornate polished gold shield frame, top amber diamond, dark textured enamel, FIVE stacked red/blue/green/brown/purple leather books with gold decoration, pedestal, laurel details, light direction, colors, symmetry and dimensional relief. Center ONE complete emblem on a square canvas, taking 88% of the canvas height, with equal transparent padding. Remove ALL surrounding board, panel, labels, typography, captions, footer, and other emblems. Background outside the shield must be genuinely transparent alpha, with clean antialiased edges, no opaque black rectangle, no ambient backdrop, no ground shadow. Keep the dark enamel INSIDE the shield opaque. Do not redesign, simplify into SVG-like line art, add text, crop the shield tips, or change the five books. Match the approved source as closely as possible. Production icon asset for a gaming profile at 64\u2013128 pixels."
+    },
+    {
+      "key": "curator",
+      "file": "app/static/images/achievements/curator.webp",
+      "source": "exec-0f8e04b3-76c7-4aaf-b66e-78ce34447e82.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the MIDDLE LEFT CURATOR emblem. Preserve its exact design: three-shelf symmetrical ornate bookcase with gold star, amber gemstone, black enamel. Image 2 is an isolated badge from the SAME family, ONLY a guide for square canvas, padding, polish, lighting and scale; do NOT copy its five-book centerpiece. Preserve the designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem straight-on on square canvas, occupying 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield; enamel inside stays opaque. Clean antialiased edges, no rectangular backdrop or ground shadow. No text, redesign, outline simplification, or cropped tips. Match the approved mockup; readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "legend",
+      "file": "app/static/images/achievements/legend.webp",
+      "source": "exec-6978f28d-10a9-4890-ba62-6f01e38c92f3.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the MIDDLE CENTER LEGEND emblem. Preserve its exact design: open symmetrical tome, gold crown, full mirrored laurel wreath, amber gemstones, ornate upgraded gold frame. Image 2 is an isolated badge from the SAME family, ONLY a guide for square canvas, padding, polish, lighting and scale; do NOT copy its five-book centerpiece. Preserve the designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem straight-on on square canvas, occupying 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield; enamel inside stays opaque. Clean antialiased edges, no rectangular backdrop or ground shadow. No text, redesign, outline simplification, or cropped tips. Match the approved mockup; readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "finisher",
+      "file": "app/static/images/achievements/finisher.webp",
+      "source": "exec-6e0efe35-f6c5-4ebc-9a14-84e6400e09c2.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the MIDDLE RIGHT FINISHER emblem. Preserve its exact design: gold trophy with teal inset diamond, small laurel sprigs, teal enamel, teal top gemstone. Image 2 is an isolated badge from the SAME family, ONLY a guide for square canvas, padding, polish, lighting and scale; do NOT copy its five-book centerpiece. Preserve the designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem straight-on on square canvas, occupying 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield; enamel inside stays opaque. Clean antialiased edges, no rectangular backdrop or ground shadow. No text, redesign, outline simplification, or cropped tips. Match the approved mockup; readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "completionist",
+      "file": "app/static/images/achievements/completionist.webp",
+      "source": "exec-571ee365-d1e4-4085-813c-df7270842989.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the COMPLETIONIST, BOTTOM LEFT panel. Keep its exact design: gold trophy, mirrored large laurel wreath, teal enamel, teal diamonds at top and bottom, engraved upgraded gold border. Image 2 is an already isolated badge from the SAME family, provided ONLY as a guide for square canvas, padding, border polish, lighting and visual scale; do NOT copy its five-book centerpiece. Preserve Image 1's designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem, straight-on, square canvas, occupying approximately 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield, dark enamel inside stays opaque. Clean antialiased edges, no black rectangular background or ground shadow. No text whatsoever, no redesign, no simplification into outline icons, no cropped tips. The result must match the approved mockup and be readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "reviewer",
+      "file": "app/static/images/achievements/reviewer.webp",
+      "source": "exec-ac0b2698-dad3-4d34-8da1-41da7042998c.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the REVIEWER, BOTTOM CENTER panel. Keep its exact design: a detailed gold writing quill and small gold-rimmed inkwell with purple diamond, purple enamel shield, amethyst top gemstone, small left gold laurel sprig. Image 2 is an already isolated badge from the SAME family, provided ONLY as a guide for square canvas, padding, border polish, lighting and visual scale; do NOT copy its five-book centerpiece. Preserve Image 1's designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem, straight-on, square canvas, occupying approximately 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield, dark enamel inside stays opaque. Clean antialiased edges, no black rectangular background or ground shadow. No text whatsoever, no redesign, no simplification into outline icons, no cropped tips. The result must match the approved mockup and be readable at 64\u2013128 pixels."
+    },
+    {
+      "key": "critic",
+      "file": "app/static/images/achievements/critic.webp",
+      "source": "exec-f4e98af5-cff2-4f62-b966-8cfa3be8e475.png",
+      "prompt": "Precise asset extraction for production. Image 1 is the approved nine-badge design board. Isolate ONLY the BOTTOM RIGHT CRITIC emblem. Preserve its exact design: gold quill over open review folio, full mirrored gold laurel wreath, amethyst gemstones, purple enamel, upgraded gold frame. Image 2 is an isolated badge from the SAME family, ONLY a guide for square canvas, padding, polish, lighting and scale; do NOT copy its five-book centerpiece. Preserve the designated emblem, gold frame shape, colors, ornamentation, symmetry, textured dark enamel and dimensional embossed relief. ONE emblem straight-on on square canvas, occupying 86\u201388% of canvas height, centered with equal padding. Remove all labels, text, panels, board, other emblems and background. Genuinely TRANSPARENT ALPHA outside the shield; enamel inside stays opaque. Clean antialiased edges, no rectangular backdrop or ground shadow. No text, redesign, outline simplification, or cropped tips. Match the approved mockup; readable at 64\u2013128 pixels."
+    }
+  ]
+}

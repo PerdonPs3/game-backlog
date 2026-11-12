@@ -1,0 +1,43 @@
+name: Service health
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '.github/workflows/service-health.yml'
+      - 'scripts/check_service_health.py'
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: service-health
+  cancel-in-progress: false
+
+jobs:
+  readiness:
+    name: Check ${{ matrix.target.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: development
+            url: https://game-backlog-git-develop-maxis2.vercel.app
+          - name: production
+            url: https://game-backlog-eight.vercel.app
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Check database-backed readiness
+        env:
+          APP_ORIGIN: ${{ matrix.target.url }}
+        run: python scripts/check_service_health.py "$APP_ORIGIN"

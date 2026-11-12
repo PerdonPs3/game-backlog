@@ -1,0 +1,16 @@
+{% if library_section and (account_user or not accounts_enabled) %}
+<nav class="section-navigation" aria-label="Library sections">
+    <a href="{{ library_home_url() if library_section else url_for('main.index') }}" {% if request.endpoint == 'main.index' %}aria-current="page"{% endif %}>All games</a>
+    {% if account_user %}<a href="{{ library_section_url('wishlist.index') if library_section else url_for('wishlist.index') }}" {% if request.endpoint == 'wishlist.index' %}aria-current="page"{% endif %}>Wishlist</a>{% endif %}
+    <a href="{{ library_section_url('main.lists') if library_section else url_for('main.lists') }}" {% if request.endpoint in ['main.lists','main.edit_list'] %}aria-current="page"{% endif %}>Lists</a>
+    <a href="{{ library_section_url('main.pick_game') if library_section else url_for('main.pick_game') }}" {% if request.endpoint == 'main.pick_game' %}aria-current="page"{% endif %}>Pick a game</a>
+</nav>
+{% elif navigation_group == 'community' and request.endpoint != 'profiles.public_profile' and (account_user or request.endpoint != 'profiles.search') %}
+<nav class="community-context-nav" aria-label="Community sections">
+{% if request.endpoint == 'profiles.search' %}
+<a href="{{ url_for('following.manage') }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M21 20v-2a6 6 0 0 0-3-5.2"/></svg>Connections</a>
+{% else %}
+<a href="{{ url_for('profiles.search') }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Find players</a>
+{% endif %}
+</nav>
+{% endif %}

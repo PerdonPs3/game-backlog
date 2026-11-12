@@ -85,11 +85,30 @@ def create_app(test_config=None):
     from app.game_reviews import init_app as init_game_reviews
     init_game_reviews(app)
 
+    from app.achievements import init_app as init_achievements
+    init_achievements(app)
+    from app.profile_backgrounds import backgrounds
+    app.register_blueprint(backgrounds)
+
+    from app.wishlist import init_app as init_wishlist
+    init_wishlist(app)
+
     from app.community import init_app as init_community
     init_community(app)
 
+    from app.following import init_app as init_following
+    init_following(app)
+
+    from app.discovery import discovery
+    app.register_blueprint(discovery)
+    from app.help_center import help_center
+    app.register_blueprint(help_center)
+
     from app.account_urls import init_app as init_account_urls
     init_account_urls(app)
+
+    from app.navigation import init_app as init_navigation
+    init_navigation(app)
 
     from app.game_fields import STATUSES, star_rating
     app.jinja_env.filters['star_rating'] = star_rating

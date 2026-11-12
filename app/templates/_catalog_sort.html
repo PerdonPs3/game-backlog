@@ -1,0 +1,1 @@
+<label class="discover-select catalog-sort">Sort by<select name="sort" aria-label="Sort by"{% if request.endpoint == 'explore.index' %} data-catalog-sort{% endif %}>{% for key, label in catalog_sorts.items() %}<option value="{{ key }}"{% if sort == key %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

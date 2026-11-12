@@ -8,6 +8,11 @@ They apply to code, tests, documentation, and configuration.
 - Use English for all work: plans, explanations, documentation, agent instructions, code comments, identifiers, tests, commit messages, branch names, and merge messages.
 - Write new or updated user-facing application text in English.
 
+## Interface changes
+
+- Avoid redundant text, links, search fields, navigation, and controls across the same page, including its header and footer. Check the surrounding interface before adding an element.
+- When asked to refresh an existing design, preserve its established layout unless the user requests a redesign. Add content only when it serves a distinct purpose; do not fill space with repeated information.
+
 ## Git Flow and responsibilities
 
 - `main` is the production branch; `develop` is the integration branch for development and testing. Use these lowercase names.

@@ -24,7 +24,7 @@
         <header class="personal-heading">
             <div>
 
-                <h3>Your review</h3>
+                <h3>Private notes</h3>
             </div>
             <span class="personal-status"><span aria-hidden="true">◇</span> {{ game.status }}</span>
         </header>
@@ -43,11 +43,11 @@
                 {% endif %}
             </div>
             <div class="personal-review">
-                <span class="verdict-label">Your review</span>
+                <span class="verdict-label">Private notes</span>
                 {% if game.review %}
                     <blockquote class="verdict-quote"><span class="quote-mark" aria-hidden="true">“</span><p class="profile-text">{{ game.review }}</p></blockquote>
                 {% else %}
-                    <p class="review-empty">No review yet.</p>
+                    <p class="review-empty">No private notes yet.</p>
                 {% endif %}
             </div>
         </div>

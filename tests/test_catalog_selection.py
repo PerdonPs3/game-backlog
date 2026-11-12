@@ -121,7 +121,7 @@ def test_lookup_rejects_missing_or_noncanonical_game(monkeypatch, game):
 
 @pytest.mark.parametrize("game_id", ["", "999", "abc", "1; drop table games", "9" * 100])
 def test_create_requires_real_catalog_selection(post_form, game_data, stored_games, game_id):
-    response = post_form("/games/new", {**game_data, "igdb_id": game_id})
+    response = post_form("/library/add", {**game_data, "igdb_id": game_id})
     assert response.status_code == 200
     assert b"choose a game from the catalog" in response.data
     assert stored_games() == []
@@ -129,20 +129,20 @@ def test_create_requires_real_catalog_selection(post_form, game_data, stored_gam
 
 @pytest.mark.parametrize("changes", [{"platform": "Xbox 360"}, {"title": "Invented game"}])
 def test_create_rejects_tampered_metadata(post_form, game_data, stored_games, changes):
-    response = post_form("/games/new", {**game_data, **changes})
+    response = post_form("/library/add", {**game_data, **changes})
     assert response.status_code == 200
     assert stored_games() == []
 
 
 def test_selected_game_survives_validation_error(post_form, game_data):
-    page = post_form("/games/new", {**game_data, "rating": "11"}).get_data(as_text=True)
+    page = post_form("/library/add", {**game_data, "rating": "11"}).get_data(as_text=True)
     assert 'value="123"' in page
     assert 'value="PC" selected' in page
     assert 'value="PS3"' in page
 
 
 def test_add_form_initially_disables_platform(client):
-    page = client.get("/games/new").get_data(as_text=True)
+    page = client.get("/library/add").get_data(as_text=True)
     assert "Choose a game first" in page
     assert 'aria-describedby="platform-message" disabled' in page
 
@@ -156,7 +156,7 @@ def test_details_endpoint_returns_platforms(client, app, game_data):
 
 def test_catalog_outage_does_not_save(post_form, game_data, app, stored_games):
     app.extensions["igdb_client"].get_game.side_effect = catalog.CatalogError("private-error")
-    response = post_form("/games/new", game_data)
+    response = post_form("/library/add", game_data)
     assert b"catalog is unavailable" in response.data
     assert b"private-error" not in response.data
     assert stored_games() == []
@@ -172,16 +172,16 @@ def test_details_outage_returns_safe_json(client, app, game_data):
 def test_game_without_platforms_cannot_be_added(post_form, game_data, app, stored_games):
     app.extensions["igdb_client"].get_game.side_effect = None
     app.extensions["igdb_client"].get_game.return_value = {"id": 123, "name": "Portal 2"}
-    response = post_form("/games/new", game_data)
+    response = post_form("/library/add", game_data)
     assert b"choose an available platform" in response.data
     assert stored_games() == []
 
 
 def test_new_game_keeps_catalog_identity_and_strict_edit(post_form, game_data, stored_games, client):
-    assert post_form("/games/new", game_data).status_code == 302
+    assert post_form("/library/add", game_data).status_code == 302
     saved = stored_games()[0]
     assert saved["igdb_id"] == 123
-    url = f"/games/{saved['id']}/edit"
+    url = f"/library/entries/{saved['id']}/edit"
     assert b'<select id="platform"' in client.get(url).data
     assert post_form(url, {**game_data, "platform": "Xbox 360"}).status_code == 200
     assert stored_games()[0] == saved

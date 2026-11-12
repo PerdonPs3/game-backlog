@@ -22,7 +22,7 @@ class Element {
     remove() { this.removed = true; }
 }
 
-function setup({ reduced = false, single = false, supported = true, broken = false, games, winnerId = 2, random = 0.5 } = {}) {
+function setup({ reduced = false, single = false, supported = true, broken = false, games, winnerId = 2, random = 0.5, offscreen = false } = {}) {
     const ids = ["adventure-roulette", "adventure-result", "roulette-track", "roulette-viewport", "roulette-data", "skip-roulette", "roulette-status"];
     const nodes = Object.fromEntries(ids.map((id) => [id, new Element()]));
     const form = new Element(), submit = new Element();
@@ -33,6 +33,14 @@ function setup({ reduced = false, single = false, supported = true, broken = fal
     document.querySelector = (selector) => selector === ".adventure-preferences" ? form : nodes[selector.slice(1)];
     document.createElement = () => new Element();
     const window = new Element(); window.matchMedia = () => media;
+    let timer;
+    window.setTimeout = callback => { timer = callback; return 1; };
+    window.clearTimeout = () => { timer = undefined; };
+    window.innerHeight = 800;
+    if (offscreen) {
+        nodes['adventure-roulette'].getBoundingClientRect = () => ({ top: 900, bottom: 1200 });
+        nodes['adventure-roulette'].scrollIntoView = options => { nodes['adventure-roulette'].scroll = options; };
+    }
     const winner = { id: 2, title: '<script>not HTML</script>', cover_url: null };
     const entries = games || (single ? [winner] : [{ id: 1, title: "Other", cover_url: "https://images.igdb.com/test.jpg" }, winner]);
     nodes["roulette-data"].textContent = JSON.stringify({ winner_id: winnerId, candidate_count: entries.length, games: entries });
@@ -47,8 +55,31 @@ function setup({ reduced = false, single = false, supported = true, broken = fal
     runInNewContext(readFileSync(join(__dirname, "../app/static/adventure-roulette.js"), "utf8"), {
         document, window, Math: Object.assign(Object.create(Math), { random: () => random }),
     });
-    return { ...nodes, form, submit, media, window, document, calls, animation, resolve, reject };
+    return { ...nodes, form, submit, media, window, document, calls, animation, resolve, reject, timeout: () => timer?.() };
 }
+
+test('offscreen reel scrolls into view before starting and starts only once', () => {
+    const ui = setup({ offscreen: true });
+    assert.equal(ui.calls.length, 0);
+    assert.equal(ui['adventure-roulette'].scroll.block, 'center');
+    ui.document.fire('scrollend');
+    assert.equal(ui.calls.length, 1);
+    ui.timeout();
+    assert.equal(ui.calls.length, 1);
+});
+
+test('scroll fallback starts the reel and skip during scrolling cancels the wait', () => {
+    const fallback = setup({ offscreen: true });
+    fallback.timeout();
+    assert.equal(fallback.calls.length, 1);
+    const skipped = setup({ offscreen: true });
+    skipped['skip-roulette'].fire('click');
+    skipped.timeout();
+    skipped.document.fire('scrollend');
+    assert.equal(skipped.calls.length, 0);
+    assert.equal(skipped['adventure-result'].hidden, false);
+    assert.equal(skipped.submit.disabled, false);
+});
 
 test("three-second reel lands on server winner and reveals the unchanged result", async () => {
     const ui = setup();

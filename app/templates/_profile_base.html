@@ -1,7 +1,17 @@
 {% extends '_workspace_base.html' %}
-{% block body_class %}library-page workspace-page profile-palette-page{% endblock %}
+{% set use_profile_cloister = request.endpoint in ('profiles.public_profile', 'auth.profile_overview') %}
+{% block body_class %}library-page workspace-page profile-palette-page{% if use_profile_cloister %} profile-cloister-page{% endif %}{% endblock %}
+{% block workspace_backdrop %}{% if use_profile_cloister %}<div class="profile-cloister-backdrop" aria-hidden="true"></div>{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block layout_class %}profile-workspace profile-overview{% endblock %}
 {% block page_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='profile-overview.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='community-profiles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='profile-achievements.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='achievements.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='following.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='profile-banner.css') }}">
+{% if use_profile_cloister %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-cloister.css') }}">{% endif %}
 {% endblock %}

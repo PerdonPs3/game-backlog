@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.parametrize("path", ["/", "/library", "/games/new", "/games/pick", "/backups/import", "/lists"])
+@pytest.mark.parametrize("path", ["/", "/library", "/library/add", "/library/pick", "/settings/data/import", "/library/lists"])
 def test_theme_available_on_all_page_shells(client, path):
     page = client.get(path)
     assert page.status_code == 200
@@ -23,5 +23,5 @@ def test_theme_available_on_all_page_shells(client, path):
 
 def test_theme_available_in_edit_delete_and_details(client, seed_game):
     game_id = seed_game()
-    for path in [f"/games/{game_id}", f"/games/{game_id}/edit", f"/games/{game_id}/delete"]:
+    for path in [f"/library/entries/{game_id}", f"/library/entries/{game_id}/edit", f"/library/entries/{game_id}/delete"]:
         assert b"data-theme-toggle" in client.get(path).data

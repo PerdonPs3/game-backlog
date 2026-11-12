@@ -1,0 +1,15 @@
+{
+  "generator": "Built-in ImageGen",
+  "concept": "Portrait gallery selected for Connections; the moonlit courtyard concept remains reserved for a future page.",
+  "reference": "Approved connections-portrait-gallery-mockup.png review artifact; not a runtime dependency.",
+  "assets": [
+    {
+      "path": "app/static/images/backgrounds/connections-gallery-night.webp",
+      "prompt": "Use case: precise-object-edit / production website background. Input image is the approved Vestigium portrait-gallery UI mockup. Create ONLY its fantasy gallery environment as a clean full-bleed background asset. Completely remove ALL interface elements: navigation header/footer, logo, lettering, Your connections heading, numbers, sidebar, cards, avatars, form controls, veils and panels. Reconstruct the architectural scene behind all removed elements. Preserve the approved environment: a grand elegant castle portrait gallery, receding gothic stone arches, tall central window showing midnight blue sky and moon, dark carved wooden wall panels, framed painted adventurer portraits along the far left and right walls, deep navy banners with restrained gold embroidery, warm lanterns and candles, climbing ivy, dark blue-and-gold carpet on polished stone floor. Polished painterly fantasy illustration, refined materials, warm amber edges and cool blue central depth; matches the existing Vestigium Library and Add game illustrations. Wide landscape framing, approximately 1536x1024, straight architectural perspective. Keep important framed portraits visible near both outer margins. Center is spacious and lower contrast for overlaying a dense web interface. No people in the room, no text anywhere, no brand marks, no UI, no watermark. This will be used behind actual HTML, so it MUST be artwork only."
+    },
+    {
+      "path": "app/static/images/backgrounds/connections-gallery-day.webp",
+      "prompt": "Use case: lighting-weather edit. This is the approved NIGHT version of a production fantasy portrait-gallery background for Vestigium. Create its matching DAY version. Preserve the architecture, perspective, precise layout and positions of every portrait, arch, framed painting, ivy, wood panel, blue-and-gold banner, floor and central carpet. Change ONLY time of day and lighting: replace the moon and stars through the central gothic window with a pale clear daytime sky and distant sunlit blue mountains, soft ivory daylight washes across warm limestone and carved walnut, restrained subtle warm lantern light remains but no dramatic candle glow. The room must feel bright, elegant and welcoming, with natural ivory/bronze highlights and the same navy banners. Keep enough tonal detail for a light-theme web interface. Full-bleed art only, landscape 1536x1024 matching the input geometry. No UI, no typography, no logos, no watermark, no people standing in the room, no new furnishings. This is the identical room at another time of day, not a redesign."
+    }
+  ]
+}

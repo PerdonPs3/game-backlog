@@ -3,6 +3,7 @@ import re
 import pytest
 
 from app.db import get_db
+from app.routes import collection_statistics
 
 
 def titles(response):
@@ -62,11 +63,12 @@ def test_sort_combines_with_search_status_and_live_responses(client, seed_game, 
     assert stored_games() == before
 
 
-def test_selected_sort_survives_reload_and_clear_filter_link(client, seed_game):
+def test_selected_sort_survives_reload_and_reset_preserves_search(client, seed_game):
     seed_game()
     page = client.get("/library?q=portal&sort=rating").get_data(as_text=True)
     assert '<option value="rating" selected>' in page
-    assert 'href="/library?sort=rating">Clear filters</a>' in page
+    assert 'href="/library?q=portal"><svg' in page
+    assert '<span>Clear filters</span>' in page
 
 
 @pytest.mark.parametrize("sort", ["", "unknown", "rating DESC; DROP TABLE games;--"])
@@ -78,9 +80,11 @@ def test_invalid_sort_never_reaches_sql(client, seed_game, stored_games, sort):
     assert stored_games() == before
 
 
-def test_sorting_does_not_change_global_statistics(client, seed_game):
+def test_sorting_does_not_change_global_statistics(app, client, seed_game):
     seed_game()
     seed_game(status="Completed")
-    original = re.search(r'<section id="collection-summary".*?</section>', client.get("/library").get_data(as_text=True), re.S).group(0)
-    sorted_summary = re.search(r'<section id="collection-summary".*?</section>', client.get("/library?sort=rating").get_data(as_text=True), re.S).group(0)
-    assert sorted_summary == original
+    with app.app_context():
+        original = collection_statistics(get_db())
+    assert client.get("/library?sort=rating").status_code == 200
+    with app.app_context():
+        assert collection_statistics(get_db()) == original

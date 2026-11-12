@@ -28,6 +28,7 @@ function setup({ saved = null, light = false, blocked = false, animated = false,
     runInNewContext(readFileSync(join(__dirname, "../app/static/theme.js"), "utf8"), { document, window });
     return { root, button, caption, writes, media, events, transitions,
         ready() { ready = true; events.DOMContentLoaded(); },
+        reveal() { ready = true; events.pagereveal(); },
         system(light) { media.matches = light; mediaEvents.change(); },
     };
 }
@@ -39,6 +40,16 @@ test("applies system theme before page content loads and reveals the accessible 
     ui.ready();
     assert.equal(ui.button.hidden, false);
     assert.equal(ui.button.attributes["aria-label"], "Switch to dark mode");
+});
+
+test("page reveal lays out the theme toggle before the navigation snapshot", () => {
+    const ui = setup({ saved: 'dark', animated: true });
+    ui.reveal();
+    assert.equal(ui.button.hidden, false);
+    assert.equal(ui.button.attributes['aria-label'], 'Switch to light mode');
+    assert.equal(ui.transitions.length, 0);
+    ui.ready();
+    assert.equal(typeof ui.button.click, 'function');
 });
 
 test("saved preference overrides system and switching remembers the next theme", () => {
@@ -106,8 +117,8 @@ test("light theme readable foregrounds contrast with their intended surfaces", (
             .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
         return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
     };
-    for (const [foreground, background] of [["29213d", "ffffff"], ["665d75", "faf8f5"],
-        ["7042b7", "ffffff"], ["ffffff", "8250bf"], ["613297", "f2ecfa"]]) {
+    for (const [foreground, background] of [["30271f", "fffdf7"], ["6d5845", "f5f0e6"],
+        ["80541f", "fffdf7"], ["30200d", "edb646"], ["73501d", "f3e7d0"]]) {
         const levels = [luminance(foreground), luminance(background)].sort((a, b) => a - b);
         assert.ok((levels[1] + 0.05) / (levels[0] + 0.05) >= 4.5, `${foreground}/${background}`);
     }

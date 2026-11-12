@@ -1,0 +1,9 @@
+{% from '_achievement_emblem.html' import emblem %}
+{% if achievement_notice %}{% set badge = achievement_notice[-1] %}
+<link rel="stylesheet" href="{{ url_for('static', filename='achievements.css') }}">
+<aside class="achievement-notice" data-achievement-notice data-ack-url="{{ url_for('achievements.acknowledge') }}" data-csrf="{{ csrf_token() }}" data-badges='{{ achievement_notice|map(attribute="key")|list|tojson }}' aria-label="Achievement unlocked">
+    <div class="achievement-notice-content" role="status" aria-live="polite">{{ emblem(badge) }}<div><small>{{ 'BADGES UNLOCKED' if achievement_notice|length > 1 else 'BADGE UNLOCKED' }}</small><strong>{{ (achievement_notice|length|string) + ' milestones' if achievement_notice|length > 1 else badge.name }}</strong><p>{{ 'Your existing progress has been recognized.' if achievement_notice|length > 1 else badge.description }}</p><a href="{{ profile_url() }}#badges">{{ 'View badges' if achievement_notice|length > 1 else 'View badge' }} →</a></div></div>
+    <button type="button" data-dismiss-achievement aria-label="Dismiss achievement notification">×</button><span class="achievement-timer" aria-hidden="true"></span>
+</aside>
+<script src="{{ url_for('static', filename='achievements.js') }}" defer></script>
+{% endif %}

@@ -18,7 +18,7 @@ def test_stickers_are_independent_and_visible(client, post_form, game_data, stor
         data["is_favorite"] = "yes"
     if goty:
         data["is_goty"] = "yes"
-    assert post_form("/games/new", data).status_code == 302
+    assert post_form("/library/add", data).status_code == 302
     saved = stored_games()[0]
     assert saved["is_favorite"] == int(favorite)
     assert saved["is_goty"] == int(goty)
@@ -31,7 +31,7 @@ def test_stickers_are_independent_and_visible(client, post_form, game_data, stor
 
 def test_edit_can_add_and_remove_stickers(client, post_form, game_data, seed_game, stored_games):
     game_id = seed_game()
-    url = f"/games/{game_id}/edit"
+    url = f"/library/entries/{game_id}/edit"
     marked = {**game_data, "is_favorite": "yes", "is_goty": "yes"}
     assert post_form(url, marked).status_code == 302
     page = client.get(url).get_data(as_text=True)
@@ -44,15 +44,15 @@ def test_edit_can_add_and_remove_stickers(client, post_form, game_data, seed_gam
 
 
 def test_invalid_form_keeps_sticker_choices_without_saving(post_form, game_data, stored_games):
-    response = post_form("/games/new", {**game_data, "is_favorite": "yes", "is_goty": "yes", "rating": "99"})
+    response = post_form("/library/add", {**game_data, "is_favorite": "yes", "is_goty": "yes", "rating": "99"})
     assert response.status_code == 200
     assert response.get_data(as_text=True).count("checked") == 2
     assert stored_games() == []
 
 
 def test_stickers_round_trip_in_backup_and_old_exports_still_work(client, post_form, game_data, stored_games):
-    assert post_form("/games/new", {**game_data, "is_favorite": "yes", "is_goty": "yes"}).status_code == 302
-    payload = client.get("/backups/export").json
+    assert post_form("/library/add", {**game_data, "is_favorite": "yes", "is_goty": "yes"}).status_code == 302
+    payload = client.get("/settings/data/export").json
     entry = payload["games"][0]
     assert entry["is_favorite"] is True
     assert entry["is_goty"] is True
@@ -67,19 +67,19 @@ def test_stickers_round_trip_in_backup_and_old_exports_still_work(client, post_f
 @pytest.mark.parametrize("value", [2, -1, "yes", [], None])
 def test_invalid_backup_sticker_values_are_rejected(client, seed_game, value):
     seed_game()
-    payload = client.get("/backups/export").json
+    payload = client.get("/settings/data/export").json
     payload["games"][0]["is_favorite"] = value
     with pytest.raises(BackupError):
         parse_backup(json.dumps(payload).encode())
 
 
 def test_import_restores_stickers(client, post_form, game_data, stored_games):
-    assert post_form("/games/new", game_data).status_code == 302
-    payload = client.get("/backups/export").json
+    assert post_form("/library/add", game_data).status_code == 302
+    payload = client.get("/settings/data/export").json
     payload["games"][0].update(igdb_id=456, title="Another game", is_favorite=True, is_goty=True)
     parser = CSRFTokenParser()
-    parser.feed(client.get("/backups/import").get_data(as_text=True))
-    response = client.post("/backups/import", data={
+    parser.feed(client.get("/settings/data/import").get_data(as_text=True))
+    response = client.post("/settings/data/import", data={
         "csrf_token": parser.token, "confirm_import": "yes",
         "backup": (io.BytesIO(json.dumps(payload).encode()), "backup.json"),
     })

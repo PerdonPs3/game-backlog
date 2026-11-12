@@ -1,6 +1,6 @@
 "use strict";
 
-(() => {
+window.startAdventureRoulette = () => {
     const roulette = document.querySelector("#adventure-roulette");
     const result = document.querySelector("#adventure-result");
     const track = document.querySelector("#roulette-track");
@@ -24,6 +24,20 @@
     let animation;
     let finished = false;
     let winningTile;
+    let scrollTimer;
+    let started = false;
+    const preventSubmission = (event) => { if (!finished) event.preventDefault(); };
+    function clearScrollWait() {
+        if (scrollTimer !== undefined) window.clearTimeout(scrollTimer);
+        document.removeEventListener("scrollend", play);
+    }
+    function removeListeners() {
+        clearScrollWait();
+        form?.removeEventListener("submit", preventSubmission);
+        window.removeEventListener("resize", finish);
+        document.removeEventListener("visibilitychange", onVisibility);
+        reducedMotion.removeEventListener("change", onPreference);
+    }
     // Only the decorative reel is deduplicated, never the server's candidates.
     // Copies of a title on different platforms should not look like new covers.
     const visualKey = (game) => game.title.trim().toLocaleLowerCase();
@@ -78,10 +92,10 @@
         skip.hidden = true;
         result.hidden = false;
         if (submit) submit.disabled = wasDisabled;
+        document.dispatchEvent?.(new Event("picker:revealed"));
         result.focus({ preventScroll: true });
-        window.removeEventListener("resize", finish);
-        document.removeEventListener("visibilitychange", onVisibility);
-        reducedMotion.removeEventListener("change", onPreference);
+        removeListeners();
+        if (!document.hidden) result.scrollIntoView?.({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
     }
     function onVisibility() { if (document.hidden) finish(); }
     function onPreference(event) { if (event.matches) finish(); }
@@ -100,31 +114,59 @@
         if (submit) submit.disabled = true;
         track.style.paddingLeft = `${Math.max(0, viewport.clientWidth / 2 - winningTile.offsetWidth / 2)}px`;
         skip.addEventListener("click", finish);
-        form?.addEventListener("submit", (event) => { if (!finished) event.preventDefault(); });
+        form?.addEventListener("submit", preventSubmission);
         window.addEventListener("resize", finish);
         document.addEventListener("visibilitychange", onVisibility);
         reducedMotion.addEventListener("change", onPreference);
-        animation = track.animate(single ? [{ opacity: 0.3 }, { opacity: 1 }] : [
-            { transform: "translateX(0px)" },
-            { transform: `translateX(${offset()}px)` },
-        ], {
-            duration: single ? 600 : 3000,
-            easing: "cubic-bezier(0.12, 0.65, 0.15, 1)", fill: "forwards",
-        });
-        animation.finished.then(finish, finish);
-        if (!single) {
-            const stride = track.children[1].offsetLeft - track.children[0].offsetLeft;
-            sound?.begin(() => {
-                const centre = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
-                return (centre - track.getBoundingClientRect().left - parseFloat(track.style.paddingLeft)) / stride;
-            });
+        const rect = roulette.getBoundingClientRect?.();
+        const headerBottom = document.querySelector(".workspace-site-header")?.getBoundingClientRect().bottom || 0;
+        if (rect && (rect.top < headerBottom || rect.bottom > window.innerHeight)) {
+            document.addEventListener("scrollend", play, { once: true });
+            scrollTimer = window.setTimeout(play, 650);
+            roulette.scrollIntoView({ block: "center", behavior: "smooth" });
+        } else {
+            play();
         }
+
     } catch {
+        fail();
+    }
+    return !finished;
+
+    function play() {
+        if (finished || started) return;
+        started = true;
+        clearScrollWait();
+        try {
+            animation = track.animate(single ? [{ opacity: 0.3 }, { opacity: 1 }] : [
+                { transform: "translateX(0px)" },
+                { transform: `translateX(${offset()}px)` },
+            ], {
+                duration: single ? 600 : 3000,
+                easing: "cubic-bezier(0.12, 0.65, 0.15, 1)", fill: "forwards",
+            });
+            animation.finished.then(finish, finish);
+            if (!single) {
+                const stride = track.children[1].offsetLeft - track.children[0].offsetLeft;
+                sound?.begin(() => {
+                    const centre = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
+                    return (centre - track.getBoundingClientRect().left - parseFloat(track.style.paddingLeft)) / stride;
+                });
+            }
+        } catch {
+            fail();
+        }
+    }
+    function fail() {
+        removeListeners();
         roulette.hidden = true;
         result.hidden = false;
         if (submit) submit.disabled = wasDisabled;
         finished = true;
         animation?.cancel();
         sound?.stop();
+        document.dispatchEvent?.(new Event("picker:revealed"));
+        result.scrollIntoView?.({ block: "start", behavior: "auto" });
     }
-})();
+};
+window.startAdventureRoulette();

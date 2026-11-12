@@ -2,12 +2,15 @@ import json
 from random import choice, sample
 
 from flask import Blueprint, abort, current_app, flash, g, jsonify, make_response, redirect, render_template, request, url_for
+from app.achievements import award_current
+from app.wishlist import consume_owned_wishes, wish_state
 from app.backups import BACKUP_FIELDS, MAX_BACKUP_BYTES, BackupError, build_backup, parse_backup
 from app.catalog import CatalogError, collection_cover_url, cover_image_id, game_profile, game_suggestion, get_catalog
 from app.db import DATABASE_ERRORS, INTEGRITY_ERRORS, begin_snapshot, begin_write, get_db, title_contains_sql
 from app.game_fields import STATUSES, validate_dates
 from app.game_reviews import begin_review_write, can_publish_public_review, save_public_review, validate_public_review
 from app.game_lists import MAX_LISTS, all_lists, clean_list_name, list_cards
+from app.library_picker import preference_games, recommend
 
 from app.ownership import owned, member_owned, insert_owned, insert_members
 
@@ -131,22 +134,23 @@ def index():
         for game in get_db().execute(query, parameters).fetchall()
     ]
 
-    context = dict(games=games, selected_status=status, search_query=search_query,
+    total = get_db().execute(f"SELECT COUNT(*) FROM games WHERE {owned()}").fetchone()[0] if search_query or status or selected_list else len(games)
+    context = dict(games=games, collection_total=total, selected_status=status, search_query=search_query,
                    selected_sort=selected_sort, sort_options=COLLECTION_SORTS,
                    selected_list=selected_list, lists=all_lists(get_db()))
     if request.accept_mimetypes.best == "application/json":
         response = jsonify(
-            html=render_template("_game_collection.html", **context), count=len(games),
+            html=render_template("_game_collection.html", **context), count=len(games), total=total,
         )
     else:
         response = make_response(render_template(
-            "index.html", stats=collection_statistics(get_db()), **context,
+            "index.html", **context,
         ))
     response.vary.add("Accept")
     return response
 
 
-@main.route("/lists", methods=["GET", "POST"])
+@main.route("/library/lists", methods=["GET", "POST"])
 def lists():
     db = get_db()
     error = None
@@ -171,7 +175,7 @@ def lists():
     return render_template("lists.html", lists=list_cards(db), error=error)
 
 
-@main.route("/lists/<int:list_id>/edit", methods=["GET", "POST"])
+@main.route("/library/lists/<int:list_id>/edit", methods=["GET", "POST"])
 def edit_list(list_id):
     db = get_db()
     item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
@@ -213,7 +217,7 @@ def edit_list(list_id):
     return render_template("edit_list.html", item=item, games=games, selected=selected, error=error, view=view)
 
 
-@main.route("/lists/<int:list_id>/delete", methods=["GET", "POST"])
+@main.route("/library/lists/<int:list_id>/delete", methods=["GET", "POST"])
 def delete_list(list_id):
     db = get_db()
     item = db.execute(f"SELECT * FROM game_lists WHERE id = ? AND {owned()}", (list_id,)).fetchone()
@@ -227,12 +231,16 @@ def delete_list(list_id):
     return render_template("delete_list.html", item=item)
 
 
-@main.get("/games/<int:game_id>")
+@main.get("/library/entries/<int:game_id>")
 def game_details(game_id):
     row = get_db().execute(f"SELECT * FROM games WHERE id = ? AND {owned()}", (game_id,)).fetchone()
     if row is None:
         abort(404)
     game = {**dict(row), "cover_url": collection_cover_url(row["cover_image_id"])}
+    if game['igdb_id'] is not None and request.accept_mimetypes.best != 'application/json':
+        from app.navigation import game_url
+        return redirect(game_url(game['igdb_id'], game['title'],
+                                 origin=request.args.get('from'), section='your-progress'), code=302)
     profile = {"release": None, "genres": [], "summary": None}
     notice = "This entry is not linked to the catalog." if game["igdb_id"] is None else None
     if game["igdb_id"] is not None:
@@ -265,45 +273,59 @@ def catalog_search():
     if len(term) < 2:
         return jsonify(games=[])
     try:
-        games = get_catalog().search_games(term, include_community=content == "all")[:10]
+        games = get_catalog().search_games(term, include_community=content == "all", suggestions=True)[:10]
     except CatalogError:
         return jsonify(error="The catalog is unavailable. Please try again shortly."), 503
     return jsonify(games=[game_suggestion(game) for game in games])
 
 
-@main.get("/games/pick")
+@main.get("/library/pick")
 def pick_game():
     pick_requested = request.args.get("pick") == "1"
     selected_platform = request.args.get("platform", "")
     selected_genre = request.args.get("genre", "")
-    if len(selected_platform) > 80 or len(selected_genre) > 100:
+    mode = request.args.get("mode", "recommended")
+    raw_statuses = request.args.getlist("status")
+    if not raw_statuses and request.args.get("status_filter") != "1":
+        raw_statuses = ["Backlog"]
+    if (len(selected_platform) > 80 or len(selected_genre) > 100
+            or mode not in ("recommended", "random") or len(raw_statuses) > len(STATUSES)
+            or any(status not in STATUSES for status in raw_statuses)):
         abort(400)
-    backlog = get_db().execute(f"SELECT * FROM games WHERE status = 'Backlog' AND {owned()}").fetchall()
-    platforms = sorted({row["platform"] for row in backlog}, key=str.casefold)
+    selected_statuses = [status for status in STATUSES if status in raw_statuses]
+    library = get_db().execute(f"SELECT * FROM games WHERE {owned()}").fetchall()
+    selected_entries = [row for row in library if row["status"] in selected_statuses]
+    platforms = sorted({row["platform"] for row in library}, key=str.casefold)
     if selected_platform and selected_platform not in platforms:
         abort(400)
+    signals = preference_games(library) if mode == "recommended" else []
     genre_map = {}
     error = None
-    catalog_ids = {row["igdb_id"] for row in backlog if row["igdb_id"] is not None}
+    catalog_ids = {row["igdb_id"] for row in [*selected_entries, *signals] if row["igdb_id"] is not None} if selected_entries else set()
     if catalog_ids:
         try:
             genre_map = get_catalog().get_game_genres(catalog_ids)
         except CatalogError:
             error = "Genre preferences are temporarily unavailable. You can still pick with Any genre."
-    genres = sorted({genre for names in genre_map.values() for genre in names}, key=str.casefold)
-    if selected_genre and error is None and selected_genre not in genres:
+    candidate_genres = {genre for row in selected_entries for genre in genre_map.get(row["igdb_id"], ())}
+    genres = sorted(candidate_genres, key=str.casefold)
+    if selected_statuses and selected_genre and error is None and selected_genre not in genres:
         abort(400)
-    candidates = [row for row in backlog
+    candidates = [row for row in selected_entries
                   if (not selected_platform or row["platform"] == selected_platform)
                   and (not selected_genre or selected_genre in genre_map.get(row["igdb_id"], ()))]
     # A failed genre lookup must never silently suggest a non-matching game.
     if selected_genre and error:
         candidates = []
-    game = choice(candidates) if pick_requested and candidates else None
+    recommended, reasons = recommend(candidates, signals, genre_map) if mode == "recommended" else ([], {})
+    pool = recommended or candidates
+    game = choice(pool) if pick_requested and pool else None
+    reason = reasons.get(game["id"]) if game is not None and recommended else None
     games = [{**dict(game), "cover_url": collection_cover_url(game["cover_image_id"])}] if game else []
     roulette = None
     if game is not None:
-        # The animation is decorative: the fair draw above remains authoritative.
+        # The decorative reel reveals the server's choice in either mode.
+        # Recommendations keep their preference ranking and explanation.
         preview = sample(candidates, min(12, len(candidates)))
         if not any(row["id"] == game["id"] for row in preview):
             preview[0] = game
@@ -311,17 +333,22 @@ def pick_game():
             {"id": row["id"], "title": row["title"],
              "cover_url": collection_cover_url(row["cover_image_id"])} for row in preview
         ]}
-    response = make_response(render_template(
-        "pick.html", games=games, selected_status="Backlog", search_query="",
+    context = dict(
+        games=games, selected_status="", search_query="",
         platforms=platforms, genres=genres, selected_platform=selected_platform,
-        selected_genre=selected_genre, genre_error=error, has_backlog=bool(backlog),
+        selected_genre=selected_genre, genre_error=error, has_backlog=bool(selected_entries),
+        selected_statuses=selected_statuses, pick_statuses=STATUSES, mode=mode, recommendation=reason,
         candidate_count=len(candidates), pick_requested=pick_requested, roulette=roulette,
-    ))
+    )
+    if request.accept_mimetypes.best == "application/json":
+        response = jsonify(html=render_template('_pick_outcome.html', **context), genres=genres)
+    else:
+        response = make_response(render_template('pick.html', **context))
     response.headers["Cache-Control"] = "no-store"
     return response
 
 
-@main.get("/backups/export")
+@main.get("/settings/data/export")
 def export_backup():
     db = get_db()
     # Keep games and membership indices in the same read snapshot.
@@ -340,7 +367,7 @@ def export_backup():
     return response
 
 
-@main.route("/backups/import", methods=["GET", "POST"])
+@main.route("/settings/data/import", methods=["GET", "POST"])
 def import_backup():
     error = None
     result = None
@@ -379,6 +406,8 @@ def import_backup():
                         list_id = db.execute(f"SELECT id FROM game_lists WHERE name_key = ? AND {owned()}", (item["name"].casefold(),)).fetchone()[0]
                         insert_members(db,
                                        [(list_id, saved_ids[index]) for index in item["games"]])
+                    consume_owned_wishes(db)
+                    award_current()
                     db.commit()
                     result = {"imported": imported, "skipped": skipped}
                 except DATABASE_ERRORS + (ValueError,):
@@ -387,15 +416,15 @@ def import_backup():
     return render_template("import_backup.html", error=error, result=result)
 
 
-@main.route("/games/new", methods=["GET", "POST"])
+@main.route("/library/add", methods=["GET", "POST"])
 def create():
     error = None
     selected_game = None
     duplicate_game_id = None
     review_publication_available = can_publish_public_review()
 
-    if request.method == 'GET' and 'igdb_id' in request.args:
-        raw_id = request.args['igdb_id']
+    if request.method == 'GET' and ('game' in request.args or 'igdb_id' in request.args):
+        raw_id = request.args.get('game', request.args.get('igdb_id'))
         if not raw_id.isascii() or not raw_id.isdigit() or len(raw_id) > 19 or not 0 < int(raw_id) < 2**63:
             abort(400)
         try:
@@ -477,6 +506,8 @@ def create():
                     )
                     if publish_requested:
                         save_public_review(db, selected_game['id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    consume_owned_wishes(db)
+                    award_current()
                     db.commit()
             except DATABASE_ERRORS as exc:
                 db.rollback()
@@ -485,18 +516,19 @@ def create():
             if error is None:
                 if publish_requested:
                     flash('Added to your library and published your review.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='community-reviews'), code=303)
+                from app.navigation import navigation_return, game_url
                 if request.form.get('return_to_catalog') == 'yes':
                     flash('Added to your library.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=selected_game['id'], _anchor='library-actions'), code=303)
-                return redirect(url_for("main.index"))
+                    return redirect(game_url(selected_game['id'], selected_game['name'], origin=request.args.get('from'), section='your-progress'), code=303)
+                return redirect(navigation_return(game_url(selected_game['id'], selected_game['name'], origin=False, section='your-progress')), code=303 if publish_requested else 302)
 
     return render_template("create.html", error=error, selected_game=selected_game,
                            duplicate_game_id=duplicate_game_id,
-                           review_publication_available=review_publication_available)
+                           review_publication_available=review_publication_available,
+                           from_wishlist=bool(selected_game and wish_state(selected_game["id"])))
 
 
-@main.route("/games/<int:game_id>/edit", methods=["GET", "POST"])
+@main.route("/library/entries/<int:game_id>/edit", methods=["GET", "POST"])
 def edit(game_id):
     db = get_db()
     game = db.execute(
@@ -507,6 +539,10 @@ def edit(game_id):
 
     if game is None:
         abort(404)
+
+    from app.navigation import game_url
+    g.navigation_default = (game_url(game['igdb_id'], game['title'], origin=False, section='your-progress')
+                            if game['igdb_id'] else url_for('main.index'))
 
     review_publication_available = game['igdb_id'] is not None and can_publish_public_review()
     public_review_spoilers_default = False
@@ -603,6 +639,8 @@ def edit(game_id):
                     )
                     if publish_requested:
                         save_public_review(db, game['igdb_id'], rating, review, request.form.get('public_review_spoilers') == 'yes')
+                    consume_owned_wishes(db)
+                    award_current()
                     db.commit()
             except DATABASE_ERRORS as exc:
                 db.rollback()
@@ -611,10 +649,10 @@ def edit(game_id):
             if error is None:
                 if publish_requested:
                     flash('Saved your changes and published your review.', 'catalog_saved')
-                    return redirect(url_for('explore.game', catalog_id=game['igdb_id'], _anchor='community-reviews'), code=303)
-                return redirect(url_for("main.index"))
+                from app.navigation import navigation_return
+                return redirect(navigation_return(), code=303 if publish_requested else 302)
 
-    return render_template("edit.html", game=game, error=error,
+    return render_template("edit.html", game=game, entry_cover=collection_cover_url(game['cover_image_id']), error=error,
                            available_platforms=available_platforms,
                            duplicate_game_id=duplicate_game_id,
                            review_publication_available=review_publication_available,
@@ -633,7 +671,7 @@ def catalog_game_details(catalog_id):
     return jsonify(game=game_suggestion(game))
 
 
-@main.route("/games/<int:game_id>/delete", methods=["GET", "POST"])
+@main.route("/library/entries/<int:game_id>/delete", methods=["GET", "POST"])
 def delete(game_id):
     db = get_db()
     game = db.execute(
@@ -652,6 +690,7 @@ def delete(game_id):
         )
         db.commit()
 
-        return redirect(url_for("main.index"))
+        from app.navigation import navigation_return
+        return redirect(navigation_return())
 
     return render_template("delete.html", game=game)

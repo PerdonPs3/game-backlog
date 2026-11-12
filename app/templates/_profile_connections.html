@@ -1,0 +1,22 @@
+{% macro connection_icon(kind) %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{% if kind == 'followers' %}<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m2-16a3 3 0 0 1 0 6m4 10v-3a6 6 0 0 0-4-5"/>{% elif kind == 'pending' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>{% elif kind == 'block' %}<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM9 9l6 6m0-6-6 6"/>{% elif kind == 'manage' %}<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/>{% else %}<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3"/>{% if kind == 'following' %}<path d="m16 10 2 2 4-4"/>{% else %}<path d="M19 7v6m-3-3h6"/>{% endif %}{% endif %}</svg>{% endmacro %}
+{% if connections %}
+<section class="profile-connections{% if not connections.counts %} is-actions-only{% endif %}" aria-label="Player connections">
+    {% for message in get_flashed_messages(category_filter=['connections_saved']) %}<p class="connection-feedback" role="status">{{ message }}</p>{% endfor %}
+    <div class="connection-toolbar">
+        {% if connections.counts %}<div class="connection-counts">
+        {% for kind, count in connections.counts.items() %}<a href="{{ url_for('following.manage', view=kind) if connections.owner else url_for('following.public_list', username=connections.username, kind=kind) }}">{{ connection_icon(kind) }}<strong>{{ count }}</strong> {{ ('follower' if count == 1 else 'followers') if kind == 'followers' else 'following' }}</a>{% endfor %}
+        </div>{% endif %}
+        {% if connections.state == 'pending' %}<span class="profile-request-state">Request pending</span>{% endif %}
+        <div class="connection-actions">
+        {% if connections.owner %}<a class="profile-action" href="{{ url_for('following.manage') }}">{{ connection_icon('manage') }}Manage connections</a>
+        {% elif connections.signed_in %}
+            <form method="post" action="{{ url_for('following.change', username=connections.username, action='unfollow' if connections.state == 'accepted' else 'cancel' if connections.state == 'pending' else 'follow') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="return_to" value="profile">
+                <button type="submit">{{ connection_icon('following' if connections.state == 'accepted' else 'pending' if connections.state == 'pending' else 'follow') }}{{ 'Unfollow' if connections.state == 'accepted' else 'Cancel request' if connections.state == 'pending' else 'Follow' }}</button>
+            </form>
+            <details class="connection-block"><summary>{{ connection_icon('block') }}Block player</summary><div class="profile-block-confirmation"><p>Remove connections and requests in both directions. Hide each other's profile and reviews while signed in.</p><form method="post" action="{{ url_for('following.change', username=connections.username, action='block') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="view" value="blocked"><button type="submit">Confirm block</button></form></div></details>
+        {% else %}<a class="profile-action" href="{{ url_for('auth.login') }}">{{ connection_icon('follow') }}Sign in to follow</a>{% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}

@@ -11,7 +11,7 @@ def test_long_reviews_are_escaped_and_expandable_in_collection(client, seed_game
     assert 'Read more' in page and 'Show less' in page
     assert '&lt;script&gt;alert(1)&lt;/script&gt;' in page and '<script>alert(1)' not in page
     assert stored_games() == before
-    full = client.get(f'/games/{game_id}').get_data(as_text=True)
+    full = client.get(f'/library/entries/{game_id}').get_data(as_text=True)
     assert 'A long review. ' * 70 in full
 
 

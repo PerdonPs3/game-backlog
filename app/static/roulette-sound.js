@@ -91,11 +91,15 @@ window.createAdventureSound = (button) => {
     });
     label();
     try { if (window.localStorage.getItem(key) === "true") activate(); } catch { /* Storage blocked. */ }
-    window.addEventListener("pagehide", () => {
+    function dispose() {
         active = wantsSound = enabled = false;
         cancelFrame();
         context?.close().catch(() => {});
-    });
+        window.removeEventListener?.("pagehide", dispose);
+        document.removeEventListener?.("picker:replace", dispose);
+    }
+    window.addEventListener("pagehide", dispose);
+    document.addEventListener?.("picker:replace", dispose);
     return {
         begin(position) { readPosition = position; active = true; startTicks(); },
         stop() { active = false; cancelFrame(); },

@@ -21,16 +21,16 @@ def encoded(entries, **extra):
 
 def import_file(client, data, confirm=True):
     parser = CSRFTokenParser()
-    parser.feed(client.get("/backups/import").get_data(as_text=True))
+    parser.feed(client.get("/settings/data/import").get_data(as_text=True))
     fields = {"csrf_token": parser.token, "backup": (io.BytesIO(data), "backup.json")}
     if confirm:
         fields["confirm_import"] = "yes"
-    return client.post("/backups/import", data=fields, content_type="multipart/form-data")
+    return client.post("/settings/data/import", data=fields, content_type="multipart/form-data")
 
 
 def test_export_contains_only_portable_fields_and_no_secrets(client, seed_game):
     seed_game()
-    response = client.get("/backups/export")
+    response = client.get("/settings/data/export")
     assert response.status_code == 200
     assert "attachment" in response.headers["Content-Disposition"]
     assert response.headers["Cache-Control"] == "no-store"
@@ -47,7 +47,7 @@ def test_import_round_trip_preserves_personal_fields(client, backup_entry, store
     saved = stored_games()[0]
     for field, value in backup_entry.items():
         assert saved[field] == value
-    exported = client.get("/backups/export").json
+    exported = client.get("/settings/data/export").json
     assert exported["games"] == [backup_entry]
 
 
@@ -103,7 +103,7 @@ def test_size_limit_is_enforced():
 
 def test_confirmation_and_csrf_are_required(client, backup_entry, stored_games):
     assert b"Please confirm" in import_file(client, encoded([backup_entry]), confirm=False).data
-    assert client.post("/backups/import", data={"backup": (io.BytesIO(encoded([backup_entry])), "b.json")}).status_code == 400
+    assert client.post("/settings/data/import", data={"backup": (io.BytesIO(encoded([backup_entry])), "b.json")}).status_code == 400
     assert stored_games() == []
 
 
@@ -120,7 +120,7 @@ def test_empty_backup_is_valid(client, stored_games):
 def test_export_is_global_even_when_query_contains_filters(client, seed_game):
     seed_game(title="One", status="Backlog")
     seed_game(title="Two", status="Dropped")
-    assert len(client.get("/backups/export?q=One&status=Backlog").json["games"]) == 2
+    assert len(client.get("/settings/data/export?q=One&status=Backlog").json["games"]) == 2
 
 
 def test_import_manual_entries_and_skip_manual_duplicates(client, backup_entry, stored_games):
@@ -131,8 +131,8 @@ def test_import_manual_entries_and_skip_manual_duplicates(client, backup_entry, 
 
 def test_missing_file_does_not_save(client, stored_games):
     parser = CSRFTokenParser()
-    parser.feed(client.get("/backups/import").get_data(as_text=True))
-    response = client.post("/backups/import", data={"csrf_token": parser.token, "confirm_import": "yes"})
+    parser.feed(client.get("/settings/data/import").get_data(as_text=True))
+    response = client.post("/settings/data/import", data={"csrf_token": parser.token, "confirm_import": "yes"})
     assert b"Please choose a JSON backup file" in response.data
     assert stored_games() == []
 

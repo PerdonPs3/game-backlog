@@ -1,0 +1,18 @@
+{
+  "tool": "Built-in imagegen",
+  "encoding": "WebP quality 86, original 1672 x 941 dimensions, no resizing",
+  "assets": [
+    {
+      "file": "app/static/images/backgrounds/games-salon-day.webp",
+      "source": "exec-34272e84-f80c-4279-af27-f4229425a985.png",
+      "reference": "app/static/images/backgrounds/map-room-day.webp (style reference)",
+      "prompt": "Use case: stylized-concept. Asset type: full-viewport 16:9 website background illustration, no UI, no text. Create a new room within the same elegant fantasy library world as reference image 1 (style reference only). A cozy circular games salon inside a grand old library, warm carved walnut shelves and cream stone gothic arches, brass details, soft teal upholstered chairs near the edges. Foreground lower left has a wooden games table with an inlaid compass-like circular selection wheel, a few handsome dice, blank adventure cards and leather-bound books. Tall arched window at right reveals a distant castle and mountain valley in clear sunny daylight. Painterly premium fantasy environment, carefully detailed but not photorealistic, warm ivory, honey gold and muted teal. Wide balanced architectural composition; main interesting objects along left and right margins and lower corners, quiet uncluttered middle for website form overlay. Full room fits within frame, avoid cropped window top. No people, no readable writing, no letters, no logos, no interface, no watermark. Produce only the DAY scene, landscape 16:9."
+    },
+    {
+      "file": "app/static/images/backgrounds/games-salon-night.webp",
+      "source": "exec-7ba5f765-6c93-47ca-89c4-f48889651353.png",
+      "reference": "exec-34272e84-f80c-4279-af27-f4229425a985.png (edit target)",
+      "prompt": "Use case: lighting-weather. Edit target: the attached day games salon illustration. Make ONLY a night variant of this exact room. Keep architecture, camera, framing, every object position, furniture, bookshelves, compass table and blank cards/dice, window mullions, castle and mountains perfectly aligned and unchanged. Replace daylight outside with deep midnight navy sky and soft stars with a moon glow, moonlit blue distant mountains and castle with a few warm glowing windows. Interior lit warmly by existing fireplace and existing brass lanterns, amber pools of light and soft blue moonlight through right window. Cozy, richly detailed readable fantasy library, never crushed blacks. Preserve original ivory, walnut, teal and gold material colors under nighttime illumination. No new objects, no people, no text/logos/UI/watermark. Same landscape16:9."
+    }
+  ]
+}

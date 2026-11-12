@@ -11,6 +11,7 @@
     const reset = form.querySelector("#filter-reset");
     const collection = document.querySelector("#game-collection");
     const message = document.querySelector("#filter-message");
+    const counter = document.querySelector("#collection-count");
     let timer;
     let controller;
     let revision = 0;
@@ -23,7 +24,7 @@
         controller?.abort();
         const currentRevision = ++revision;
         collection.setAttribute("aria-busy", "true");
-        message.textContent = "Updating your collection...";
+        message.textContent = "";
         timer = setTimeout(() => updateCollection(currentRevision), delay);
     }
 
@@ -43,24 +44,34 @@
             if (!response.ok) throw new Error("Filter request failed.");
             const data = await response.json();
             if (currentRevision !== revision) return;
-            if (typeof data.html !== "string" || !Number.isInteger(data.count)) {
+            if (typeof data.html !== "string" || !Number.isInteger(data.count) || data.count < 0 ||
+                !Number.isInteger(data.total) || data.total < data.count) {
                 throw new Error("Invalid collection response.");
             }
             // Only the server-rendered, autoescaped collection fragment is inserted.
             collection.innerHTML = data.html;
             reset.replaceChildren();
-            reset.hidden = !query && !status.value && !list?.value;
-            if (query || status.value || list?.value) {
+            reset.hidden = !status.value && !list?.value && sort.value === "newest";
+            if (!reset.hidden) {
                 const link = document.createElement("a");
                 const resetUrl = new URL(form.action, window.location.href);
-                if (sort.value !== "newest") resetUrl.searchParams.set("sort", sort.value);
+                if (query) resetUrl.searchParams.set("q", query);
                 link.href = resetUrl.href;
-                link.textContent = "Clear filters";
+                link.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg><span>Clear filters</span>';
                 reset.append(link);
             }
             window.history.replaceState(null, "", url);
             document.dispatchEvent(new Event("collection:updated"));
-            message.textContent = `${data.count} ${data.count === 1 ? "game" : "games"} found.`;
+            if (counter) {
+                const filtered = Boolean(query || status.value || list?.value);
+                counter.textContent = filtered ? `${data.count} / ${data.total}` : String(data.total);
+                counter.setAttribute("aria-label", filtered
+                    ? `${data.count} of ${data.total} ${data.total === 1 ? "game" : "games"}`
+                    : `${data.total} ${data.total === 1 ? "game" : "games"}`);
+                message.textContent = "";
+            } else {
+                message.textContent = `${data.count} ${data.count === 1 ? "game" : "games"} found.`;
+            }
             button.hidden = true;
         } catch (error) {
             if (currentRevision !== revision || error.name === "AbortError") return;
@@ -95,8 +106,8 @@
     reset.addEventListener("click", (event) => {
         if (!event.target.closest("a")) return;
         event.preventDefault();
-        search.value = "";
         status.value = "";
+        sort.value = "newest";
         if (list) list.value = "";
         schedule(0);
     });
