@@ -1,0 +1,25 @@
+{% extends '_workspace_base.html' %}
+{% block page_title %}Help · Vestigium{% endblock %}
+{% block body_class %}library-page workspace-page help-page{% endblock %}
+{% block layout_class %}help-layout{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='help.css') }}">{% endblock %}
+{% block workspace_backdrop %}<div class="help-backdrop" aria-hidden="true"></div>{% endblock %}
+{% block workspace_hero %}<header class="help-hero"><h1>Help</h1><p>Find your next step.</p></header>{% endblock %}
+{% block panel_label %}Help topics{% endblock %}
+{% block panel %}
+<form class="help-search" action="{{ url_for('help_center.index') }}" method="get" role="search" aria-label="Search help">
+    <label class="visually-hidden" for="help-query">Search help</label>
+    <input id="help-query" name="q" type="search" value="{{ query }}" maxlength="200" placeholder="Search questions…" autocomplete="off" data-help-query>
+    <button type="submit" aria-label="Find answers"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+</form>
+<p class="help-empty" data-help-empty role="status"{% if has_matches %} hidden{% endif %}>No answers found. Try a shorter phrase.</p>
+<div class="help-topics">
+{% for topic in topics %}<section class="help-topic" id="help-{{ topic.id }}" data-help-topic{% if not topic.matches %} hidden{% endif %}>
+    <h2><span class="help-topic-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ topic.icon }}"/></svg></span>{{ topic.title }}</h2>
+    {% for entry in topic.questions %}<details data-help-entry data-help-text="{{ topic.title }} {{ entry.question }} {{ entry.answer }}"{% if not entry.matches %} hidden{% endif %}>
+        <summary>{{ entry.question }}<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><p>{{ entry.answer }}</p>
+    </details>{% endfor %}
+</section>{% endfor %}
+</div>
+{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='help.js') }}" defer></script>{% endblock %}
