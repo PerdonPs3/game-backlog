@@ -1,10 +1,14 @@
 # Service health
 
-The proposed Service health workflow checks development and production every six
+The Service health workflow checks development and production every six
 hours, at minute 23 UTC. It uses the existing `/community/member-count` endpoint, which
 performs a real database read and returns 503 when the database cannot be queried.
 The endpoint caches its aggregate for 60 seconds, far shorter than this schedule.
 Checking a static homepage alone would miss database outages.
+
+Changes to the workflow or probe also run a check on publication to `develop`
+or `main`. This verifies the initial installation without waiting for the next
+scheduled run. Subsequent scheduled checks execute only from `main`.
 
 The probe has a 15-second request timeout, up to three attempts, short backoff,
 no redirects, and bounded JSON parsing. It requires a successful status and a
@@ -18,10 +22,11 @@ notification delivery depends on the owner's GitHub notification preferences.
 - The repository is public. Standard GitHub-hosted runners are currently free
   for public repositories; this workflow uses a standard Ubuntu runner.
 - Scheduled workflows execute from the repository's default branch, currently
-  `main`. The workflow and script are prepared locally; they are not active until
-  their separate main publication is explicitly authorized and completed.
-- This automation-only publication can be kept separate from publishing Help
-  or the rest of develop. Do not change the default branch to bypass this gate.
+  `main`. The owner authorized publication to both branches on 2026-11-12 as part
+  of the [global release](Global-Release-2026-11-12.md). The schedule starts only
+  after the workflow is published to `main`; its copy in `develop` does not
+  create a second scheduled job. Do not change the default branch to bypass
+  publication requirements.
 - Supabase may pause free projects with low database activity over a week.
   Periodic readiness checks produce database activity and can reduce inactivity,
   but do not guarantee immunity from pausing, platform outages, or quota limits.

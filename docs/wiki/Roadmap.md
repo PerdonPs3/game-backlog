@@ -14,12 +14,13 @@ For the current priority order and release state, see the
   rather than repeating long help blocks throughout the application. The first
   version uses authored guides and answers without a chatbot or AI provider.
 
-Help is implemented locally with instant search, native expandable answers,
-and day/night layouts. Publication is pending owner approval.
+Help includes instant search, native expandable answers, and day/night layouts.
+The owner authorized publication with the [global release](../Global-Release-2026-11-12.md)
+on 2026-11-12.
 
 - [x] Prepare credential-free database readiness checks for development and
   production every six hours, with bounded retries and failure reporting.
-- [ ] Activate the scheduled workflow through separately authorized publication
+- [ ] Complete the authorized scheduled workflow publication
   to the default branch. See [Service health](../Service-Health.md) for limits;
   periodic activity does not guarantee immunity from free-project pausing.
 
