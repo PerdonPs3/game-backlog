@@ -6,13 +6,23 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 For the current priority order and release state, see the
 [product plan](../Product-Plan.md#current-priorities--2026-10-25).
 
-## Planned Help center — 2026-11-08
+## Help center and service health — 2026-11-11
 
-- [ ] Add a dedicated Help page with browsable topics and frequently asked
+- [x] Add a dedicated Help page with browsable topics and frequently asked
   questions covering the library, wishlist, public reviews, profile privacy,
   Discover recommendations and sorting. Keep explanations in this destination
   rather than repeating long help blocks throughout the application. The first
   version uses authored guides and answers without a chatbot or AI provider.
+
+Help includes instant search, native expandable answers, and day/night layouts.
+The owner authorized publication with the [global release](../Global-Release-2026-11-12.md)
+on 2026-11-12.
+
+- [x] Prepare credential-free database readiness checks for development and
+  production every six hours, with bounded retries and failure reporting.
+- [ ] Complete the authorized scheduled workflow publication
+  to the default branch. See [Service health](../Service-Health.md) for limits;
+  periodic activity does not guarantee immunity from free-project pausing.
 
 The owner requested removing Discover's inline "How these picks work" section
 now and building this Help destination later. Recommendation rules and provider

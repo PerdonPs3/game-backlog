@@ -5,7 +5,16 @@ palette and the private profile overview design are approved in Preview. The
 five-game showcase is deployed to develop. Each phase should be
 reviewed in Preview before moving to the next one or expanding its scope.
 
-## Current priorities — 2026-10-25
+## Global release authorization — 2026-11-12
+
+The owner authorized publishing all reviewed development work, Help, and the
+service-health workflow to `develop` and `main`. See the
+[release record](Global-Release-2026-11-12.md) for scope, database requirements and
+verification. The historical per-feature pending-production notes below are
+superseded by this release once deployment verification completes. SMTP and
+other deferred integrations remain pending; no payment is authorized.
+
+## Previous priorities — 2026-10-25
 
 This section supersedes the historical execution order and pending-release notes
 below. Accounts, profiles, public reviews, the catalog gallery, game details, and

@@ -188,6 +188,8 @@ def init_app(app):
     def navigation_context():
         endpoint = request.endpoint or ''
         group = 'discover' if endpoint.startswith(('explore.', 'discovery.')) else 'community' if endpoint.startswith(('profiles.', 'following.')) else 'library'
+        if endpoint == 'help_center.index':
+            group = 'help'
         if endpoint in ('auth.profile', 'auth.edit_showcase', 'main.export_backup', 'main.import_backup', 'navigation.data'):
             group = 'settings'
         profile = getattr(g, 'profile', None)

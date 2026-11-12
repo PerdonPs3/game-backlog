@@ -158,13 +158,13 @@ def test_import_deduplication_and_memberships_are_per_account(libraries):
 
 def test_profile_is_private_validated_and_escaped(libraries):
     alice, bob, _ = libraries
-    response = submit(alice, "/settings/profile", {"display_name": "<script>Alice</script>", "bio": "<b>Hello</b>", "avatar": "ghost"})
+    response = submit(alice, "/settings/profile", {"display_name": "<b>Alice</b>", "bio": "<b>Hello</b>", "avatar": "ghost"})
     assert response.status_code == 303
     response = alice.get(response.location)
     assert "Changes saved" in response.get_data(as_text=True)
-    assert "&lt;script&gt;Alice&lt;/script&gt;" in response.get_data(as_text=True)
+    assert "&lt;b&gt;Alice&lt;/b&gt;" in response.get_data(as_text=True)
     assert "Alice" not in bob.get("/settings/profile").get_data(as_text=True)
-    response = submit(alice, "/settings/profile", {"display_name": "x" * 61, "avatar": "invalid"})
+    response = submit(alice, "/settings/profile", {"display_name": "x" * 21, "avatar": "invalid"})
     assert "Choose a name" in response.get_data(as_text=True)
 
 

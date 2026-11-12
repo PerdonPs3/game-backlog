@@ -93,3 +93,6 @@ html[data-theme="light"] .hero-emblem { filter: drop-shadow(0 4px 12px #80541f2a
     .workspace-site-header .account-navigation > a, .workspace-site-header .account-navigation button { padding: .5rem; font-size: .7rem; white-space: nowrap; }
     .header-search { order: 3; flex-basis: 100%; }
 }
+
+.site-footer-help { color: var(--text-muted); font-size: .75rem; text-decoration: none; }
+.site-footer-help:hover { color: var(--accent); }
