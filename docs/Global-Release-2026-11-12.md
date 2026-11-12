@@ -26,6 +26,11 @@ existing profile, game, public-review and session row counts before and after
 the transaction. No destructive migration or account transfer is part of this
 release.
 
+Hosted schema preparation completed on 2026-11-12: development required no
+changes; production applied all five migrations transactionally. Immutable
+checksums matched and existing profile, game, public-review and session row
+counts were preserved.
+
 Run the Python and JavaScript suites, integrate the task branch into `develop`
 with `--no-ff`, publish and check Preview, then integrate `develop` into `main`
 with `--no-ff`. Preserve all task branches. Verify both deployments and run the
