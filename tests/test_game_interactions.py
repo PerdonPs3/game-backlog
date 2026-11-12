@@ -65,8 +65,12 @@ def test_star_ratings_display_five_stars_preserve_saved_precision_and_can_be_cle
 def test_header_search_is_available_from_private_pages_and_submits_to_public_catalog(accounts):
     fake_catalog(accounts)
     client = sign_in(accounts, 'alice')
-    for path in ('/library', '/settings/profile', '/account/profile', '/library/add', '/explore/games/123'):
+    for path in ('/library', '/settings/profile', '/account/profile', '/explore/games/123'):
         page = client.get(path, follow_redirects=True)
         assert page.status_code == 200
         assert b'class="header-search" action="/discover/browse"' in page.data
+    add_page = client.get('/library/add')
+    assert add_page.status_code == 200
+    assert b'class="header-search"' not in add_page.data
+    assert b'Search games' in add_page.data
     assert b'Portal 2' in client.get('/discover/browse?q=Portal').data
