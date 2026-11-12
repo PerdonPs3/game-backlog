@@ -20,7 +20,7 @@ on 2026-11-12.
 
 - [x] Prepare credential-free database readiness checks for development and
   production every six hours, with bounded retries and failure reporting.
-- [ ] Complete the authorized scheduled workflow publication
+- [x] Include the scheduled workflow in the authorized global publication
   to the default branch. See [Service health](../Service-Health.md) for limits;
   periodic activity does not guarantee immunity from free-project pausing.
 
