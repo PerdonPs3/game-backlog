@@ -14,7 +14,7 @@ verification. The historical per-feature pending-production notes below are
 superseded by this release once deployment verification completes. SMTP and
 other deferred integrations remain pending; no payment is authorized.
 
-## Previous priorities — 2026-10-25
+## Current priorities — 2026-10-25
 
 This section supersedes the historical execution order and pending-release notes
 below. Accounts, profiles, public reviews, the catalog gallery, game details, and

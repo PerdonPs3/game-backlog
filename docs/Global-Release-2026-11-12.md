@@ -42,3 +42,17 @@ or guarantee uptime. See [Service health](Service-Health.md).
 Registration and recovery SMTP setup, automated image moderation, chatbot,
 profile reporting and notifications remain separate follow-ups. No paid
 service is introduced by this release.
+
+## Release validation
+
+- PostgreSQL: all 742 collected cases covered. The four-shard run passed 740;
+  its two failures were resolved by a focused eight-case run (all passed).
+  One old header-search expectation was updated to respect Add game's single
+  search field. A temporary missing-template failure during a checkout passed
+  when rerun without concurrent branch changes.
+- SQLite/local mode: 479 passed, 263 PostgreSQL-only cases skipped.
+- JavaScript: 201 passed.
+- Static publishing build and whitespace checks passed.
+- Development deployment and its initial health workflow passed, including
+  database-backed checks for both environments. Main deployment and workflow
+  status must be checked after publication.
