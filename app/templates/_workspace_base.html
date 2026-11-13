@@ -19,7 +19,7 @@
 </head>
 <body class="{% block body_class %}library-page workspace-page{% endblock %}{% if library_section %} library-archive library-section-page{% endif %}">
     {% call site_header() %}
-        {% block workspace_return %}<a href="{{ navigation_return() }}"><span aria-hidden="true">←</span> {{ navigation_return_label() }}</a>{% endblock %}
+        {% block workspace_return %}<a href="{{ navigation_return() }}">{{ navigation_return_label() }}</a>{% endblock %}
     {% endcall %}
     {% block workspace_backdrop %}{% if library_section %}{% include '_library_backdrop.html' %}{% endif %}{% endblock %}
     <main class="workspace-layout {% if library_section %}library-layout {% endif %}{% block layout_class %}{% endblock %}">

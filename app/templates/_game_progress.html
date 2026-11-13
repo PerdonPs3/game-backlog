@@ -7,7 +7,7 @@
         {% if entry.is_favorite or entry.is_goty %}<p class="catalog-progress-stickers">{% if entry.is_favorite %}★ Favorite{% endif %}{% if entry.is_goty %} · ✦ Your GOTY{% endif %}</p>{% endif %}
         {% if entry.started_on or entry.completed_on %}<p class="catalog-progress-dates">{% if entry.started_on %}Started <time datetime="{{ entry.started_on }}">{{ entry.started_on }}</time>{% endif %}{% if entry.completed_on %} · Completed <time datetime="{{ entry.completed_on }}">{{ entry.completed_on }}</time>{% endif %}</p>{% endif %}
         <div class="catalog-progress-notes"><h4>Private notes</h4><p>{{ entry.review or 'No private notes yet.' }}</p></div>
-        <div class="catalog-progress-actions"><a href="{{ url_for('main.edit', game_id=entry.id) }}">Edit {{ entry.platform }} entry ↗</a><a href="{{ url_for('main.delete', game_id=entry.id) }}">Remove from library</a></div>
+        <div class="catalog-progress-actions"><a href="{{ url_for('main.edit', game_id=entry.id) }}">Edit {{ entry.platform }} entry</a><a href="{{ url_for('main.delete', game_id=entry.id) }}">Remove from library</a></div>
     </article>{% endfor %}
 </section>
 {% endif %}

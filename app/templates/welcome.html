@@ -38,10 +38,10 @@
                 <h1 id="welcome-title">VESTIGIUM</h1>
                 <p class="welcome-tagline">Every game leaves a mark.</p>
                 {% with compact_search=true %}{% include '_public_catalog_search.html' %}{% endwith %}
-                {% if account_user %}<a class="welcome-primary" href="{{ url_for('main.index') }}">Open library <span aria-hidden="true">↗</span></a>{% endif %}
+                {% if account_user %}<a class="welcome-primary" href="{{ url_for('main.index') }}">Open library</a>{% endif %}
                 {% if accounts_enabled %}<span class="welcome-community" data-member-count-url="{{ url_for('community.count') }}" title="Confirmed accounts that have signed in to Vestigium. Updated every minute." aria-label="{{ member_count if member_count is not none else '' }} activated player {{ 'account' if member_count == 1 else 'accounts' }}"{% if member_count is not defined or member_count is none %} hidden{% endif %}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5 22v-3a7 7 0 0 1 14 0v3"/></svg><span data-member-count-value>{{ member_count if member_count is defined and member_count is not none else '' }}</span></span>{% endif %}
             </div>
-            <a class="welcome-scroll" href="#your-library">See what you can do <span aria-hidden="true">↓</span></a>
+            <a class="welcome-scroll" href="#your-library">See what you can do</a>
         </section>
         <div class="welcome-story">
             <section class="welcome-section welcome-tour" id="your-library" aria-labelledby="tour-title" data-product-tour>
@@ -51,16 +51,16 @@
                     <span class="tour-chapter-number" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
                     <div class="tour-context"><span class="tour-eyebrow">{{ {'search': '01 / DISCOVER', 'library': '02 / YOUR COLLECTION', 'profile': '03 / YOUR IDENTITY'}[kind] }}</span><h3 id="chapter-{{ kind }}">{{ {'search': 'Find it. Save it. Play it.', 'library': 'A home for every game.', 'profile': 'Put your favorites on display.'}[kind] }}</h3><p>{{ {'search': 'Search the catalog and add a game without leaving its page.', 'library': 'Backlog, playing, completed. Keep your ratings and notes alongside each game.', 'profile': 'Pick five games for your showcase. You decide what your profile shares.'}[kind] }}</p></div>
                     <div class="tour-scene">{{ product_demo(kind) }}</div>
-                    {% if kind == 'search' %}<div class="tour-feature-trail" aria-label="Save a game in three steps"><span>Search the catalog</span><i aria-hidden="true">→</i><span>Choose your platform</span><i aria-hidden="true">→</i><span>Add to your library</span></div>{% elif kind == 'library' %}<div class="tour-feature-trail"><span>Backlog</span><i aria-hidden="true">→</i><span>Playing</span><i aria-hidden="true">→</i><span>Completed ✓</span></div>{% else %}<div class="tour-feature-trail"><span>Your name</span><i aria-hidden="true">+</i><span>Your five favorites</span><i aria-hidden="true">+</i><span>Your sharing choices</span></div>{% endif %}
+                    {% if kind == 'search' %}<div class="tour-feature-trail" aria-label="Save a game in three steps"><span>Search the catalog</span><i aria-hidden="true">·</i><span>Choose your platform</span><i aria-hidden="true">·</i><span>Add to your library</span></div>{% elif kind == 'library' %}<div class="tour-feature-trail"><span>Backlog</span><i aria-hidden="true">·</i><span>Playing</span><i aria-hidden="true">·</i><span>Completed ✓</span></div>{% else %}<div class="tour-feature-trail"><span>Your name</span><i aria-hidden="true">+</i><span>Your five favorites</span><i aria-hidden="true">+</i><span>Your sharing choices</span></div>{% endif %}
                 </section>
                 {% endfor %}
-                <div class="tour-bottom"><span>Your library and notes stay private.</span><a href="{{ url_for('explore.index') }}">Try the real thing: explore games ↗</a></div>
+                <div class="tour-bottom"><span>Your library and notes stay private.</span><a href="{{ url_for('explore.index') }}">Try the real thing: explore games</a></div>
             </section>
             <section class="tour-cover-finale" aria-labelledby="finale-title" data-tour-panel>
                 <div class="tour-cover-fan" aria-hidden="true">{% for cover in ['co1rs4', 'cob9dh', 'co4jni', 'cocpbl', 'cob9kr'] %}<img src="https://images.igdb.com/igdb/image/upload/t_cover_big_2x/{{ cover }}.jpg" alt="" loading="lazy" width="132" height="187" style="--fan-index: {{ loop.index0 }}">{% endfor %}</div>
-                <div><span class="tour-eyebrow">NEXT UP</span><h2 id="finale-title">What will you play next?</h2><p>Find something new. Or return to an old favorite.</p><a href="{{ url_for('explore.index') }}">Explore games ↗</a></div>
+                <div><span class="tour-eyebrow">NEXT UP</span><h2 id="finale-title">What will you play next?</h2><p>Find something new. Or return to an old favorite.</p><a href="{{ url_for('explore.index') }}">Explore games</a></div>
             </section>
-            <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }} ↗</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
+            <section class="welcome-join" aria-labelledby="join-title"><h2 id="join-title">Keep yours here.</h2><a class="welcome-join-action" href="{{ url_for('main.index') if account_user else url_for('auth.register') if accounts_enabled else url_for('explore.index') }}">{{ 'Open your library' if account_user else 'Start your collection' }}</a>{% if accounts_enabled and not account_user %}<p>Already a member? <a href="{{ url_for('auth.login') }}">Sign in</a></p>{% endif %}</section>
         </div>
     </main>
     {{ site_footer() }}

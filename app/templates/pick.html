@@ -48,7 +48,7 @@
         </div>
         <p id="pick-genre-help" class="adventure-hint">Genres come from catalog-linked games in your selected states. Entries without a known genre are included only with Any genre.</p>
         <div class="form-actions">
-            <button type="submit">Pick a game <span aria-hidden="true">↗</span></button>
+            <button type="submit">Pick a game</button>
             {% if selected_platform or selected_genre or selected_statuses != ['Backlog'] or mode != 'recommended' %}<a href="{{ library_section_url('main.pick_game') }}">Reset preferences</a>{% endif %}
         </div>
     </form>

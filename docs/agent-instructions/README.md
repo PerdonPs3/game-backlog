@@ -12,6 +12,7 @@ They apply to code, tests, documentation, and configuration.
 
 - Avoid redundant text, links, search fields, navigation, and controls across the same page, including its header and footer. Check the surrounding interface before adding an element.
 - When asked to refresh an existing design, preserve its established layout unless the user requests a redesign. Add content only when it serves a distinct purpose; do not fill space with repeated information.
+- Do not append decorative text arrows to links or action labels. Prefer clean labels; use an established SVG icon only when it communicates a distinct function. Keep meaningful directional controls accessible.
 
 ## Git Flow and responsibilities
 

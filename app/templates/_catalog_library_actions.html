@@ -4,7 +4,7 @@
     {% for message in get_flashed_messages(category_filter=['catalog_saved']) %}<p class="catalog-save-feedback" role="status">✓ {{ message }}</p>{% endfor %}
     {% if can_manage %}
         {% if entries %}
-        <p class="catalog-access-note">Saved on {{ entries|length }} {{ 'platform' if entries|length == 1 else 'platforms' }}.</p><a class="catalog-progress-shortcut" href="#your-progress">Your progress ↓</a>
+        <p class="catalog-access-note">Saved on {{ entries|length }} {{ 'platform' if entries|length == 1 else 'platforms' }}.</p><a class="catalog-progress-shortcut" href="#your-progress">Your progress</a>
         {% endif %}
         {% if available_platforms %}
         {% if entries %}<details class="catalog-add-platform"><summary><span aria-hidden="true">+</span>Add another platform</summary>{% endif %}
@@ -23,7 +23,7 @@
             {% from '_rating_picker.html' import rating_picker %}{{ rating_picker() }}
             <button type="submit">Add to library <span aria-hidden="true">+</span></button>
             <p class="catalog-message" role="status" data-quick-feedback hidden></p>
-            <a class="catalog-more-options" href="{{ url_for('explore.add', catalog_id=game.id) }}">More options ↗</a>
+            <a class="catalog-more-options" href="{{ url_for('explore.add', catalog_id=game.id) }}">More options</a>
         </form>
         {% if entries %}</details>{% endif %}
         {% elif entries %}<p class="catalog-access-note">Already in your library.</p>
@@ -31,6 +31,6 @@
         <p class="catalog-access-note">Your library and notes stay private.</p>
     {% else %}
         <p class="catalog-access-note">Keep track of this game in your collection.</p>
-        {% if game.platforms %}<a class="button-link" href="{{ url_for('explore.add', catalog_id=game.id) }}">{{ 'Continue to add game' if account_user else 'Sign in to add game' }} ↗</a>{% endif %}
+        {% if game.platforms %}<a class="button-link" href="{{ url_for('explore.add', catalog_id=game.id) }}">{{ 'Continue to add game' if account_user else 'Sign in to add game' }}</a>{% endif %}
     {% endif %}
 </aside>

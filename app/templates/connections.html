@@ -7,7 +7,7 @@
 {% block workspace_backdrop %}
 {% include '_community_gallery.html' %}
 {% endblock %}
-{% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">← Back to profile</a>{% endblock %}
+{% block workspace_return %}<a href="{{ profile_url() if connection_owner else url_for('profiles.public_profile', username=username) }}">Back to profile</a>{% endblock %}
 {% macro icon(name) -%}
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 {% if name in ['followers', 'following'] %}<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/>{% if name == 'following' %}<path d="m16 2 2 2 3-3"/>{% endif %}
