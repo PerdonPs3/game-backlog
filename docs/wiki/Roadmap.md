@@ -6,6 +6,19 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 For the current priority order and release state, see the
 [product plan](../Product-Plan.md#current-priorities--2026-10-25).
 
+## Discover cards and game management — 2026-11-13
+
+- [x] Implement the approved Discover card direction locally: complete native
+  links, platform/store logos, and compact owner-only saved-state indicators.
+  Remove direct wishlist actions from recommendation cards. Use the same logos
+  in catalog search; preserve existing ranking, filters and pagination.
+- [ ] Review the local card implementation before publication.
+- [ ] Update the game-page collection controls in the next increment, keeping
+  wishlist and library management together. The current game page is unchanged.
+
+See [Discover recommendations](../Catalog-Recommendations.md#local-card-refresh--2026-11-13)
+for metadata accuracy, icon sources and implementation boundaries.
+
 ## Help center and service health — 2026-11-11
 
 - [x] Add a dedicated Help page with browsable topics and frequently asked

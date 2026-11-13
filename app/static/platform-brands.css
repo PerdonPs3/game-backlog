@@ -1,0 +1,14 @@
+.platform-brands { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem .7rem; margin: .6rem 0 .85rem; color: var(--text-muted); font-size: .68rem; line-height: 1.5; }
+.platform-brand { min-width: 0; max-width: 100%; }
+.platform-brand > span { display: inline-flex; align-items: center; gap: .3rem; min-width: 0; max-width: 100%; }
+.platform-brand-icon { display: inline-block; flex: none; width: 17px; height: 17px; background-color: currentColor; mask: var(--platform-icon) center / contain no-repeat; -webkit-mask: var(--platform-icon) center / contain no-repeat; }
+.platform-brand-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.platform-brand-windows { --platform-icon: url('icons/platforms/windows.svg'); }
+.platform-brand-playstation { --platform-icon: url('icons/platforms/playstation.svg'); }
+.platform-brand-xbox { --platform-icon: url('icons/platforms/xbox.svg'); }
+.platform-brand-nintendoswitch { --platform-icon: url('icons/platforms/nintendoswitch.svg'); }
+.platform-brand-nintendo { --platform-icon: url('icons/platforms/nintendo.svg'); }
+.platform-brand-apple { --platform-icon: url('icons/platforms/apple.svg'); }
+.platform-brand-linux { --platform-icon: url('icons/platforms/linux.svg'); }
+.platform-brand-steam { --platform-icon: url('icons/platforms/steam.svg'); }
+.catalog-result-copy .platform-brand-label { font-size: .68rem; margin: 0; color: inherit; }

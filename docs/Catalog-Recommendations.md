@@ -1,5 +1,23 @@
 # Discover recommendations
 
+## Local card refresh — 2026-11-13
+
+For you and Popular picks now use one native link for each complete game card,
+with no direct wishlist-save button or repeated cover/title destinations.
+Search games uses the same platform-brand presentation. Compact saved-state
+markers are read-only and owner-scoped; recommendation pools still exclude
+owned games. Existing game-detail controls are unchanged in this increment.
+
+Platform versions are grouped by brand, with exact platform names available in
+accessible labels and hover titles. Unsupported platforms retain their names.
+Steam is shown only for validated HTTPS Steam catalog links, not inferred from
+PC support. Store metadata is requested with existing candidate/search queries,
+without a request per card. Icons are served locally; upstream sources and
+license are in `app/static/icons/platforms/README.md`.
+
+The existing saved context in game links retains Discover mode, sorting,
+filters and pagination. This change does not modify ranking or the game page.
+
 Implemented on `feature/catalog-recommendations`, based on updated `develop`, and
 preserved through a `--no-ff` merge into `refactor/navigation-flow`. The owner
 reviewed the local experience and authorized develop integration/publication on
