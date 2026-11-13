@@ -104,6 +104,10 @@ html[data-theme="light"] .discover-hero h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8
 .discover-page .catalog-public-search input { width: 100%; padding-right: 3.2rem; }
 .discover-page .catalog-public-search > div:first-of-type > button { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 48px; height: 100%; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--accent); }
 .discover-page .catalog-public-search input:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: none; }
+.discover-page .catalog-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.3rem; }
+.discover-page .catalog-results-heading h2 { margin: 0; font-size: 1.15rem; }
+.discover-page .catalog-results-heading p { margin: 0; flex: none; }
+@media (max-width:640px) { .discover-page .catalog-results-heading { flex-direction: column; align-items: flex-start; gap: .45rem; } }
 .discover-page .discover-card-copy > :is(form, .discover-saved, .discover-wish):last-child { margin-top: auto; }
 
 .discover-page .catalog-search-filters { margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: .65rem; }

@@ -30,7 +30,6 @@ html[data-theme="light"] .catalog-workspace .workspace-panel { padding: 0; borde
 .catalog-result-copy { display: block; padding: 1rem; }
 .catalog-result-copy strong { display: block; line-height: 1.5; font-size: .9rem; overflow-wrap: anywhere; }
 .catalog-result-copy small { display: block; color: var(--accent); margin-top: .5rem; font-size: .7rem; }
-.catalog-result-copy > span { display: block; color: var(--text-muted); font-size: .65rem; line-height: 1.6; margin-top: .5rem; overflow-wrap: anywhere; }
 .catalog-empty { padding: 3rem 1.5rem; text-align: center; border: 1px solid var(--border); border-radius: 16px; background: var(--color-panel); }
 .catalog-empty-symbol { color: var(--accent); font-size: 2.5rem; }
 .catalog-empty h2 { font-size: 1.4rem; }
