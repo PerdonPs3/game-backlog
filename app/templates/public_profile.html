@@ -4,7 +4,7 @@
 {% from '_profile_country.html' import country_flag %}
 {% from '_profile_badges.html' import admin_badge %}
 {% block page_title %}{{ profile.display_name }} (@{{ profile.username }}) · Vestigium{% endblock %}
-{% block workspace_return %}<a href="{{ url_for('main.welcome') }}">Discover Vestigium ↗</a>{% endblock %}
+{% block workspace_return %}<a href="{{ url_for('main.welcome') }}">Discover Vestigium</a>{% endblock %}
 {% block workspace_hero %}{% call profile_hero(profile, public_stats if public_stats and public_stats.total else none, owner=false) %}{% include '_profile_connections.html' %}{% endcall %}{% endblock %}
 {% block panel_label %}Public player profile{% endblock %}
 {% block panel %}
