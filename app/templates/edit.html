@@ -19,4 +19,5 @@
             {% include '_game_entry_identity.html' %}
             {% include '_game_entry_fields.html' %}
         </form>
+        <p class="entry-remove"><a class="danger-link" href="{{ url_for('main.delete', game_id=game.id, **{'from': navigation_return()}) }}">Remove from library</a></p>
 {% endblock %}

@@ -12,9 +12,11 @@ For the current priority order and release state, see the
   links, platform/store logos, and compact owner-only saved-state indicators.
   Remove direct wishlist actions from recommendation cards. Use the same logos
   in catalog search; preserve existing ranking, filters and pagination.
-- [ ] Review the local card implementation before publication.
-- [ ] Update the game-page collection controls in the next increment, keeping
-  wishlist and library management together. The current game page is unchanged.
+- [ ] Review the local card and game-page implementation before publication.
+- [x] Group wishlist and library management on the game page. Keep platform,
+  rating, status and review editing in the preselected Add/Edit forms; show
+  saved progress without duplicate controls. Compact the gallery and let the
+  complete sidebar follow scrolling when it fits below the header.
 
 See [Discover recommendations](../Catalog-Recommendations.md#local-card-refresh--2026-11-13)
 for metadata accuracy, icon sources and implementation boundaries.

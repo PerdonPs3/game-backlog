@@ -4,7 +4,7 @@
         <div><dt>Release date</dt><dd>{% if profile.release %}<time datetime="{{ profile.release }}">{{ profile.release }}</time>{% else %}Not available{% endif %}</dd></div>
         {% if profile.developers %}<div><dt>{{ 'Developer' if profile.developers|length == 1 else 'Developers' }}</dt><dd>{% for company in profile.developers %}<span>{{ company }}</span>{% endfor %}</dd></div>{% endif %}
         {% if profile.publishers %}<div><dt>{{ 'Publisher' if profile.publishers|length == 1 else 'Publishers' }}</dt><dd>{% for company in profile.publishers %}<span>{{ company }}</span>{% endfor %}</dd></div>{% endif %}
-        {% if game.platforms %}<div><dt>Platforms</dt><dd><ul class="catalog-platforms">{% for platform in game.platforms %}<li>{{ platform }}</li>{% endfor %}</ul></dd></div>{% endif %}
+        {% if game.platforms %}<div><dt>Platforms</dt><dd>{% from '_platform_badges.html' import platforms %}{{ platforms(profile) }}</dd></div>{% endif %}
     </dl>
     {% if profile.links %}<nav class="catalog-game-links" aria-label="Official game links">{% for link in profile.links %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>{% endfor %}</nav>{% endif %}
 </section>

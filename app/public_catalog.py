@@ -171,6 +171,9 @@ def game(catalog_id, slug=None):
     g.navigation_default = url_for('discovery.index')
     saved_platforms = {entry['platform'].strip().casefold() for entry in entries}
     available_platforms = [platform for platform in item['platforms'] if platform.strip().casefold() not in saved_platforms] if item else []
+    if item:
+        profile['platform_badges'] = platform_badges(item['platforms'])
+    entries = [{**dict(entry), 'platform_icon': platform_badges([entry['platform']])[0]['icon']} for entry in entries]
     return render_template('catalog_game.html', game=item, profile=profile, error=error,
                            can_manage=can_manage, entries=entries, available_platforms=available_platforms,
                            wishlist_saved=wish_state(catalog_id) if item else False,

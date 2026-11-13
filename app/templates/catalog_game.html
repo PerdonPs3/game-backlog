@@ -1,7 +1,7 @@
 {% extends '_catalog_base.html' %}
 {% from '_review_stars.html' import review_stars %}
 {% block page_title %}{{ game.name if game else 'Game unavailable' }} · Vestigium{% endblock %}
-{% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='wishlist.css') }}">{% endblock %}
+{% block page_styles %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='review-cards.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='wishlist.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='platform-brands.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='catalog-collection.css') }}">{% endblock %}
 {% block body_class %}{{ super() }}{% if game and profile.backdrop_url %} catalog-illustrated-page{% endif %}{% endblock %}
 {% block workspace_backdrop %}{% if game and profile.backdrop_url %}<div class="catalog-game-backdrop" aria-hidden="true"><img src="{{ profile.backdrop_url }}" alt="" fetchpriority="low" decoding="async" referrerpolicy="no-referrer"></div>{% endif %}{% endblock %}
 {% block workspace_hero %}{% if not game %}<header class="workspace-hero"><div><h1>Game <span>unavailable.</span></h1><p>{{ error }}</p></div></header>{% endif %}{% endblock %}
@@ -21,8 +21,7 @@
                     <span class="catalog-rating-label">{{ review_count }} {{ 'review' if review_count == 1 else 'reviews' }}</span>
                 </a>
                 {% endif %}
-                <div class="catalog-game-actions" id="game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button>{% include '_wishlist_button.html' %}</div>
-                {% for message in get_flashed_messages(category_filter=['wishlist_saved']) %}<p class="wishlist-feedback" role="status">✓ {{ message }}</p>{% endfor %}
+                <div class="catalog-game-actions"><button type="button" class="secondary-button" data-copy-game-link hidden>Share</button></div>
                 <p class="catalog-copy-feedback" role="status" data-copy-feedback></p>
             </div>
         </header>
@@ -32,15 +31,15 @@
             <section class="catalog-detail-panel"><h2>About the game</h2><p class="catalog-synopsis">{{ profile.summary or 'A synopsis is not available for this game yet.' }}</p></section>
         </div>
         {% include '_game_progress.html' %}
+        {% if reviews_enabled %}{% include '_game_reviews.html' %}{% endif %}
     </div>
     <div class="catalog-game-sidebar">
         {% include '_catalog_game_facts.html' %}
         {% include '_catalog_library_actions.html' %}
     </div>
 </div>
-{% if reviews_enabled %}{% include '_game_reviews.html' %}{% endif %}
 {% else %}
 <section class="catalog-empty" role="alert"><h2>Keep exploring.</h2><p>{{ error }}</p><a class="button-link" href="{{ url_for('explore.index') }}">Browse the catalog</a></section>
 {% endif %}
 {% endblock %}
-{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-quick-add.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-media.js') }}" defer></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='collection-covers.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-share.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-media.js') }}" defer></script><script src="{{ url_for('static', filename='catalog-layout.js') }}" defer></script>{% endblock %}
