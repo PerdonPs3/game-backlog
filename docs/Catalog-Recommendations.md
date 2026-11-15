@@ -36,8 +36,9 @@ and reviews remain in the main column so the sidebar can follow the content.
 Validation passed 99 relevant Python cases against disposable local PostgreSQL
 and eight JavaScript tests. Browser checks covered owned and unowned games,
 preselected Add/Edit navigation, sidebar scrolling, and light/dark desktop and
-390-pixel mobile layouts. These changes remain local pending owner review and
-publication authorization.
+390-pixel mobile layouts. The owner reviewed these changes and the Help tutorials,
+then approved develop integration and publication on 2026-11-15. Production
+publication remains separate; no database migration is required.
 
 Implemented on `feature/catalog-recommendations`, based on updated `develop`, and
 preserved through a `--no-ff` merge into `refactor/navigation-flow`. The owner

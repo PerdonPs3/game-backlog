@@ -12,7 +12,8 @@ For the current priority order and release state, see the
   links, platform/store logos, and compact owner-only saved-state indicators.
   Remove direct wishlist actions from recommendation cards. Use the same logos
   in catalog search; preserve existing ranking, filters and pagination.
-- [ ] Review the local card and game-page implementation before publication.
+- [x] Review the card and game-page implementation. The owner approved develop
+  integration and publication on 2026-11-15; production publication is separate.
 - [x] Group wishlist and library management on the game page. Keep platform,
   rating, status and review editing in the preselected Add/Edit forms; show
   saved progress without duplicate controls. Compact the gallery and let the
@@ -30,10 +31,10 @@ for metadata accuracy, icon sources and implementation boundaries.
   version uses authored guides and answers without a chatbot or AI provider.
 
 Help includes instant search, native expandable answers, and day/night layouts.
-The local follow-up adds a silent, captioned 30-second Add game demonstration
+The follow-up adds a silent, captioned 30-second Add game demonstration
 inside its answer, with deferred loading, native controls and Replay. See
-[Help tutorial](../Help-Tutorial.md); publication of this follow-up is pending.
-The local review-publication answer also includes a 28-second demonstration of
+[Help tutorial](../Help-Tutorial.md); the owner approved develop integration and
+publication on 2026-11-15. The review-publication answer also includes a 28-second demonstration of
 the explicit public-review choice and its result on the game page.
 The owner authorized publication with the [global release](../Global-Release-2026-11-12.md)
 on 2026-11-12.

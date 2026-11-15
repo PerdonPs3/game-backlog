@@ -42,7 +42,9 @@ Validation: six Python Help tests, five JavaScript behavior tests, and browser
 checks for real MP4 decoding, deferred loading, delayed playback, pause/replay
 and mobile layout. Timer regressions cover quick reopening, manual playback,
 reduced motion, filtering and hidden tabs.
-The implementation remains local until publication is authorized.
+The owner approved develop integration and publication on 2026-11-15, together
+with the reviewed Discover cards and game-page collection controls. Production
+publication remains separate. No migration or paid service is required.
 
 ## Publishing a review
 
@@ -62,3 +64,8 @@ and the writing sequence uses actual per-character captures. The same encoder,
 pointer, captions and genuine scroll frames are used for both demonstrations.
 Validation now includes seven Python Help cases and seven JavaScript cases,
 including playback coordination between tutorials.
+
+Develop publication checks on 2026-11-15 passed 195 relevant Python cases on
+disposable local PostgreSQL schemas, all 210 JavaScript tests, the Vercel static
+asset build and whitespace validation. Hosted development readiness was healthy
+before integration. No hosted data migration is part of this release.
