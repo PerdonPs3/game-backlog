@@ -18,6 +18,11 @@ start; manual playback and Replay start immediately. It loads when the answer op
 the answer or hiding the tab, and does not autoplay with reduced motion enabled.
 The ordinary text instructions remain usable without JavaScript or video.
 
+Help topics use two independent desktop columns: Library/Wishlist/Discover and
+Ratings & reviews/Profile & privacy/Account & access. Expanding the video does
+not create empty grid rows beside it. Mobile stacks the groups in DOM order;
+search removes empty columns and lets remaining matches use the available width.
+
 Assets live in `app/static/videos/help-add-game.*`, with the WebP poster beside
 them. The MP4 uses 1920 × 1152 at 30 fps, H.264 CRF 17 and fast-start metadata.
 The 1920 × 1072 browser content is placed at native size below the caption bar,
