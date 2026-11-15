@@ -1,4 +1,4 @@
-# Add game Help demonstration
+# Help demonstrations
 
 The first Library question on `/help` contains a silent 30-second MP4 tutorial.
 It uses captures of the real local interface with a fictional account and
@@ -43,3 +43,22 @@ checks for real MP4 decoding, deferred loading, delayed playback, pause/replay
 and mobile layout. Timer regressions cover quick reopening, manual playback,
 reduced motion, filtering and hidden tabs.
 The implementation remains local until publication is authorized.
+
+## Publishing a review
+
+The second question under Ratings & reviews contains a 28-second companion
+clip. It opens a fictional Celeste library entry, types a short review, selects
+Publish these notes as a public review, saves with a rating, and opens Player
+reviews on the game page. The unchanged text remains private until the explicit
+publication choice. No hosted account or shared database was used to record it.
+
+Both videos use the shared `_help_demo.html` component and playback lifecycle.
+Starting one pauses the other and cancels its pending automatic start. They keep
+independent Replay controls and load only when their own answer is opened.
+
+Generate the companion assets with `scripts/build_help_demo.py CAPTURE_DIR
+publish-review`. Review captures are padded at native resolution, never enlarged,
+and the writing sequence uses actual per-character captures. The same encoder,
+pointer, captions and genuine scroll frames are used for both demonstrations.
+Validation now includes seven Python Help cases and seven JavaScript cases,
+including playback coordination between tutorials.

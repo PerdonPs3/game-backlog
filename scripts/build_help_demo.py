@@ -12,6 +12,10 @@ import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 
 SOURCE = Path(sys.argv[1])
+DEMO = sys.argv[2] if len(sys.argv) > 2 else 'add-game'
+if DEMO not in {'add-game', 'publish-review'}:
+    raise ValueError('Choose add-game or publish-review.')
+ASSET = f'help-{DEMO}'
 TARGET = Path(__file__).resolve().parents[1] / 'app/static/videos'
 CAPTURE_SIZE = (1920, 1072)
 VIDEO_SIZE = (1920, 1152)
@@ -22,6 +26,10 @@ MENU_FONT = ImageFont.truetype('C:/Windows/Fonts/segoeui.ttf', 17)
 
 def screenshot(name):
     picture = Image.open(SOURCE/(name+'.jpg')).convert('RGB')
+    if DEMO == 'publish-review' and 1500 <= picture.width <= CAPTURE_SIZE[0] and 1000 <= picture.height <= CAPTURE_SIZE[1]:
+        canvas = Image.new('RGB', CAPTURE_SIZE, '#101215')
+        canvas.paste(picture, ((CAPTURE_SIZE[0]-picture.width)//2, (CAPTURE_SIZE[1]-picture.height)//2))
+        picture = canvas
     if name == 'library' and picture.height == CAPTURE_SIZE[1] and picture.width < CAPTURE_SIZE[0]:
         # Preserve native text pixels if the browser resized during navigation.
         canvas = Image.new('RGB', CAPTURE_SIZE, '#101215')
@@ -59,28 +67,45 @@ def add(name,seconds,label,point,transition='fade',click=False,image=None):
     scenes.append(dict(image=image or screenshot(name),seconds=seconds,label=label,point=point,transition=transition,click=click))
 
 
-add('empty',1.6,'Search for a game',(610,275),click=True)
-add('focused',.5,'Search for a game',(610,275),'cut')
-for letter in range(1,8):
-    add(f'type-{letter}',.24,'Type the title',(650,280),'cut')
-add('results',2.5,'Choose the matching game',(675,350),click=True)
-add('selected',2.2,'Check the selected game',(700,255))
-add('selected',2.8,'Choose your platform',(620,645),image=menu(screenshot('selected'),480,520,
-    ['Choose a platform','Google Stadia','Linux','Mac','Nintendo Switch','PC (Microsoft Windows)','PlayStation 4','Xbox One'],'Mac'),click=True)
-add('platform-picked',1.7,'Platform selected',(625,495))
-add('platform-picked',2.4,'Choose your status',(940,575),image=menu(screenshot('platform-picked'),795,520,
-    ['Backlog','Playing','Completed','On hold','Dropped'],'Playing'),click=True)
-add('status-picked',1.7,'Playing · You can change this later',(940,495))
-add('status-picked',1.2,'Your rating is optional',(1250,490),'cut',click=True)
-add('rating',2.1,'A half-star rating works too',(1250,490))
-for capture in json.loads((SOURCE/'scroll.json').read_text()):
-    add(Path(capture['file']).stem,2/FPS,'Notes and extra details are optional',(1520,800),'microfade')
-add('save',2.4,'Save your game',(540,910),'cut',click=True)
-add('library',5.0,'Saved · Mac · Playing · 4.5/5',(510,885))
+if DEMO == 'publish-review':
+    add('library',2,'In your library, choose Edit game',(540,944),click=True)
+    add('edit',1.5,'Open your saved game',(750,300))
+    for capture in json.loads((SOURCE/'scroll.json').read_text()):
+        add(Path(capture['file']).stem,2/FPS,'Find your private notes',(1480,700),'microfade')
+    add('notes-empty',.7,'Write your review',(700,490),'cut')
+    text = json.loads((SOURCE/'review.json').read_text())
+    for letter in range(1,text['characters']+1):
+        add(f'review-{letter}',.1,'Write your review',(1330,585),'cut')
+    add(f'review-{text["characters"]}',2,'These notes stay private until you publish them',(1330,585),'cut')
+    add('publish-checked',2.8,'Select Publish these notes as a public review',(508,640),click=True)
+    add('publish-checked',1.5,'A rating is required to publish',(1270,330),'cut')
+    add('save',2.2,'Save your changes',(540,850),click=True)
+    add('saved-library',1.3,'Open the game page',(535,650),click=True)
+    add('game',1.8,'Go to Player reviews',(746,353),click=True)
+    add('published',5,'Your review now appears in Player reviews',(850,845))
+else:
+    add('empty',1.6,'Search for a game',(610,275),click=True)
+    add('focused',.5,'Search for a game',(610,275),'cut')
+    for letter in range(1,8):
+        add(f'type-{letter}',.24,'Type the title',(650,280),'cut')
+    add('results',2.5,'Choose the matching game',(675,350),click=True)
+    add('selected',2.2,'Check the selected game',(700,255))
+    add('selected',2.8,'Choose your platform',(620,645),image=menu(screenshot('selected'),480,520,
+        ['Choose a platform','Google Stadia','Linux','Mac','Nintendo Switch','PC (Microsoft Windows)','PlayStation 4','Xbox One'],'Mac'),click=True)
+    add('platform-picked',1.7,'Platform selected',(625,495))
+    add('platform-picked',2.4,'Choose your status',(940,575),image=menu(screenshot('platform-picked'),795,520,
+        ['Backlog','Playing','Completed','On hold','Dropped'],'Playing'),click=True)
+    add('status-picked',1.7,'Playing · You can change this later',(940,495))
+    add('status-picked',1.2,'Your rating is optional',(1250,490),'cut',click=True)
+    add('rating',2.1,'A half-star rating works too',(1250,490))
+    for capture in json.loads((SOURCE/'scroll.json').read_text()):
+        add(Path(capture['file']).stem,2/FPS,'Notes and extra details are optional',(1520,800),'microfade')
+    add('save',2.4,'Save your game',(540,910),'cut',click=True)
+    add('library',5.0,'Saved · Mac · Playing · 4.5/5',(510,885))
 
 
 total_frames=sum(round(scene['seconds']*FPS) for scene in scenes)
-writer=imageio_ffmpeg.write_frames(str(TARGET/'help-add-game.mp4'),VIDEO_SIZE,fps=FPS,
+writer=imageio_ffmpeg.write_frames(str(TARGET/f'{ASSET}.mp4'),VIDEO_SIZE,fps=FPS,
     codec='libx264',pix_fmt_in='rgb24',pix_fmt_out='yuv420p',macro_block_size=1,
     output_params=['-movflags','+faststart','-crf','17','-preset','slow'])
 writer.send(None)
@@ -117,7 +142,7 @@ try:
             frame.paste(cursor,(x,y),cursor)
             draw.rectangle((0,1149,round(1920*(elapsed+tick+1)/total_frames),1151),fill='#ffbe57')
             if index==0 and tick==25:
-                frame.save(TARGET/'help-add-game-poster.webp',quality=94)
+                frame.save(TARGET/f'{ASSET}-poster.webp',quality=94)
             writer.send(frame.tobytes())
         previous_image=image
         elapsed+=frames
@@ -138,5 +163,5 @@ for start,end,label in cues:
     else:
         merged.append((start,end,label))
 blocks=[f'{timestamp(start)} --> {timestamp(end)}\n{label}' for start,end,label in merged]
-(TARGET/'help-add-game.vtt').write_text('WEBVTT\n\n'+'\n\n'.join(blocks)+'\n',encoding='utf-8')
+(TARGET/f'{ASSET}.vtt').write_text('WEBVTT\n\n'+'\n\n'.join(blocks)+'\n',encoding='utf-8')
 print(f'Created {total_frames/FPS:.2f}s tutorial at {VIDEO_SIZE}, CRF 17; scroll uses real captures.')

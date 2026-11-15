@@ -23,9 +23,11 @@ test('help searches answers immediately and restores all topics after clearing t
     assert.ok(topics.every(topic=>!topic.hidden)); assert.equal(empty.hidden,true);
 });
 
-function demoPage(reducedMotion = false) {
-    const events = {}, documentEvents = {}, inputEvents = {};
+function demoPage(reducedMotion = false, count = 1) {
+    const documentEvents = {}, inputEvents = {};
     const timers = new Map(); let timerId = 0;
+    const demos = Array.from({length:count}, (_,index) => {
+    const events = {};
     const answer = {scrollHeight:360, animations:[], animate:(frames,options)=>{
         answer.animations.push({frames,options}); return {cancel:()=>{}};
     }};
@@ -33,21 +35,23 @@ function demoPage(reducedMotion = false) {
     const entry = {open:false, hidden:false, dataset:{helpText:'Library add a game'},
         querySelector:selector=>selector==='[data-help-video]'?video:selector==='.help-answer'?answer:replay,
         addEventListener:(name,fn)=>events.toggle=fn};
-    const video = {dataset:{src:'/static/videos/help-add-game.mp4'},paused:true,currentTime:0,loads:0,plays:0,
+    const video = {dataset:{src:`/static/videos/demo-${index}.mp4`},paused:true,currentTime:0,loads:0,plays:0,
         closest:()=>entry,getAttribute:()=>video.src,addEventListener:(name,fn)=>events[name]=fn,
-        load:()=>video.loads++,play:()=>{video.paused=false;video.plays++;return Promise.resolve();},pause:()=>video.paused=true};
+        load:()=>video.loads++,play:()=>{video.paused=false;video.plays++;events.play?.();return Promise.resolve();},pause:()=>video.paused=true};
+    return {events,answer,replay,entry,video};
+    });
     const input = {value:'',addEventListener:(name,fn)=>inputEvents[name]=fn};
-    const topic = {querySelectorAll:()=>[entry]};
+    const topic = {querySelectorAll:()=>demos.map(demo=>demo.entry)};
     const document = {hidden:false,querySelector:selector=>selector==='[data-help-query]'?input:{},
-        querySelectorAll:selector=>selector==='[data-help-topic]'?[topic]:[video],
+        querySelectorAll:selector=>selector==='[data-help-topic]'?[topic]:demos.map(demo=>demo.video),
         addEventListener:(name,fn)=>documentEvents[name]=fn};
     runInNewContext(readFileSync(join(__dirname,'../app/static/help.js'),'utf8'), {
         document,window:{matchMedia:()=>({matches:reducedMotion})},
         setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},
         clearTimeout:id=>timers.delete(id),
     });
-    const advance = () => { const pending=[...timers.values()]; timers.clear(); pending.forEach(timer=>timer.fn()); };
-    return {events,documentEvents,inputEvents,entry,video,input,document,replay,timers,advance,answer};
+    const advance = () => { for (const [id,timer] of [...timers]) { if (timers.has(id)) {timers.delete(id);timer.fn();} } };
+    return {...demos[0],demos,documentEvents,inputEvents,input,document,timers,advance};
 }
 
 test('demo loads on opening, pauses on closing, and can replay without reloading', () => {
@@ -98,4 +102,29 @@ test('rapid reopening schedules only one start and manual play cancels it', () =
     assert.equal(page.timers.size,1);
     page.events.play(); assert.equal(page.timers.size,0);
     page.advance(); assert.equal(page.video.plays,0);
+});
+
+test('starting a second tutorial pauses the first and cancels its pending start', () => {
+    const page = demoPage(false,2);
+    const [first,second] = page.demos;
+    first.entry.open=true; first.events.toggle(); page.advance();
+    assert.equal(first.video.paused,false);
+    second.entry.open=true; second.events.toggle();
+    assert.equal(first.video.paused,true);
+    page.advance();
+    assert.equal(first.video.paused,true); assert.equal(second.video.paused,false);
+    first.entry.open=false; first.events.toggle();
+    first.entry.open=true; first.events.toggle();
+    assert.equal(page.timers.size,1);
+    second.events.replay(); assert.equal(page.timers.size,0);
+    page.advance(); assert.equal(first.video.paused,true);
+});
+
+test('opening two tutorials quickly leaves only the latest automatic start pending', () => {
+    const page = demoPage(false,2);
+    const [first,second] = page.demos;
+    first.entry.open=true; first.events.toggle();
+    second.entry.open=true; second.events.toggle();
+    assert.equal(page.timers.size,1); page.advance();
+    assert.equal(first.video.plays,0); assert.equal(second.video.plays,1);
 });

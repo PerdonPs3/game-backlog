@@ -23,12 +23,16 @@
         }
         function play() { load(); video.play()?.catch(() => {}); }
         replay.hidden = false;
-        video.addEventListener('play', cancelStart);
+        video.addEventListener('play', () => {
+            cancelStart();
+            stopDemos.forEach((stop, other) => { if (other !== video) stop(); });
+        });
         replay.addEventListener('click', () => { cancelStart(); load(); video.currentTime = 0; play(); });
         entry.addEventListener('toggle', () => {
             stop();
             openingAnimation?.cancel();
             if (!entry.open || entry.hidden) return;
+            stopDemos.forEach((stop, other) => { if (other !== video) stop(); });
             load();
             if (reducedMotion.matches) return;
             openingAnimation = answer?.animate?.([

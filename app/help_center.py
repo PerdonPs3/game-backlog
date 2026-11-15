@@ -11,7 +11,7 @@ TOPICS = (
     )),
     ('reviews', 'Ratings & reviews', 'm12 3 3 6 6 1-4.5 4.5 1 6.5L12 18l-5.5 3 1-6.5L3 10l6-1Z', (
         ('What is the rating scale?', 'Ratings use five stars, including half stars. A rating is optional: you can save a game without choosing one.'),
-        ('How do I publish a review?', 'Write your review in Add game or Edit game and select Also publish this review before saving. You can mark spoilers there too. A review left only in your library is private.'),
+        ('How do I publish a review?', 'Write your notes in Add game or Edit game, select Publish these notes as a public review, add a rating and save. You can mark spoilers there too. Leave publication unchecked to keep your notes private.'),
         ('Why does my review not appear on my public profile?', 'Only explicitly published reviews appear publicly, and your profile must be public. Private library notes are never used as a public review. Check the publication option in Edit game and your profile privacy settings.'),
     )),
     ('privacy', 'Profile & privacy', 'M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6ZM9 12l2 2 4-4', (
