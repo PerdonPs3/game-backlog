@@ -30,6 +30,9 @@ for metadata accuracy, icon sources and implementation boundaries.
   version uses authored guides and answers without a chatbot or AI provider.
 
 Help includes instant search, native expandable answers, and day/night layouts.
+The local follow-up adds a silent, captioned 15-second Add game demonstration
+inside its answer, with deferred loading, native controls and Replay. See
+[Help tutorial](../Help-Tutorial.md); publication of this follow-up is pending.
 The owner authorized publication with the [global release](../Global-Release-2026-11-12.md)
 on 2026-11-12.
 

@@ -41,3 +41,16 @@ def test_help_rejects_invalid_queries(client, query):
 def test_help_link_appears_once_in_the_shared_footer(client):
     html = client.get('/discover/browse').get_data(as_text=True)
     assert html.count('href="/help"') == 1
+
+
+def test_add_game_demo_is_local_accessible_and_loaded_only_when_opened(client):
+    html = client.get('/help').get_data(as_text=True)
+    assert html.count('<video ') == 1
+    assert 'controls muted playsinline preload="none"' in html
+    assert 'data-src="/static/videos/help-add-game.mp4"' in html
+    assert 'kind="captions"' in html and 'data-help-replay hidden' in html
+    media = client.get('/static/videos/help-add-game.mp4', headers={'Range': 'bytes=0-99'})
+    assert media.status_code == 206 and media.mimetype == 'video/mp4'
+    assert len(media.data) == 100
+    assert client.get('/static/videos/help-add-game-poster.webp').status_code == 200
+    assert client.get('/static/videos/help-add-game.vtt').status_code == 200

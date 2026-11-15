@@ -26,6 +26,12 @@ html[data-theme="light"] .help-hero h1 { text-shadow: 0 1px 12px #fff8; }
 .help-topic summary svg { flex: none; color: var(--accent); transition: transform .2s; }
 .help-topic details[open] summary svg { transform: rotate(180deg); }
 .help-topic details p { margin: -.2rem 0 1.1rem; font-size: .83rem; line-height: 1.8; color: var(--help-muted); overflow-wrap: anywhere; }
+.help-demo { margin: 0 0 1rem; }
+.help-demo video { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: #101215; }
+.help-demo figcaption { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding-top: .5rem; color: var(--help-muted); font-size: .72rem; }
+.help-demo button { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .5rem; margin: 0; border: 0; border-radius: 6px; background: none; color: var(--accent); font-size: inherit; }
+.help-demo button[hidden] { display: none; }
+.help-demo button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .help-empty { padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: var(--help-panel); color: var(--help-muted); }
 .help-topic[hidden],.help-topic details[hidden],.help-empty[hidden] { display: none; }
 @media (max-width:700px) { .help-topics { grid-template-columns: minmax(0,1fr); gap: 1rem; } .help-topic { padding: 1.1rem 1rem .4rem; } }
