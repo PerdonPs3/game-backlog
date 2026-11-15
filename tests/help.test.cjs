@@ -25,12 +25,16 @@ test('help searches answers immediately and restores all topics after clearing t
 
 function demoPage(reducedMotion = false) {
     const events = {}, documentEvents = {}, inputEvents = {};
+    const timers = new Map(); let timerId = 0;
+    const answer = {scrollHeight:360, animations:[], animate:(frames,options)=>{
+        answer.animations.push({frames,options}); return {cancel:()=>{}};
+    }};
     const replay = {hidden:true, addEventListener:(name,fn)=>events.replay=fn};
     const entry = {open:false, hidden:false, dataset:{helpText:'Library add a game'},
-        querySelector:selector=>selector==='[data-help-video]'?video:replay,
+        querySelector:selector=>selector==='[data-help-video]'?video:selector==='.help-answer'?answer:replay,
         addEventListener:(name,fn)=>events.toggle=fn};
     const video = {dataset:{src:'/static/videos/help-add-game.mp4'},paused:true,currentTime:0,loads:0,plays:0,
-        closest:()=>entry,getAttribute:()=>video.src,
+        closest:()=>entry,getAttribute:()=>video.src,addEventListener:(name,fn)=>events[name]=fn,
         load:()=>video.loads++,play:()=>{video.paused=false;video.plays++;return Promise.resolve();},pause:()=>video.paused=true};
     const input = {value:'',addEventListener:(name,fn)=>inputEvents[name]=fn};
     const topic = {querySelectorAll:()=>[entry]};
@@ -39,8 +43,11 @@ function demoPage(reducedMotion = false) {
         addEventListener:(name,fn)=>documentEvents[name]=fn};
     runInNewContext(readFileSync(join(__dirname,'../app/static/help.js'),'utf8'), {
         document,window:{matchMedia:()=>({matches:reducedMotion})},
+        setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},
+        clearTimeout:id=>timers.delete(id),
     });
-    return {events,documentEvents,inputEvents,entry,video,input,document,replay};
+    const advance = () => { const pending=[...timers.values()]; timers.clear(); pending.forEach(timer=>timer.fn()); };
+    return {events,documentEvents,inputEvents,entry,video,input,document,replay,timers,advance,answer};
 }
 
 test('demo loads on opening, pauses on closing, and can replay without reloading', () => {
@@ -48,7 +55,10 @@ test('demo loads on opening, pauses on closing, and can replay without reloading
     assert.equal(page.video.loads,0);
     assert.equal(page.replay.hidden,false);
     page.entry.open=true; page.events.toggle();
-    assert.equal(page.video.loads,1); assert.equal(page.video.paused,false);
+    assert.equal(page.video.loads,1); assert.equal(page.video.paused,true);
+    assert.equal([...page.timers.values()][0].delay,2000);
+    assert.equal(page.answer.animations[0].options.duration,380);
+    page.advance(); assert.equal(page.video.paused,false);
     page.entry.open=false; page.events.toggle();
     assert.equal(page.video.paused,true);
     page.video.currentTime=15; page.events.replay();
@@ -59,9 +69,33 @@ test('reduced motion keeps manual playback and hidden content pauses the clip', 
     const page = demoPage(true);
     page.entry.open=true; page.events.toggle();
     assert.equal(page.video.loads,1); assert.equal(page.video.plays,0);
+    assert.equal(page.timers.size,0); assert.equal(page.answer.animations.length,0);
     page.events.replay(); assert.equal(page.video.plays,1);
     page.input.value='ratings'; page.inputEvents.input();
     assert.equal(page.entry.hidden,true); assert.equal(page.video.paused,true);
     page.events.replay(); page.document.hidden=true; page.documentEvents.visibilitychange();
     assert.equal(page.video.paused,true);
+});
+
+test('closing, filtering or hiding the tab cancels the pending start', () => {
+    for (const interrupt of ['close','filter','hide']) {
+        const page = demoPage();
+        page.entry.open=true; page.events.toggle();
+        assert.equal(page.timers.size,1);
+        if (interrupt==='close') {page.entry.open=false;page.events.toggle();}
+        if (interrupt==='filter') {page.input.value='ratings';page.inputEvents.input();}
+        if (interrupt==='hide') {page.document.hidden=true;page.documentEvents.visibilitychange();}
+        assert.equal(page.timers.size,0); page.advance();
+        assert.equal(page.video.plays,0);
+    }
+});
+
+test('rapid reopening schedules only one start and manual play cancels it', () => {
+    const page = demoPage();
+    page.entry.open=true; page.events.toggle();
+    page.entry.open=false; page.events.toggle();
+    page.entry.open=true; page.events.toggle();
+    assert.equal(page.timers.size,1);
+    page.events.play(); assert.equal(page.timers.size,0);
+    page.advance(); assert.equal(page.video.plays,0);
 });

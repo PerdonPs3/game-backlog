@@ -11,7 +11,9 @@ popup surfaces. This is an edited guided sequence, not a continuous recording.
 No real account data or provider credentials appear in the clip.
 
 The local H.264 MP4 supports native pause, seek, fullscreen and captions, plus a
-Replay button. It loads when the answer opens, pauses on closing, filtering out
+Replay button. The answer expands over 380 ms and playback starts after a
+two-second reading pause. Closing, filtering or hiding the tab cancels a pending
+start; manual playback and Replay start immediately. It loads when the answer opens, pauses on closing, filtering out
 the answer or hiding the tab, and does not autoplay with reduced motion enabled.
 The ordinary text instructions remain usable without JavaScript or video.
 
@@ -26,6 +28,8 @@ and the Windows Segoe UI font; none are runtime dependencies of the website.
 Capture filenames and pointer targets are defined in the script. Review every
 stage and its captions when recapturing; do not reuse personal profile captures.
 
-Validation: six Python Help tests, three JavaScript behavior tests, and browser
-checks for real MP4 decoding, deferred loading, pause/replay and mobile layout.
+Validation: six Python Help tests, five JavaScript behavior tests, and browser
+checks for real MP4 decoding, deferred loading, delayed playback, pause/replay
+and mobile layout. Timer regressions cover quick reopening, manual playback,
+reduced motion, filtering and hidden tabs.
 The implementation remains local until publication is authorized.

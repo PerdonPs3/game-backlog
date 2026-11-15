@@ -25,6 +25,7 @@ html[data-theme="light"] .help-hero h1 { text-shadow: 0 1px 12px #fff8; }
 .help-topic summary::-webkit-details-marker { display: none; }
 .help-topic summary svg { flex: none; color: var(--accent); transition: transform .2s; }
 .help-topic details[open] summary svg { transform: rotate(180deg); }
+.help-answer { display: flow-root; overflow: hidden; }
 .help-topic details p { margin: -.2rem 0 1.1rem; font-size: .83rem; line-height: 1.8; color: var(--help-muted); overflow-wrap: anywhere; }
 .help-demo { margin: 0 0 1rem; }
 .help-demo video { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: #101215; }
