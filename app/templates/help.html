@@ -21,8 +21,8 @@
         <div class="help-answer"><p>{{ entry.answer }}</p>
         {% if topic.id == 'library' and loop.first %}
         <figure class="help-demo" data-help-demo>
-            <video controls muted playsinline preload="none" poster="{{ url_for('static', filename='videos/help-add-game-poster.webp', v='2') }}" data-help-video data-src="{{ url_for('static', filename='videos/help-add-game.mp4', v='2') }}" aria-label="How to add a game: a 30-second demonstration" width="1280" height="800">
-                <track kind="captions" src="{{ url_for('static', filename='videos/help-add-game.vtt', v='2') }}" srclang="en" label="English">
+            <video controls muted playsinline preload="none" poster="{{ url_for('static', filename='videos/help-add-game-poster.webp', v='3') }}" data-help-video data-src="{{ url_for('static', filename='videos/help-add-game.mp4', v='3') }}" aria-label="How to add a game: a 30-second demonstration" width="1920" height="1152">
+                <track kind="captions" src="{{ url_for('static', filename='videos/help-add-game.vtt', v='3') }}" srclang="en" label="English">
                 Your browser does not support this video. Follow the steps above to add a game.
             </video>
             <figcaption><span>30 seconds · No audio</span><button type="button" data-help-replay hidden aria-label="Replay the add game demonstration"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7"/></svg>Replay</button></figcaption>
