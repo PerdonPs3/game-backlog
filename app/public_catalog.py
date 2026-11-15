@@ -7,12 +7,13 @@ from urllib.parse import urlencode
 
 from flask import Blueprint, abort, current_app, g, redirect, render_template, url_for, request, jsonify
 
-from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, collection_cover_url, cover_image_id, is_community_game, sorted_catalog, CATALOG_SORTS
+from app.catalog import CatalogError, get_catalog, game_suggestion, game_profile, game_facts, collection_cover_url, cover_image_id, is_community_game, sorted_catalog, CATALOG_SORTS
 from app.catalog_journey import remember_selection, take_selection
 from app.db import get_db
 from app.ownership import owned
 from app.game_reviews import review_context
 from app.wishlist import wish_state
+from app.platform_icons import platform_badges
 
 
 explore = Blueprint('explore', __name__)
@@ -50,7 +51,25 @@ def catalog_card(game):
     return {**suggestion, 'name': suggestion['name'][:200], 'url': game_url(game['id'], game['name'], origin=False),
             'community': is_community_game(game),
             'platforms': suggestion['platforms'][:60],
+            'platform_badges': platform_badges(suggestion['platforms'][:60], game_facts(game)['links']),
             'cover_url': collection_cover_url(cover_image_id(game))}
+
+
+def mark_collection_states(games):
+    """Read status for this owner only; never mutate shared catalog metadata."""
+    from app.achievements import normal_owner
+    if not games or not normal_owner():
+        return
+    ids = [game['id'] for game in games]
+    placeholders = ','.join('?' for _ in ids)
+    db = get_db()
+    library = {row['igdb_id'] for row in db.execute(
+        f'SELECT DISTINCT igdb_id FROM games WHERE {owned()} AND igdb_id IN ({placeholders})', ids)}
+    wishes = {row['catalog_id'] for row in db.execute(
+        f'SELECT catalog_id FROM wishlist_games WHERE owner_id = ? AND catalog_id IN ({placeholders})',
+        (g.user['id'], *ids))}
+    for game in games:
+        game.update(in_library=game['id'] in library, wished=game['id'] in wishes)
 
 
 @explore.get('/discover/browse')
@@ -85,6 +104,7 @@ def index():
                          if type(game.get('id')) is int and 0 < game['id'] < 2**63]
             except CatalogError:
                 error, status = 'The catalog is temporarily unavailable. Please try again shortly.', 503
+    mark_collection_states(games)
     return render_template('explore.html', query=term[:200], games=games, error=error, sort=sort, catalog_sorts=CATALOG_SORTS,
                            content=content, page=page, total=total,
                            pages=max(1, (total + SEARCH_PAGE_SIZE - 1) // SEARCH_PAGE_SIZE)), status
@@ -151,6 +171,9 @@ def game(catalog_id, slug=None):
     g.navigation_default = url_for('discovery.index')
     saved_platforms = {entry['platform'].strip().casefold() for entry in entries}
     available_platforms = [platform for platform in item['platforms'] if platform.strip().casefold() not in saved_platforms] if item else []
+    if item:
+        profile['platform_badges'] = platform_badges(item['platforms'])
+    entries = [{**dict(entry), 'platform_icon': platform_badges([entry['platform']])[0]['icon']} for entry in entries]
     return render_template('catalog_game.html', game=item, profile=profile, error=error,
                            can_manage=can_manage, entries=entries, available_platforms=available_platforms,
                            wishlist_saved=wish_state(catalog_id) if item else False,

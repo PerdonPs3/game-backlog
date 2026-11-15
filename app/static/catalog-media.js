@@ -58,7 +58,7 @@
             caption.textContent = item.dataset.title;
             position.textContent = `${items.indexOf(item) + 1} / ${items.length}`;
             external.href = item.href;
-            external.textContent = video ? 'Watch on YouTube ↗' : 'Open image ↗';
+            external.textContent = video ? 'Watch on YouTube' : 'Open image';
         }
         items.forEach(item => item.addEventListener('click', event => {
             if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;

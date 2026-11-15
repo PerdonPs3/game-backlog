@@ -101,7 +101,7 @@ class IGDBClient:
                 conditions.append(f'total_rating_count >= {MIN_RATING_COUNT} & total_rating != null')
             sort_field = {'popular': 'total_rating_count', 'rating': 'total_rating', 'newest': 'first_release_date'}[order]
             raw = self._query_games(
-                f'fields {GAME_FIELDS},genres.name,themes.name,player_perspectives.name,game_modes.name,total_rating_count,total_rating,keywords.name; '
+                f'fields {GAME_FIELDS},genres.name,themes.name,player_perspectives.name,game_modes.name,total_rating_count,total_rating,keywords.name,websites.url,websites.type.type; '
                 f'where {" & ".join(conditions)}; sort {sort_field} desc; limit 200;'
             )
             unique = {}
@@ -204,7 +204,7 @@ class IGDBClient:
         elif order == 'newest':
             order_conditions = f' & first_release_date <= {int(datetime.now(timezone.utc).timestamp())}'
         query = (
-            f"fields {GAME_FIELDS},total_rating_count,total_rating,keywords.name; "
+            f"fields {GAME_FIELDS},total_rating_count,total_rating,keywords.name,websites.url,websites.type.type; "
             f"where ({matches}) & version_parent = null & game_type.type != "
             f"({','.join(json.dumps(value) for value in excluded)}){order_conditions}; "
             f"sort {order_field} desc; limit 500;"

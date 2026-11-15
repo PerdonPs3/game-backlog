@@ -8,11 +8,11 @@ test('help searches answers immediately and restores all topics after clearing t
     const handlers = {};
     const input = {value:'', addEventListener:(name,fn)=>handlers[name]=fn};
     const empty = {};
-    const library = {dataset:{helpText:'Library add a game platform'},hidden:true};
-    const reviews = {dataset:{helpText:'Reviews ratings half stars'},hidden:true};
+    const library = {dataset:{helpText:'Library add a game platform'},hidden:true,querySelector:()=>null};
+    const reviews = {dataset:{helpText:'Reviews ratings half stars'},hidden:true,querySelector:()=>null};
     const topics = [library,reviews].map(entry=>({hidden:true,querySelectorAll:()=>[entry]}));
     runInNewContext(readFileSync(join(__dirname,'../app/static/help.js'),'utf8'), {
-        document:{querySelector:selector=>selector==='[data-help-query]'?input:empty, querySelectorAll:()=>topics},
+        document:{querySelector:selector=>selector==='[data-help-query]'?input:empty, querySelectorAll:selector=>selector==='[data-help-topic]'?topics:[],addEventListener:()=>{}},
     });
     assert.ok(topics.every(topic=>!topic.hidden));
     input.value='HALF STARS'; handlers.input();
@@ -21,4 +21,110 @@ test('help searches answers immediately and restores all topics after clearing t
     input.value='zzzz'; handlers.input(); assert.equal(empty.hidden,false);
     input.value=''; handlers.input();
     assert.ok(topics.every(topic=>!topic.hidden)); assert.equal(empty.hidden,true);
+});
+
+function demoPage(reducedMotion = false, count = 1) {
+    const documentEvents = {}, inputEvents = {};
+    const timers = new Map(); let timerId = 0;
+    const demos = Array.from({length:count}, (_,index) => {
+    const events = {};
+    const answer = {scrollHeight:360, animations:[], animate:(frames,options)=>{
+        answer.animations.push({frames,options}); return {cancel:()=>{}};
+    }};
+    const replay = {hidden:true, addEventListener:(name,fn)=>events.replay=fn};
+    const entry = {open:false, hidden:false, dataset:{helpText:'Library add a game'},
+        querySelector:selector=>selector==='[data-help-video]'?video:selector==='.help-answer'?answer:replay,
+        addEventListener:(name,fn)=>events.toggle=fn};
+    const video = {dataset:{src:`/static/videos/demo-${index}.mp4`},paused:true,currentTime:0,loads:0,plays:0,
+        closest:()=>entry,getAttribute:()=>video.src,addEventListener:(name,fn)=>events[name]=fn,
+        load:()=>video.loads++,play:()=>{video.paused=false;video.plays++;events.play?.();return Promise.resolve();},pause:()=>video.paused=true};
+    return {events,answer,replay,entry,video};
+    });
+    const input = {value:'',addEventListener:(name,fn)=>inputEvents[name]=fn};
+    const topic = {querySelectorAll:()=>demos.map(demo=>demo.entry)};
+    const document = {hidden:false,querySelector:selector=>selector==='[data-help-query]'?input:{},
+        querySelectorAll:selector=>selector==='[data-help-topic]'?[topic]:demos.map(demo=>demo.video),
+        addEventListener:(name,fn)=>documentEvents[name]=fn};
+    runInNewContext(readFileSync(join(__dirname,'../app/static/help.js'),'utf8'), {
+        document,window:{matchMedia:()=>({matches:reducedMotion})},
+        setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},
+        clearTimeout:id=>timers.delete(id),
+    });
+    const advance = () => { for (const [id,timer] of [...timers]) { if (timers.has(id)) {timers.delete(id);timer.fn();} } };
+    return {...demos[0],demos,documentEvents,inputEvents,input,document,timers,advance};
+}
+
+test('demo loads on opening, pauses on closing, and can replay without reloading', () => {
+    const page = demoPage();
+    assert.equal(page.video.loads,0);
+    assert.equal(page.replay.hidden,false);
+    page.entry.open=true; page.events.toggle();
+    assert.equal(page.video.loads,1); assert.equal(page.video.paused,true);
+    assert.equal([...page.timers.values()][0].delay,2000);
+    assert.equal(page.answer.animations[0].options.duration,380);
+    page.advance(); assert.equal(page.video.paused,false);
+    page.entry.open=false; page.events.toggle();
+    assert.equal(page.video.paused,true);
+    page.video.currentTime=15; page.events.replay();
+    assert.equal(page.video.currentTime,0); assert.equal(page.video.loads,1);
+});
+
+test('reduced motion keeps manual playback and hidden content pauses the clip', () => {
+    const page = demoPage(true);
+    page.entry.open=true; page.events.toggle();
+    assert.equal(page.video.loads,1); assert.equal(page.video.plays,0);
+    assert.equal(page.timers.size,0); assert.equal(page.answer.animations.length,0);
+    page.events.replay(); assert.equal(page.video.plays,1);
+    page.input.value='ratings'; page.inputEvents.input();
+    assert.equal(page.entry.hidden,true); assert.equal(page.video.paused,true);
+    page.events.replay(); page.document.hidden=true; page.documentEvents.visibilitychange();
+    assert.equal(page.video.paused,true);
+});
+
+test('closing, filtering or hiding the tab cancels the pending start', () => {
+    for (const interrupt of ['close','filter','hide']) {
+        const page = demoPage();
+        page.entry.open=true; page.events.toggle();
+        assert.equal(page.timers.size,1);
+        if (interrupt==='close') {page.entry.open=false;page.events.toggle();}
+        if (interrupt==='filter') {page.input.value='ratings';page.inputEvents.input();}
+        if (interrupt==='hide') {page.document.hidden=true;page.documentEvents.visibilitychange();}
+        assert.equal(page.timers.size,0); page.advance();
+        assert.equal(page.video.plays,0);
+    }
+});
+
+test('rapid reopening schedules only one start and manual play cancels it', () => {
+    const page = demoPage();
+    page.entry.open=true; page.events.toggle();
+    page.entry.open=false; page.events.toggle();
+    page.entry.open=true; page.events.toggle();
+    assert.equal(page.timers.size,1);
+    page.events.play(); assert.equal(page.timers.size,0);
+    page.advance(); assert.equal(page.video.plays,0);
+});
+
+test('starting a second tutorial pauses the first and cancels its pending start', () => {
+    const page = demoPage(false,2);
+    const [first,second] = page.demos;
+    first.entry.open=true; first.events.toggle(); page.advance();
+    assert.equal(first.video.paused,false);
+    second.entry.open=true; second.events.toggle();
+    assert.equal(first.video.paused,true);
+    page.advance();
+    assert.equal(first.video.paused,true); assert.equal(second.video.paused,false);
+    first.entry.open=false; first.events.toggle();
+    first.entry.open=true; first.events.toggle();
+    assert.equal(page.timers.size,1);
+    second.events.replay(); assert.equal(page.timers.size,0);
+    page.advance(); assert.equal(first.video.paused,true);
+});
+
+test('opening two tutorials quickly leaves only the latest automatic start pending', () => {
+    const page = demoPage(false,2);
+    const [first,second] = page.demos;
+    first.entry.open=true; first.events.toggle();
+    second.entry.open=true; second.events.toggle();
+    assert.equal(page.timers.size,1); page.advance();
+    assert.equal(first.video.plays,0); assert.equal(second.video.plays,1);
 });

@@ -58,7 +58,7 @@ def test_one_game_page_combines_public_information_and_only_the_viewers_progress
     ps3 = seed(accounts,ALICE,'PS3',notes='ALICE PS3 PRIVATE')
     seed(accounts,BOB,notes='BOB PRIVATE')
     page = alice.get('/games/123/portal-2')
-    assert page.status_code == 200 and 'Your progress' in page.text
+    assert page.status_code == 200 and 'Your collection' in page.text
     assert 'ALICE PC PRIVATE' in page.text and 'ALICE PS3 PRIVATE' in page.text
     assert 'BOB PRIVATE' not in page.text
     assert f'/library/entries/{pc}/edit' in page.text and f'/library/entries/{ps3}/edit' in page.text
@@ -352,7 +352,7 @@ def test_search_to_add_and_edit_retains_the_game_and_return_context(accounts):
     game_page = alice.get('/games/123/portal-2', query_string={'from': origin})
     assert game_page.status_code == 200
     parsed = FlowElements(game_page.text)
-    more = next(item['href'] for tag, item in parsed.elements if tag == 'a' and item.get('class') == 'catalog-more-options')
+    more = next(item['href'] for tag, item in parsed.elements if tag == 'a' and item.get('class') == 'catalog-add-game')
     add = alice.get(more, follow_redirects=True)
     assert add.status_code == 200
     fields = FlowElements(add.text)

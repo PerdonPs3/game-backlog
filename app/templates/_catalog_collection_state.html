@@ -1,0 +1,3 @@
+{% macro collection_state(game) -%}
+{% if game.in_library or game.wished %}<span class="catalog-collection-state"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{% if game.in_library %}<path d="M12 5c-3-2-7-2-10-1v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Zm0 0v15"/>{% else %}<path d="M6 3h12v18l-6-4-6 4V3Z"/>{% endif %}</svg>{{ 'In your library' if game.in_library else 'On your wishlist' }}</span>{% endif %}
+{%- endmacro %}

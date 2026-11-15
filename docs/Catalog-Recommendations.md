@@ -1,5 +1,45 @@
 # Discover recommendations
 
+## Local card refresh — 2026-11-13
+
+For you and Popular picks now use one native link for each complete game card,
+with no direct wishlist-save button or repeated cover/title destinations.
+Search games uses the same platform-brand presentation. Compact saved-state
+markers are read-only and owner-scoped; recommendation pools still exclude
+owned games. Collection management continues from the game detail page.
+
+Platform versions are grouped by brand, with exact platform names available in
+accessible labels and hover titles. Unsupported platforms retain their names.
+Steam is shown only for validated HTTPS Steam catalog links, not inferred from
+PC support. Store metadata is requested with existing candidate/search queries,
+without a request per card. Icons are served locally; upstream sources and
+license are in `app/static/icons/platforms/README.md`.
+
+The existing saved context in game links retains Discover mode, sorting,
+filters and pagination. This change does not modify ranking.
+
+### Game collection controls — local follow-up
+
+The game page groups Add to library and Wishlist in Your collection. Adding
+opens the existing form with the game selected; platform, status, rating, notes,
+and optional public review publication are managed there. Owned entries show
+read-only progress and one Edit entry link per platform. Add another platform
+also opens the complete form. Removal stays in the edit flow with its existing
+confirmation. Private notes and dates remain owner-only without duplicate edit
+controls on the detail page.
+
+Game details uses the shared platform logos above Your collection. The complete
+sidebar follows scrolling only when it fits below the header; tall sidebars and
+mobile layouts use normal page scrolling. The desktop gallery is more compact,
+and reviews remain in the main column so the sidebar can follow the content.
+
+Validation passed 99 relevant Python cases against disposable local PostgreSQL
+and eight JavaScript tests. Browser checks covered owned and unowned games,
+preselected Add/Edit navigation, sidebar scrolling, and light/dark desktop and
+390-pixel mobile layouts. The owner reviewed these changes and the Help tutorials,
+then approved develop integration and publication on 2026-11-15. Production
+publication remains separate; no database migration is required.
+
 Implemented on `feature/catalog-recommendations`, based on updated `develop`, and
 preserved through a `--no-ff` merge into `refactor/navigation-flow`. The owner
 reviewed the local experience and authorized develop integration/publication on

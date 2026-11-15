@@ -31,8 +31,8 @@
     </div>
     {% if reviews_page > 1 or reviews_has_next %}
     <nav class="community-reviews-pages" aria-label="Review pages">
-        {% if reviews_page > 1 %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page - 1, _anchor='community-reviews') }}">← Newer reviews</a>{% endif %}
-        {% if reviews_has_next %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page + 1, _anchor='community-reviews') }}">Older reviews →</a>{% endif %}
+        {% if reviews_page > 1 %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page - 1, _anchor='community-reviews') }}">Newer reviews</a>{% endif %}
+        {% if reviews_has_next %}<a href="{{ url_for('explore.game', catalog_id=game.id, reviews_page=reviews_page + 1, _anchor='community-reviews') }}">Older reviews</a>{% endif %}
     </nav>
     {% endif %}
 </section>

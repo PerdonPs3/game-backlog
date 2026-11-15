@@ -6,6 +6,22 @@ not a release schedule. Checked items are implemented; unchecked items are plann
 For the current priority order and release state, see the
 [product plan](../Product-Plan.md#current-priorities--2026-10-25).
 
+## Discover cards and game management — 2026-11-13
+
+- [x] Implement the approved Discover card direction locally: complete native
+  links, platform/store logos, and compact owner-only saved-state indicators.
+  Remove direct wishlist actions from recommendation cards. Use the same logos
+  in catalog search; preserve existing ranking, filters and pagination.
+- [x] Review the card and game-page implementation. The owner approved develop
+  integration and publication on 2026-11-15; production publication is separate.
+- [x] Group wishlist and library management on the game page. Keep platform,
+  rating, status and review editing in the preselected Add/Edit forms; show
+  saved progress without duplicate controls. Compact the gallery and let the
+  complete sidebar follow scrolling when it fits below the header.
+
+See [Discover recommendations](../Catalog-Recommendations.md#local-card-refresh--2026-11-13)
+for metadata accuracy, icon sources and implementation boundaries.
+
 ## Help center and service health — 2026-11-11
 
 - [x] Add a dedicated Help page with browsable topics and frequently asked
@@ -15,6 +31,11 @@ For the current priority order and release state, see the
   version uses authored guides and answers without a chatbot or AI provider.
 
 Help includes instant search, native expandable answers, and day/night layouts.
+The follow-up adds a silent, captioned 30-second Add game demonstration
+inside its answer, with deferred loading, native controls and Replay. See
+[Help tutorial](../Help-Tutorial.md); the owner approved develop integration and
+publication on 2026-11-15. The review-publication answer also includes a 28-second demonstration of
+the explicit public-review choice and its result on the game page.
 The owner authorized publication with the [global release](../Global-Release-2026-11-12.md)
 on 2026-11-12.
 

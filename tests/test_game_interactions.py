@@ -14,22 +14,23 @@ def test_quick_add_stays_on_the_game_and_only_lists_the_current_owners_entries(a
     assert alice.post('/library/add', data=data).status_code == 303
     with accounts.app_context():
         assert get_db().execute('SELECT COUNT(*) FROM games').fetchone()[0] == 0
-    response = submit(alice, '/library/add', data, source=path)
+    response = submit(alice, '/library/add', data, source='/library/add?igdb_id=123')
     assert response.status_code == 303
     assert response.location == '/games/123/portal-2#your-progress'
     own = alice.get(response.location).get_data(as_text=True)
     assert 'Added to your library.' in own and 'data-status="Playing">Playing' in own
     assert 'aria-label="Your rating: 4.5/5"' in own
     assert '<option value="PC">' not in own
-    assert '<option value="PS3">' in own
+    assert 'Add another platform' in own and '<select' not in own
     other = bob.get(path).get_data(as_text=True)
-    assert 'aria-label="Your rating: 4.5/5"' not in other and '<option value="PC">' in other
+    assert 'aria-label="Your rating: 4.5/5"' not in other and 'Add to library' in other
+    assert '<select' not in other and 'data-rating-picker' not in other
     anonymous = accounts.test_client().get(path).get_data(as_text=True)
     assert 'aria-label="Your rating: 4.5/5"' not in anonymous and 'catalog-quick-form' not in anonymous
     assert 'Sign in to add game' in anonymous
-    duplicate = submit(alice, '/library/add', data, source=path)
+    duplicate = submit(alice, '/library/add', data, source='/library/add?igdb_id=123')
     assert b'already in your collection' in duplicate.data
-    assert submit(bob, '/library/add', data, source=path).status_code == 303
+    assert submit(bob, '/library/add', data, source='/library/add?igdb_id=123').status_code == 303
     with accounts.app_context():
         rows = get_db().execute('SELECT owner_id, rating FROM games ORDER BY id').fetchall()
         assert [(str(row['owner_id']), row['rating']) for row in rows] == [(ALICE, 9), (BOB, 9)]

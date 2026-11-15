@@ -45,6 +45,12 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-results-heading > span { font-size: .75rem; white-space: nowrap; color: var(--discover-muted); }
 .discover-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 1.2rem; }
 .discover-card { min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--discover-panel); border: 1px solid var(--border); border-radius: 13px; box-shadow: 0 7px 20px #00000024; }
+.discover-card { transition: border-color .2s ease, box-shadow .2s ease; }
+.discover-card:has(.discover-card-link:is(:hover,:focus-visible)) { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent), 0 8px 24px #0003; }
+.discover-card-link { display: flex; flex-direction: column; flex: 1; min-width: 0; color: var(--text); text-decoration: none; }
+.discover-card-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 12px; }
+.discover-card-link:hover .discover-cover img { transform: scale(1.025); }
+.discover-card-link h3 { color: var(--text); overflow-wrap: anywhere; }
 .discover-cover { display: block; position: relative; overflow: hidden; aspect-ratio: 264/330; color: var(--accent); background: var(--color-raised); text-decoration: none; }
 .discover-cover > span:first-child { position: absolute; inset: 0; display: grid; place-items: center; font-size: 4rem; }
 .discover-cover img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
@@ -61,6 +67,9 @@ html[data-theme="light"] .discover-workspace .workspace-panel { background: none
 .discover-reason > span { color: var(--accent); }
 .discover-reason strong { color: var(--text); font-weight: 500; }
 .discover-reason small { display: block; color: var(--accent); font-size: .65rem; margin-top: .4rem; }
+.discover-card .discover-reason { flex: none; margin: auto 0 0; padding-top: .75rem; font-size: .72rem; }
+.catalog-collection-state { display: flex; align-items: center; gap: .35rem; width: fit-content; max-width: 100%; margin: .25rem 0 .2rem; padding: .2rem .45rem; border: 1px solid var(--border); border-radius: 6px; color: var(--accent); font-size: .65rem; line-height: 1.5; }
+.catalog-collection-state svg { flex: none; }
 .discover-card form { margin: auto 0 0; }
 .discover-wish { display: block; width: 100%; text-align: center; border: 1px solid color-mix(in srgb,var(--accent) 40%,var(--border)); border-radius: 8px; background: color-mix(in srgb,var(--accent) 8%,transparent); color: var(--accent); padding: .7rem .4rem; margin: 0; font-size: .75rem; font-weight: 600; text-decoration: none; }
 .discover-wish:hover { background: color-mix(in srgb,var(--accent) 17%,transparent); }
@@ -95,6 +104,10 @@ html[data-theme="light"] .discover-hero h1 { text-shadow: 0 1px 0 #fff8ec, 0 0 8
 .discover-page .catalog-public-search input { width: 100%; padding-right: 3.2rem; }
 .discover-page .catalog-public-search > div:first-of-type > button { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 48px; height: 100%; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--accent); }
 .discover-page .catalog-public-search input:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); box-shadow: none; }
+.discover-page .catalog-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.3rem; }
+.discover-page .catalog-results-heading h2 { margin: 0; font-size: 1.15rem; }
+.discover-page .catalog-results-heading p { margin: 0; flex: none; }
+@media (max-width:640px) { .discover-page .catalog-results-heading { flex-direction: column; align-items: flex-start; gap: .45rem; } }
 .discover-page .discover-card-copy > :is(form, .discover-saved, .discover-wish):last-child { margin-top: auto; }
 
 .discover-page .catalog-search-filters { margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: .65rem; }

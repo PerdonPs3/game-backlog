@@ -12,7 +12,7 @@
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='profile-obsidian.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='profile-achievements.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='achievements.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='profile-hall.css') }}">{% endblock %}
 {% block workspace_backdrop %}<div class="profile-hall-backdrop" aria-hidden="true"></div>{% endblock %}
 {% block layout_class %}profile-workspace{% endblock %}
-{% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ profile_url() }}">← Back to profile</a>{% endif %}{% endblock %}
+{% block workspace_return %}{% if is_setup %}<span class="profile-setup-badge">Profile setup</span>{% else %}<a href="{{ profile_url() }}">Back to profile</a>{% endif %}{% endblock %}
 {% block page_heading %}{{ 'Create' if is_setup else 'Edit' }} <span>profile</span>{% endblock %}
 {% block panel_label %}{{ 'Create your profile' if is_setup else 'Profile settings' }}{% endblock %}
 {% block panel %}
@@ -32,7 +32,7 @@
                 <div class="avatar-edit-panel" role="group" aria-label="Profile picture options">
                     <p class="avatar-edit-heading">Profile picture</p>
                     <input class="avatar-file-input" type="file" id="profile-photo" name="photo" form="profile-form" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint photo-feedback">
-                    <label class="avatar-upload-button" for="profile-photo">Upload photo <span aria-hidden="true">↗</span></label>
+                    <label class="avatar-upload-button" for="profile-photo">Upload photo</label>
                     <p id="photo-hint" class="profile-field-hint">JPG, PNG, or WebP · Up to 20 MB. Large photos are optimized automatically.</p>
                     <p id="photo-feedback" class="profile-field-hint" role="status" aria-live="polite" data-photo-feedback></p>
                     <div class="avatar-palette" data-avatar-palette role="group" aria-label="Default avatar color" {% if profile.has_photo %}hidden{% endif %}>

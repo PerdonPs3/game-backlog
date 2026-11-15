@@ -1,0 +1,36 @@
+.catalog-library-actions { position: static; scroll-margin-top: 105px; }
+.catalog-library-actions :is(#game-actions,#your-progress) { scroll-margin-top: 105px; }
+.catalog-game-facts dd > span:not(.platform-brands) { display: block; }
+.catalog-game-facts dd > .platform-brands { display: flex; margin: .2rem 0 0; }
+.catalog-game-facts { padding: 1.2rem; }
+.catalog-game-facts h2 { margin-bottom: 1rem; }
+.catalog-game-facts dl > div { padding: .65rem 0; }
+.catalog-game-facts dt { margin-bottom: .3rem; }
+.catalog-game-sidebar { gap: 1rem; }
+.catalog-game-sidebar[data-sticky="true"] { position: sticky; top: var(--catalog-sidebar-top, 96px); }
+.catalog-owned-entries { margin: 0; }
+.catalog-owned-entries li { padding: .9rem; gap: .65rem; }
+.catalog-entry-platform { gap: .55rem; }
+.catalog-entry-platform > .platform-brand-icon { width: 23px; height: 23px; color: var(--accent); }
+.catalog-entry-progress { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; }
+.catalog-entry-rating .review-score-stars { gap: 2px; }
+.catalog-owned-entries .catalog-entry-edit, .catalog-add-game { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .8rem; border: 1px solid var(--accent); border-radius: 8px; background: var(--color-action); color: var(--color-on-action); text-decoration: none; font-size: .8rem; font-weight: 650; }
+.catalog-owned-entries .catalog-entry-edit:hover, .catalog-add-game:hover { background: var(--accent); color: var(--color-on-action); }
+.catalog-add-entry { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .55rem .25rem; color: var(--text-muted); font-size: .75rem; text-decoration: none; }
+.catalog-add-entry:hover { color: var(--accent); }
+.catalog-library-actions .catalog-wishlist-form { display: block; margin: .7rem 0 0; }
+.catalog-library-actions .wishlist-toggle { display: flex; justify-content: center; align-items: center; gap: .5rem; width: 100%; padding: .8rem; margin: 0; font-size: .8rem; }
+.catalog-library-actions > .wishlist-toggle { margin-top: .7rem; }
+.catalog-library-actions :is(a,button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.catalog-game-layout .catalog-media-stage { max-height: 300px; min-height: 0; }
+.catalog-game-layout .catalog-media-strip > a { flex-basis: 96px; }
+.catalog-game-layout .catalog-media-caption { padding: .65rem 0; }
+.catalog-game-main > .community-reviews { margin-top: 1.5rem; }
+.catalog-game-main .community-review-card { min-width: 0; }
+.entry-remove { margin: 1.25rem 0 0; font-size: .8rem; text-align: right; }
+@media (max-width:1000px) {
+    .catalog-game-sidebar[data-sticky="true"] { position: static; }
+    .catalog-game-layout .catalog-media-stage { max-height: none; }
+    .catalog-game-main > .catalog-personal-progress { order: 3; }
+    .catalog-game-main > .community-reviews { order: 4; margin-top: 0; }
+}

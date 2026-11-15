@@ -41,3 +41,19 @@ def test_help_rejects_invalid_queries(client, query):
 def test_help_link_appears_once_in_the_shared_footer(client):
     html = client.get('/discover/browse').get_data(as_text=True)
     assert html.count('href="/help"') == 1
+
+
+@pytest.mark.parametrize('name,version', [('add-game','3'), ('publish-review','1')])
+def test_help_demos_are_local_accessible_and_loaded_only_when_opened(client, name, version):
+    html = client.get('/help').get_data(as_text=True)
+    assert html.count('<video ') == 2
+    assert 'controls muted playsinline preload="none"' in html
+    assert f'data-src="/static/videos/help-{name}.mp4?v={version}"' in html
+    assert 'width="1920" height="1152"' in html
+    assert '30 seconds · No audio' in html
+    assert 'kind="captions"' in html and 'data-help-replay hidden' in html
+    media = client.get(f'/static/videos/help-{name}.mp4', headers={'Range': 'bytes=0-99'})
+    assert media.status_code == 206 and media.mimetype == 'video/mp4'
+    assert len(media.data) == 100
+    assert client.get(f'/static/videos/help-{name}-poster.webp').status_code == 200
+    assert client.get(f'/static/videos/help-{name}.vtt').status_code == 200

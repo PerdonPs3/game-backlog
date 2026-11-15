@@ -1,0 +1,5 @@
+{% macro platforms(game) -%}
+<span class="platform-brands" role="group" aria-label="Platforms and stores">
+{% for brand in game.platform_badges %}<span class="platform-brand" role="img" aria-label="{{ brand.title }}" title="{{ brand.title }}"><span aria-hidden="true">{% if brand.icon %}<span class="platform-brand-icon platform-brand-{{ brand.icon }}"></span>{% endif %}<span class="platform-brand-label">{{ brand.label }}</span></span></span>{% else %}<span class="platform-unavailable">Platforms unavailable</span>{% endfor %}
+</span>
+{%- endmacro %}
